@@ -34,6 +34,7 @@ import { Route as CommunityRequestsRouteImport } from './routes/community.reques
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 
 const IndexRoute = IndexRouteImport.update({
@@ -164,6 +165,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const RecordReportYearRoute = RecordReportYearRouteImport.update({
+  id: '/report/$year',
+  path: '/report/$year',
+  getParentRoute: () => RecordRoute,
+} as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
   path: '/api/public/webhooks/stripe',
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesByTo {
@@ -223,6 +230,7 @@ export interface FileRoutesByTo {
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesById {
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRouteTypes {
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/record'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   id:
     | '__root__'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
 }
@@ -545,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/record/report/$year': {
+      id: '/record/report/$year'
+      path: '/report/$year'
+      fullPath: '/record/report/$year'
+      preLoaderRoute: typeof RecordReportYearRouteImport
+      parentRoute: typeof RecordRoute
+    }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
       path: '/api/public/webhooks/stripe'
@@ -557,10 +576,12 @@ declare module '@tanstack/react-router' {
 
 interface RecordRouteChildren {
   RecordIndexRoute: typeof RecordIndexRoute
+  RecordReportYearRoute: typeof RecordReportYearRoute
 }
 
 const RecordRouteChildren: RecordRouteChildren = {
   RecordIndexRoute: RecordIndexRoute,
+  RecordReportYearRoute: RecordReportYearRoute,
 }
 
 const RecordRouteWithChildren =
