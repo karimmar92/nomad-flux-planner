@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as KitRouteImport } from './routes/kit'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as StaysRouteImport } from './routes/stays'
@@ -34,6 +35,11 @@ const CalculatorRoute = CalculatorRouteImport.update({
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KitRoute = KitRouteImport.update({
+  id: '/kit',
+  path: '/kit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/kit': typeof KitRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/kit': typeof KitRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/kit': typeof KitRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/compare'
+    | '/kit'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/compare'
+    | '/kit'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/'
     | '/calculator'
     | '/compare'
+    | '/kit'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
+  KitRoute: typeof KitRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   StaysRoute: typeof StaysRoute
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/compare'
       fullPath: '/compare'
       preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kit': {
+      id: '/kit'
+      path: '/kit'
+      fullPath: '/kit'
+      preLoaderRoute: typeof KitRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -259,6 +279,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
+  KitRoute: KitRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   StaysRoute: StaysRoute,
