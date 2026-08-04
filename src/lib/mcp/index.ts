@@ -19,7 +19,10 @@ export default defineMcp({
     acceptedAudiences: "authenticated",
   }),
   // Cast: tools declare no outputSchema, which trips exactOptionalPropertyTypes.
-  tools: [listCitiesTool, getCityTool, compareCitiesTool, schengenCheckTool] as Parameters<
-    typeof defineMcp
-  >[0]["tools"],
+  tools: [
+    listCitiesTool,
+    getCityTool,
+    compareCitiesTool,
+    schengenCheckTool,
+  ] as unknown as Parameters<typeof defineMcp>[0]["tools"],
 });
