@@ -407,7 +407,8 @@
       },
       "arbitrageNote": "Internet is the weak point — always verify actual speeds at the specific villa, not the island average. Scooter accidents are the top health risk; insurance often excludes them without a local licence.",
       "nearestAirportIata": "DPS",
-      "overlandNeighbours": []
+      "overlandNeighbours": [],
+      "connectivityWarning": "The island-wide average hides big variation: villa and homestay speeds rarely match it, and outages are common in the wet season. Test the connection at the specific property, and keep a coworking desk or 4G backup."
     },
     {
       "id": "tbilisi-ge",
@@ -1421,6 +1422,317 @@
       "arbitrageNote": "Caribbean beach plus a real nomad scene, US timezone overlap. Sargassum season (Apr-Aug) and humidity are the trade-offs.",
       "nearestAirportIata": "CUN",
       "overlandNeighbours": []
+    },
+    {
+      "id": "chengdu-cn",
+      "city": "Chengdu",
+      "country": "China",
+      "countryCode": "CN",
+      "region": "Asia",
+      "lat": 30.5728,
+      "lng": 104.0668,
+      "localCurrency": "CNY",
+      "costs": {
+        "rent1brCentral": 520,
+        "rent1brOutskirts": 330,
+        "colivingRoom": 450,
+        "coworkingHotDesk": 130,
+        "groceriesMonthly": 250,
+        "mealInexpensive": 4,
+        "utilities": 60,
+        "mobileData": 12,
+        "transportMonthly": 30,
+        "gymMonthly": 40,
+        "totalMonthlyMidRange": 1300,
+        "totalMonthlyLean": 850
+      },
+      "scores": {
+        "internetSpeedMbps": 250,
+        "safety": 4.5,
+        "nomadCommunity": 3.5,
+        "walkability": 4.0,
+        "englishFriendly": 2.5,
+        "weather": 3.0
+      },
+      "visa": {
+        "ruleType": "FIXED_PER_ENTRY",
+        "touristDays": 30,
+        "windowDays": null,
+        "nationalityDependent": true,
+        "policyTrialExpiry": "2026-12-31",
+        "notes": "30-day visa-free entry applies to roughly 50 eligible nationalities — most of Europe, Japan, South Korea, Singapore, Australia, New Zealand, Brazil, and the UK and Canada since 17 February 2026. The United States is NOT on that list; US passport holders need a visa in advance. The separate 240-hour (10-day) transit exemption requires an onward ticket to a third country — China cannot be your final destination, so it is not a way to spend ten days working here. There is no digital nomad visa, and working remotely on a tourist entry is not permitted; enforcement against laptop work is reportedly light, but that is the legal position.",
+        "nomadVisa": {
+          "name": "X2 Student Visa (language study)",
+          "exists": true,
+          "durationMonths": 6,
+          "minMonthlyIncomeUSD": null,
+          "approxCostUSD": 625,
+          "renewable": true,
+          "pathToResidency": false,
+          "notes": "Not a work visa. Enrol in a Chinese language program, typically 10–15 hrs/week. The common legitimate route for stays beyond 30 days. Remote work on this visa remains a grey area."
+        }
+      },
+      "tax": {
+        "residencyTriggerDays": 183,
+        "taxYear": "calendar",
+        "notes": "Six-year rule: worldwide income liability only after 183+ days for six consecutive years. Before that, foreign-sourced income paid by foreign entities is generally exempt — unusually favourable for medium-term stays.",
+        "foreignIncomeExemptForNomadVisa": false
+      },
+      "arbitrageNote": "The largest expat and maker scene outside the tier-one cities, at roughly half Shanghai's cost. Excellent food and transit. English is limited outside international circles; expect to rely on translation apps daily.",
+      "connectivityWarning": "Fast domestic internet, but Google, WhatsApp, Slack and most Western tools are blocked. A VPN is effectively required, sits in a legal grey area, and is periodically disrupted. Test your entire work stack before committing to a long stay.",
+      "nearestAirportIata": "CTU",
+      "overlandNeighbours": [
+        "kunming-cn"
+      ]
+    },
+    {
+      "id": "kunming-cn",
+      "city": "Kunming",
+      "country": "China",
+      "countryCode": "CN",
+      "region": "Asia",
+      "lat": 25.0389,
+      "lng": 102.7183,
+      "localCurrency": "CNY",
+      "costs": {
+        "rent1brCentral": 380,
+        "rent1brOutskirts": 250,
+        "colivingRoom": 350,
+        "coworkingHotDesk": 100,
+        "groceriesMonthly": 220,
+        "mealInexpensive": 3.5,
+        "utilities": 50,
+        "mobileData": 12,
+        "transportMonthly": 25,
+        "gymMonthly": 35,
+        "totalMonthlyMidRange": 1000,
+        "totalMonthlyLean": 700
+      },
+      "scores": {
+        "internetSpeedMbps": 200,
+        "safety": 4.5,
+        "nomadCommunity": 3.0,
+        "walkability": 3.5,
+        "englishFriendly": 2.0,
+        "weather": 5.0
+      },
+      "visa": {
+        "ruleType": "FIXED_PER_ENTRY",
+        "touristDays": 30,
+        "windowDays": null,
+        "nationalityDependent": true,
+        "policyTrialExpiry": "2026-12-31",
+        "notes": "30-day visa-free entry applies to roughly 50 eligible nationalities — most of Europe, Japan, South Korea, Singapore, Australia, New Zealand, Brazil, and the UK and Canada since 17 February 2026. The United States is NOT on that list; US passport holders need a visa in advance. The separate 240-hour (10-day) transit exemption requires an onward ticket to a third country — China cannot be your final destination, so it is not a way to spend ten days working here. There is no digital nomad visa, and working remotely on a tourist entry is not permitted; enforcement against laptop work is reportedly light, but that is the legal position.",
+        "nomadVisa": {
+          "name": "X2 Student Visa (language study)",
+          "exists": true,
+          "durationMonths": 6,
+          "minMonthlyIncomeUSD": null,
+          "approxCostUSD": 625,
+          "renewable": true,
+          "pathToResidency": false,
+          "notes": "Not a work visa. Enrol in a Chinese language program, typically 10–15 hrs/week. The common legitimate route for stays beyond 30 days. Remote work on this visa remains a grey area."
+        }
+      },
+      "tax": {
+        "residencyTriggerDays": 183,
+        "taxYear": "calendar",
+        "notes": "Six-year rule: worldwide income liability only after 183+ days for six consecutive years. Before that, foreign-sourced income paid by foreign entities is generally exempt — unusually favourable for medium-term stays.",
+        "foreignIncomeExemptForNomadVisa": false
+      },
+      "arbitrageNote": "'Spring City' — the most consistently pleasant climate in China, and among the cheapest cities on this entire list. Very little English, and a small foreign community. Strong value if you can work in relative isolation.",
+      "connectivityWarning": "Fast domestic internet, but Google, WhatsApp, Slack and most Western tools are blocked. A VPN is effectively required, sits in a legal grey area, and is periodically disrupted. Test your entire work stack before committing to a long stay.",
+      "nearestAirportIata": "KMG",
+      "overlandNeighbours": [
+        "chengdu-cn",
+        "dali-cn"
+      ]
+    },
+    {
+      "id": "dali-cn",
+      "city": "Dali",
+      "country": "China",
+      "countryCode": "CN",
+      "region": "Asia",
+      "lat": 25.6065,
+      "lng": 100.2679,
+      "localCurrency": "CNY",
+      "costs": {
+        "rent1brCentral": 330,
+        "rent1brOutskirts": 220,
+        "colivingRoom": 300,
+        "coworkingHotDesk": 90,
+        "groceriesMonthly": 210,
+        "mealInexpensive": 3,
+        "utilities": 45,
+        "mobileData": 12,
+        "transportMonthly": 20,
+        "gymMonthly": 30,
+        "totalMonthlyMidRange": 900,
+        "totalMonthlyLean": 620
+      },
+      "scores": {
+        "internetSpeedMbps": 150,
+        "safety": 4.5,
+        "nomadCommunity": 3.5,
+        "walkability": 4.0,
+        "englishFriendly": 2.0,
+        "weather": 4.5
+      },
+      "visa": {
+        "ruleType": "FIXED_PER_ENTRY",
+        "touristDays": 30,
+        "windowDays": null,
+        "nationalityDependent": true,
+        "policyTrialExpiry": "2026-12-31",
+        "notes": "30-day visa-free entry applies to roughly 50 eligible nationalities — most of Europe, Japan, South Korea, Singapore, Australia, New Zealand, Brazil, and the UK and Canada since 17 February 2026. The United States is NOT on that list; US passport holders need a visa in advance. The separate 240-hour (10-day) transit exemption requires an onward ticket to a third country — China cannot be your final destination, so it is not a way to spend ten days working here. There is no digital nomad visa, and working remotely on a tourist entry is not permitted; enforcement against laptop work is reportedly light, but that is the legal position.",
+        "nomadVisa": {
+          "name": "X2 Student Visa (language study)",
+          "exists": true,
+          "durationMonths": 6,
+          "minMonthlyIncomeUSD": null,
+          "approxCostUSD": 625,
+          "renewable": true,
+          "pathToResidency": false,
+          "notes": "Not a work visa. Enrol in a Chinese language program, typically 10–15 hrs/week. The common legitimate route for stays beyond 30 days. Remote work on this visa remains a grey area."
+        }
+      },
+      "tax": {
+        "residencyTriggerDays": 183,
+        "taxYear": "calendar",
+        "notes": "Six-year rule: worldwide income liability only after 183+ days for six consecutive years. Before that, foreign-sourced income paid by foreign entities is generally exempt — unusually favourable for medium-term stays.",
+        "foreignIncomeExemptForNomadVisa": false
+      },
+      "arbitrageNote": "Cheapest entry on the list. A long-standing backpacker and artist town by the lake, now with a small remote-work community. Infrastructure is thinner than the big cities — verify internet at the specific property before booking anything long.",
+      "connectivityWarning": "Fast domestic internet, but Google, WhatsApp, Slack and most Western tools are blocked. A VPN is effectively required, sits in a legal grey area, and is periodically disrupted. Test your entire work stack before committing to a long stay.",
+      "nearestAirportIata": "DLU",
+      "overlandNeighbours": [
+        "kunming-cn"
+      ]
+    },
+    {
+      "id": "shenzhen-cn",
+      "city": "Shenzhen",
+      "country": "China",
+      "countryCode": "CN",
+      "region": "Asia",
+      "lat": 22.5431,
+      "lng": 114.0579,
+      "localCurrency": "CNY",
+      "costs": {
+        "rent1brCentral": 800,
+        "rent1brOutskirts": 480,
+        "colivingRoom": 600,
+        "coworkingHotDesk": 170,
+        "groceriesMonthly": 330,
+        "mealInexpensive": 5,
+        "utilities": 75,
+        "mobileData": 14,
+        "transportMonthly": 35,
+        "gymMonthly": 55,
+        "totalMonthlyMidRange": 1850,
+        "totalMonthlyLean": 1250
+      },
+      "scores": {
+        "internetSpeedMbps": 300,
+        "safety": 4.5,
+        "nomadCommunity": 3.0,
+        "walkability": 3.5,
+        "englishFriendly": 3.0,
+        "weather": 3.5
+      },
+      "visa": {
+        "ruleType": "FIXED_PER_ENTRY",
+        "touristDays": 30,
+        "windowDays": null,
+        "nationalityDependent": true,
+        "policyTrialExpiry": "2026-12-31",
+        "notes": "30-day visa-free entry applies to roughly 50 eligible nationalities — most of Europe, Japan, South Korea, Singapore, Australia, New Zealand, Brazil, and the UK and Canada since 17 February 2026. The United States is NOT on that list; US passport holders need a visa in advance. The separate 240-hour (10-day) transit exemption requires an onward ticket to a third country — China cannot be your final destination, so it is not a way to spend ten days working here. There is no digital nomad visa, and working remotely on a tourist entry is not permitted; enforcement against laptop work is reportedly light, but that is the legal position.",
+        "nomadVisa": {
+          "name": "X2 Student Visa (language study)",
+          "exists": true,
+          "durationMonths": 6,
+          "minMonthlyIncomeUSD": null,
+          "approxCostUSD": 625,
+          "renewable": true,
+          "pathToResidency": false,
+          "notes": "Not a work visa. Enrol in a Chinese language program, typically 10–15 hrs/week. The common legitimate route for stays beyond 30 days. Remote work on this visa remains a grey area."
+        }
+      },
+      "tax": {
+        "residencyTriggerDays": 183,
+        "taxYear": "calendar",
+        "notes": "Six-year rule: worldwide income liability only after 183+ days for six consecutive years. Before that, foreign-sourced income paid by foreign entities is generally exempt — unusually favourable for medium-term stays.",
+        "foreignIncomeExemptForNomadVisa": false
+      },
+      "arbitrageNote": "China's hardware capital, next door to Hong Kong for visa runs and unrestricted internet. Best choice if your work touches manufacturing or electronics.",
+      "connectivityWarning": "Fast domestic internet, but Google, WhatsApp, Slack and most Western tools are blocked. A VPN is effectively required, sits in a legal grey area, and is periodically disrupted. Test your entire work stack before committing to a long stay.",
+      "nearestAirportIata": "SZX",
+      "overlandNeighbours": [
+        "shanghai-cn"
+      ]
+    },
+    {
+      "id": "shanghai-cn",
+      "city": "Shanghai",
+      "country": "China",
+      "countryCode": "CN",
+      "region": "Asia",
+      "lat": 31.2304,
+      "lng": 121.4737,
+      "localCurrency": "CNY",
+      "costs": {
+        "rent1brCentral": 1100,
+        "rent1brOutskirts": 650,
+        "colivingRoom": 800,
+        "coworkingHotDesk": 220,
+        "groceriesMonthly": 400,
+        "mealInexpensive": 6,
+        "utilities": 90,
+        "mobileData": 15,
+        "transportMonthly": 40,
+        "gymMonthly": 70,
+        "totalMonthlyMidRange": 2400,
+        "totalMonthlyLean": 1600
+      },
+      "scores": {
+        "internetSpeedMbps": 300,
+        "safety": 4.5,
+        "nomadCommunity": 3.5,
+        "walkability": 4.5,
+        "englishFriendly": 3.5,
+        "weather": 3.0
+      },
+      "visa": {
+        "ruleType": "FIXED_PER_ENTRY",
+        "touristDays": 30,
+        "windowDays": null,
+        "nationalityDependent": true,
+        "policyTrialExpiry": "2026-12-31",
+        "notes": "30-day visa-free entry applies to roughly 50 eligible nationalities — most of Europe, Japan, South Korea, Singapore, Australia, New Zealand, Brazil, and the UK and Canada since 17 February 2026. The United States is NOT on that list; US passport holders need a visa in advance. The separate 240-hour (10-day) transit exemption requires an onward ticket to a third country — China cannot be your final destination, so it is not a way to spend ten days working here. There is no digital nomad visa, and working remotely on a tourist entry is not permitted; enforcement against laptop work is reportedly light, but that is the legal position.",
+        "nomadVisa": {
+          "name": "X2 Student Visa (language study)",
+          "exists": true,
+          "durationMonths": 6,
+          "minMonthlyIncomeUSD": null,
+          "approxCostUSD": 625,
+          "renewable": true,
+          "pathToResidency": false,
+          "notes": "Not a work visa. Enrol in a Chinese language program, typically 10–15 hrs/week. The common legitimate route for stays beyond 30 days. Remote work on this visa remains a grey area."
+        }
+      },
+      "tax": {
+        "residencyTriggerDays": 183,
+        "taxYear": "calendar",
+        "notes": "Six-year rule: worldwide income liability only after 183+ days for six consecutive years. Before that, foreign-sourced income paid by foreign entities is generally exempt — unusually favourable for medium-term stays.",
+        "foreignIncomeExemptForNomadVisa": false
+      },
+      "arbitrageNote": "The most internationally legible city in China — most English, most foreign infrastructure, easiest soft landing. Also the most expensive, and the arbitrage largely evaporates versus Southeast Asia.",
+      "connectivityWarning": "Fast domestic internet, but Google, WhatsApp, Slack and most Western tools are blocked. A VPN is effectively required, sits in a legal grey area, and is periodically disrupted. Test your entire work stack before committing to a long stay.",
+      "nearestAirportIata": "PVG",
+      "overlandNeighbours": [
+        "shenzhen-cn"
+      ]
     }
   ]
 }
