@@ -1,0 +1,146 @@
+{
+  "app": {
+    "tagline": "What a city costs you."
+  },
+  "nav": {
+    "plan": "Plan",
+    "explore": "Explore",
+    "arbitrage": "Arbitrage",
+    "compare": "Compare",
+    "tracker": "Tracker",
+    "record": "Record",
+    "pricing": "Pricing",
+    "profile": "Profile",
+    "toggleTheme": "Toggle theme"
+  },
+  "footerLinks": {
+    "beforeYouGo": "Before you go",
+    "community": "Community",
+    "stays": "Stays",
+    "profile": "Profile",
+    "company": "Do you need a company?",
+    "kit": "Nomad kit",
+    "business": "For teams",
+    "org": "Team dashboard",
+    "employerSharing": "Employer sharing",
+    "howWeMakeMoney": "How we make money",
+    "creatorProgramme": "Creator programme",
+    "creatorDashboard": "Creator dashboard"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "retry": "Try again",
+    "goHome": "Go home",
+    "viewDetail": "View detail",
+    "add": "Add",
+    "remove": "Remove",
+    "dismiss": "Dismiss"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for doesn't exist or has been moved.",
+    "genericTitle": "This page didn't load",
+    "genericBody": "Something went wrong on our end. You can try refreshing or head back home."
+  },
+  "empty": {
+    "noResults": "Nothing matches these filters yet.",
+    "noTrips": "No trips logged yet.",
+    "noDocuments": "No documents stored yet."
+  },
+  "language": {
+    "label": "Language",
+    "change": "Change language",
+    "machineBanner": "This page is machine translated. The English original is authoritative.",
+    "untranslatedBanner": "This page is not yet translated into {{language}} and is shown in English.",
+    "translatedMarker": "Translated — view English original",
+    "hideOriginal": "Hide English original",
+    "englishOriginal": "English original"
+  },
+  "legal": {
+    "disclaimer": "Informational only. Not legal or tax advice. Verify with the relevant authority before travelling."
+  },
+  "onboarding": {
+    "appStep": "{{app}} · step {{current}} of {{total}}",
+    "skip": "Skip",
+    "skipAria": "Skip setup",
+    "steps": {
+      "0": "Where are you now?",
+      "1": "Your passport",
+      "2": "Your income",
+      "3": "How you earn",
+      "4": "Where you live"
+    },
+    "stage": {
+      "intro": "The app works differently depending on where you are in this. Both paths are free to switch between later.",
+      "abroadLabel": "I'm already living abroad",
+      "abroadBlurb": "Day counters, visa deadlines and your record of presence.",
+      "planningLabel": "I'm planning my first move",
+      "planningBlurb": "Runway, where to start, and the countdown to departure."
+    },
+    "income": {
+      "label": "Monthly income (USD)",
+      "placeholder": "5000",
+      "helper": "Everything in {{app}} is computed from this number. You can change it any time.",
+      "continue": "Continue"
+    },
+    "incomeType": {
+      "employedLabel": "Employed",
+      "employedHint": "Salaried by one company",
+      "freelanceLabel": "Freelance",
+      "freelanceHint": "Multiple clients, invoiced",
+      "founderLabel": "Founder",
+      "founderHint": "Own company, variable draw",
+      "continue": "Continue"
+    },
+    "banking": {
+      "prompt": "Invoicing clients abroad?",
+      "offer": "gives a company multi-currency account with local details in 9+ currencies.",
+      "affiliate": "Affiliate link — we earn a commission at no extra cost to you.",
+      "dismissAria": "Dismiss"
+    },
+    "home": {
+      "finishPlanning": "Show me my runway",
+      "finishAbroad": "Show me my numbers"
+    },
+    "ariaLabelSuffix": "setup"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "onPlan": "You're on the",
+    "planSuffix": "plan.",
+    "free": {
+      "title": "Free",
+      "price": "$0",
+      "cities8": "8 cities",
+      "basicCostData": "Basic cost data",
+      "singleCountryCounter": "Single-country day counter",
+      "personalisedArbitrage": "Personalised arbitrage across every city",
+      "compare": "Compare",
+      "unlimitedTrips": "Unlimited trips",
+      "dataExport": "Data export"
+    },
+    "pro": {
+      "title": "Pro",
+      "recommended": "Recommended",
+      "priceMonthly": "$9",
+      "perMonth": "/mo",
+      "yearlyNote": "or $69/yr — two months free",
+      "everyCity": "Every city in the dataset",
+      "personalisedArbitrage": "Personalised arbitrage across every city",
+      "compare": "Side-by-side compare, 2–4 cities",
+      "unlimitedTrips": "Unlimited trips and timeline history",
+      "dataExport": "Data export",
+      "goProMonthly": "Go Pro — $9/mo",
+      "yearlyCta": "$69/yr"
+    },
+    "toast": {
+      "checkoutSoonTitle": "Checkout is coming soon",
+      "checkoutSoonDescription": "Payments aren't wired up yet."
+    }
+  }
+}

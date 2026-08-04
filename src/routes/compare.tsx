@@ -104,9 +104,9 @@ function ComparePage() {
           <table className="w-full min-w-[600px] text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="label-xs px-4 py-3 text-left font-medium">Metric</th>
+                <th className="label-xs px-4 py-3 text-start font-medium">Metric</th>
                 {selected.map((city) => (
-                  <th key={city.id} className="px-4 py-3 text-right">
+                  <th key={city.id} className="px-4 py-3 text-end">
                     <Link
                       to="/city/$cityId"
                       params={{ cityId: city.id }}
@@ -252,7 +252,7 @@ function CompareRow({
           <td
             key={city.id}
             className={cn(
-              "num px-4 py-2.5 text-right",
+              "num px-4 py-2.5 text-end",
               isBest && "bg-positive-muted font-semibold text-positive",
             )}
           >

@@ -81,10 +81,10 @@ function VaultPage() {
             <div
               key={doc.id}
               className={cn(
-                "panel flex items-start gap-2 border-l-2 p-3",
+                "panel flex items-start gap-2 border-s-2 p-3",
                 state!.severity === "expired" || state!.severity === "critical"
-                  ? "border-l-accent-warning bg-accent-warning/5"
-                  : "border-l-accent-warning/50",
+                  ? "border-s-accent-warning bg-accent-warning/5"
+                  : "border-s-accent-warning/50",
               )}
             >
               <FileWarning className="mt-0.5 h-4 w-4 shrink-0 text-accent-warning" aria-hidden />
@@ -154,7 +154,7 @@ function VaultPage() {
             }
           }}
         >
-          <Trash2 className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+          <Trash2 className="me-1.5 h-3.5 w-3.5" aria-hidden />
           Delete everything
         </button>
       ) : null}
@@ -276,7 +276,7 @@ function UploadForm({
 
       <div className="sm:col-span-2">
         <button type="submit" className="btn-primary" disabled={!file || busy || disabled}>
-          <Upload className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+          <Upload className="me-1.5 h-3.5 w-3.5" aria-hidden />
           {busy ? "Uploading…" : "Add to vault"}
         </button>
       </div>

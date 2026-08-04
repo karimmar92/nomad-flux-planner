@@ -37,7 +37,7 @@ export function PreDepartureCard({
       : `You must leave the Schengen Area in ${trigger.daysUntil} ${trigger.daysUntil === 1 ? "day" : "days"}.`;
 
   return (
-    <section className="panel border-l-2 border-l-primary p-4">
+    <section className="panel border-s-2 border-s-primary p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-2 text-sm font-semibold">

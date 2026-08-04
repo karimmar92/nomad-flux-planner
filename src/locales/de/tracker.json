@@ -1,0 +1,41 @@
+{
+  "title": "Visum-Tracker",
+  "subtitle": "Jeder Tag, den du verbraucht hast, und jeder, der dir bleibt.",
+  "addTrip": "Reise hinzufügen",
+  "editTrip": "Reise bearbeiten",
+  "deleteTrip": "Reise löschen",
+  "fields": {
+    "country": "Land",
+    "city": "Stadt",
+    "entryDate": "Einreisedatum",
+    "exitDate": "Ausreisedatum",
+    "stillHere": "Noch vor Ort",
+    "notes": "Notizen"
+  },
+  "openTrip": "Offene Reise — kein Ausreisedatum erfasst",
+  "empty": {
+    "title": "Noch keine Reisen erfasst",
+    "body": "Trage dein erstes Ein- und Ausreisedatum ein, um die 90/180-Berechnung zu starten."
+  },
+  "arrival": {
+    "title": "Sieht aus, als wärst du in {{country}} angekommen",
+    "confirm": "Ankunft erfassen",
+    "notNow": "Nicht jetzt",
+    "daysGranted": "Gewährte Tage: {{days}}",
+    "exitDeadline": "Ausreise bis {{date}}"
+  },
+  "checklist": {
+    "title": "Vor dem Abflug",
+    "esim": "eSIM",
+    "insurance": "Versicherung",
+    "address": "Adresse der Unterkunft",
+    "onward": "Weiterreise"
+  },
+  "record": {
+    "title": "Deine Nachweise",
+    "report": "Jahresbericht zur Anwesenheit",
+    "vault": "Dokumententresor",
+    "calendar": "Fristenkalender",
+    "expiring": "Läuft am {{date}} ab"
+  }
+}

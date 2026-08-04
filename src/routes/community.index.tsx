@@ -145,10 +145,10 @@ function CommunityRadar() {
           to="/community/requests"
           className="relative rounded-md border border-border px-3 py-2 text-xs font-medium hover:bg-surface-2"
         >
-          <Inbox className="mr-1.5 inline h-3.5 w-3.5" />
+          <Inbox className="me-1.5 inline h-3.5 w-3.5" />
           Requests
           {pendingIncoming > 0 ? (
-            <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+            <span className="ms-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
               {pendingIncoming}
             </span>
           ) : null}
@@ -196,7 +196,7 @@ function CommunityRadar() {
               onClick={shareArea}
               className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
             >
-              <LocateFixed className="mr-1.5 inline h-3.5 w-3.5" />
+              <LocateFixed className="me-1.5 inline h-3.5 w-3.5" />
               {myCell ? "Refresh area" : "Set my area"}
             </button>
           </div>
@@ -277,7 +277,7 @@ function CommunityRadar() {
           }}
           className="rounded-md border border-negative/40 px-3 py-1.5 text-xs font-medium text-negative hover:bg-negative-muted"
         >
-          <Trash2 className="mr-1.5 inline h-3.5 w-3.5" />
+          <Trash2 className="me-1.5 inline h-3.5 w-3.5" />
           Delete my area and radar data
         </button>
       </div>

@@ -1,0 +1,201 @@
+{
+  "explore": {
+    "title": "Entdecken",
+    "subtitle": "Was eine Stadt dich kostet — und was sie von deinem Pass verlangt.",
+    "search": "Städte oder Länder suchen",
+    "filters": {
+      "region": "Region",
+      "maxBudget": "Maximales Monatsbudget",
+      "nonSchengenOnly": "Nur Nicht-Schengen",
+      "all": "Alle"
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "cost": "Günstigste",
+      "internet": "Schnellstes Internet",
+      "safety": "Sicherste",
+      "community": "Nomad-Community"
+    },
+    "results_one": "{{count}} Stadt",
+    "results_other": "{{count}} Städte"
+  },
+  "detail": {
+    "costs": "Kosten",
+    "liveability": "Lebensqualität",
+    "visa": "Visum",
+    "tax": "Steuern",
+    "whyHere": "Warum hier",
+    "monthlyMid": "Monatlich, mittlere Kategorie",
+    "monthlyLean": "Monatlich, sparsam",
+    "lastVerified": "Zuletzt geprüft am {{date}}",
+    "confidence": "Verlässlichkeit: {{level}}",
+    "nonSchengenBadge": "Kein Schengen-Staat — verbraucht deine 90/180 Tage nicht",
+    "connectivityWarning": "Warnung zur Internetverbindung",
+    "save": "Stadt speichern",
+    "saved": "Gespeichert"
+  },
+  "scores": {
+    "internet": "Internet",
+    "safety": "Sicherheit",
+    "nomadCommunity": "Nomad-Community",
+    "walkability": "Fußläufigkeit",
+    "englishFriendly": "Englisch",
+    "weather": "Wetter"
+  },
+  "costLines": {
+    "rent1brCentral": "Miete — 1-Zimmer, zentral",
+    "rent1brOutskirts": "Miete — 1-Zimmer, Randlage",
+    "colivingRoom": "Coliving-Zimmer",
+    "coworkingHotDesk": "Coworking-Arbeitsplatz",
+    "groceriesMonthly": "Lebensmittel",
+    "mealInexpensive": "Essen gehen (pro Mahlzeit)",
+    "utilities": "Nebenkosten",
+    "mobileData": "Mobiles Internet",
+    "transportMonthly": "Nahverkehr",
+    "gymMonthly": "Fitnessstudio"
+  },
+  "content": {
+    "lisbon-pt": {
+      "arbitrageNote": "Die Preise sind zwischen 2022 und 2026 stark gestiegen. Für die Infrastruktur ist es weiterhin stark, aber kein Schnäppchen mehr.",
+      "taxNotes": "Das alte NHR-Regime ist für neue Antragsteller geschlossen; ein enger gefasster Nachfolger (IFICI) richtet sich an wissenschaftliche und hochwertige Tätigkeiten. Gehe von den normalen progressiven Steuersätzen aus, sofern du nicht qualifizierst.",
+      "nomadVisaNotes": "Erfordert etwa das 4-fache des portugiesischen Mindestlohns als monatliches Einkommen, den Nachweis eines Remote-Vertrags oder von Freelance-Kunden, eine NIF-Nummer und ein portugiesisches Bankkonto."
+    },
+    "chiang-mai-th": {
+      "arbitrageNote": "Bestes Verhältnis von Kosten zu Infrastruktur auf dieser Liste. Die Brandrodungssaison (Feb-Apr) ist ein echtes Luftqualitätsproblem; plane das mit ein.",
+      "taxNotes": "180+ Tage in einem Kalenderjahr machen dich zum thailändischen Steuerresidenten. Seit 2024 besteuert Thailand ausländisches Einkommen, das von Residenten nach Thailand überwiesen wird. Der Zeitpunkt der Überweisung ist entscheidend.",
+      "nomadVisaNotes": "5 Jahre, mehrfache Einreise. Jede Einreise erlaubt 180 Tage, einmal um weitere 180 Tage verlängerbar (bis zu 360 zusammenhängende Tage). Erfordert 500.000 THB, die mindestens 3 Monate gehalten wurden — große kürzliche Einzahlungen und Krypto-Überweisungen sind Warnsignale. Muss von außerhalb Thailands beantragt werden."
+    },
+    "bangkok-th": {
+      "arbitrageNote": "Weltklasse-Nahverkehr, Krankenhäuser und Flughafenanbindung für weniger als die Hälfte der westeuropäischen Kosten.",
+      "taxNotes": "Gleiche Regeln zur Besteuerung nach Überweisung (Remittance-Basis) wie in Chiang Mai."
+    },
+    "mexico-city-mx": {
+      "arbitrageNote": "Grenzbeamte gewähren zunehmend nach eigenem Ermessen weniger als 180 Tage. Gehe nicht von der vollen Stempeldauer aus.",
+      "taxNotes": "Die Anzahl der Tage ist ein Test; wenn sich der 'Mittelpunkt deiner Lebensinteressen' in Mexiko befindet, kann dies unabhängig davon eine Steuerresidenz auslösen.",
+      "nomadVisaNotes": "Wird nicht als Nomadenvisum bezeichnet, funktioniert aber wie eines. Muss bei einem mexikanischen Konsulat im Ausland beantragt werden, nicht innerhalb Mexikos. Die Schwellenwerte sind an den mexikanischen Mindestlohn gekoppelt und ändern sich jährlich."
+    },
+    "medellin-co": {
+      "arbitrageNote": "Ganzjähriges Frühlingsklima, starke Gründerszene in El Poblado und Laureles. Kleinkriminalität und Getränkemanipulation ('drink-spiking') sind echte Risiken; die App sollte Sicherheitshinweise sichtbar machen, nicht verstecken.",
+      "taxNotes": "Kolumbianische Steuerresidenten werden auf ihr weltweites Einkommen besteuert. Das betrifft Langzeit-Nomaden häufiger, als sie erwarten.",
+      "nomadVisaNotes": "Einer der niedrigsten Einkommensschwellenwerte weltweit (etwa das 3-fache des kolumbianischen Mindestlohns). Zählt nicht für die permanente Aufenthaltserlaubnis."
+    },
+    "buenos-aires-ar": {
+      "arbitrageNote": "Die Kosten schwanken stark mit dem Peso. Sehr volatil — behandle diese Zahlen als wenig verlässlich und aktualisiere sie häufig.",
+      "taxNotes": "Das Devisen- und Kapitalkontrollregime war volatil; überprüfe die aktuelle Wechselkurssituation, bevor du dich auf einen langfristigen Mietvertrag festlegst."
+    },
+    "bali-id": {
+      "arbitrageNote": "Das Internet ist der Schwachpunkt — überprüfe immer die tatsächlichen Geschwindigkeiten bei der jeweiligen Villa, nicht den Inseldurchschnitt. Rollerunfälle sind das größte Gesundheitsrisiko; Versicherungen schließen sie ohne lokalen Führerschein oft aus.",
+      "taxNotes": "Inhaber eines E33G-Visums werden im Allgemeinen nicht auf ausländisches Einkommen besteuert, aber das Überschreiten von 183 Tagen mit anderen Visumsarten kann eine Steuerresidenz auslösen.",
+      "nomadVisaNotes": "Erfordert den Nachweis einer Beschäftigung oder von Verträgen mit einem Unternehmen außerhalb Indonesiens. Einkommen aus indonesischen Quellen ist nicht erlaubt."
+    },
+    "tbilisi-ge": {
+      "arbitrageNote": "365 Tage visumfrei plus ein 1%-Freiberufler-Steuerregime ist der stärkste kombinierte Visums- und Steuervorteil, den es gibt. Der Haken ist das lokale Bankwesen: Seit 2023 haben mehrere Banken Konten für russische, belarussische, iranische und einige zentralasiatische Staatsangehörige abgelehnt oder verzögert, und die Compliance-Prüfungen für alle anderen wurden verschärft. Die meisten Nomaden hier nutzen ein Multiwährungskonto und behandeln ein lokales Konto als optional. Ignoriere Agenturen, die 200-500 USD verlangen, um eines zu 'garantieren' — wir verlinken sie nicht, und du solltest es auch nicht tun.",
+      "taxNotes": "Der Small Business Status bietet 1% Steuer auf den Umsatz bis 500.000 GEL/Jahr (~180.000 USD) für registrierte Einzelunternehmer. Umsatz über der Obergrenze wird mit 3% besteuert. Dies ist die größte einzelne Steuerarbitrage auf dieser Liste für Freelancer.",
+      "nomadVisaNotes": "Weitgehend überflüssig angesichts des 365-tägigen visumfreien Aufenthalts für über 90 Staatsangehörigkeiten."
+    },
+    "budapest-hu": {
+      "arbitrageNote": "Günstigste EU-Hauptstadt mit wirklich guter Infrastruktur. Die Schengen-Uhr gilt.",
+      "taxNotes": "Pauschale Einkommensteuer von 15%. Inhaber einer White Card dürfen in der Regel nicht für ungarische Unternehmen arbeiten."
+    },
+    "belgrade-rs": {
+      "arbitrageNote": "Erstklassiger Parkplatz für die Schengen-Uhr. Günstig, in der europäischen Zeitzone, und hier verbrachte Tage zählen nicht gegen deine 90/180-Regel.",
+      "taxNotes": "Serbien bietet eine Ausnahme für ausländisches Einkommen für qualifizierte Nomaden in den ersten 90 Tagen. Der Nicht-Schengen-Status macht es zu einer nützlichen 'Reset'-Basis zwischen EU-Aufenthalten.",
+      "nomadVisaNotes": "Kein Schengen-Land, daher verbraucht die hier verbrachte Zeit keine Schengen-Tage."
+    },
+    "istanbul-tr": {
+      "arbitrageNote": "Nicht-Schengen mit einem großen Flug-Drehkreuz. Die Inflation macht die Kostendaten ungewöhnlich volatil — monatlich aktualisieren.",
+      "taxNotes": "Umfeld mit hoher Inflation; Zahlen in Landeswährung veralten schnell.",
+      "nomadVisaNotes": "Alter 21-55, Universitätsabschluss erforderlich."
+    },
+    "warsaw-pl": {
+      "arbitrageNote": "Bestes Internet und höchste Sicherheit pro Dollar in der EU. Starker Pool an Startup- und Entwicklertalenten für die Zusammenarbeit mit Gründern.",
+      "taxNotes": "Registrierte Einzelunternehmer können den Pauschalsatz von 12-15% für IT-Dienstleistungen nutzen, was für Entwickler attraktiv ist."
+    },
+    "prague-cz": {
+      "arbitrageNote": "Sehr fußgängerfreundlich, ausgezeichneter Nahverkehr, ausgereifter rechtlicher Rahmen für Freelancer.",
+      "taxNotes": "Der Gewerbeschein 'živnostenský list' mit dem 60/40-Pauschalabzug für Ausgaben ist eine seit Langem etablierte Option für Freelancer.",
+      "nomadVisaNotes": "Beschränkt auf Staatsangehörige einer bestimmten zulässigen Liste, mit Fokus auf IT/Tech."
+    },
+    "las-palmas-es": {
+      "arbitrageNote": "Bestes ganzjähriges Klima in der EU, und das Beckham Law macht Spanien trotz der nominalen Steuersätze ungewöhnlich attraktiv für Gutverdiener.",
+      "taxNotes": "Inhaber eines Nomadenvisums können sich für das Beckham Law-Regime bewerben: pauschal 24% auf spanisches Einkommen bis zu 600.000 EUR für bis zu 6 Jahre. Die Kanarischen Inseln haben zudem eine ermäßigte IGIC (7%) anstelle der Mehrwertsteuer auf dem Festland (21%).",
+      "nomadVisaNotes": "Etwa 200% des spanischen SMI. Freelancer dürfen höchstens 20% ihres Einkommens von spanischen Kunden beziehen."
+    },
+    "athens-gr": {
+      "arbitrageNote": "Günstigste Eurozonen-Hauptstadt mit einer echten Nomaden-Szene. Die Sommerhitze wird zunehmend extremer.",
+      "taxNotes": "50% Einkommensteuerbefreiung für 7 Jahre für qualifizierte neue Steuerresidenten, die sich verpflichten, mindestens 2 Jahre zu bleiben."
+    },
+    "tallinn-ee": {
+      "arbitrageNote": "Beste digitale Verwaltung der Welt. Öffentliche Verkehrsmittel sind für Einwohner kostenlos. Die winterliche Dunkelheit ist ein echter Faktor für die Lebensqualität.",
+      "taxNotes": "Mit der e-Residency kannst du remote ein EU-Unternehmen führen, aber sie verleiht keinen Aufenthaltsstatus, kein Visum und ändert nicht deine persönliche Steuerresidenz. Weit verbreitetes Missverständnis.",
+      "nomadVisaNotes": "Das weltweit erste eigene Nomadenvisum (2020). Die Einkommensschwelle ist brutto und hoch."
+    },
+    "dubai-ae": {
+      "arbitrageNote": "Teuer zu leben, aber 0% Einkommensteuer kehrt die Arbitrage-Rechnung oberhalb von etwa 120.000 USD/Jahr vollständig um. Der Rechner muss das Nettoeinkommen abbilden, nicht nur die Lebenshaltungskosten.",
+      "taxNotes": "0% persönliche Einkommensteuer. 9% Körperschaftsteuer gilt oberhalb eines Gewinns von 375.000 AED."
+    },
+    "kuala-lumpur-my": {
+      "arbitrageNote": "Am meisten unterschätzt auf dieser Liste: englischsprachig, großartiges Internet, günstig, gute Gesundheitsversorgung, wichtiges Flug-Drehkreuz. Im Vergleich zu Bali oder Chiang Mai eine schwächere soziale Nomaden-Szene.",
+      "taxNotes": "Ausländisches Einkommen, das nach Malaysia überwiesen wird, ist für Privatpersonen mindestens bis 2026 steuerfrei — überprüfe das aktuelle Ablaufdatum.",
+      "nomadVisaNotes": "Beschränkt auf IT, digitales Marketing, Content und ähnliche digitale Berufe."
+    },
+    "ho-chi-minh-vn": {
+      "arbitrageNote": "Das 90-tägige E-Visum ist großzügig und einfach. Luftqualität und Verkehrslärm sind die Hauptbeschwerden.",
+      "taxNotes": "Residenten werden mit progressiven Sätzen von bis zu 35% auf ihr weltweites Einkommen besteuert. Die Durchsetzung gegenüber Ausländern war historisch gering, wird aber verschärft."
+    },
+    "taipei-tw": {
+      "arbitrageNote": "Sicherste Stadt auf dieser Liste, Weltklasse-Nahverkehr und Internet. Die Gold Card ist eine der lohnendsten langfristigen Nomaden-Genehmigungen überhaupt.",
+      "taxNotes": "Inhaber einer Gold Card erhalten für die ersten 5 Jahre ihrer Aufenthaltszeit eine 50%ige Befreiung auf Einkommen über 3 Mio. TWD.",
+      "nomadVisaNotes": "Kombiniert Arbeitserlaubnis, Aufenthaltsvisum, ARC und Wiedereinreisegenehmigung in einem."
+    },
+    "seoul-kr": {
+      "arbitrageNote": "Schnellstes Internet auf der Liste. Die hohe Einkommenshürde und schwaches Englisch machen es zu einer Wahl für Spezialisten.",
+      "taxNotes": "Progressive Sätze von bis zu 45%. Die hohe Einkommensschwelle des Visums bedeutet, dass die meisten Inhaber steuerpflichtig sind.",
+      "nomadVisaNotes": "Erfordert ein Einkommen von mindestens dem Doppelten des koreanischen BIP pro Kopf und mindestens 1 Jahr beim gleichen Arbeitgeber."
+    },
+    "cape-town-za": {
+      "arbitrageNote": "Außergewöhnliche Landschaft und Wert in der europäischen Zeitzone, aber die Gewaltkriminalität ist wirklich hoch und Lastabwürfe (Load-Shedding) können die Arbeit stören. Das darf in der UI nicht beschönigt werden.",
+      "taxNotes": "NICHT-KALENDARISCHES STEUERJAHR: 1. März bis 28./29. Februar. Zudem gilt ein separater 'gewöhnlicher Wohnsitz'-Test. Die Tageszählung allein ist nicht das gesamte Bild.",
+      "nomadVisaNotes": "Inhaber, die weniger als 6 Monate innerhalb eines 12-Monats-Fensters bleiben, sind von der südafrikanischen Einkommensteuerregistrierung befreit."
+    },
+    "mauritius-mu": {
+      "arbitrageNote": "Kostenloses Visum, pauschal 15% Steuer, englischsprachig, sicher. Isoliert und autoabhängig; Flüge sind teuer.",
+      "taxNotes": "NICHT-KALENDARISCHES STEUERJAHR: 1. Juli bis 30. Juni. Pauschale Einkommensteuer von 15%; ausländisches Einkommen, das nicht nach Mauritius überwiesen wird, wird im Allgemeinen nicht besteuert.",
+      "nomadVisaNotes": "Kostenlos zu beantragen. Eine der am leichtesten zu genehmigenden Optionen auf dieser Liste."
+    },
+    "tirana-al": {
+      "arbitrageNote": "Nicht-Schengen, spottbillig, 365 Tage visumfrei für US-Pässe, an der Adria gelegen. Der dunkle Pferd der europäischen Arbitrage.",
+      "taxNotes": "Inhaber einer Nomaden-Genehmigung wurde im ersten Jahr eine Befreiung für ausländisches Einkommen gewährt. Aktuellen Status vor Verlassen darauf überprüfen.",
+      "nomadVisaNotes": "Sehr niedrige Einkommensschwelle. Der 1-jährige visumfreie Aufenthalt für US-Bürger macht die Genehmigung für viele optional."
+    },
+    "playa-del-carmen-mx": {
+      "arbitrageNote": "Karibikstrand plus eine echte Nomaden-Szene, Überschneidung mit der US-Zeitzone. Die Sargassum-Saison (Apr-Aug) und die Luftfeuchtigkeit sind die Nachteile.",
+      "taxNotes": "Gleich wie in Mexiko-Stadt."
+    },
+    "chengdu-cn": {
+      "arbitrageNote": "Die größte Expat- und Maker-Szene außerhalb der Tier-1-Städte, bei etwa der Hälfte der Kosten von Shanghai. Ausgezeichnetes Essen und Nahverkehr. Englisch ist außerhalb internationaler Kreise begrenzt; man sollte täglich mit Übersetzungs-Apps rechnen.",
+      "taxNotes": "Sechs-Jahres-Regel: Die weltweite Einkommenssteuerpflicht entsteht erst nach 183+ Tagen über sechs aufeinanderfolgende Jahre. Davor ist ausländisches Einkommen, das von ausländischen Unternehmen gezahlt wird, im Allgemeinen steuerfrei — ungewöhnlich günstig für mittelfristige Aufenthalte.",
+      "nomadVisaNotes": "Kein Arbeitsvisum. Einschreibung in ein chinesisches Sprachprogramm, typischerweise 10-15 Std./Woche. Der übliche legitime Weg für Aufenthalte über 30 Tage hinaus. Remote-Arbeit mit diesem Visum bleibt eine Grauzone."
+    },
+    "kunming-cn": {
+      "arbitrageNote": "'Stadt des Frühlings' — das beständig angenehmste Klima Chinas und eine der günstigsten Städte auf dieser gesamten Liste. Sehr wenig Englisch und eine kleine ausländische Gemeinschaft. Starker Wert, wenn du relativ isoliert arbeiten kannst.",
+      "taxNotes": "Sechs-Jahres-Regel: Die weltweite Einkommenssteuerpflicht entsteht erst nach 183+ Tagen über sechs aufeinanderfolgende Jahre. Davor ist ausländisches Einkommen, das von ausländischen Unternehmen gezahlt wird, im Allgemeinen steuerfrei — ungewöhnlich günstig für mittelfristige Aufenthalte.",
+      "nomadVisaNotes": "Kein Arbeitsvisum. Einschreibung in ein chinesisches Sprachprogramm, typischerweise 10-15 Std./Woche. Der übliche legitime Weg für Aufenthalte über 30 Tage hinaus. Remote-Arbeit mit diesem Visum bleibt eine Grauzone."
+    },
+    "dali-cn": {
+      "arbitrageNote": "Günstigster Eintrag auf der Liste. Eine seit Langem bestehende Backpacker- und Künstlerstadt am See, jetzt mit einer kleinen Remote-Work-Community. Die Infrastruktur ist dünner als in den Großstädten — überprüfe das Internet bei der jeweiligen Unterkunft, bevor du etwas Langfristiges buchst.",
+      "taxNotes": "Sechs-Jahres-Regel: Die weltweite Einkommenssteuerpflicht entsteht erst nach 183+ Tagen über sechs aufeinanderfolgende Jahre. Davor ist ausländisches Einkommen, das von ausländischen Unternehmen gezahlt wird, im Allgemeinen steuerfrei — ungewöhnlich günstig für mittelfristige Aufenthalte.",
+      "nomadVisaNotes": "Kein Arbeitsvisum. Einschreibung in ein chinesisches Sprachprogramm, typischerweise 10-15 Std./Woche. Der übliche legitime Weg für Aufenthalte über 30 Tage hinaus. Remote-Arbeit mit diesem Visum bleibt eine Grauzone."
+    },
+    "shenzhen-cn": {
+      "arbitrageNote": "Chinas Hardware-Hauptstadt, direkt neben Hongkong für Visa-Runs und uneingeschränktes Internet. Beste Wahl, wenn deine Arbeit mit Fertigung oder Elektronik zu tun hat.",
+      "taxNotes": "Sechs-Jahres-Regel: Die weltweite Einkommenssteuerpflicht entsteht erst nach 183+ Tagen über sechs aufeinanderfolgende Jahre. Davor ist ausländisches Einkommen, das von ausländischen Unternehmen gezahlt wird, im Allgemeinen steuerfrei — ungewöhnlich günstig für mittelfristige Aufenthalte.",
+      "nomadVisaNotes": "Kein Arbeitsvisum. Einschreibung in ein chinesisches Sprachprogramm, typischerweise 10-15 Std./Woche. Der übliche legitime Weg für Aufenthalte über 30 Tage hinaus. Remote-Arbeit mit diesem Visum bleibt eine Grauzone."
+    },
+    "shanghai-cn": {
+      "arbitrageNote": "Die international am besten zugängliche Stadt Chinas — am meisten Englisch, meiste ausländische Infrastruktur, einfachste sanfte Landung. Auch die teuerste, und die Arbitrage verschwindet weitgehend im Vergleich zu Südostasien.",
+      "taxNotes": "Sechs-Jahres-Regel: Die weltweite Einkommenssteuerpflicht entsteht erst nach 183+ Tagen über sechs aufeinanderfolgende Jahre. Davor ist ausländisches Einkommen, das von ausländischen Unternehmen gezahlt wird, im Allgemeinen steuerfrei — ungewöhnlich günstig für mittelfristige Aufenthalte.",
+      "nomadVisaNotes": "Kein Arbeitsvisum. Einschreibung in ein chinesisches Sprachprogramm, typischerweise 10-15 Std./Woche. Der übliche legitime Weg für Aufenthalte über 30 Tage hinaus. Remote-Arbeit mit diesem Visum bleibt eine Grauzone."
+    }
+  }
+}

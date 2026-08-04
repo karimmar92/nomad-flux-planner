@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { CITIES } from "@/lib/cities";
 import { useProfile } from "@/lib/store";
 import type { IncomeType, UserStage } from "@/lib/types";
@@ -28,22 +29,11 @@ const NATIONALITIES = [
   ["BR", "Brazil"],
 ] as const;
 
-const INCOME_TYPES: [IncomeType, string, string][] = [
-  ["employed", "Employed", "Salaried by one company"],
-  ["freelance", "Freelance", "Multiple clients, invoiced"],
-  ["founder", "Founder", "Own company, variable draw"],
-];
-
-const STEP_TITLES = [
-  "Where are you now?",
-  "Your passport",
-  "Your income",
-  "How you earn",
-  "Where you live",
-];
+const INCOME_TYPES: IncomeType[] = ["employed", "freelance", "founder"];
 
 /** Five-step, skippable first-run flow. Writes straight into the profile. */
 export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
+  const { t } = useTranslation("common");
   const { profile, patchProfile } = useProfile();
   const [step, setStep] = useState(0);
   const [stage, setStage] = useState<UserStage>(profile.stage);
@@ -53,6 +43,20 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
   const [bankingDismissed, setBankingDismissed] = useState(false);
 
   const [homeCity, setHomeCity] = useState<string | null>(profile.home_city_id);
+
+  const STEP_TITLES = [
+    t("onboarding.steps.0"),
+    t("onboarding.steps.1"),
+    t("onboarding.steps.2"),
+    t("onboarding.steps.3"),
+    t("onboarding.steps.4"),
+  ];
+
+  const INCOME_TYPE_LABELS: Record<IncomeType, [string, string]> = {
+    employed: [t("onboarding.incomeType.employedLabel"), t("onboarding.incomeType.employedHint")],
+    freelance: [t("onboarding.incomeType.freelanceLabel"), t("onboarding.incomeType.freelanceHint")],
+    founder: [t("onboarding.incomeType.founderLabel"), t("onboarding.incomeType.founderHint")],
+  };
 
   const finish = (skipped: boolean) => {
     patchProfile(
@@ -90,13 +94,13 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
         className="panel w-full max-w-md p-5 sm:rounded-lg"
         role="dialog"
         aria-modal="true"
-        aria-label={`${APP_NAME} setup`}
+        aria-label={`${APP_NAME} ${t("onboarding.ariaLabelSuffix")}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="label-xs">
-              {APP_NAME} · step {step + 1} of {STEP_TITLES.length}
+              {t("onboarding.appStep", { app: APP_NAME, current: step + 1, total: STEP_TITLES.length })}
             </p>
             <h2 className="text-lg font-semibold">
               {STEP_TITLES[step]}
@@ -104,10 +108,10 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
           </div>
           <button
             onClick={() => finish(true)}
-            aria-label="Skip setup"
+            aria-label={t("onboarding.skipAria")}
             className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/50 hover:bg-surface-2"
           >
-            Skip
+            {t("onboarding.skip")}
             <X className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
@@ -125,20 +129,19 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
         {step === 0 ? (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              The app works differently depending on where you are in this. Both paths are free to
-              switch between later.
+              {t("onboarding.stage.intro")}
             </p>
             {(
               [
                 [
                   "abroad",
-                  "I'm already living abroad",
-                  "Day counters, visa deadlines and your record of presence.",
+                  t("onboarding.stage.abroadLabel"),
+                  t("onboarding.stage.abroadBlurb"),
                 ],
                 [
                   "planning",
-                  "I'm planning my first move",
-                  "Runway, where to start, and the countdown to departure.",
+                  t("onboarding.stage.planningLabel"),
+                  t("onboarding.stage.planningBlurb"),
                 ],
               ] as [UserStage, string, string][]
             ).map(([value, label, blurb]) => (
@@ -149,7 +152,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   setStep(1);
                 }}
                 className={cn(
-                  "w-full rounded-md border border-border px-3 py-3 text-left hover:border-primary/50",
+                  "w-full rounded-md border border-border px-3 py-3 text-start hover:border-primary/50",
                   stage === value && "border-primary bg-primary/10",
                 )}
               >
@@ -170,7 +173,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   setStep(2);
                 }}
                 className={cn(
-                  "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:border-primary/50",
+                  "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-start text-sm hover:border-primary/50",
                   nationality === code && "border-primary bg-primary/10",
                 )}
               >
@@ -184,48 +187,51 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
         {step === 2 ? (
           <div>
             <label className="label-xs" htmlFor="ob-income">
-              Monthly income (USD)
+              {t("onboarding.income.label")}
             </label>
             <input
               id="ob-income"
               inputMode="numeric"
               value={income}
               onChange={(e) => setIncome(e.target.value.replace(/[^0-9]/g, ""))}
-              placeholder="5000"
+              placeholder={t("onboarding.income.placeholder")}
               className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2.5 text-2xl font-semibold outline-none focus:border-primary"
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Everything in {APP_NAME} is computed from this number. You can change it any time.
+              {t("onboarding.income.helper", { app: APP_NAME })}
             </p>
             <button
               onClick={() => setStep(3)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Continue
+              {t("onboarding.income.continue")}
             </button>
           </div>
         ) : null}
 
         {step === 3 ? (
           <div className="space-y-2">
-            {INCOME_TYPES.map(([value, label, hint]) => (
-              <button
-                key={value}
-                onClick={() => {
-                  setIncomeType(value);
-                  // Freelance and founder stay on this step for a beat: it's the
-                  // one moment a business account is genuinely relevant.
-                  if (value === "employed") setStep(4);
-                }}
-                className={cn(
-                  "w-full rounded-md border border-border px-3 py-2.5 text-left hover:border-primary/50",
-                  incomeType === value && "border-primary bg-primary/10",
-                )}
-              >
-                <div className="text-sm font-medium">{label}</div>
-                <div className="text-xs text-muted-foreground">{hint}</div>
-              </button>
-            ))}
+            {INCOME_TYPES.map((value) => {
+              const [label, hint] = INCOME_TYPE_LABELS[value];
+              return (
+                <button
+                  key={value}
+                  onClick={() => {
+                    setIncomeType(value);
+                    // Freelance and founder stay on this step for a beat: it's the
+                    // one moment a business account is genuinely relevant.
+                    if (value === "employed") setStep(4);
+                  }}
+                  className={cn(
+                    "w-full rounded-md border border-border px-3 py-2.5 text-start hover:border-primary/50",
+                    incomeType === value && "border-primary bg-primary/10",
+                  )}
+                >
+                  <div className="text-sm font-medium">{label}</div>
+                  <div className="text-xs text-muted-foreground">{hint}</div>
+                </button>
+              );
+            })}
 
             {/*
               One quiet, dismissible line — never a card stack, never on any
@@ -237,7 +243,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
               <div className="rounded-md border border-border bg-surface-2 px-3 py-2.5">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Invoicing clients abroad?{" "}
+                    {t("onboarding.banking.prompt")}{" "}
                     <a
                       href={bankingPartner ? partnerUrl(bankingPartner) : "#"}
                       target="_blank"
@@ -253,15 +259,15 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                     >
                       {bankingPartner?.name}
                     </a>{" "}
-                    gives a company multi-currency account with local details in 9+ currencies.{" "}
+                    {t("onboarding.banking.offer")}{" "}
                     <span className="text-muted-foreground/80">
-                      Affiliate link — we earn a commission at no extra cost to you.
+                      {t("onboarding.banking.affiliate")}
                     </span>
                   </p>
                   <button
                     type="button"
                     onClick={() => setBankingDismissed(true)}
-                    aria-label="Dismiss"
+                    aria-label={t("onboarding.banking.dismissAria")}
                     className="shrink-0 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-4 w-4" />
@@ -277,7 +283,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
               onClick={() => setStep(4)}
               className="mt-2 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Continue
+              {t("onboarding.incomeType.continue")}
             </button>
           </div>
         ) : null}
@@ -291,7 +297,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   key={city.id}
                   onClick={() => setHomeCity(city.id)}
                   className={cn(
-                    "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:border-primary/50",
+                    "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-start text-sm hover:border-primary/50",
                     homeCity === city.id && "border-primary bg-primary/10",
                   )}
                 >
@@ -304,7 +310,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
               onClick={() => finish(false)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
-              {stage === "planning" ? "Show me my runway" : "Show me my numbers"}
+              {stage === "planning" ? t("onboarding.home.finishPlanning") : t("onboarding.home.finishAbroad")}
             </button>
           </div>
         ) : null}

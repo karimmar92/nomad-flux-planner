@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import {
   SCHENGEN_COUNTRIES,
@@ -35,6 +36,7 @@ import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import type { Trip, TripPurpose } from "@/lib/types";
+import { formatDate, formatDateLong } from "@/lib/i18n/format";
 
 export const Route = createFileRoute("/tracker")({
   head: () => ({
@@ -93,6 +95,7 @@ const PALETTE = [
 ];
 
 function Tracker() {
+  const { i18n } = useTranslation();
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
   const { profile } = useProfile();
   const today = useMemo(() => todayIso(), []);
@@ -253,7 +256,7 @@ function Tracker() {
             <p className="num text-sm">
               you could stay{" "}
               <span className="font-semibold text-primary">{plannerDays} days</span>
-              {plannerLastDay ? ` — until ${plannerLastDay}` : ""}
+              {plannerLastDay ? ` — until ${formatDate(plannerLastDay, i18n.language)}` : ""}
             </p>
           </div>
         </div>
@@ -365,13 +368,14 @@ function Tracker() {
                     <div className="font-medium">
                       {flagEmoji(trip.country_code)} {countryName(trip.country_code)}
                       {SCHENGEN_COUNTRIES.has(trip.country_code) ? (
-                        <span className="ml-2 rounded border border-border px-1 text-[10px] text-muted-foreground">
+                        <span className="ms-2 rounded border border-border px-1 text-[10px] text-muted-foreground">
                           Schengen
                         </span>
                       ) : null}
                     </div>
                     <div className="num text-xs text-muted-foreground">
-                      {trip.entry_date} → {trip.exit_date ?? "still here"} ·{" "}
+                      {formatDate(trip.entry_date, i18n.language)} →{" "}
+                      {trip.exit_date ? formatDate(trip.exit_date, i18n.language) : "still here"} ·{" "}
                       {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days · {trip.purpose.replace("_", " ")}
                     </div>
                   </div>
@@ -564,13 +568,9 @@ function TripConfirmKit({
   showPartnerCard: boolean;
   onDismiss: () => void;
 }) {
+  const { i18n } = useTranslation();
   const destination = trip.city_id ? getCity(trip.city_id) : undefined;
-  const parts = trip.entry_date.split("-").map(Number) as [number, number, number];
-  const label = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])));
+  const label = formatDateLong(trip.entry_date, i18n.language);
 
   // One card per screen. The journey is the thing that's just been decided, so
   // routing wins when we know both ends; otherwise data on landing. Everything
@@ -579,7 +579,7 @@ function TripConfirmKit({
   const showEsim = showPartnerCard && !showTransport;
 
   return (
-    <section className="panel border-l-2 border-l-primary p-4">
+    <section className="panel border-s-2 border-s-primary p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">

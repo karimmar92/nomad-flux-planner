@@ -1,5 +1,7 @@
 import { AlertTriangle, CalendarClock, FileText, Plane, ShieldCheck, Stamp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { buildComplianceCalendar, kindLabel, type Obligation } from "@/lib/compliance-calendar";
+import { formatDate } from "@/lib/i18n/format";
 import type { VaultDocument } from "@/lib/documents/vault";
 import { LEGAL_DISCLAIMER } from "@/lib/app";
 import type { Trip } from "@/lib/types";
@@ -15,9 +17,9 @@ const ICONS = {
 } as const;
 
 const SEVERITY = {
-  critical: "border-l-accent-warning bg-accent-warning/5",
-  warning: "border-l-accent-warning/50",
-  info: "border-l-border",
+  critical: "border-s-accent-warning bg-accent-warning/5",
+  warning: "border-s-accent-warning/50",
+  info: "border-s-border",
 } as const;
 
 function whenLabel(daysAway: number): string {
@@ -64,11 +66,12 @@ export function ComplianceCalendar({
 }
 
 function Row({ obligation }: { obligation: Obligation }) {
+  const { i18n } = useTranslation();
   const Icon = ICONS[obligation.kind];
   return (
     <div
       className={cn(
-        "panel flex gap-3 border-l-2 p-3",
+        "panel flex gap-3 border-s-2 p-3",
         SEVERITY[obligation.severity],
       )}
     >
@@ -88,8 +91,10 @@ function Row({ obligation }: { obligation: Obligation }) {
         </div>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{obligation.detail}</p>
       </div>
-      <div className="shrink-0 text-right">
-        <div className="num text-xs font-medium tabular-nums">{obligation.date}</div>
+      <div className="shrink-0 text-end">
+        <div className="num text-xs font-medium tabular-nums">
+          {formatDate(obligation.date, i18n.language)}
+        </div>
         <div className="text-[10px] text-muted-foreground">{whenLabel(obligation.daysAway)}</div>
       </div>
     </div>

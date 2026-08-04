@@ -112,7 +112,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <section className="panel space-y-2 p-4">
       <h2 className="text-sm font-semibold">{title}</h2>
-      <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">{children}</ul>
+      <ul className="list-disc space-y-1 ps-4 text-sm text-muted-foreground">{children}</ul>
     </section>
   );
 }

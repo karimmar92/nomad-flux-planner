@@ -1,0 +1,42 @@
+{
+  "hub": {
+    "title": "Bevor du gehst",
+    "subtitle": "Alles, was vor dem ersten Flug passieren muss.",
+    "runway": "Runway-Rechner",
+    "firstMove": "Wo soll ich anfangen?",
+    "checklist": "90-Tage-Countdown bis zur Abreise",
+    "taxExit": "Abmeldung aus deinem Heimatland",
+    "budget": "Startbudget"
+  },
+  "runway": {
+    "title": "Runway-Rechner",
+    "savings": "Ersparnisse",
+    "monthlyIncome": "Monatliches Einkommen",
+    "homeCost": "Kosten zu Hause",
+    "targetCost": "Kosten in {{city}}",
+    "monthsHome": "{{count}} Monate zu Hause",
+    "monthsTarget": "{{count}} Monate in {{city}}",
+    "free": "Dauerhaft kostenlos und partnerfrei — auf diesem Bildschirm verdienen wir nichts."
+  },
+  "firstMove": {
+    "title": "Wo soll ich anfangen?",
+    "subtitle": "Sortiert für den ersten Umzug: einfache Visa, weiche Landung, vorhandene Community."
+  },
+  "checklist": {
+    "title": "90-Tage-Countdown bis zur Abreise",
+    "daysToGo": "Noch {{count}} Tage",
+    "done": "Erledigt",
+    "todo": "Offen"
+  },
+  "taxExit": {
+    "title": "Abmeldung aus deinem Heimatland",
+    "subtitle": "Was die Abmeldung konkret bedeutet — Land für Land.",
+    "noLinks": "Dieser Bereich enthält keinerlei Partnerlinks."
+  },
+  "stage": {
+    "question": "Wo stehst du gerade?",
+    "planning": "Noch zu Hause, in der Planung",
+    "abroad": "Schon im Ausland",
+    "graduated": "Willkommen im Ausland — dein Tracker ist jetzt aktiv."
+  }
+}

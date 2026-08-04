@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useSession } from "@/lib/use-session";
 import { getCreatorDashboard } from "@/lib/referrals/creator.functions";
@@ -9,6 +10,7 @@ import { pct } from "@/lib/referrals/commission";
 import { ReferralLinkCard } from "@/components/referrals/ReferralLinkCard";
 import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
+import { formatDate } from "@/lib/i18n/format";
 
 export const Route = createFileRoute("/creator")({
   head: () => ({
@@ -32,6 +34,7 @@ export const Route = createFileRoute("/creator")({
 });
 
 function CreatorPage() {
+  const { i18n } = useTranslation();
   const { signedIn, ready } = useSession();
   // Commission figures are server-derived from the append-only ledger, so this
   // screen genuinely needs a connection. Say so rather than spinning.
@@ -141,7 +144,7 @@ function CreatorPage() {
       {emptyState ? (
         <section className="panel space-y-2 p-4">
           <h2 className="text-sm font-semibold">What works</h2>
-          <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+          <ul className="list-disc space-y-1 ps-4 text-sm text-muted-foreground">
             <li>A concrete number beats a feature list — "Lisbon vs Tbilisi, same income".</li>
             <li>Visa-deadline content converts best: people act when a clock is running.</li>
             <li>The QR code above works well at coworking talks and meetups.</li>
@@ -176,22 +179,22 @@ function CreatorPage() {
             <h2 className="label-xs mb-2">Monthly cohorts</h2>
             <table className="w-full text-sm">
               <thead className="text-muted-foreground">
-                <tr className="text-left">
+                <tr className="text-start">
                   <th className="py-1 font-normal">Month</th>
-                  <th className="py-1 text-right font-normal">New</th>
-                  <th className="py-1 text-right font-normal">Conv.</th>
-                  <th className="py-1 text-right font-normal">Accrued</th>
-                  <th className="py-1 text-right font-normal">Cleared</th>
+                  <th className="py-1 text-end font-normal">New</th>
+                  <th className="py-1 text-end font-normal">Conv.</th>
+                  <th className="py-1 text-end font-normal">Accrued</th>
+                  <th className="py-1 text-end font-normal">Cleared</th>
                 </tr>
               </thead>
               <tbody>
                 {cohorts.map((c) => (
                   <tr key={c.month} className="border-t border-border">
                     <td className="num py-1.5">{c.month}</td>
-                    <td className="num py-1.5 text-right">{c.newReferrals}</td>
-                    <td className="num py-1.5 text-right">{c.conversions}</td>
-                    <td className="num py-1.5 text-right">{formatUsd(c.accruedCents)}</td>
-                    <td className="num py-1.5 text-right">{formatUsd(c.clearedCents)}</td>
+                    <td className="num py-1.5 text-end">{c.newReferrals}</td>
+                    <td className="num py-1.5 text-end">{c.conversions}</td>
+                    <td className="num py-1.5 text-end">{formatUsd(c.accruedCents)}</td>
+                    <td className="num py-1.5 text-end">{formatUsd(c.clearedCents)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -226,7 +229,7 @@ function CreatorPage() {
           <ul className="divide-y divide-border text-sm">
             {data.payouts.map((p) => (
               <li key={p.id} className="flex items-center justify-between py-2">
-                <span className="num text-muted-foreground">{p.created_at.slice(0, 10)}</span>
+                <span className="num text-muted-foreground">{formatDate(p.created_at, i18n.language)}</span>
                 <span className="num font-medium">{formatUsd(p.amount_cents)}</span>
                 <span className="text-xs text-muted-foreground">{p.status}</span>
               </li>

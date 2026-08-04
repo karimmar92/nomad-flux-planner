@@ -221,7 +221,7 @@ function PeerDetail() {
                 onClick={sendIntro}
                 className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
               >
-                <Send className="mr-1.5 inline h-3.5 w-3.5" />
+                <Send className="me-1.5 inline h-3.5 w-3.5" />
                 Send intro
               </button>
             </div>
@@ -238,14 +238,14 @@ function PeerDetail() {
           }}
           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
-          <Ban className="mr-1.5 inline h-3.5 w-3.5" />
+          <Ban className="me-1.5 inline h-3.5 w-3.5" />
           Block
         </button>
         <button
           onClick={() => setReporting((v) => !v)}
           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
-          <Flag className="mr-1.5 inline h-3.5 w-3.5" />
+          <Flag className="me-1.5 inline h-3.5 w-3.5" />
           Report
         </button>
       </section>

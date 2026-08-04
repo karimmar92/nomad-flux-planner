@@ -1,0 +1,41 @@
+{
+  "card": {
+    "title": "Visado",
+    "touristDays": "Entrada turística: {{days}} días",
+    "ruleType": {
+      "SCHENGEN_90_180": "Schengen 90/180",
+      "FIXED_PER_ENTRY": "Días fijos por entrada",
+      "ROLLING_PER_YEAR": "Días móviles por año",
+      "NOMAD_VISA": "Vía de visado nómada"
+    },
+    "nationalityDependent": "Las normas de visado varían mucho según el pasaporte: confírmalas para el tuyo.",
+    "trialExpiry": "Esta política es un programa piloto y su vigencia actual termina el {{date}}. Verifícala antes de reservar una estancia posterior.",
+    "nomadVisa": "Visado nómada",
+    "nomadVisaNone": "No hay un visado nómada específico.",
+    "durationMonths": "{{count}} meses",
+    "minIncome": "Ingresos mínimos",
+    "approxCost": "Coste habitual",
+    "renewable": "Renovable",
+    "pathToResidency": "Vía a la residencia",
+    "extension": "Prórroga"
+  },
+  "schengen": {
+    "title": "Schengen 90/180",
+    "daysUsed": "{{used}} de {{total}} días consumidos",
+    "daysRemaining": "Hoy te quedan {{count}} días",
+    "mustExitBy": "Debes salir antes del {{date}}",
+    "nextResetOn": "El siguiente día se libera el {{date}}",
+    "overstay": "La presencia registrada supera el límite de 90 días.",
+    "notSchengen": "No es un país Schengen: esta estancia no consume tu cupo de 90/180."
+  },
+  "borderRun": {
+    "title": "Salida de frontera",
+    "subtitle": "Opciones de salida ordenadas por coste y días disponibles.",
+    "daysAvailable": "{{count}} días disponibles",
+    "nonSchengen": "Fuera de Schengen"
+  },
+  "disclaimer": {
+    "visa": "Solo con fines informativos. No es asesoramiento legal. Las normas de visado cambian sin previo aviso: confírmalas con la embajada o la autoridad de inmigración del país al que entras.",
+    "tax": "Solo con fines informativos. No es asesoramiento fiscal. Esto registra presencia; no determina residencia. Confírmalo con un asesor cualificado en la jurisdicción correspondiente."
+  }
+}

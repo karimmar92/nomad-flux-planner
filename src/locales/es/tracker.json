@@ -1,0 +1,41 @@
+{
+  "title": "Control de visados",
+  "subtitle": "Cada día que has gastado y cada día que te queda.",
+  "addTrip": "Añadir viaje",
+  "editTrip": "Editar viaje",
+  "deleteTrip": "Eliminar viaje",
+  "fields": {
+    "country": "País",
+    "city": "Ciudad",
+    "entryDate": "Fecha de entrada",
+    "exitDate": "Fecha de salida",
+    "stillHere": "Sigo aquí",
+    "notes": "Notas"
+  },
+  "openTrip": "Viaje abierto: sin fecha de salida registrada",
+  "empty": {
+    "title": "Aún no has registrado viajes",
+    "body": "Añade tu primera fecha de entrada y salida para iniciar el cálculo 90/180."
+  },
+  "arrival": {
+    "title": "Parece que has llegado a {{country}}",
+    "confirm": "Registrar esta llegada",
+    "notNow": "Ahora no",
+    "daysGranted": "Días concedidos: {{days}}",
+    "exitDeadline": "Salir antes del {{date}}"
+  },
+  "checklist": {
+    "title": "Antes de volar",
+    "esim": "eSIM",
+    "insurance": "Seguro",
+    "address": "Dirección del alojamiento",
+    "onward": "Billete de salida"
+  },
+  "record": {
+    "title": "Tu registro",
+    "report": "Informe anual de presencia",
+    "vault": "Bóveda de documentos",
+    "calendar": "Calendario de cumplimiento",
+    "expiring": "Caduca el {{date}}"
+  }
+}

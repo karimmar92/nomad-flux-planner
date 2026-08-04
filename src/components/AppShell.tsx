@@ -19,8 +19,10 @@ import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
-type NavItem = { to: string; label: string; icon: typeof Compass };
+type NavItem = { to: string; labelKey: string; icon: typeof Compass };
 
 /**
  * People who have not left yet have no trips, so the tracker and the record
@@ -28,23 +30,24 @@ type NavItem = { to: string; label: string; icon: typeof Compass };
  * tracker reappears at graduation.
  */
 const NAV_PLANNING: NavItem[] = [
-  { to: "/plan", label: "Plan", icon: PlaneTakeoff },
-  { to: "/", label: "Explore", icon: Compass },
-  { to: "/calculator", label: "Arbitrage", icon: Calculator },
-  { to: "/compare", label: "Compare", icon: GitCompareArrows },
-  { to: "/pricing", label: "Pricing", icon: Tag },
+  { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
+  { to: "/", labelKey: "nav.explore", icon: Compass },
+  { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
+  { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
+  { to: "/pricing", labelKey: "nav.pricing", icon: Tag },
 ];
 
 const NAV_ABROAD: NavItem[] = [
-  { to: "/", label: "Explore", icon: Compass },
-  { to: "/calculator", label: "Arbitrage", icon: Calculator },
-  { to: "/compare", label: "Compare", icon: GitCompareArrows },
-  { to: "/tracker", label: "Tracker", icon: CalendarClock },
-  { to: "/record", label: "Record", icon: FolderLock },
-  { to: "/pricing", label: "Pricing", icon: Tag },
+  { to: "/", labelKey: "nav.explore", icon: Compass },
+  { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
+  { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
+  { to: "/tracker", labelKey: "nav.tracker", icon: CalendarClock },
+  { to: "/record", labelKey: "nav.record", icon: FolderLock },
+  { to: "/pricing", labelKey: "nav.pricing", icon: Tag },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("common");
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
   const NAV = profile.stage === "planning" ? NAV_PLANNING : NAV_ABROAD;
@@ -64,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="text-sm font-semibold tracking-tight">{APP_NAME}</span>
           </Link>
 
-          <nav className="ml-4 hidden items-center gap-1 md:flex">
+          <nav className="ms-4 hidden items-center gap-1 md:flex">
             {NAV.map((item) => (
               <Link
                 key={item.to}
@@ -73,23 +76,24 @@ export function AppShell({ children }: { children: ReactNode }) {
                 activeProps={{ className: "bg-surface-2 text-foreground" }}
                 activeOptions={{ exact: item.to === "/" }}
               >
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ms-auto flex items-center gap-1">
             <AuthButton />
+            <LanguageSwitcher />
             <button
               onClick={toggleTheme}
-              aria-label="Toggle theme"
+              aria-label={t("nav.toggleTheme")}
               className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <Link
               to="/profile"
-              aria-label="Profile"
+              aria-label={t("nav.profile")}
               className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
             >
               <UserRound className="h-4 w-4" />
@@ -105,40 +109,40 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="mx-auto mb-20 flex w-full max-w-6xl flex-wrap gap-4 px-4 text-xs text-muted-foreground md:mb-6">
         <Link to="/plan" className="hover:text-foreground">
-          Before you go
+          {t("footerLinks.beforeYouGo")}
         </Link>
         <Link to="/community" className="hover:text-foreground">
-          Community
+          {t("footerLinks.community")}
         </Link>
         <Link to="/stays" className="hover:text-foreground">
-          Stays
+          {t("footerLinks.stays")}
         </Link>
         <Link to="/profile" className="hover:text-foreground">
-          Profile
+          {t("footerLinks.profile")}
         </Link>
         <Link to="/setup/company" className="hover:text-foreground">
-          Do you need a company?
+          {t("footerLinks.company")}
         </Link>
         <Link to="/kit" className="hover:text-foreground">
-          Nomad kit
+          {t("footerLinks.kit")}
         </Link>
         <Link to="/business" className="hover:text-foreground">
-          For teams
+          {t("footerLinks.business")}
         </Link>
         <Link to="/org" className="hover:text-foreground">
-          Team dashboard
+          {t("footerLinks.org")}
         </Link>
         <Link to="/settings/employer-sharing" className="hover:text-foreground">
-          Employer sharing
+          {t("footerLinks.employerSharing")}
         </Link>
         <Link to="/how-we-make-money" className="hover:text-foreground">
-          How we make money
+          {t("footerLinks.howWeMakeMoney")}
         </Link>
         <Link to="/creators" className="hover:text-foreground">
-          Creator programme
+          {t("footerLinks.creatorProgramme")}
         </Link>
         <Link to="/creator" className="hover:text-foreground">
-          Creator dashboard
+          {t("footerLinks.creatorDashboard")}
         </Link>
       </div>
 
@@ -154,7 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             activeOptions={{ exact: item.to === "/" }}
           >
             <item.icon className="h-4 w-4" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
       </nav>

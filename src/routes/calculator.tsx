@@ -114,7 +114,7 @@ function CalculatorPage() {
         <div className="overflow-x-auto hide-scrollbar">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left">
+              <tr className="border-b border-border text-start">
                 <Th>City</Th>
                 <Th right>Cost/mo</Th>
                 <Th right>Surplus/mo</Th>
@@ -173,7 +173,7 @@ function CalculatorPage() {
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
   return (
-    <th className={cn("label-xs px-4 py-2 font-medium", right && "text-right")}>{children}</th>
+    <th className={cn("label-xs px-4 py-2 font-medium", right && "text-end")}>{children}</th>
   );
 }
 
@@ -187,6 +187,6 @@ function Td({
   className?: string;
 }) {
   return (
-    <td className={cn("num px-4 py-2.5", right && "text-right", className)}>{children}</td>
+    <td className={cn("num px-4 py-2.5", right && "text-end", className)}>{children}</td>
   );
 }

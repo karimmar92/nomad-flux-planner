@@ -1,3 +1,12 @@
+/*
+ * RTL policy: use Tailwind logical-property utilities (ms-/me-, ps-/pe-,
+ * border-s/border-e, rounded-s/rounded-e, start-/end-, text-start/text-end)
+ * instead of directional ones (ml-/mr-, pl-/pr-, border-l/border-r,
+ * rounded-l/rounded-r, left-/right-, text-left/text-right) everywhere in
+ * src/. This makes RTL locales (Arabic/Hebrew) a `dir` attribute change,
+ * not a rewrite. `dir` is derived from the active locale in
+ * src/components/i18n/I18nProvider.tsx and set on the document root.
+ */
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";

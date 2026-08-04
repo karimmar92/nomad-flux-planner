@@ -1,0 +1,31 @@
+{
+  "creator": {
+    "title": "Creator programme",
+    "pitch": "30% of every subscription you refer, every month, for as long as they stay.",
+    "apply": "Apply to the programme",
+    "dashboard": "Creator dashboard",
+    "balance": "Available balance",
+    "pending": "Pending",
+    "paid": "Paid out",
+    "clicks": "Clicks",
+    "signups": "Signups",
+    "conversions": "Conversions",
+    "link": "Your link",
+    "copyLink": "Copy link",
+    "qr": "QR code"
+  },
+  "user": {
+    "title": "Invite a friend",
+    "body": "They get a free month of Pro. So do you, when they subscribe.",
+    "invited_one": "{{count}} friend invited",
+    "invited_other": "{{count}} friends invited",
+    "freeMonths_one": "{{count}} free month earned",
+    "freeMonths_other": "{{count}} free months earned"
+  },
+  "admin": {
+    "title": "Creator applications",
+    "approve": "Approve",
+    "reject": "Reject",
+    "adjustment": "Manual adjustment"
+  }
+}

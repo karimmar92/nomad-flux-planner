@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useSession } from "@/lib/use-session";
 import {
@@ -12,6 +13,7 @@ import {
   reviewApplication,
 } from "@/lib/referrals/admin.functions";
 import { formatUsd } from "@/lib/referrals/config";
+import { formatDate } from "@/lib/i18n/format";
 
 export const Route = createFileRoute("/admin/creators")({
   head: () => ({
@@ -27,6 +29,7 @@ export const Route = createFileRoute("/admin/creators")({
 });
 
 function AdminCreatorsPage() {
+  const { i18n } = useTranslation();
   const { signedIn, ready } = useSession();
   const fetchOverview = useServerFn(getAdminOverview);
   const qc = useQueryClient();
@@ -120,7 +123,7 @@ function AdminCreatorsPage() {
                 <code className="num text-xs text-muted-foreground">
                   {JSON.stringify(f.detail)}
                 </code>
-                <div className="ml-auto flex gap-2">
+                <div className="ms-auto flex gap-2">
                   <button
                     className="rounded-full border border-border px-3 py-1 text-xs"
                     onClick={async () => {
@@ -165,8 +168,8 @@ function AdminCreatorsPage() {
               <li key={r.id} className="flex items-center gap-3 py-2">
                 <span className="num">{formatUsd(r.amount_cents)}</span>
                 <span className="text-muted-foreground">{r.note}</span>
-                <span className="num ml-auto text-xs text-muted-foreground">
-                  {r.created_at.slice(0, 10)}
+                <span className="num ms-auto text-xs text-muted-foreground">
+                  {formatDate(r.created_at, i18n.language)}
                 </span>
               </li>
             ))}

@@ -89,7 +89,7 @@ function CompanySetupPage() {
           <Link
             to="/kit"
             aria-label="Back to the nomad kit"
-            className="-ml-2 grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+            className="-ms-2 grid h-9 w-9 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>

@@ -3,18 +3,11 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, Lock, Plane, TrainFront, TriangleAlert } from "lucide-react";
 import type { BorderRunPlan, ExitOption } from "@/lib/border-run";
 import { RANK_WEIGHTS } from "@/lib/border-run";
+import { useTranslation } from "react-i18next";
 import { flagEmoji, formatUsd } from "@/lib/arbitrage";
 import { TransportGroup } from "@/components/partners/TransportGroup";
+import { formatDateLong } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
-
-function longDate(iso: string): string {
-  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(y, m - 1, d)));
-}
 
 /**
  * Border-run planner. Deadline-triggered only — this card never appears
@@ -22,6 +15,7 @@ function longDate(iso: string): string {
  * reason a transport link is allowed inside it.
  */
 export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boolean }) {
+  const { i18n } = useTranslation();
   const { deadline, origin, departOn, options } = plan;
   const [openId, setOpenId] = useState<string | null>(options[0]?.city.id ?? null);
   const visible = isPro ? options : options.slice(0, 1);
@@ -29,10 +23,10 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
   return (
     <section
       className={cn(
-        "panel border-l-2 p-4",
+        "panel border-s-2 p-4",
         deadline.overstayed || deadline.daysLeft <= 7
-          ? "border-l-negative"
-          : "border-l-accent-warning",
+          ? "border-s-negative"
+          : "border-s-accent-warning",
       )}
     >
       <div className="flex items-start gap-2.5">
@@ -53,7 +47,7 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
                   deadline.reason === "schengen"
                     ? "the Schengen Area"
                     : `${flagEmoji(deadline.countryCode)} ${deadline.countryCode}`
-                } by ${longDate(deadline.lastLegalDay)} — ${deadline.daysLeft} ${
+                } by ${formatDateLong(deadline.lastLegalDay, i18n.language)} — ${deadline.daysLeft} ${
                   deadline.daysLeft === 1 ? "day" : "days"
                 }`}
           </h2>
@@ -134,7 +128,7 @@ function OptionRow({
         type="button"
         onClick={onToggle}
         aria-expanded={expanded}
-        className="flex w-full items-start gap-3 p-3 text-left"
+        className="flex w-full items-start gap-3 p-3 text-start"
       >
         <span className="num mt-0.5 w-5 shrink-0 text-sm font-semibold text-muted-foreground">
           {rank}

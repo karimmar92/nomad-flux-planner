@@ -1,0 +1,201 @@
+{
+  "explore": {
+    "title": "Explorar",
+    "subtitle": "Lo que te cuesta una ciudad y lo que le exige a tu pasaporte.",
+    "search": "Buscar ciudades o países",
+    "filters": {
+      "region": "Región",
+      "maxBudget": "Presupuesto mensual máximo",
+      "nonSchengenOnly": "Solo fuera de Schengen",
+      "all": "Todas"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "cost": "Más baratas",
+      "internet": "Internet más rápido",
+      "safety": "Más seguras",
+      "community": "Comunidad nómada"
+    },
+    "results_one": "{{count}} ciudad",
+    "results_other": "{{count}} ciudades"
+  },
+  "detail": {
+    "costs": "Costes",
+    "liveability": "Habitabilidad",
+    "visa": "Visado",
+    "tax": "Impuestos",
+    "whyHere": "Por qué aquí",
+    "monthlyMid": "Mensual, gama media",
+    "monthlyLean": "Mensual, ajustado",
+    "lastVerified": "Verificado por última vez el {{date}}",
+    "confidence": "Fiabilidad: {{level}}",
+    "nonSchengenBadge": "Fuera de Schengen: no consume tus 90/180 días",
+    "connectivityWarning": "Aviso sobre la conectividad",
+    "save": "Guardar ciudad",
+    "saved": "Guardada"
+  },
+  "scores": {
+    "internet": "Internet",
+    "safety": "Seguridad",
+    "nomadCommunity": "Comunidad nómada",
+    "walkability": "Caminabilidad",
+    "englishFriendly": "Inglés",
+    "weather": "Clima"
+  },
+  "costLines": {
+    "rent1brCentral": "Alquiler — 1 hab., centro",
+    "rent1brOutskirts": "Alquiler — 1 hab., afueras",
+    "colivingRoom": "Habitación en coliving",
+    "coworkingHotDesk": "Puesto en coworking",
+    "groceriesMonthly": "Supermercado",
+    "mealInexpensive": "Comer fuera (por comida)",
+    "utilities": "Suministros",
+    "mobileData": "Datos móviles",
+    "transportMonthly": "Transporte",
+    "gymMonthly": "Gimnasio"
+  },
+  "content": {
+    "lisbon-pt": {
+      "arbitrageNote": "Los precios subieron marcadamente entre 2022 y 2026. Sigue siendo sólida por su infraestructura, pero ya no es la ganga que era.",
+      "taxNotes": "El antiguo régimen NHR ya no admite nuevos solicitantes; un sucesor más restringido (IFICI) se dirige a actividades científicas y de alto valor. Asume las tasas progresivas estándar salvo que califiques.",
+      "nomadVisaNotes": "Requiere aproximadamente 4 veces el salario mínimo portugués como ingreso mensual, prueba de contrato remoto o de clientes freelance, número de NIF y una cuenta bancaria portuguesa."
+    },
+    "chiang-mai-th": {
+      "arbitrageNote": "La mejor relación costo-infraestructura de esta lista. La temporada de quemas (feb-abr) es un problema real de calidad del aire; planifica en función de ello.",
+      "taxNotes": "180 días o más en un año calendario te convierten en residente fiscal tailandés. Desde 2024, Tailandia grava los ingresos extranjeros remitidos a Tailandia por residentes. El momento de la remesa es importante.",
+      "nomadVisaNotes": "5 años, entrada múltiple. Cada entrada permite 180 días, prorrogables una vez por 180 días más (hasta 360 días consecutivos). Requiere 500.000 THB mantenidos durante al menos 3 meses; depósitos grandes recientes y transferencias de criptomonedas son señales de alerta. Debe solicitarse desde fuera de Tailandia."
+    },
+    "bangkok-th": {
+      "arbitrageNote": "Transporte, hospitales y conectividad aérea de clase mundial por menos de la mitad del costo de Europa Occidental.",
+      "taxNotes": "Mismas reglas de tributación por remesa que Chiang Mai."
+    },
+    "mexico-city-mx": {
+      "arbitrageNote": "Los oficiales de frontera otorgan cada vez más, a su discreción, menos de 180 días. No des por sentado el sello completo.",
+      "taxNotes": "El conteo de días es una prueba; tener tu 'centro de intereses vitales' en México puede desencadenar la residencia fiscal de forma independiente.",
+      "nomadVisaNotes": "No se comercializa como visa nómada, pero funciona como tal. Debe solicitarse en un consulado mexicano en el extranjero, no dentro de México. Los umbrales están vinculados al salario mínimo mexicano y varían anualmente."
+    },
+    "medellin-co": {
+      "arbitrageNote": "Clima primaveral durante todo el año, escena de emprendedores fuerte en El Poblado y Laureles. La delincuencia menor y la manipulación de bebidas son riesgos reales; la app debería mostrar la guía de seguridad, no ocultarla.",
+      "taxNotes": "Los residentes fiscales colombianos tributan sobre su renta mundial. Esto afecta a los nómadas de larga estancia con más frecuencia de lo que esperan.",
+      "nomadVisaNotes": "Uno de los umbrales de ingresos más bajos del mundo (aproximadamente 3 veces el salario mínimo colombiano). No cuenta para la residencia permanente."
+    },
+    "buenos-aires-ar": {
+      "arbitrageNote": "Los costos fluctúan fuertemente con el peso. Muy volátil: trata estas cifras como de baja confiabilidad y actualízalas con frecuencia.",
+      "taxNotes": "El régimen cambiario y de control de capitales ha sido volátil; verifica la situación cambiaria actual antes de comprometerte con un alquiler a largo plazo."
+    },
+    "bali-id": {
+      "arbitrageNote": "El internet es el punto débil: siempre verifica las velocidades reales en la villa específica, no el promedio de la isla. Los accidentes en motoneta son el principal riesgo de salud; los seguros a menudo los excluyen sin una licencia local.",
+      "taxNotes": "Los titulares de la visa E33G generalmente no tributan sobre ingresos de origen extranjero, pero superar los 183 días con otros tipos de visa puede desencadenar la residencia fiscal.",
+      "nomadVisaNotes": "Requiere prueba de empleo o de contratos con una empresa fuera de Indonesia. No se permiten ingresos de fuentes indonesias."
+    },
+    "tbilisi-ge": {
+      "arbitrageNote": "365 días sin visado más un régimen fiscal del 1% para freelancers es la combinación más fuerte de visado e impuestos disponible. La salvedad es la banca local: desde 2023 varios bancos han rechazado o retrasado cuentas para ciudadanos rusos, bielorrusos, iraníes y de algunos países de Asia Central, y los controles de cumplimiento para el resto también se han endurecido. La mayoría de los nómadas aquí usan una cuenta multidivisa y tratan una cuenta local como opcional. Ignora a las agencias que cobran entre 200 y 500 USD para 'garantizar' una: nosotros no las enlazamos y tú tampoco deberías.",
+      "taxNotes": "El Small Business Status ofrece un 1% de impuesto sobre la facturación hasta 500.000 GEL/año (~180.000 USD) para empresarios individuales registrados. La facturación por encima del límite se grava al 3%. Este es el mayor arbitraje fiscal individual de esta lista para freelancers.",
+      "nomadVisaNotes": "Es en gran medida redundante dada la estancia sin visado de 365 días para más de 90 nacionalidades."
+    },
+    "budapest-hu": {
+      "arbitrageNote": "La capital de la UE más barata con una infraestructura genuinamente buena. Se aplica el reloj Schengen.",
+      "taxNotes": "Impuesto sobre la renta plano del 15%. Los titulares de la White Card generalmente no pueden trabajar para empresas húngaras."
+    },
+    "belgrade-rs": {
+      "arbitrageNote": "Un lugar privilegiado para 'aparcar' el reloj Schengen. Barato, en la zona horaria europea, y los días pasados aquí no cuentan contra tus 90/180.",
+      "taxNotes": "Serbia ofrece una exención de ingresos extranjeros para nómadas que califiquen durante los primeros 90 días. Su estatus fuera de Schengen lo convierte en una base útil de 'reinicio' entre estancias en la UE.",
+      "nomadVisaNotes": "Fuera de Schengen, por lo que el tiempo aquí no consume días Schengen."
+    },
+    "istanbul-tr": {
+      "arbitrageNote": "Fuera de Schengen con un importante centro de conexiones aéreas. La inflación hace que los datos de costos sean inusualmente volátiles: actualízalos mensualmente.",
+      "taxNotes": "Entorno de alta inflación; las cifras en moneda local quedan obsoletas rápidamente.",
+      "nomadVisaNotes": "Edad 21-55, se requiere título universitario."
+    },
+    "warsaw-pl": {
+      "arbitrageNote": "El mejor internet y la mayor seguridad por dólar en la UE. Un fuerte grupo de talento en startups y desarrollo para colaborar con fundadores.",
+      "taxNotes": "Los autónomos registrados pueden acceder a una tasa fija del 12-15% para servicios de TI, lo cual resulta atractivo para desarrolladores."
+    },
+    "prague-cz": {
+      "arbitrageNote": "Muy caminable, excelente transporte público, marco legal maduro para freelancers.",
+      "taxNotes": "La licencia comercial 'živnostenský list' con la deducción fija de gastos 60/40 es una opción consolidada desde hace tiempo para freelancers.",
+      "nomadVisaNotes": "Limitado a nacionales de una lista específica de países elegibles, enfocado en TI/tecnología."
+    },
+    "las-palmas-es": {
+      "arbitrageNote": "El mejor clima durante todo el año en la UE, y la Beckham Law hace que España sea inusualmente atractiva para quienes tienen altos ingresos, pese a las tasas nominales.",
+      "taxNotes": "Los titulares de la visa de nómada pueden solicitar el régimen de la Beckham Law: 24% fijo sobre ingresos de fuente española hasta 600.000 EUR durante hasta 6 años. Las Islas Canarias también tienen un IGIC reducido (7%) en lugar del IVA peninsular (21%).",
+      "nomadVisaNotes": "Aproximadamente el 200% del SMI español. Los freelancers no pueden obtener más del 20% de sus ingresos de clientes españoles."
+    },
+    "athens-gr": {
+      "arbitrageNote": "La capital más barata de la eurozona con una escena nómada real. El calor del verano es cada vez más severo.",
+      "taxNotes": "50% de exención del impuesto sobre la renta durante 7 años para nuevos residentes fiscales que califiquen y se comprometan a permanecer 2 años o más."
+    },
+    "tallinn-ee": {
+      "arbitrageNote": "El mejor gobierno digital del mundo. El transporte público es gratuito para los residentes. La oscuridad invernal es un factor real de calidad de vida.",
+      "taxNotes": "La e-Residency te permite operar una empresa de la UE de forma remota, pero no otorga residencia, ni visado, ni cambia tu residencia fiscal personal. Es ampliamente malentendida.",
+      "nomadVisaNotes": "La primera visa nómada dedicada del mundo (2020). El umbral de ingresos es bruto y alto."
+    },
+    "dubai-ae": {
+      "arbitrageNote": "Caro para vivir, pero un 0% de impuesto sobre la renta invierte por completo la ecuación de arbitraje por encima de aproximadamente 120.000 USD/año. La calculadora debe modelar el ingreso neto de impuestos, no solo el costo de vida.",
+      "taxNotes": "0% de impuesto sobre la renta personal. Se aplica un 9% de impuesto corporativo por encima de 375.000 AED de beneficio."
+    },
+    "kuala-lumpur-my": {
+      "arbitrageNote": "El más subestimado de esta lista: de habla inglesa, gran internet, barato, buena atención médica, importante centro de conexiones aéreas. Escena social nómada más débil comparada con Bali o Chiang Mai.",
+      "taxNotes": "Los ingresos de fuente extranjera remitidos a Malasia están exentos para individuos al menos hasta 2026; verifica la fecha de vencimiento actual.",
+      "nomadVisaNotes": "Restringido a TI, marketing digital, contenido y profesiones digitales similares."
+    },
+    "ho-chi-minh-vn": {
+      "arbitrageNote": "La visa electrónica de 90 días es generosa y sencilla. La calidad del aire y el ruido del tráfico son las principales quejas.",
+      "taxNotes": "Los residentes tributan sobre su renta mundial a tasas progresivas de hasta el 35%. La aplicación de la ley contra extranjeros ha sido históricamente laxa, pero se está endureciendo."
+    },
+    "taipei-tw": {
+      "arbitrageNote": "La ciudad más segura de esta lista, transporte e internet de clase mundial. La Gold Card es uno de los permisos nómadas de largo plazo con mejor relación calidad-precio que existen.",
+      "taxNotes": "Los titulares de la Gold Card obtienen una exención del 50% sobre los ingresos superiores a 3 millones de TWD durante los primeros 5 años de residencia.",
+      "nomadVisaNotes": "Combina permiso de trabajo, visa de residencia, ARC y permiso de reingreso en uno solo."
+    },
+    "seoul-kr": {
+      "arbitrageNote": "El internet más rápido de la lista. El alto umbral de ingresos y el inglés limitado lo convierten en una opción para especialistas.",
+      "taxNotes": "Tasas progresivas de hasta el 45%. El alto umbral de ingresos de la visa implica que la mayoría de los titulares queda expuesta.",
+      "nomadVisaNotes": "Requiere un ingreso de al menos el doble del PIB per cápita de Corea y 1 año o más con el mismo empleador."
+    },
+    "cape-town-za": {
+      "arbitrageNote": "Paisajes y relación calidad-precio extraordinarios en la zona horaria europea, pero las tasas de delitos violentos son realmente altas y los cortes de electricidad programados pueden interrumpir el trabajo. Esto no debe suavizarse en la interfaz.",
+      "taxNotes": "AÑO FISCAL NO CALENDARIO: del 1 de marzo al 28/29 de febrero. También se aplica una prueba separada de 'residencia habitual'. El conteo de días por sí solo no es el panorama completo.",
+      "nomadVisaNotes": "Los titulares que permanecen menos de 6 meses dentro de una ventana de 12 meses están exentos del registro del impuesto sobre la renta sudafricano."
+    },
+    "mauritius-mu": {
+      "arbitrageNote": "Visa gratuita, impuesto fijo del 15%, de habla inglesa, seguro. Aislado y dependiente del automóvil; los vuelos son caros.",
+      "taxNotes": "AÑO FISCAL NO CALENDARIO: del 1 de julio al 30 de junio. Impuesto sobre la renta fijo del 15%; los ingresos extranjeros no remitidos a Mauricio generalmente no tributan.",
+      "nomadVisaNotes": "Gratis de solicitar. Una de las aprobaciones más sencillas de esta lista."
+    },
+    "tirana-al": {
+      "arbitrageNote": "Fuera de Schengen, muy barato, 365 días sin visado para pasaportes estadounidenses, en el Adriático. El caballo oscuro del arbitraje europeo.",
+      "taxNotes": "A los titulares del permiso nómada se les ha concedido una exención de ingresos extranjeros durante el primer año. Verifica el estado actual antes de confiar en ello.",
+      "nomadVisaNotes": "Umbral de ingresos muy bajo. La estancia sin visado de 1 año para ciudadanos estadounidenses hace que el permiso sea opcional para muchos."
+    },
+    "playa-del-carmen-mx": {
+      "arbitrageNote": "Playa caribeña más una escena nómada real, con superposición horaria con EE. UU. La temporada de sargazo (abr-ago) y la humedad son las desventajas.",
+      "taxNotes": "Igual que Ciudad de México."
+    },
+    "chengdu-cn": {
+      "arbitrageNote": "La mayor comunidad de expatriados y makers fuera de las ciudades de primer nivel, a aproximadamente la mitad del costo de Shanghái. Excelente comida y transporte. El inglés es limitado fuera de círculos internacionales; espera depender de aplicaciones de traducción a diario.",
+      "taxNotes": "Regla de los seis años: la obligación tributaria sobre la renta mundial surge solo tras 183 días o más durante seis años consecutivos. Antes de eso, los ingresos de fuente extranjera pagados por entidades extranjeras generalmente están exentos, algo inusualmente favorable para estancias de mediano plazo.",
+      "nomadVisaNotes": "No es una visa de trabajo. Inscríbete en un programa de idioma chino, típicamente 10-15 horas/semana. La vía legítima habitual para estancias de más de 30 días. El trabajo remoto con esta visa sigue siendo un área gris."
+    },
+    "kunming-cn": {
+      "arbitrageNote": "'Ciudad de la primavera': el clima más consistentemente agradable de China, y una de las ciudades más baratas de toda esta lista. Muy poco inglés y una pequeña comunidad extranjera. Gran valor si puedes trabajar en relativo aislamiento.",
+      "taxNotes": "Regla de los seis años: la obligación tributaria sobre la renta mundial surge solo tras 183 días o más durante seis años consecutivos. Antes de eso, los ingresos de fuente extranjera pagados por entidades extranjeras generalmente están exentos, algo inusualmente favorable para estancias de mediano plazo.",
+      "nomadVisaNotes": "No es una visa de trabajo. Inscríbete en un programa de idioma chino, típicamente 10-15 horas/semana. La vía legítima habitual para estancias de más de 30 días. El trabajo remoto con esta visa sigue siendo un área gris."
+    },
+    "dali-cn": {
+      "arbitrageNote": "La opción más barata de la lista. Un pueblo mochilero y artístico de larga tradición junto al lago, ahora con una pequeña comunidad de trabajo remoto. La infraestructura es más limitada que en las grandes ciudades: verifica el internet en la propiedad específica antes de reservar algo a largo plazo.",
+      "taxNotes": "Regla de los seis años: la obligación tributaria sobre la renta mundial surge solo tras 183 días o más durante seis años consecutivos. Antes de eso, los ingresos de fuente extranjera pagados por entidades extranjeras generalmente están exentos, algo inusualmente favorable para estancias de mediano plazo.",
+      "nomadVisaNotes": "No es una visa de trabajo. Inscríbete en un programa de idioma chino, típicamente 10-15 horas/semana. La vía legítima habitual para estancias de más de 30 días. El trabajo remoto con esta visa sigue siendo un área gris."
+    },
+    "shenzhen-cn": {
+      "arbitrageNote": "La capital del hardware de China, junto a Hong Kong para viajes de renovación de visa e internet sin restricciones. La mejor opción si tu trabajo se relaciona con manufactura o electrónica.",
+      "taxNotes": "Regla de los seis años: la obligación tributaria sobre la renta mundial surge solo tras 183 días o más durante seis años consecutivos. Antes de eso, los ingresos de fuente extranjera pagados por entidades extranjeras generalmente están exentos, algo inusualmente favorable para estancias de mediano plazo.",
+      "nomadVisaNotes": "No es una visa de trabajo. Inscríbete en un programa de idioma chino, típicamente 10-15 horas/semana. La vía legítima habitual para estancias de más de 30 días. El trabajo remoto con esta visa sigue siendo un área gris."
+    },
+    "shanghai-cn": {
+      "arbitrageNote": "La ciudad más accesible internacionalmente de China: más inglés, más infraestructura extranjera, aterrizaje más fácil. También la más cara, y el arbitraje desaparece en gran medida frente al sudeste asiático.",
+      "taxNotes": "Regla de los seis años: la obligación tributaria sobre la renta mundial surge solo tras 183 días o más durante seis años consecutivos. Antes de eso, los ingresos de fuente extranjera pagados por entidades extranjeras generalmente están exentos, algo inusualmente favorable para estancias de mediano plazo.",
+      "nomadVisaNotes": "No es una visa de trabajo. Inscríbete en un programa de idioma chino, típicamente 10-15 horas/semana. La vía legítima habitual para estancias de más de 30 días. El trabajo remoto con esta visa sigue siendo un área gris."
+    }
+  }
+}

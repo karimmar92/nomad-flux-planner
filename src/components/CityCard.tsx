@@ -79,7 +79,7 @@ export function CityCard({
 
       <div className="flex flex-wrap gap-1.5">
         <Badge>
-          <Wifi className="mr-1 h-3 w-3" />
+          <Wifi className="me-1 h-3 w-3" />
           {city.scores.internetSpeedMbps} Mbps
         </Badge>
         <Badge tone={city.visa.nomadVisa.exists ? "positive" : "muted"}>

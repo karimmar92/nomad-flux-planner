@@ -1,0 +1,31 @@
+{
+  "creator": {
+    "title": "Programa de creadores",
+    "pitch": "30 % de cada suscripción que traigas, todos los meses, mientras siga activa.",
+    "apply": "Solicitar entrar al programa",
+    "dashboard": "Panel de creador",
+    "balance": "Saldo disponible",
+    "pending": "Pendiente",
+    "paid": "Pagado",
+    "clicks": "Clics",
+    "signups": "Registros",
+    "conversions": "Conversiones",
+    "link": "Tu enlace",
+    "copyLink": "Copiar enlace",
+    "qr": "Código QR"
+  },
+  "user": {
+    "title": "Invita a alguien",
+    "body": "Consiguen un mes gratis de Pro. Tú también, cuando se suscriban.",
+    "invited_one": "{{count}} persona invitada",
+    "invited_other": "{{count}} personas invitadas",
+    "freeMonths_one": "{{count}} mes gratis conseguido",
+    "freeMonths_other": "{{count}} meses gratis conseguidos"
+  },
+  "admin": {
+    "title": "Solicitudes de creadores",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "adjustment": "Ajuste manual"
+  }
+}

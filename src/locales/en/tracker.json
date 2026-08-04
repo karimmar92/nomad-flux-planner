@@ -1,0 +1,41 @@
+{
+  "title": "Visa tracker",
+  "subtitle": "Every day you have spent, and every day you have left.",
+  "addTrip": "Add trip",
+  "editTrip": "Edit trip",
+  "deleteTrip": "Delete trip",
+  "fields": {
+    "country": "Country",
+    "city": "City",
+    "entryDate": "Entry date",
+    "exitDate": "Exit date",
+    "stillHere": "Still here",
+    "notes": "Notes"
+  },
+  "openTrip": "Open trip — no exit date recorded",
+  "empty": {
+    "title": "No trips logged yet",
+    "body": "Add your first entry and exit date to start the 90/180 calculation."
+  },
+  "arrival": {
+    "title": "Looks like you've arrived in {{country}}",
+    "confirm": "Log this arrival",
+    "notNow": "Not now",
+    "daysGranted": "Days granted: {{days}}",
+    "exitDeadline": "Exit by {{date}}"
+  },
+  "checklist": {
+    "title": "Before you fly",
+    "esim": "eSIM",
+    "insurance": "Insurance",
+    "address": "Accommodation address",
+    "onward": "Onward travel"
+  },
+  "record": {
+    "title": "Your record",
+    "report": "Year-end presence report",
+    "vault": "Document vault",
+    "calendar": "Compliance calendar",
+    "expiring": "Expires {{date}}"
+  }
+}

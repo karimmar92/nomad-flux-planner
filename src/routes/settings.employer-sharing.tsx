@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Eye, EyeOff, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
@@ -16,6 +17,7 @@ import {
 import { buildOrgOverview, PE_BENCHMARK_LABEL } from "@/lib/org/presence";
 import { TravelRequestForm } from "@/components/org/TravelRequestForm";
 import { todayIso } from "@/lib/trip-dates";
+import { formatDate } from "@/lib/i18n/format";
 
 export const Route = createFileRoute("/settings/employer-sharing")({
   head: () => ({
@@ -48,6 +50,7 @@ const NOT_SHARED = [
 ];
 
 function EmployerSharing() {
+  const { i18n } = useTranslation();
   const { signedIn, ready } = useSession();
   const qc = useQueryClient();
   useOrgTripSync(signedIn);
@@ -157,23 +160,25 @@ function EmployerSharing() {
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-start text-sm">
               <thead className="text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-1.5 pr-4 font-medium">Country</th>
-                  <th className="py-1.5 pr-4 font-medium">Entry</th>
-                  <th className="py-1.5 pr-4 font-medium">Exit</th>
+                  <th className="py-1.5 pe-4 font-medium">Country</th>
+                  <th className="py-1.5 pe-4 font-medium">Entry</th>
+                  <th className="py-1.5 pe-4 font-medium">Exit</th>
                   <th className="py-1.5 font-medium">Logged</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.trip_id} className="border-b border-border/60">
-                    <td className="num py-1.5 pr-4">{r.country_code}</td>
-                    <td className="num py-1.5 pr-4">{r.entry_date}</td>
-                    <td className="num py-1.5 pr-4">{r.exit_date ?? "open"}</td>
+                    <td className="num py-1.5 pe-4">{r.country_code}</td>
+                    <td className="num py-1.5 pe-4">{formatDate(r.entry_date, i18n.language)}</td>
+                    <td className="num py-1.5 pe-4">
+                      {r.exit_date ? formatDate(r.exit_date, i18n.language) : "open"}
+                    </td>
                     <td className="num py-1.5 text-muted-foreground">
-                      {r.logged_at?.slice(0, 10) ?? "—"}
+                      {r.logged_at ? formatDate(r.logged_at, i18n.language) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -249,7 +254,8 @@ function EmployerSharing() {
             {(ctx.data?.requests ?? []).map((r) => (
               <li key={r.id} className="flex flex-wrap justify-between gap-2">
                 <span>
-                  {r.country_code} · {r.start_date} → {r.end_date}
+                  {r.country_code} · {formatDate(r.start_date, i18n.language)} →{" "}
+                  {formatDate(r.end_date, i18n.language)}
                 </span>
                 <span className="text-muted-foreground">{r.status}</span>
               </li>
