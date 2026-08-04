@@ -21,6 +21,7 @@ import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RecordRouteImport } from './routes/record'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -92,6 +93,11 @@ const PricingRoute = PricingRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordRoute = RecordRouteImport.update({
+  id: '/record',
+  path: '/record',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaysRoute = StaysRouteImport.update({
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/record': typeof RecordRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/record': typeof RecordRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/record': typeof RecordRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
+    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
+    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
+    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
+  RecordRoute: typeof RecordRoute
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -429,6 +442,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/record': {
+      id: '/record'
+      path: '/record'
+      fullPath: '/record'
+      preLoaderRoute: typeof RecordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stays': {
@@ -531,6 +551,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
+  RecordRoute: RecordRoute,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
