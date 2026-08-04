@@ -1,0 +1,186 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { CITIES } from "@/lib/cities";
+import { computeArbitrage, flagEmoji, formatUsd, monthsToTarget } from "@/lib/arbitrage";
+import { useProfile } from "@/lib/store";
+import { APP_NAME } from "@/lib/app";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/calculator")({
+  head: () => ({
+    meta: [
+      { title: `Arbitrage calculator | ${APP_NAME}` },
+      {
+        name: "description",
+        content:
+          "Rank every city by monthly and annual surplus on your income, and see how long each takes to hit your savings target.",
+      },
+      { property: "og:title", content: `Arbitrage calculator | ${APP_NAME}` },
+      {
+        property: "og:description",
+        content: "Rank every city by what you'd actually keep on your income.",
+      },
+    ],
+  }),
+  component: CalculatorPage,
+});
+
+function CalculatorPage() {
+  const { profile, patchProfile } = useProfile();
+  const [income, setIncome] = useState<string>(profile.monthly_income_usd?.toString() ?? "");
+  const [target, setTarget] = useState("50000");
+  const [tier, setTier] = useState<"lean" | "mid">("mid");
+
+  const inc = income ? Number(income) : null;
+  const targetNum = target ? Number(target) : 0;
+
+  const rows = CITIES.map((city) => {
+    const arb = computeArbitrage(city, inc, tier);
+    return { city, arb, months: monthsToTarget(arb.surplusMonthly, targetNum) };
+  }).sort((a, b) => b.arb.surplusMonthly - a.arb.surplusMonthly);
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Arbitrage calculator</h1>
+        <p className="text-sm text-muted-foreground">
+          Every city ranked by what you&apos;d actually keep.
+        </p>
+      </div>
+
+      <section className="panel grid gap-4 p-4 sm:grid-cols-3">
+        <div>
+          <label className="label-xs" htmlFor="calc-income">
+            Monthly income (USD)
+          </label>
+          <input
+            id="calc-income"
+            inputMode="numeric"
+            value={income}
+            onChange={(e) => {
+              const v = e.target.value.replace(/\D/g, "");
+              setIncome(v);
+              patchProfile({ monthly_income_usd: v ? Number(v) : null });
+            }}
+            placeholder="5000"
+            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <label className="label-xs" htmlFor="calc-target">
+            Savings target (USD)
+          </label>
+          <input
+            id="calc-target"
+            inputMode="numeric"
+            value={target}
+            onChange={(e) => setTarget(e.target.value.replace(/\D/g, ""))}
+            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
+          />
+        </div>
+        <div>
+          <span className="label-xs">Cost tier</span>
+          <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
+            {(["lean", "mid"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTier(t)}
+                className={cn(
+                  "flex-1 rounded px-2 py-1.5",
+                  tier === t ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
+                {t === "mid" ? "Mid-range" : "Lean"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The shareable table */}
+      <section className="panel overflow-hidden">
+        <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
+          <h2 className="text-sm font-semibold">
+            {inc ? `${formatUsd(inc)}/mo across ${CITIES.length} cities` : "Enter an income"}
+          </h2>
+          <span className="label-xs">{APP_NAME}</span>
+        </div>
+        <div className="overflow-x-auto hide-scrollbar">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-left">
+                <Th>City</Th>
+                <Th right>Cost/mo</Th>
+                <Th right>Surplus/mo</Th>
+                <Th right>Surplus/yr</Th>
+                <Th right>Rate</Th>
+                <Th right>To {formatUsd(targetNum)}</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ city, arb, months }) => (
+                <tr key={city.id} className="border-b border-border/60 last:border-0">
+                  <td className="px-4 py-2.5">
+                    <Link
+                      to="/city/$cityId"
+                      params={{ cityId: city.id }}
+                      className="flex items-center gap-2 hover:text-primary"
+                    >
+                      <span aria-hidden>{flagEmoji(city.country_code)}</span>
+                      <span className="font-medium">{city.city}</span>
+                      <span className="text-xs text-muted-foreground">{city.country}</span>
+                    </Link>
+                  </td>
+                  <Td right>{formatUsd(arb.cost)}</Td>
+                  <Td
+                    right
+                    className={cn(
+                      "font-semibold",
+                      inc ? (arb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
+                    )}
+                  >
+                    {inc ? formatUsd(arb.surplusMonthly) : "—"}
+                  </Td>
+                  <Td right>{inc ? formatUsd(arb.surplusAnnual) : "—"}</Td>
+                  <Td right>{inc ? `${arb.savingsRate.toFixed(0)}%` : "—"}</Td>
+                  <Td right>
+                    {!inc || months == null
+                      ? "Never"
+                      : months < 12
+                        ? `${months.toFixed(1)} mo`
+                        : `${(months / 12).toFixed(1)} yr`}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
+          Surplus = income − (rent central + coworking + groceries + eating out + utilities +
+          mobile + transport + gym) at the {tier === "mid" ? "mid-range" : "lean"} tier. Each
+          city page shows its last-verified date.
+        </p>
+      </section>
+    </div>
+  );
+}
+
+function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
+  return (
+    <th className={cn("label-xs px-4 py-2 font-medium", right && "text-right")}>{children}</th>
+  );
+}
+
+function Td({
+  children,
+  right,
+  className,
+}: {
+  children: React.ReactNode;
+  right?: boolean;
+  className?: string;
+}) {
+  return (
+    <td className={cn("num px-4 py-2.5", right && "text-right", className)}>{children}</td>
+  );
+}
