@@ -27,6 +27,7 @@ import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
+import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
@@ -130,6 +131,11 @@ const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
   path: '/admin/creators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessIndexRoute = BusinessIndexRouteImport.update({
+  id: '/business/',
+  path: '/business/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CityCityIdRoute = CityCityIdRouteImport.update({
   id: '/city/$cityId',
   path: '/city/$cityId',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/business/'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/business'
     | '/community'
     | '/record'
     | '/.lovable/oauth/consent'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/business/'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
+  BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -520,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCreatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/': {
+      id: '/business/'
+      path: '/business'
+      fullPath: '/business/'
+      preLoaderRoute: typeof BusinessIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/city/$cityId': {
       id: '/city/$cityId'
       path: '/city/$cityId'
@@ -631,6 +651,7 @@ const rootRouteChildren: RootRouteChildren = {
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
+  BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
