@@ -21,7 +21,7 @@ const trip = (
   entryDate: string,
   exitDate: string | null,
   purpose?: Trip["purpose"],
-): Trip => ({ countryCode, entryDate, exitDate, purpose });
+): Trip => (purpose ? { countryCode, entryDate, exitDate, purpose } : { countryCode, entryDate, exitDate });
 
 /** A single trip that exactly exhausts the 90-day allowance on REF. */
 const maxed: Trip[] = [trip("PT", "2026-05-07", "2026-08-04")];
