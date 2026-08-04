@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CreatorRouteImport } from './routes/creator'
+import { Route as CreatorTermsRouteImport } from './routes/creator-terms'
 import { Route as CreatorsRouteImport } from './routes/creators'
 import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
@@ -24,6 +25,7 @@ import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
@@ -55,6 +57,11 @@ const CompareRoute = CompareRouteImport.update({
 const CreatorRoute = CreatorRouteImport.update({
   id: '/creator',
   path: '/creator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorTermsRoute = CreatorTermsRouteImport.update({
+  id: '/creator-terms',
+  path: '/creator-terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreatorsRoute = CreatorsRouteImport.update({
@@ -109,6 +116,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
+  id: '/admin/creators',
+  path: '/admin/creators',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CityCityIdRoute = CityCityIdRouteImport.update({
   id: '/city/$cityId',
   path: '/city/$cityId',
@@ -152,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/creator': typeof CreatorRoute
+  '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
@@ -162,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/creators': typeof AdminCreatorsRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -176,6 +190,7 @@ export interface FileRoutesByTo {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/creator': typeof CreatorRoute
+  '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
@@ -186,6 +201,7 @@ export interface FileRoutesByTo {
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/creators': typeof AdminCreatorsRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -201,6 +217,7 @@ export interface FileRoutesById {
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
   '/creator': typeof CreatorRoute
+  '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
@@ -211,6 +228,7 @@ export interface FileRoutesById {
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/creators': typeof AdminCreatorsRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -227,6 +245,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/creator'
+    | '/creator-terms'
     | '/creators'
     | '/how-we-make-money'
     | '/kit'
@@ -237,6 +256,7 @@ export interface FileRouteTypes {
     | '/tracker'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/creators'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -251,6 +271,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/creator'
+    | '/creator-terms'
     | '/creators'
     | '/how-we-make-money'
     | '/kit'
@@ -261,6 +282,7 @@ export interface FileRouteTypes {
     | '/tracker'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/creators'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -275,6 +297,7 @@ export interface FileRouteTypes {
     | '/calculator'
     | '/compare'
     | '/creator'
+    | '/creator-terms'
     | '/creators'
     | '/how-we-make-money'
     | '/kit'
@@ -285,6 +308,7 @@ export interface FileRouteTypes {
     | '/tracker'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/creators'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -300,6 +324,7 @@ export interface RootRouteChildren {
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
   CreatorRoute: typeof CreatorRoute
+  CreatorTermsRoute: typeof CreatorTermsRoute
   CreatorsRoute: typeof CreatorsRoute
   HowWeMakeMoneyRoute: typeof HowWeMakeMoneyRoute
   KitRoute: typeof KitRoute
@@ -310,6 +335,7 @@ export interface RootRouteChildren {
   TrackerRoute: typeof TrackerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AdminCreatorsRoute: typeof AdminCreatorsRoute
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
@@ -354,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/creator'
       fullPath: '/creator'
       preLoaderRoute: typeof CreatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator-terms': {
+      id: '/creator-terms'
+      path: '/creator-terms'
+      fullPath: '/creator-terms'
+      preLoaderRoute: typeof CreatorTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/creators': {
@@ -426,6 +459,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/creators': {
+      id: '/admin/creators'
+      path: '/admin/creators'
+      fullPath: '/admin/creators'
+      preLoaderRoute: typeof AdminCreatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/city/$cityId': {
       id: '/city/$cityId'
       path: '/city/$cityId'
@@ -484,6 +524,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
   CreatorRoute: CreatorRoute,
+  CreatorTermsRoute: CreatorTermsRoute,
   CreatorsRoute: CreatorsRoute,
   HowWeMakeMoneyRoute: HowWeMakeMoneyRoute,
   KitRoute: KitRoute,
@@ -495,6 +536,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AdminCreatorsRoute: AdminCreatorsRoute,
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
