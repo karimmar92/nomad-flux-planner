@@ -12,6 +12,7 @@ import {
   toDay,
 } from "@/lib/schengen";
 import { CITIES } from "@/lib/cities";
+import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useTrips } from "@/lib/store";
 import { flagEmoji } from "@/lib/arbitrage";
 import { EmptyState, Stat } from "@/components/Primitives";
@@ -51,9 +52,9 @@ function taxMetaFor(code: string) {
   const fromCity = CITIES.find((c) => c.country_code === code);
   return (
     TAX_META[code] ?? {
-      trigger: fromCity?.tax.residency_trigger_days ?? 183,
-      startMonth: fromCity?.tax.tax_year_start_month ?? 0,
-      label: fromCity?.tax.tax_year ?? "Jan–Dec",
+      trigger: fromCity?.tax.residencyTriggerDays ?? 183,
+      startMonth: fromCity ? taxYearStartMonth(fromCity) : 0,
+      label: fromCity ? taxYearLabel(fromCity) : "Jan–Dec",
     }
   );
 }

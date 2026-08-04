@@ -1,15 +1,26 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { Bookmark, Check, GitCompareArrows, Plus, X } from "lucide-react";
+import { Bookmark, Check, GitCompareArrows, Plus, TriangleAlert, X } from "lucide-react";
 import { getCity } from "@/lib/cities";
 import {
   computeArbitrage,
+  costLines,
   flagEmoji,
   formatUsd,
-  monthlyCost,
+  isSchengenCity,
+  nomadIncomeMonthly,
+  taxYearLabel,
+  taxYearWarning,
   touristDaysFor,
+  touristDaysWithExtension,
 } from "@/lib/arbitrage";
-import { COST_LABELS, CORE_COST_KEYS, SCORE_LABELS, type Costs } from "@/lib/types";
+import {
+  SCORE_LABELS,
+  SCORE_MAX,
+  VISA_RULE_DESCRIPTIONS,
+  VISA_RULE_LABELS,
+  type VisaRuleType,
+} from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -52,9 +63,16 @@ function CityDetail() {
 
   const income = profile.monthly_income_usd;
   const arb = computeArbitrage(city, income, tier, profile.savings_usd);
-  const touristDays = touristDaysFor(city, profile.nationality);
-  const nomad = city.visa.nomad_visa;
-  const clearsIncome = nomad ? (income ?? 0) >= nomad.income_usd_monthly : false;
+  const touristDays = touristDaysFor(city);
+  const nomad = city.visa.nomadVisa.exists ? city.visa.nomadVisa : null;
+  const nomadIncome = nomadIncomeMonthly(city);
+  const clearsIncome = nomadIncome != null ? (income ?? 0) >= nomadIncome : false;
+  const schengen = isSchengenCity(city);
+  const ruleType = city.visa.ruleType as VisaRuleType;
+  const lines = costLines(city);
+  const maxLine = Math.max(...lines.map((l) => l.amount));
+  const taxWarning = taxYearWarning(city);
+  const regime = city.tax.specialRegime;
   const isSaved = saved.includes(city.id);
 
   return (
@@ -178,7 +196,7 @@ function CityDetail() {
             {showMath ? (
               <div className="num mt-2 rounded-md border border-border bg-surface-2 p-3 font-mono text-xs leading-relaxed text-muted-foreground">
                 <div>
-                  cost = {CORE_COST_KEYS.map((k) => city.costs[k][tier]).join(" + ")} ={" "}
+                  cost = dataset {tier === "mid" ? "mid-range" : "lean"} monthly total ={" "}
                   {formatUsd(arb.cost)}
                 </div>
                 <div>
@@ -190,7 +208,9 @@ function CityDetail() {
                   {arb.savingsRate.toFixed(1)}%
                 </div>
                 <div className="mt-1">
-                  Basket excludes coliving and outskirts rent (alternatives to central rent).
+                  Total is the dataset&apos;s monthly figure for a single remote worker: central
+                  1BR, one coworking desk, groceries with ~half of meals out, utilities, mobile
+                  data, transport and gym.
                 </div>
               </div>
             ) : null}
@@ -206,41 +226,35 @@ function CityDetail() {
             <TierToggle tier={tier} onChange={setTier} />
           </div>
           <div className="space-y-2">
-            {(Object.keys(COST_LABELS) as (keyof Costs)[]).map((key) => {
-              const amount = city.costs[key][tier];
-              const max = Math.max(
-                ...(Object.keys(COST_LABELS) as (keyof Costs)[]).map((k) => city.costs[k][tier]),
-              );
-              return (
-                <div key={key}>
-                  <div className="flex items-baseline justify-between text-sm">
-                    <span
-                      className={cn(
-                        CORE_COST_KEYS.includes(key)
-                          ? "text-foreground"
-                          : "text-muted-foreground",
-                      )}
-                    >
-                      {COST_LABELS[key]}
-                      {CORE_COST_KEYS.includes(key) ? "" : " *"}
-                    </span>
-                    <span className="num font-medium">{formatUsd(amount)}</span>
-                  </div>
-                  <div className="mt-1 h-1 overflow-hidden rounded-full bg-surface-2">
-                    <div
-                      className={cn(
-                        "h-full rounded-full",
-                        CORE_COST_KEYS.includes(key) ? "bg-primary" : "bg-muted-foreground/40",
-                      )}
-                      style={{ width: `${(amount / max) * 100}%` }}
-                    />
-                  </div>
+            {lines.map((line) => (
+              <div key={line.key}>
+                <div className="flex items-baseline justify-between text-sm">
+                  <span className={cn(line.inTotal ? "text-foreground" : "text-muted-foreground")}>
+                    {line.label}
+                    {line.inTotal ? "" : " *"}
+                  </span>
+                  <span className="num font-medium">{formatUsd(line.amount)}</span>
                 </div>
-              );
-            })}
+                <div className="mt-1 h-1 overflow-hidden rounded-full bg-surface-2">
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      line.inTotal ? "bg-primary" : "bg-muted-foreground/40",
+                    )}
+                    style={{ width: `${(line.amount / maxLine) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="flex items-baseline justify-between border-t border-border pt-2 text-sm">
+              <span className="font-medium">
+                Monthly total — {tier === "mid" ? "mid-range" : "lean"}
+              </span>
+              <span className="num font-semibold">{formatUsd(arb.cost)}</span>
+            </div>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            * Not counted in the basket — alternatives to central rent. Verified{" "}
+            * Reference only — alternatives to central rent, or a per-meal price. Verified{" "}
             {city.last_verified}.
           </p>
         </section>
@@ -250,31 +264,56 @@ function CityDetail() {
           <h2 className="mb-3 text-sm font-semibold">Scores</h2>
           <div className="space-y-3">
             <ScoreBar
-              label={SCORE_LABELS.internet_mbps}
-              value={Math.min(city.scores.internet_mbps, 300)}
+              label={SCORE_LABELS.internetSpeedMbps}
+              value={Math.min(city.scores.internetSpeedMbps, 300)}
               max={300}
-              display={`${city.scores.internet_mbps} Mbps`}
+              display={`${city.scores.internetSpeedMbps} Mbps`}
             />
-            <ScoreBar label={SCORE_LABELS.safety} value={city.scores.safety} />
-            <ScoreBar label={SCORE_LABELS.community} value={city.scores.community} />
-            <ScoreBar label={SCORE_LABELS.walkability} value={city.scores.walkability} />
-            <ScoreBar label={SCORE_LABELS.english} value={city.scores.english} />
-            <ScoreBar label={SCORE_LABELS.weather} value={city.scores.weather} />
+            <ScoreBar label={SCORE_LABELS.safety} value={city.scores.safety} max={SCORE_MAX} />
+            <ScoreBar
+              label={SCORE_LABELS.nomadCommunity}
+              value={city.scores.nomadCommunity}
+              max={SCORE_MAX}
+            />
+            <ScoreBar
+              label={SCORE_LABELS.walkability}
+              value={city.scores.walkability}
+              max={SCORE_MAX}
+            />
+            <ScoreBar
+              label={SCORE_LABELS.englishFriendly}
+              value={city.scores.englishFriendly}
+              max={SCORE_MAX}
+            />
+            <ScoreBar label={SCORE_LABELS.weather} value={city.scores.weather} max={SCORE_MAX} />
           </div>
         </section>
 
         {/* Visa */}
         <section className="panel p-4">
           <h2 className="mb-3 text-sm font-semibold">Visa</h2>
-          <div className="flex items-baseline gap-2">
+          <div className="grid grid-cols-2 gap-4">
             <Stat
-              label={`Tourist days — ${profile.nationality} passport`}
+              label="Visa-free tourist days"
               value={touristDays === 0 ? "Visa required" : `${touristDays} days`}
               tone={touristDays === 0 ? "negative" : "default"}
+              hint={
+                city.visa.extensionDays
+                  ? `+${city.visa.extensionDays} with an extension (${touristDaysWithExtension(city)} total)`
+                  : "No standard extension"
+              }
             />
+            <Stat label="Rule" value={VISA_RULE_LABELS[ruleType]} size="sm" />
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">{city.visa.rule}</p>
-          {city.visa.schengen ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {VISA_RULE_DESCRIPTIONS[ruleType]}
+          </p>
+          {city.visa.maxDaysPerCalendarYear ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Hard cap of {city.visa.maxDaysPerCalendarYear} days per calendar year.
+            </p>
+          ) : null}
+          {schengen ? (
             <p className="mt-2 rounded-md border border-negative/40 bg-negative-muted px-3 py-2 text-xs text-negative">
               Schengen area — these days share one rolling 90/180 allowance with every other
               Schengen country.{" "}
@@ -282,7 +321,11 @@ function CityDetail() {
                 Open the tracker
               </Link>
             </p>
-          ) : null}
+          ) : (
+            <p className="mt-2 rounded-md border border-positive/40 bg-positive-muted px-3 py-2 text-xs text-positive">
+              Non-Schengen — days spent here do not burn your Schengen 90/180 allowance.
+            </p>
+          )}
 
           <div className="mt-4 rounded-md border border-border p-3">
             <div className="label-xs">Nomad visa</div>
@@ -303,10 +346,12 @@ function CityDetail() {
                               : "text-negative",
                         )}
                       >
-                        {nomad.income_usd_monthly === 0
-                          ? "None stated"
-                          : `${formatUsd(nomad.income_usd_monthly)}/mo`}
-                        {income != null && nomad.income_usd_monthly > 0 ? (
+                        {nomadIncome == null
+                          ? nomad.requiredSavingsUSD
+                            ? `${formatUsd(nomad.requiredSavingsUSD)} in savings`
+                            : "None stated"
+                          : `${formatUsd(nomadIncome)}/mo`}
+                        {income != null && nomadIncome != null ? (
                           clearsIncome ? (
                             <Check className="h-4 w-4" />
                           ) : (
@@ -316,9 +361,20 @@ function CityDetail() {
                       </span>
                     }
                   />
-                  <Row label="Duration" value={`${nomad.duration_months} months`} />
+                  {nomad.durationMonths ? (
+                    <Row label="Duration" value={`${nomad.durationMonths} months`} />
+                  ) : null}
+                  {nomad.staysPerEntryDays ? (
+                    <Row label="Stay per entry" value={`${nomad.staysPerEntryDays} days`} />
+                  ) : null}
                   <Row label="Renewable" value={nomad.renewable ? "Yes" : "No"} />
-                  <Row label="Path to residency" value={nomad.residency_path} />
+                  <Row
+                    label="Path to residency"
+                    value={nomad.pathToResidency ? "Yes" : "No"}
+                  />
+                  {nomad.notes ? (
+                    <p className="pt-1 text-xs text-muted-foreground">{nomad.notes}</p>
+                  ) : null}
                 </div>
               </>
             ) : (
@@ -336,31 +392,46 @@ function CityDetail() {
           <div className="grid grid-cols-2 gap-4">
             <Stat
               label="Residency trigger"
-              value={`${city.tax.residency_trigger_days} days`}
+              value={`${city.tax.residencyTriggerDays} days`}
               hint="in the tax year"
             />
             <Stat
               label="Tax year"
-              value={city.tax.tax_year}
-              tone={city.tax.tax_year_start_month !== 0 ? "negative" : "default"}
-              hint={
-                city.tax.tax_year_start_month !== 0
-                  ? "Non-calendar year — plan around this"
-                  : "Calendar year"
-              }
+              value={taxYearLabel(city)}
+              hint={taxWarning ? "Non-calendar year" : "Calendar year"}
             />
           </div>
-          {city.tax.tax_year_start_month !== 0 ? (
-            <p className="mt-3 rounded-md border border-negative/40 bg-negative-muted px-3 py-2 text-xs text-negative">
-              This country&apos;s tax year does not follow the calendar. Day counts reset in{" "}
-              {city.tax.tax_year.split("–")[0]}, not January.
+          {taxWarning ? (
+            <p className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>
+                {taxWarning} Your {city.tax.residencyTriggerDays}-day count resets on the tax-year
+                boundary, not on 1 January.
+              </span>
             </p>
           ) : null}
-          {city.tax.special_regime ? (
-            <div className="mt-3 rounded-md border border-border bg-surface-2 p-3">
-              <div className="label-xs">Special regime</div>
-              <p className="text-sm">{city.tax.special_regime}</p>
+          {city.tax.windowNote ? (
+            <p className="mt-2 text-xs text-muted-foreground">{city.tax.windowNote}</p>
+          ) : null}
+          {regime ? (
+            <div className="mt-3 rounded-md border-l-2 border-l-primary border border-primary/30 bg-primary/5 p-3">
+              <div className="label-xs text-primary">Special tax regime</div>
+              <p className="text-sm font-semibold">{regime.name}</p>
+              <p className="num text-sm">{regime.rate}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {regime.years ? `Available for up to ${regime.years} years. ` : ""}
+                {regime.turnoverCapUSD
+                  ? `Turnover cap ~${formatUsd(regime.turnoverCapUSD)}/yr. `
+                  : ""}
+                For a high earner this can matter more than the rent difference.
+              </p>
             </div>
+          ) : null}
+          <p className="mt-3 text-sm text-muted-foreground">{city.tax.notes}</p>
+          {city.tax.foreignIncomeExemptForNomadVisa ? (
+            <p className="mt-2 rounded-md border border-positive/40 bg-positive-muted px-3 py-2 text-xs text-positive">
+              Foreign-sourced income is generally exempt for nomad-permit holders here.
+            </p>
           ) : null}
         </section>
       </div>
