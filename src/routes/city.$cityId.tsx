@@ -208,7 +208,9 @@ function CityDetail() {
           <div className="space-y-2">
             {(Object.keys(COST_LABELS) as (keyof Costs)[]).map((key) => {
               const amount = city.costs[key][tier];
-              const max = Math.max(...Object.values(city.costs).map((v) => v[tier]));
+              const max = Math.max(
+                ...(Object.keys(COST_LABELS) as (keyof Costs)[]).map((k) => city.costs[k][tier]),
+              );
               return (
                 <div key={key}>
                   <div className="flex items-baseline justify-between text-sm">
