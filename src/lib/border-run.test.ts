@@ -80,11 +80,25 @@ describe("rankExitOptions", () => {
     monthlyIncomeUsd: 5000,
   });
 
-  it("puts non-Schengen destinations ahead of Schengen ones", () => {
-    const firstSchengen = options.findIndex((o) => SCHENGEN_COUNTRIES.has(o.city.country_code));
-    const lastNonSchengen = options.map((o) => o.nonSchengen).lastIndexOf(true);
+  it("drops Schengen destinations entirely once the 90 days are spent", () => {
+    // With no legal days left anywhere in the area, they are not options.
+    expect(options.every((o) => o.nonSchengen)).toBe(true);
+  });
+
+  it("puts non-Schengen destinations ahead of Schengen ones while days remain", () => {
+    const partial = rankExitOptions({
+      origin: lisbon,
+      trips: [trip({ entry_date: "2026-07-20" })],
+      today: "2026-08-04",
+      departOn: "2026-08-20",
+      avoidSchengen: true,
+      monthlyIncomeUsd: 5000,
+    });
+    const firstSchengen = partial.findIndex((o) => !o.nonSchengen);
+    const lastNonSchengen = partial.map((o) => o.nonSchengen).lastIndexOf(true);
     expect(firstSchengen).toBeGreaterThan(lastNonSchengen);
   });
+
 
   it("surfaces Belgrade and Tirana strongly for a Schengen exit", () => {
     const top = options.slice(0, 6).map((o) => o.city.id);
