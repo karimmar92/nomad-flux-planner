@@ -5,7 +5,14 @@ import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
 import { EmptyState } from "@/components/Primitives";
 import { CITIES, REGIONS } from "@/lib/cities";
-import { computeArbitrage, formatUsd, monthlyCost, touristDaysFor } from "@/lib/arbitrage";
+import {
+  computeArbitrage,
+  formatUsd,
+  isSchengenCity,
+  monthlyCost,
+  nomadIncomeMonthly,
+  touristDaysFor,
+} from "@/lib/arbitrage";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
@@ -58,12 +65,12 @@ function Explore() {
       }
       if (region !== "all" && city.region !== region) return false;
       if (cost > maxBudget) return false;
-      if (city.scores.internet_mbps < minInternet) return false;
+      if (city.scores.internetSpeedMbps < minInternet) return false;
       if (city.scores.safety < minSafety) return false;
-      if (nomadOnly && !city.visa.nomad_visa) return false;
-      if (outsideSchengen && city.visa.schengen) return false;
+      if (nomadOnly && !city.visa.nomadVisa.exists) return false;
+      if (outsideSchengen && isSchengenCity(city)) return false;
       if (incomeQualifies) {
-        const req = city.visa.nomad_visa?.income_usd_monthly ?? 0;
+        const req = nomadIncomeMonthly(city) ?? 0;
         if (!income || income < req) return false;
       }
       return true;
@@ -71,7 +78,7 @@ function Explore() {
 
     return list.sort((a, b) => {
       if (sort === "cheapest") return monthlyCost(a) - monthlyCost(b);
-      if (sort === "internet") return b.scores.internet_mbps - a.scores.internet_mbps;
+      if (sort === "internet") return b.scores.internetSpeedMbps - a.scores.internetSpeedMbps;
       if (sort === "weather") return b.scores.weather - a.scores.weather;
       return (
         computeArbitrage(b, income).surplusMonthly - computeArbitrage(a, income).surplusMonthly
@@ -106,7 +113,7 @@ function Explore() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {income && best && cities[0]
-            ? `Best right now: ${cities[0].city} — ${formatUsd(best.surplusMonthly)}/mo surplus, ${best.savingsRate.toFixed(0)}% savings rate. Your ${profile.nationality} passport gets ${touristDaysFor(cities[0], profile.nationality)} tourist days there.`
+            ? `Best right now: ${cities[0].city} — ${formatUsd(best.surplusMonthly)}/mo surplus, ${best.savingsRate.toFixed(0)}% savings rate. Visa-free tourist days there: ${touristDaysFor(cities[0])}.`
             : "Every figure below is generic until we know your income and passport."}
         </p>
         {!income ? (
@@ -192,9 +199,9 @@ function Explore() {
           <RangeRow
             label="Min safety score"
             value={minSafety}
-            display={minSafety.toFixed(1)}
+            display={`${minSafety.toFixed(1)} / 5`}
             min={0}
-            max={10}
+            max={5}
             step={0.5}
             onChange={setMinSafety}
           />
@@ -215,7 +222,7 @@ function Explore() {
       {cities.length === 0 ? (
         <EmptyState
           title="No cities match those filters"
-          body="Loosen the budget or internet minimum. Only a placeholder dataset is loaded so far."
+          body="Loosen the budget or internet minimum to see more of the 25-city dataset."
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

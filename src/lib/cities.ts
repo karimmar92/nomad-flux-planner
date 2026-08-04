@@ -1,325 +1,49 @@
-import type { City } from "./types";
+import seed from "@/data/seed-cities.json";
+import type { City, Confidence, Costs, Scores, Tax, Visa } from "./types";
 
-const c = (lean: number, mid: number) => ({ lean, mid });
+type SeedCity = {
+  id: string;
+  city: string;
+  country: string;
+  countryCode: string;
+  region: string;
+  lat: number;
+  lng: number;
+  localCurrency: string;
+  costs: Costs;
+  scores: Scores;
+  visa: Visa;
+  tax: Tax;
+  arbitrageNote: string;
+};
 
-/**
- * Placeholder seed data until the full verified dataset lands.
- * Shape matches the intended `cities` table exactly (jsonb columns included).
- */
-export const CITIES: City[] = [
-  {
-    id: "lisbon-pt",
-    city: "Lisbon",
-    country: "Portugal",
-    country_code: "PT",
-    region: "Europe",
-    lat: 38.7223,
-    lng: -9.1393,
-    local_currency: "EUR",
-    costs: {
-      rent_central: c(1100, 1550),
-      rent_outskirts: c(750, 1050),
-      coliving: c(850, 1200),
-      coworking: c(110, 180),
-      groceries: c(230, 330),
-      meal: c(120, 260),
-      utilities: c(70, 110),
-      mobile: c(15, 25),
-      transport: c(40, 60),
-      gym: c(30, 55),
-    },
-    scores: {
-      internet_mbps: 120,
-      safety: 8.4,
-      community: 9.2,
-      walkability: 8.0,
-      english: 8.3,
-      weather: 8.6,
-    },
-    visa: {
-      schengen: true,
-      tourist_days: { default: 90, GB: 90, US: 90, CA: 90, AU: 90, IN: 0, ZA: 0 },
-      rule: "Visa-free entry counts against the shared Schengen 90-days-in-any-180 allowance, not a per-country clock.",
-      nomad_visa: {
-        name: "D8 Digital Nomad Visa",
-        income_usd_monthly: 3480,
-        duration_months: 12,
-        renewable: true,
-        residency_path: "Renewable to a 2-year residence permit; citizenship eligibility after 5 years.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 183,
-      tax_year: "Jan–Dec",
-      tax_year_start_month: 0,
-      special_regime: "NHR 2.0 (IFICI) — 20% flat rate on qualifying Portuguese-sourced income for 10 years.",
-    },
-    arbitrage_note:
-      "The arbitrage here is thinner than nomad forums claim. Central rents have roughly doubled since 2020 and landlords increasingly quote in EUR at expat rates, so your saving comes mostly from food and transport, not housing. Portugal is also an aggressive tax residency trap: 183 days and you are in the net worldwide. Good if you want community and EU access; poor if raw savings rate is the only goal.",
-    last_verified: "2026-06-14",
-    confidence: "high",
-  },
-  {
-    id: "tbilisi-ge",
-    city: "Tbilisi",
-    country: "Georgia",
-    country_code: "GE",
-    region: "Caucasus",
-    lat: 41.7151,
-    lng: 44.8271,
-    local_currency: "GEL",
-    costs: {
-      rent_central: c(500, 780),
-      rent_outskirts: c(320, 480),
-      coliving: c(450, 650),
-      coworking: c(80, 130),
-      groceries: c(160, 250),
-      meal: c(90, 180),
-      utilities: c(50, 90),
-      mobile: c(8, 14),
-      transport: c(15, 30),
-      gym: c(25, 45),
-    },
-    scores: {
-      internet_mbps: 65,
-      safety: 8.1,
-      community: 7.4,
-      walkability: 6.5,
-      english: 6.2,
-      weather: 6.8,
-    },
-    visa: {
-      schengen: false,
-      tourist_days: { default: 365, GB: 365, US: 365, CA: 365, AU: 365, ZA: 365 },
-      rule: "Georgia grants many nationalities a full 365 days visa-free on arrival, resetting on each new entry.",
-      nomad_visa: {
-        name: "Remotely from Georgia",
-        income_usd_monthly: 2000,
-        duration_months: 12,
-        renewable: true,
-        residency_path: "No direct path; residence permits are handled separately.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 183,
-      tax_year: "Jan–Dec",
-      tax_year_start_month: 0,
-      special_regime: "Small Business Status — 1% turnover tax up to ~GEL 500k for registered individual entrepreneurs.",
-    },
-    arbitrage_note:
-      "The 1% small business regime is real and it is the reason people come, but it requires registration, Georgian-source bookkeeping and turnover under the cap — it is not automatic just because you live here. Internet is fine in the centre and unreliable in older buildings. Winter air quality in the valley is genuinely bad, and regional security risk is non-trivial.",
-    last_verified: "2026-05-30",
-    confidence: "medium",
-  },
-  {
-    id: "bangkok-th",
-    city: "Bangkok",
-    country: "Thailand",
-    country_code: "TH",
-    region: "Southeast Asia",
-    lat: 13.7563,
-    lng: 100.5018,
-    local_currency: "THB",
-    costs: {
-      rent_central: c(520, 900),
-      rent_outskirts: c(300, 520),
-      coliving: c(480, 720),
-      coworking: c(90, 150),
-      groceries: c(180, 300),
-      meal: c(110, 240),
-      utilities: c(45, 85),
-      mobile: c(10, 18),
-      transport: c(30, 60),
-      gym: c(35, 70),
-    },
-    scores: {
-      internet_mbps: 180,
-      safety: 7.2,
-      community: 8.8,
-      walkability: 5.4,
-      english: 5.8,
-      weather: 6.0,
-    },
-    visa: {
-      schengen: false,
-      tourist_days: { default: 60, GB: 60, US: 60, CA: 60, AU: 60, ZA: 60, IN: 60 },
-      rule: "60 days visa-exempt on arrival for most Western passports, extendable once by 30 days at an immigration office.",
-      nomad_visa: {
-        name: "Destination Thailand Visa (DTV)",
-        income_usd_monthly: 0,
-        duration_months: 60,
-        renewable: true,
-        residency_path: "No residency path; 180-day stays per entry over a 5-year multiple-entry validity.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 180,
-      tax_year: "Jan–Dec",
-      tax_year_start_month: 0,
-      special_regime: "Foreign income remitted to Thailand is taxable for residents; non-remitted foreign income rules changed recently — get advice.",
-    },
-    arbitrage_note:
-      "Savings rate here is among the best available to a Western income, but the tax picture stopped being simple: remitted foreign income is taxable once you pass 180 days, and 180 (not 183) is the trigger. Air quality between January and April is a real health cost, and the DTV requires a THB 500k savings showing rather than income.",
-    last_verified: "2026-06-02",
-    confidence: "medium",
-  },
-  {
-    id: "cape-town-za",
-    city: "Cape Town",
-    country: "South Africa",
-    country_code: "ZA",
-    region: "Africa",
-    lat: -33.9249,
-    lng: 18.4241,
-    local_currency: "ZAR",
-    costs: {
-      rent_central: c(600, 1050),
-      rent_outskirts: c(400, 650),
-      coliving: c(550, 850),
-      coworking: c(90, 160),
-      groceries: c(180, 290),
-      meal: c(100, 220),
-      utilities: c(60, 110),
-      mobile: c(15, 28),
-      transport: c(80, 160),
-      gym: c(30, 55),
-    },
-    scores: {
-      internet_mbps: 95,
-      safety: 4.9,
-      community: 7.6,
-      walkability: 4.2,
-      english: 9.4,
-      weather: 8.2,
-    },
-    visa: {
-      schengen: false,
-      tourist_days: { default: 90, GB: 90, US: 90, CA: 90, AU: 90 },
-      rule: "90 days visitor's visa on arrival for most Western passports, extendable once in-country.",
-      nomad_visa: {
-        name: "Remote Work Visa",
-        income_usd_monthly: 5200,
-        duration_months: 36,
-        renewable: true,
-        residency_path: "Does not itself lead to permanent residence.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 183,
-      tax_year: "Mar–Feb",
-      tax_year_start_month: 2,
-      special_regime: null,
-    },
-    arbitrage_note:
-      "Currency arbitrage is excellent and the lifestyle is hard to beat, but two things are routinely understated: personal safety limits where and how you move after dark, and load-shedding still forces you to pay for backup power or a coworking membership you cannot skip. The tax year runs March to February, which catches people who plan around a calendar year.",
-    last_verified: "2026-05-21",
-    confidence: "medium",
-  },
-  {
-    id: "mexico-city-mx",
-    city: "Mexico City",
-    country: "Mexico",
-    country_code: "MX",
-    region: "Latin America",
-    lat: 19.4326,
-    lng: -99.1332,
-    local_currency: "MXN",
-    costs: {
-      rent_central: c(750, 1250),
-      rent_outskirts: c(450, 700),
-      coliving: c(700, 1000),
-      coworking: c(110, 180),
-      groceries: c(200, 320),
-      meal: c(130, 260),
-      utilities: c(40, 75),
-      mobile: c(15, 25),
-      transport: c(30, 60),
-      gym: c(35, 65),
-    },
-    scores: {
-      internet_mbps: 110,
-      safety: 5.6,
-      community: 8.9,
-      walkability: 7.1,
-      english: 5.2,
-      weather: 8.4,
-    },
-    visa: {
-      schengen: false,
-      tourist_days: { default: 180, GB: 180, US: 180, CA: 180, AU: 180, ZA: 180 },
-      rule: "Up to 180 days granted at officer discretion — the stamped number is increasingly shorter than the maximum.",
-      nomad_visa: {
-        name: "Temporary Resident Visa",
-        income_usd_monthly: 4300,
-        duration_months: 12,
-        renewable: true,
-        residency_path: "Renewable up to 4 years, then eligible for permanent residency.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 183,
-      tax_year: "Jan–Dec",
-      tax_year_start_month: 0,
-      special_regime: null,
-    },
-    arbitrage_note:
-      "Roma and Condesa are now priced for remote workers, not locals, and the resentment about that is well earned. Move one neighbourhood out and the arbitrage improves sharply. Border officers no longer reliably grant the full 180 days, so do not build a six-month plan on a stamp you have not received yet.",
-    last_verified: "2026-06-09",
-    confidence: "high",
-  },
-  {
-    id: "taipei-tw",
-    city: "Taipei",
-    country: "Taiwan",
-    country_code: "TW",
-    region: "East Asia",
-    lat: 25.033,
-    lng: 121.5654,
-    local_currency: "TWD",
-    costs: {
-      rent_central: c(750, 1150),
-      rent_outskirts: c(500, 780),
-      coliving: c(700, 980),
-      coworking: c(120, 190),
-      groceries: c(250, 380),
-      meal: c(140, 260),
-      utilities: c(45, 85),
-      mobile: c(18, 30),
-      transport: c(25, 45),
-      gym: c(40, 70),
-    },
-    scores: {
-      internet_mbps: 210,
-      safety: 9.1,
-      community: 6.4,
-      walkability: 8.3,
-      english: 5.5,
-      weather: 6.2,
-    },
-    visa: {
-      schengen: false,
-      tourist_days: { default: 90, GB: 180, US: 90, CA: 90, AU: 90 },
-      rule: "90 days visa-exempt for most Western passports; UK nationals receive 180.",
-      nomad_visa: {
-        name: "Employment Gold Card",
-        income_usd_monthly: 5500,
-        duration_months: 36,
-        renewable: true,
-        residency_path: "Counts toward permanent residency after 3–5 years of physical presence.",
-      },
-    },
-    tax: {
-      residency_trigger_days: 183,
-      tax_year: "Jan–Dec",
-      tax_year_start_month: 0,
-      special_regime: "Gold Card holders: 50% exemption on foreign-sourced salary above NT$3m for the first 5 years.",
-    },
-    arbitrage_note:
-      "Safety, transport and internet are close to best-in-class and the Gold Card tax exemption is unusually generous. The trade-offs are humidity, typhoon season, a smaller nomad scene than Bangkok or Lisbon, and a rental market that is difficult to navigate without Mandarin or a local guarantor.",
-    last_verified: "2026-06-11",
-    confidence: "high",
-  },
-];
+/** Dataset-wide verification date. Every row carries it in the UI. */
+export const SEED_LAST_VERIFIED = "2026-08-04";
+
+/** Volatile local currencies — cost figures go stale fast. */
+const LOW_CONFIDENCE_IDS = new Set(["buenos-aires-ar", "istanbul-tr"]);
+
+function toCity(row: SeedCity): City {
+  return {
+    id: row.id,
+    city: row.city,
+    country: row.country,
+    country_code: row.countryCode,
+    region: row.region,
+    lat: row.lat,
+    lng: row.lng,
+    local_currency: row.localCurrency,
+    costs: row.costs,
+    scores: row.scores,
+    visa: row.visa,
+    tax: row.tax,
+    arbitrage_note: row.arbitrageNote,
+    last_verified: SEED_LAST_VERIFIED,
+    confidence: (LOW_CONFIDENCE_IDS.has(row.id) ? "low" : "medium") as Confidence,
+  };
+}
+
+export const CITIES: City[] = (seed.cities as unknown as SeedCity[]).map(toCity);
 
 export const REGIONS = Array.from(new Set(CITIES.map((x) => x.region))).sort();
 

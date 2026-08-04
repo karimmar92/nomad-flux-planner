@@ -1,6 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Bookmark, Wifi } from "lucide-react";
-import { computeArbitrage, flagEmoji, formatUsd, monthlyCost } from "@/lib/arbitrage";
+import {
+  computeArbitrage,
+  flagEmoji,
+  formatUsd,
+  isSchengenCity,
+  monthlyCost,
+} from "@/lib/arbitrage";
 import type { City } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +24,7 @@ export function CityCard({
   const arb = computeArbitrage(city, income);
   const cost = monthlyCost(city);
   const positive = arb.surplusMonthly > 0;
+  const schengen = isSchengenCity(city);
 
   return (
     <div className="panel group relative flex flex-col gap-3 p-4 transition-colors hover:border-primary/40">
@@ -67,12 +74,16 @@ export function CityCard({
       <div className="flex flex-wrap gap-1.5">
         <Badge>
           <Wifi className="mr-1 h-3 w-3" />
-          {city.scores.internet_mbps} Mbps
+          {city.scores.internetSpeedMbps} Mbps
         </Badge>
-        <Badge tone={city.visa.nomad_visa ? "positive" : "muted"}>
-          {city.visa.nomad_visa ? "Nomad visa" : "No nomad visa"}
+        <Badge tone={city.visa.nomadVisa.exists ? "positive" : "muted"}>
+          {city.visa.nomadVisa.exists ? "Nomad visa" : "No nomad visa"}
         </Badge>
-        {city.visa.schengen ? <Badge tone="warning">Schengen</Badge> : null}
+        {schengen ? (
+          <Badge tone="warning">Schengen clock</Badge>
+        ) : (
+          <Badge tone="positive">Non-Schengen</Badge>
+        )}
       </div>
     </div>
   );

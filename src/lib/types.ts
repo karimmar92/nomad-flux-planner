@@ -1,86 +1,143 @@
 export type Confidence = "high" | "medium" | "low";
 
-export type CostItem = { lean: number; mid: number };
-
+/** Monthly USD figures, mid-range basis. Shape matches the `costs` jsonb column. */
 export type Costs = {
-  rent_central: CostItem;
-  rent_outskirts: CostItem;
-  coliving: CostItem;
-  coworking: CostItem;
-  groceries: CostItem;
-  meal: CostItem;
-  utilities: CostItem;
-  mobile: CostItem;
-  transport: CostItem;
-  gym: CostItem;
+  rent1brCentral: number;
+  rent1brOutskirts: number;
+  colivingRoom: number;
+  coworkingHotDesk: number;
+  groceriesMonthly: number;
+  mealInexpensive: number;
+  utilities: number;
+  mobileData: number;
+  transportMonthly: number;
+  gymMonthly: number;
+  totalMonthlyMidRange: number;
+  totalMonthlyLean: number;
 };
 
-export const COST_LABELS: Record<keyof Costs, string> = {
-  rent_central: "Rent — central 1BR",
-  rent_outskirts: "Rent — outskirts 1BR",
-  coliving: "Coliving",
-  coworking: "Coworking desk",
-  groceries: "Groceries",
-  meal: "Eating out",
+export type CostLineKey = Exclude<
+  keyof Costs,
+  "totalMonthlyMidRange" | "totalMonthlyLean"
+>;
+
+export const COST_LABELS: Record<CostLineKey, string> = {
+  rent1brCentral: "Rent — central 1BR",
+  rent1brOutskirts: "Rent — outskirts 1BR",
+  colivingRoom: "Coliving room",
+  coworkingHotDesk: "Coworking hot desk",
+  groceriesMonthly: "Groceries",
+  mealInexpensive: "Meal out (per meal)",
   utilities: "Utilities",
-  mobile: "Mobile / data",
-  transport: "Transport",
-  gym: "Gym",
+  mobileData: "Mobile data",
+  transportMonthly: "Transport",
+  gymMonthly: "Gym",
 };
 
-/** Items summed into the headline monthly cost (rent_central used; alternatives excluded). */
-export const CORE_COST_KEYS: (keyof Costs)[] = [
-  "rent_central",
-  "coworking",
-  "groceries",
-  "meal",
+/** Line items shown as monthly recurring costs. */
+export const MONTHLY_COST_KEYS: CostLineKey[] = [
+  "rent1brCentral",
+  "coworkingHotDesk",
+  "groceriesMonthly",
   "utilities",
-  "mobile",
-  "transport",
-  "gym",
+  "mobileData",
+  "transportMonthly",
+  "gymMonthly",
 ];
 
+/** Line items shown for reference only (alternatives or per-unit prices). */
+export const REFERENCE_COST_KEYS: CostLineKey[] = [
+  "rent1brOutskirts",
+  "colivingRoom",
+  "mealInexpensive",
+];
+
+/** 0–5 subjective scores, except internet which is Mbps. */
 export type Scores = {
-  internet_mbps: number;
+  internetSpeedMbps: number;
   safety: number;
-  community: number;
+  nomadCommunity: number;
   walkability: number;
-  english: number;
+  englishFriendly: number;
   weather: number;
 };
 
+export const SCORE_MAX = 5;
+
 export const SCORE_LABELS: Record<keyof Scores, string> = {
-  internet_mbps: "Internet",
+  internetSpeedMbps: "Internet",
   safety: "Safety",
-  community: "Nomad community",
+  nomadCommunity: "Nomad community",
   walkability: "Walkability",
-  english: "English",
+  englishFriendly: "English",
   weather: "Weather",
+};
+
+export type VisaRuleType =
+  | "SCHENGEN_90_180"
+  | "FIXED_PER_ENTRY"
+  | "ROLLING_PER_YEAR"
+  | "NOMAD_VISA";
+
+export const VISA_RULE_LABELS: Record<VisaRuleType, string> = {
+  SCHENGEN_90_180: "Schengen 90/180",
+  FIXED_PER_ENTRY: "Fresh allowance per entry",
+  ROLLING_PER_YEAR: "Rolling annual cap",
+  NOMAD_VISA: "Nomad permit only",
+};
+
+export const VISA_RULE_DESCRIPTIONS: Record<VisaRuleType, string> = {
+  SCHENGEN_90_180:
+    "Rolling window. Max 90 days in any trailing 180-day period across the whole Schengen Area combined. Entry day and exit day both count. Leaving to a non-Schengen country does not reset it.",
+  FIXED_PER_ENTRY:
+    "A fresh allowance each time you enter. Border runs may reset it, but repeated same-day runs draw scrutiny.",
+  ROLLING_PER_YEAR:
+    "Max N days per rolling 12 months or per calendar year, tracked cumulatively.",
+  NOMAD_VISA:
+    "A dedicated remote-work residence permit. Separate from the tourist allowance.",
 };
 
 export type NomadVisa = {
   name: string;
-  income_usd_monthly: number;
-  duration_months: number;
-  renewable: boolean;
-  residency_path: string;
+  exists: boolean;
+  minMonthlyIncomeUSD?: number;
+  minAnnualIncomeUSD?: number;
+  requiredSavingsUSD?: number;
+  alternativeSavingsUSD?: number;
+  durationMonths?: number;
+  staysPerEntryDays?: number;
+  renewable?: boolean;
+  renewableUpToYears?: number;
+  pathToResidency?: boolean;
+  notes?: string;
 };
 
 export type Visa = {
-  schengen: boolean;
-  /** Tourist days by ISO-2 nationality; `default` is the fallback. */
-  tourist_days: Record<string, number> & { default: number };
-  rule: string;
-  nomad_visa: NomadVisa | null;
+  ruleType: VisaRuleType;
+  touristDays: number;
+  extensionDays?: number;
+  windowDays?: number | null;
+  maxDaysPerCalendarYear?: number;
+  nomadVisa: NomadVisa;
+};
+
+export type SpecialRegime = {
+  name: string;
+  rate: string;
+  years?: number;
+  turnoverCapGEL?: number;
+  turnoverCapUSD?: number;
 };
 
 export type Tax = {
-  residency_trigger_days: number;
-  /** e.g. "Jan–Dec", "Mar–Feb", "Jul–Jun" */
-  tax_year: string;
-  /** month index 0-11 that the tax year starts */
-  tax_year_start_month: number;
-  special_regime: string | null;
+  residencyTriggerDays: number;
+  /** "calendar", "March-February", "July-June" */
+  taxYear: string;
+  windowNote?: string;
+  notes: string;
+  foreignIncomeExemptForNomadVisa: boolean;
+  personalIncomeTaxRate?: number;
+  specialRegime?: SpecialRegime;
 };
 
 export type City = {
