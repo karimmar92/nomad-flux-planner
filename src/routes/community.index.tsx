@@ -33,6 +33,7 @@ import {
   useNow,
 } from "@/components/radar/RadarBits";
 import { cn } from "@/lib/utils";
+import { RequiresNetwork } from "@/components/OfflineBanner";
 
 export const Route = createFileRoute("/community/")({
   head: () => ({

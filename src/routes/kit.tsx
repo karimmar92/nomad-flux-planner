@@ -5,6 +5,7 @@ import { TransportGroup } from "@/components/partners/TransportGroup";
 import { BankingGroup } from "@/components/partners/BankingGroup";
 
 import { APP_NAME } from "@/lib/app";
+import { RequiresNetwork } from "@/components/OfflineBanner";
 
 export const Route = createFileRoute("/kit")({
   head: () => ({
