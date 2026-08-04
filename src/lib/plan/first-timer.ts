@@ -91,7 +91,7 @@ export function passesFirstMoveGates(city: City): boolean {
   );
 }
 
-export function rankForFirstMove(cities: City[], limit = 6): FirstMovePick[] {
+export function rankForFirstMove(cities: City[], limit = 8): FirstMovePick[] {
   const eligible = cities.filter(passesFirstMoveGates);
   const leanCosts = cities.map((c) => c.costs.totalMonthlyLean);
   const min = Math.min(...leanCosts);
