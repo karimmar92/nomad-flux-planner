@@ -33,7 +33,7 @@ export interface Trip {
 
 /** Days since epoch for a YYYY-MM-DD string. Timezone-independent. */
 export function toDayIndex(iso: string): number {
-  const [y, m, d] = iso.split("-").map(Number);
+  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
   return Math.floor(Date.UTC(y, m - 1, d) / 86_400_000);
 }
 
