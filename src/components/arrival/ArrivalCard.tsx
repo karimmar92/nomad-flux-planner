@@ -280,7 +280,7 @@ function ArrivalFacts({
           <div className="mt-2">
             <PartnerGroup
               category="esim"
-              placement="city_detail"
+              placement="arrival"
               title="Data"
               countryCode={countryCode}
               cityId={city?.id ?? null}
