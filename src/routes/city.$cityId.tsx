@@ -23,6 +23,7 @@ import {
 } from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
+import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
@@ -384,6 +385,26 @@ function CityDetail() {
               </p>
             )}
           </div>
+          {/* Only where a nomad visa actually exists — most applications require
+              proof of cover, so this is a requirement note that happens to be
+              commercial. Hidden for Pro. */}
+          {nomad && profile.plan !== "pro" ? (
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="mb-2 text-xs text-muted-foreground">
+                Most nomad visa applications require proof of health cover for the full permit
+                duration
+                {nomad.durationMonths ? ` — here that's ${nomad.durationMonths} months` : ""}.
+              </p>
+              <PartnerGroup
+                category="insurance"
+                placement="visa_card"
+                title="Cover accepted for nomad permits"
+                countryCode={city.country_code}
+                citySlug={city.id}
+                cityId={city.id}
+              />
+            </div>
+          ) : null}
         </section>
 
         {/* Tax */}
@@ -441,6 +462,26 @@ function CityDetail() {
         <h2 className="mb-2 text-sm font-semibold">The honest note</h2>
         <p className="text-sm leading-relaxed text-foreground/90">{city.arbitrage_note}</p>
       </section>
+
+      {/* Before you arrive — deliberately last, after the numbers. Pro subscribers
+          paid to not be sold to while browsing, so they never see this. */}
+      {profile.plan === "pro" ? null : (
+        <section className="panel p-4">
+          <h2 className="text-sm font-semibold">Before you arrive</h2>
+          <p className="mb-3 mt-1 text-xs text-muted-foreground">
+            Two eSIM options for landing in {city.country} with data. Notes are ours; neither
+            affects where {city.city} ranks anywhere in {APP_NAME}.
+          </p>
+          <PartnerGroup
+            category="esim"
+            placement="city_detail"
+            title="eSIM"
+            countryCode={city.country_code}
+            citySlug={city.id}
+            cityId={city.id}
+          />
+        </section>
+      )}
 
       <LegalFooter />
     </div>

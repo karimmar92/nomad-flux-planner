@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2, X } from "lucide-react";
 import {
   SCHENGEN_COUNTRIES,
   SCHENGEN_MAX_DAYS,
@@ -21,6 +21,7 @@ import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useTrips } from "@/lib/store";
 import { flagEmoji } from "@/lib/arbitrage";
 import { EmptyState, Stat } from "@/components/Primitives";
+import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,7 @@ function Tracker() {
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
   const today = useMemo(() => todayIso(), []);
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
+  const [justAdded, setJustAdded] = useState<Trip | null>(null);
 
   const engineTrips = useMemo(() => toEngineTrips(trips), [trips]);
   const schengen = useMemo(() => schengenStatus(engineTrips, today), [engineTrips, today]);
@@ -254,7 +256,16 @@ function Tracker() {
         )}
       </section>
 
-      <AddTrip onAdd={addTrip} />
+      <AddTrip
+        onAdd={(trip) => {
+          addTrip(trip);
+          setJustAdded(trip.entry_date > today ? trip : null);
+        }}
+      />
+
+      {justAdded ? (
+        <TripConfirmKit trip={justAdded} onDismiss={() => setJustAdded(null)} />
+      ) : null}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Your trips</h2>
@@ -449,6 +460,57 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
       >
         Add trip
       </button>
+    </section>
+  );
+}
+
+/**
+ * Highest-intent moment in the app: a future trip was just logged. Shown once,
+ * dismissible, and only for future entry dates.
+ */
+function TripConfirmKit({ trip, onDismiss }: { trip: Trip; onDismiss: () => void }) {
+  const parts = trip.entry_date.split("-").map(Number) as [number, number, number];
+  const label = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])));
+
+  return (
+    <section className="panel border-l-2 border-l-primary p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold">
+            Arriving in {countryName(trip.country_code)} on {label}. Sorted for data and cover?
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Our notes, not the partners&apos;. Dismiss if you&apos;re already set.
+          </p>
+        </div>
+        <button
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="mt-3 space-y-4">
+        <PartnerGroup
+          category="esim"
+          placement="trip_confirm"
+          title="eSIM"
+          countryCode={trip.country_code}
+          cityId={trip.city_id}
+        />
+        <PartnerGroup
+          category="insurance"
+          placement="trip_confirm"
+          title="Health cover"
+          countryCode={trip.country_code}
+          cityId={trip.city_id}
+        />
+      </div>
     </section>
   );
 }

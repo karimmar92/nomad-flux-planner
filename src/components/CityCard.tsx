@@ -1,3 +1,9 @@
+/**
+ * PARTNER-FREE ZONE (see PARTNER_FREE_ZONES in src/config/partners.ts).
+ * No affiliate link may ever be rendered here. The ranked city row
+ * decides what the app recommends, and that must depend only on the user's
+ * income, their filters and the seed data — never on commission.
+ */
 import { Link } from "@tanstack/react-router";
 import { Bookmark, Wifi } from "lucide-react";
 import {

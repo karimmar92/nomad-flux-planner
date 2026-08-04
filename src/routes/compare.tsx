@@ -1,3 +1,9 @@
+/**
+ * PARTNER-FREE ZONE (see PARTNER_FREE_ZONES in src/config/partners.ts).
+ * No affiliate link may ever be rendered here. The Compare table
+ * decides what the app recommends, and that must depend only on the user's
+ * income, their filters and the seed data — never on commission.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CITIES, getCity } from "@/lib/cities";
 import {
