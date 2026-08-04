@@ -387,7 +387,10 @@ function CityDetail() {
           </div>
           {/* Only where a nomad visa actually exists — most applications require
               proof of cover, so this is a requirement note that happens to be
-              commercial. Hidden for Pro. */}
+              commercial. Hidden for Pro. When this shows, it is this screen's
+              one and only partner card: the "Before you arrive" eSIM card below
+              stands down. One card per screen, app-wide. */}
+
           {nomad && profile.plan !== "pro" ? (
             <div className="mt-4 border-t border-border pt-3">
               <p className="mb-2 text-xs text-muted-foreground">
@@ -407,9 +410,24 @@ function CityDetail() {
           ) : null}
         </section>
 
-        {/* Tax */}
+        {/*
+          TAX CARD — NO PARTNER LINK MAY EVER GO IN THIS SECTION.
+
+          Not an eSIM, not insurance, and above all not a banking link. This
+          card shows residency triggers and special regimes (Georgia's 1%
+          small-business status, Spain's Beckham Law). Putting "open this
+          account" next to "become tax resident here at 183 days" reads as tax
+          structuring advice, which is a regulated activity in most of these
+          jurisdictions and one we are not licensed to give. Banking lives on
+          the Nomad kit page, in its own section, deliberately far from here.
+          See BANKING_FREE_ZONES in src/config/partners.ts.
+
+          Local banking context for a city is editorial only: write it into
+          `arbitrage_note` with no link attached. Information, not a referral.
+        */}
         <section className="panel p-4">
           <h2 className="mb-3 text-sm font-semibold">Tax</h2>
+
           <div className="grid grid-cols-2 gap-4">
             <Stat
               label="Residency trigger"
@@ -464,14 +482,17 @@ function CityDetail() {
       </section>
 
       {/* Before you arrive — deliberately last, after the numbers. Pro subscribers
-          paid to not be sold to while browsing, so they never see this. */}
-      {profile.plan === "pro" ? null : (
+          paid to not be sold to while browsing, so they never see this. Skipped
+          entirely when the visa card already carried this screen's one card. */}
+      {profile.plan === "pro" || nomad ? null : (
+
         <section className="panel p-4">
           <h2 className="text-sm font-semibold">Before you arrive</h2>
           <p className="mb-3 mt-1 text-xs text-muted-foreground">
-            Two eSIM options for landing in {city.country} with data. Notes are ours; neither
-            affects where {city.city} ranks anywhere in {APP_NAME}.
+            One eSIM option for landing in {city.country} with data. The note is ours, and it
+            doesn&apos;t affect where {city.city} ranks anywhere in {APP_NAME}.
           </p>
+
           <PartnerGroup
             category="esim"
             placement="city_detail"

@@ -1,10 +1,18 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 import { useProfile } from "@/lib/store";
 import type { IncomeType } from "@/lib/types";
 import { APP_NAME } from "@/lib/app";
 import { flagEmoji } from "@/lib/arbitrage";
 import { cn } from "@/lib/utils";
+import { BANKING_DISCLAIMER, PARTNERS, partnerUrl } from "@/config/partners";
+import { logPartnerClick } from "@/lib/partner-clicks";
+
+// Business account only: this line exists because someone just said they
+// freelance or run a company. Personal accounts are on the Nomad kit page.
+const bankingPartner = PARTNERS.find((p) => p.id === "wise-business");
+
 
 const NATIONALITIES = [
   ["GB", "United Kingdom"],
@@ -132,7 +140,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 key={value}
                 onClick={() => {
                   setIncomeType(value);
-                  setStep(3);
+                  // Freelance and founder stay on this step for a beat: it's the
+                  // one moment a business account is genuinely relevant.
+                  if (value === "employed") setStep(3);
                 }}
                 className={cn(
                   "w-full rounded-md border border-border px-3 py-2.5 text-left hover:border-primary/50",
@@ -143,8 +153,62 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 <div className="text-xs text-muted-foreground">{hint}</div>
               </button>
             ))}
+
+            {/*
+              One quiet, dismissible line — never a card stack, never on any
+              other step, and nowhere near tax content. Banking is a regulated
+              financial promotion: comparative fact only, standing disclaimer
+              always visible. See the BANKING RULE in src/config/partners.ts.
+            */}
+            {(incomeType === "freelance" || incomeType === "founder") && !bankingDismissed ? (
+              <div className="rounded-md border border-border bg-surface-2 px-3 py-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Invoicing clients abroad?{" "}
+                    <a
+                      href={bankingPartner ? partnerUrl(bankingPartner) : "#"}
+                      target="_blank"
+                      rel="sponsored noopener"
+                      onClick={() =>
+                        bankingPartner &&
+                        logPartnerClick({
+                          partner_id: bankingPartner.id,
+                          placement: "onboarding",
+                        })
+                      }
+                      className="font-semibold text-foreground underline underline-offset-2"
+                    >
+                      {bankingPartner?.name}
+                    </a>{" "}
+                    gives a company multi-currency account with local details in 9+ currencies.{" "}
+                    <span className="text-muted-foreground/80">
+                      Affiliate link — we earn a commission at no extra cost to you.
+                    </span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setBankingDismissed(true)}
+                    aria-label="Dismiss"
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/80">
+                  {BANKING_DISCLAIMER}
+                </p>
+              </div>
+            ) : null}
+
+            <button
+              onClick={() => setStep(3)}
+              className="mt-2 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
+            >
+              Continue
+            </button>
           </div>
         ) : null}
+
 
         {step === 3 ? (
           <div>

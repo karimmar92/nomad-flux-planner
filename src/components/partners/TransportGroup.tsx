@@ -1,5 +1,11 @@
-import { partnersForRegion, type PartnerPlacement } from "@/config/partners";
+import { Link } from "@tanstack/react-router";
+import {
+  isCataloguePlacement,
+  partnersForRegion,
+  type PartnerPlacement,
+} from "@/config/partners";
 import { PartnerCard } from "./PartnerCard";
+
 
 /**
  * Transport links. Permitted ONLY at `border_run`, `trip_confirm` and
@@ -29,7 +35,10 @@ export function TransportGroup({
   title?: string;
   variant?: "compact" | "row";
 }) {
-  const partners = partnersForRegion("transport", region);
+  const all = partnersForRegion("transport", region);
+  // One card per screen outside the Nomad kit catalogue. Region coverage
+  // decides who is eligible; editorial order decides which one shows.
+  const partners = isCataloguePlacement(placement) ? all : all.slice(0, 1);
   if (partners.length === 0) return null;
 
   const cards = partners.map((p) => (
@@ -58,7 +67,15 @@ export function TransportGroup({
   return (
     <div>
       <div className="label-xs mb-2">{title}</div>
-      <div className="grid gap-2 sm:grid-cols-2">{cards}</div>
+      <div className="grid gap-2">{cards}</div>
+      {all.length > partners.length ? (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          <Link to="/kit" className="underline hover:text-foreground">
+            Other routing options are on the Nomad kit page
+          </Link>
+        </p>
+      ) : null}
     </div>
+
   );
 }

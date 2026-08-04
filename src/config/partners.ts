@@ -23,29 +23,102 @@
  *
  * Permitted in exactly three placements: `border_run`, `trip_confirm`,
  * `kit_page`. Forbidden everywhere listed in TRANSPORT_FREE_ZONES.
+ *
+ * ---------------------------------------------------------------------------
+ * BANKING RULE (regulated — read all of it before touching this category)
+ * ---------------------------------------------------------------------------
+ * Multi-currency accounts ONLY: the accounts nomads use instead of local
+ * banking. Wise, Revolut, Payoneer.
+ *
+ *   NEVER link to local bank account opening. Local retail banks in Georgia,
+ *   Thailand or Portugal do not run affiliate programmes. What fills that gap
+ *   is "account opening assistance" agencies charging $200-500, and that space
+ *   contains outright scams targeting exactly this audience. One bad referral
+ *   there costs more trust than the entire affiliate stack earns. This is a
+ *   prohibition, not a preference — see PROHIBITED_PARTNER_TYPES.
+ *
+ * Where a city has genuinely useful local banking context (Georgia's banking
+ * has become harder for some nationalities, for instance) it is written as
+ * editorial content in `arbitrage_note`, with no link attached. Information,
+ * not a referral.
+ *
+ * Deposit-taking and payment services are regulated financial promotions in
+ * the UK and EU, and the rules reach affiliates, not just the firms. Three
+ * requirements, all enforced in code below:
+ *
+ *   1. No recommendation language anywhere near a banking link. Not "best
+ *      account for nomads", not "we recommend", not "you should". Comparative
+ *      fact only: what it does, where it works, what it costs.
+ *   2. BANKING_DISCLAIMER renders on every banking placement, always visible,
+ *      in the same standing style as the visa disclaimer.
+ *   3. Banking links stay physically separate from tax content. We display
+ *      residency triggers and special regimes (Georgia 1%, Beckham Law).
+ *      "Open this account" next to "become tax resident here at 183 days"
+ *      reads as tax structuring advice, a regulated activity in most of these
+ *      jurisdictions. See BANKING_FREE_ZONES.
+ *
+ * ---------------------------------------------------------------------------
+ * ONE CARD PER SCREEN (applies to every category)
+ * ---------------------------------------------------------------------------
+ * There are four affiliate categories now. No screen may display more than one
+ * partner card. If a placement wants two, it belongs on the Nomad kit page,
+ * which is the single catalogue surface (CATALOGUE_PLACEMENTS). The failure
+ * mode from here is not too little revenue, it's the app quietly turning into
+ * a link farm — and one good free-to-paid conversion is worth more than any
+ * individual affiliate category. PartnerGroup/TransportGroup/BankingGroup
+ * enforce this by rendering a single card outside the catalogue.
  */
 
-export type PartnerCategory = "esim" | "insurance" | "transport";
+export type PartnerCategory = "esim" | "insurance" | "transport" | "banking";
+
+/**
+ * Categories of partner we will never carry, whatever they pay.
+ * Load-bearing: read this before adding anything to PARTNERS.
+ */
+export const PROHIBITED_PARTNER_TYPES = [
+  "local-bank-account-opening", // Local retail banks: no programmes, and the gap is filled by scams
+  "account-opening-assistance", // $200-500 agencies targeting this exact audience
+  "residency-by-investment", // Same risk class, worse
+  "tax-structuring-services", // Regulated advice we are not licensed to sell
+  "banner-ad-networks", // No ads, ever
+] as const;
 
 /** Coarse coverage regions, matching the `region` field on the cities dataset. */
-export type PartnerRegion = "Europe" | "Asia" | "Latin America" | "Africa" | "Middle East";
+export type PartnerRegion =
+  | "*"
+  | "Europe"
+  | "Asia"
+  | "Latin America"
+  | "Africa"
+  | "Middle East";
 
 export interface Partner {
   id: string;
   name: string;
   category: PartnerCategory;
   /**
-   * Regions the partner actually covers. Omit for destination-agnostic
-   * partners (eSIM, insurance). Coverage differs sharply for transport —
-   * a European rail aggregator is useless to someone in Vietnam.
+   * Regions the partner actually covers, or ["*"] for global. Omit for
+   * destination-agnostic partners (eSIM, insurance). Coverage differs sharply
+   * for transport — a European rail aggregator is useless to someone in
+   * Vietnam — and for banking, where eligibility follows country of residence.
    */
   regions?: PartnerRegion[];
+  /** Banking only: which product this row is. Business is not a footnote. */
+  accountType?: "personal" | "business";
   /** Placeholder — replace once the affiliate account is approved. */
   urlTemplate: string; // supports {countryCode}, {citySlug}, {fromCity}, {toCity}, {date}
   disclosure: string;
   /** Editorial note. Written by us, never by the partner. */
   note: string;
 }
+
+/**
+ * Standing disclaimer for every banking placement. Always visible, never
+ * behind a disclosure triangle, never abbreviated.
+ */
+export const BANKING_DISCLAIMER =
+  "Information only, not financial advice. Availability, fees and features depend on your country of residence. Check the provider's terms.";
+
 
 export const PARTNERS: Partner[] = [
   {
@@ -109,6 +182,41 @@ export const PARTNERS: Partner[] = [
     disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
     note: "Combines flights, trains and buses into one itinerary — useful for awkward routes no single carrier covers.",
   },
+  // Banking — subject to the BANKING RULE above. Multi-currency accounts only.
+  // Notes are comparative fact: what it does, where it works, what it costs.
+  // No superlatives, no "recommended", no "best for nomads".
+  {
+    id: "wise",
+    name: "Wise",
+    category: "banking",
+    accountType: "personal",
+    regions: ["*"],
+    urlTemplate: "https://wise.com/invite/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "Multi-currency account with local bank details in 9+ currencies. The business account is the one that matters if you invoice international clients.",
+  },
+  {
+    // Surfaced as its own row, not a footnote under the personal account: this
+    // audience invoices international clients, and the product is different.
+    id: "wise-business",
+    name: "Wise Business",
+    category: "banking",
+    accountType: "business",
+    regions: ["*"],
+    urlTemplate: "https://wise.com/business/invite/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "Same local bank details in the company's name, with batch payouts and accounting exports. One-off setup fee in most countries; company registration documents required.",
+  },
+  {
+    id: "revolut",
+    name: "Revolut",
+    category: "banking",
+    accountType: "personal",
+    regions: ["Europe", "Asia", "Latin America"],
+    urlTemplate: "https://revolut.com/referral/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "Strong app and card. Availability and features vary a lot by country of residence — check yours before relying on it.",
+  },
 ];
 
 /**
@@ -146,15 +254,48 @@ export const TRANSPORT_FREE_ZONES = [
   "notifications", // Any push/email surface. No fare alerts, ever.
 ] as const;
 
+/**
+ * Banking-specific lint zone. The tax entries are the important ones: a
+ * banking link beside a residency trigger or a special regime reads as tax
+ * structuring advice, which is regulated in most of these jurisdictions.
+ */
+export const BANKING_FREE_ZONES = [
+  ...PARTNER_FREE_ZONES,
+  "src/routes/city.$cityId.tsx", // Tax card, residency triggers, special regimes — see the comment there
+  "src/routes/tracker.tsx", // Day counters sit next to residency thresholds
+  "src/components/borderrun/BorderRunCard.tsx", // A forced move is not a moment to sell an account
+  "notifications", // No financial promotions pushed at anyone
+] as const;
+
 /** Placements where a transport link is permitted. Nowhere else. */
 export const TRANSPORT_PLACEMENTS = ["border_run", "trip_confirm", "kit_page"] as const;
+
+/**
+ * Placements where a banking link is permitted. Nowhere else — specifically
+ * not city detail, not the tracker, not the border-run planner.
+ */
+export const BANKING_PLACEMENTS = ["kit_page", "onboarding"] as const;
 
 export type PartnerPlacement =
   | "city_detail"
   | "trip_confirm"
   | "visa_card"
   | "kit_page"
-  | "border_run";
+  | "border_run"
+  | "onboarding";
+
+/**
+ * The one-card-per-screen budget. The Nomad kit page is the single catalogue
+ * surface and is exempt: it exists precisely so that no other screen has to
+ * carry a second link.
+ */
+export const MAX_PARTNER_CARDS_PER_SCREEN = 1;
+export const CATALOGUE_PLACEMENTS: PartnerPlacement[] = ["kit_page"];
+
+export function isCataloguePlacement(placement: PartnerPlacement): boolean {
+  return CATALOGUE_PLACEMENTS.includes(placement);
+}
+
 
 /** Partners for a category, in editorial order. Never sorted by payout. */
 export function partnersByCategory(category: PartnerCategory): Partner[] {
@@ -167,9 +308,14 @@ export function partnersByCategory(category: PartnerCategory): Partner[] {
  */
 export function partnersForRegion(category: PartnerCategory, region?: string): Partner[] {
   return partnersByCategory(category).filter(
-    (p) => !p.regions || !region || p.regions.includes(region as PartnerRegion),
+    (p) =>
+      !p.regions ||
+      !region ||
+      p.regions.includes("*") ||
+      p.regions.includes(region as PartnerRegion),
   );
 }
+
 
 export function getPartner(id: string): Partner | undefined {
   return PARTNERS.find((p) => p.id === id);
