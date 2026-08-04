@@ -86,6 +86,7 @@ function Tracker() {
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
   const today = useMemo(() => todayIso(), []);
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
+  const [justAdded, setJustAdded] = useState<Trip | null>(null);
 
   const engineTrips = useMemo(() => toEngineTrips(trips), [trips]);
   const schengen = useMemo(() => schengenStatus(engineTrips, today), [engineTrips, today]);
