@@ -385,6 +385,26 @@ function CityDetail() {
               </p>
             )}
           </div>
+          {/* Only where a nomad visa actually exists — most applications require
+              proof of cover, so this is a requirement note that happens to be
+              commercial. Hidden for Pro. */}
+          {nomad && profile.plan !== "pro" ? (
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="mb-2 text-xs text-muted-foreground">
+                Most nomad visa applications require proof of health cover for the full permit
+                duration
+                {nomad.durationMonths ? ` — here that's ${nomad.durationMonths} months` : ""}.
+              </p>
+              <PartnerGroup
+                category="insurance"
+                placement="visa_card"
+                title="Cover accepted for nomad permits"
+                countryCode={city.country_code}
+                citySlug={city.id}
+                cityId={city.id}
+              />
+            </div>
+          ) : null}
         </section>
 
         {/* Tax */}
