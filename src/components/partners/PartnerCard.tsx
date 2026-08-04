@@ -20,14 +20,46 @@ export function PartnerCard({
   countryCode,
   citySlug,
   cityId,
+  variant = "compact",
 }: {
   partner: Partner;
   placement: PartnerPlacement;
   countryCode?: string;
   citySlug?: string;
   cityId?: string | null;
+  /** "row" is the full-width Nomad kit treatment; "compact" is the inline card. */
+  variant?: "compact" | "row";
 }) {
   const href = partnerUrl(partner, { countryCode: countryCode ?? "", citySlug: citySlug ?? "" });
+  const onClick = () =>
+    logPartnerClick({ partner_id: partner.id, placement, city_id: cityId ?? null });
+
+  if (variant === "row") {
+    return (
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-base font-bold leading-tight tracking-tight text-foreground">
+              {partner.name}
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{partner.note}</p>
+          </div>
+          <a
+            href={href}
+            target="_blank"
+            rel="sponsored noopener"
+            onClick={onClick}
+            className="shrink-0 rounded-full bg-accent-positive-muted px-4 py-2 text-sm font-semibold text-accent-positive transition-colors hover:bg-accent-positive hover:text-background"
+          >
+            Compare plans
+          </a>
+        </div>
+        <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground/80">
+          {partner.disclosure}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col rounded-md border border-border bg-surface p-3">
@@ -35,9 +67,7 @@ export function PartnerCard({
         href={href}
         target="_blank"
         rel="sponsored noopener"
-        onClick={() =>
-          logPartnerClick({ partner_id: partner.id, placement, city_id: cityId ?? null })
-        }
+        onClick={onClick}
         className="flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary"
       >
         {partner.name}
@@ -61,6 +91,7 @@ export function PartnerGroup({
   countryCode,
   citySlug,
   cityId,
+  variant = "compact",
 }: {
   category: PartnerCategory;
   placement: PartnerPlacement;
@@ -68,8 +99,29 @@ export function PartnerGroup({
   countryCode?: string;
   citySlug?: string;
   cityId?: string | null;
+  variant?: "compact" | "row";
 }) {
   const partners = partnersByCategory(category);
+
+  if (variant === "row") {
+    return (
+      <section className="space-y-3">
+        <h2 className="label-xs font-semibold">{title}</h2>
+        {partners.map((p) => (
+          <PartnerCard
+            key={p.id}
+            partner={p}
+            placement={placement}
+            variant="row"
+            {...(countryCode ? { countryCode } : {})}
+            {...(citySlug ? { citySlug } : {})}
+            cityId={cityId ?? null}
+          />
+        ))}
+      </section>
+    );
+  }
+
   return (
     <div>
       <div className="label-xs mb-2">{title}</div>
