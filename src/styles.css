@@ -41,6 +41,10 @@
   --color-negative-muted: var(--negative-muted);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-accent-positive: var(--accent-positive);
+  --color-accent-positive-muted: var(--accent-positive-muted);
+  --color-accent-warning: var(--accent-warning);
+  --color-accent-warning-muted: var(--accent-warning-muted);
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
