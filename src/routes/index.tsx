@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
+import { readProfile } from "@/lib/store";
 import { EmptyState } from "@/components/Primitives";
 import { CITIES, REGIONS } from "@/lib/cities";
 import {
@@ -48,6 +49,7 @@ function Explore() {
   const { profile, hydrated } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<string>("all");
   const [maxBudget, setMaxBudget] = useState(4000);
@@ -108,7 +110,14 @@ function Explore() {
   return (
     <div className="space-y-6">
       {hydrated && !profile.onboarded && showOnboarding ? (
-        <Onboarding onDone={() => setShowOnboarding(false)} />
+        <Onboarding
+          onDone={() => {
+            setShowOnboarding(false);
+            // Planning-track users land on the runway calculator, not on a
+            // ranking of cities they cannot yet act on.
+            if (readProfile().stage === "planning") void navigate({ to: "/plan" });
+          }}
+        />
       ) : null}
 
       {/* Hero stat panel — mirrors the tracker dashboard's big-number card */}
