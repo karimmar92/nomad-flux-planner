@@ -24,8 +24,9 @@ export function useOrgTripSync(enabled = true) {
       country_code: t.country_code,
       entry_date: t.entry_date,
       exit_date: t.exit_date,
-      created_at: t.created_at ?? undefined,
+      ...(t.created_at ? { created_at: t.created_at } : {}),
     }));
+
     const fingerprint = JSON.stringify(payload);
     if (fingerprint === last.current) return;
     last.current = fingerprint;
