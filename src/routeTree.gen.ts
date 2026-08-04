@@ -31,6 +31,7 @@ import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
+import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
@@ -147,6 +148,11 @@ const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   path: '/community/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordIndexRoute = RecordIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RecordRoute,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -177,7 +183,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
-  '/record': typeof RecordRoute
+  '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/community/': typeof CommunityIndexRoute
+  '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -204,7 +211,6 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
-  '/record': typeof RecordRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -214,6 +220,7 @@ export interface FileRoutesByTo {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/community': typeof CommunityIndexRoute
+  '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -232,7 +239,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
-  '/record': typeof RecordRoute
+  '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -242,6 +249,7 @@ export interface FileRoutesById {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/community/': typeof CommunityIndexRoute
+  '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
@@ -271,6 +279,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/community/'
+    | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/webhooks/stripe'
@@ -288,7 +297,6 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
-    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -298,6 +306,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/community'
+    | '/record'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/webhooks/stripe'
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/community/'
+    | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/webhooks/stripe'
@@ -343,7 +353,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
-  RecordRoute: typeof RecordRoute
+  RecordRoute: typeof RecordRouteWithChildren
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -514,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/record/': {
+      id: '/record/'
+      path: '/'
+      fullPath: '/record/'
+      preLoaderRoute: typeof RecordIndexRouteImport
+      parentRoute: typeof RecordRoute
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -538,6 +555,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface RecordRouteChildren {
+  RecordIndexRoute: typeof RecordIndexRoute
+}
+
+const RecordRouteChildren: RecordRouteChildren = {
+  RecordIndexRoute: RecordIndexRoute,
+}
+
+const RecordRouteWithChildren =
+  RecordRoute._addFileChildren(RecordRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
@@ -551,7 +579,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
-  RecordRoute: RecordRoute,
+  RecordRoute: RecordRouteWithChildren,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
