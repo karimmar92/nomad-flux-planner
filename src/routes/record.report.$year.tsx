@@ -270,7 +270,7 @@ function ReportPage() {
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string | undefined }) {
   return (
     <div>
       <div className="num text-lg font-semibold tabular-nums">{value}</div>
