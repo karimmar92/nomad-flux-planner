@@ -1,0 +1,41 @@
+{
+  "card": {
+    "title": "Visum",
+    "touristDays": "Touristische Einreise: {{days}} Tage",
+    "ruleType": {
+      "SCHENGEN_90_180": "Schengen 90/180",
+      "FIXED_PER_ENTRY": "Feste Tagezahl pro Einreise",
+      "ROLLING_PER_YEAR": "Rollierende Tage pro Jahr",
+      "NOMAD_VISA": "Nomad-Visum-Weg"
+    },
+    "nationalityDependent": "Die Visumregeln unterscheiden sich stark je nach Pass — prüfe sie für deinen.",
+    "trialExpiry": "Diese Regelung ist ein Pilotprogramm und läuft derzeit am {{date}} aus. Prüfe sie, bevor du einen Aufenthalt darüber hinaus buchst.",
+    "nomadVisa": "Nomad-Visum",
+    "nomadVisaNone": "Kein eigenes Nomad-Visum.",
+    "durationMonths": "{{count}} Monate",
+    "minIncome": "Mindesteinkommen",
+    "approxCost": "Übliche Kosten",
+    "renewable": "Verlängerbar",
+    "pathToResidency": "Weg zur Aufenthaltserlaubnis",
+    "extension": "Verlängerung"
+  },
+  "schengen": {
+    "title": "Schengen 90/180",
+    "daysUsed": "{{used}} von {{total}} Tagen verbraucht",
+    "daysRemaining": "Heute noch {{count}} Tage übrig",
+    "mustExitBy": "Ausreise spätestens am {{date}}",
+    "nextResetOn": "Nächster Tag wird am {{date}} wieder frei",
+    "overstay": "Die erfasste Anwesenheit überschreitet das 90-Tage-Kontingent.",
+    "notSchengen": "Kein Schengen-Staat — dieser Aufenthalt verbraucht dein 90/180-Kontingent nicht."
+  },
+  "borderRun": {
+    "title": "Border Run",
+    "subtitle": "Ausreisemöglichkeiten, sortiert nach Kosten und verfügbaren Tagen.",
+    "daysAvailable": "{{count}} Tage verfügbar",
+    "nonSchengen": "Nicht-Schengen"
+  },
+  "disclaimer": {
+    "visa": "Nur zur Information. Keine Rechtsberatung. Visumregeln ändern sich ohne Vorankündigung — bestätige sie bei der Botschaft oder Einwanderungsbehörde des Einreiselandes.",
+    "tax": "Nur zur Information. Keine Steuerberatung. Hier wird Anwesenheit erfasst, keine Steueransässigkeit festgestellt. Kläre das mit einer qualifizierten Beratung in der jeweiligen Jurisdiktion."
+  }
+}

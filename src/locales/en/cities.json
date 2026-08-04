@@ -1,0 +1,60 @@
+{
+  "explore": {
+    "title": "Explore",
+    "subtitle": "What a city costs you, and what it asks of your passport.",
+    "search": "Search cities or countries",
+    "filters": {
+      "region": "Region",
+      "maxBudget": "Max monthly budget",
+      "nonSchengenOnly": "Non-Schengen only",
+      "all": "All"
+    },
+    "sort": {
+      "label": "Sort by",
+      "cost": "Cheapest",
+      "internet": "Fastest internet",
+      "safety": "Safest",
+      "community": "Nomad community"
+    },
+    "results_one": "{{count}} city",
+    "results_other": "{{count}} cities"
+  },
+  "detail": {
+    "costs": "Costs",
+    "liveability": "Liveability",
+    "visa": "Visa",
+    "tax": "Tax",
+    "whyHere": "Why here",
+    "monthlyMid": "Mid-range monthly",
+    "monthlyLean": "Lean monthly",
+    "lastVerified": "Last verified {{date}}",
+    "confidence": "Confidence: {{level}}",
+    "nonSchengenBadge": "Not Schengen — does not consume your 90/180 days",
+    "connectivityWarning": "Connectivity warning",
+    "save": "Save city",
+    "saved": "Saved"
+  },
+  "scores": {
+    "internet": "Internet",
+    "safety": "Safety",
+    "nomadCommunity": "Nomad community",
+    "walkability": "Walkability",
+    "englishFriendly": "English",
+    "weather": "Weather"
+  },
+  "costLines": {
+    "rent1brCentral": "Rent — central 1BR",
+    "rent1brOutskirts": "Rent — outskirts 1BR",
+    "colivingRoom": "Coliving room",
+    "coworkingHotDesk": "Coworking hot desk",
+    "groceriesMonthly": "Groceries",
+    "mealInexpensive": "Meal out (per meal)",
+    "utilities": "Utilities",
+    "mobileData": "Mobile data",
+    "transportMonthly": "Transport",
+    "gymMonthly": "Gym"
+  },
+  "content": {
+    "note": "City content strings (arbitrage notes, connectivity warnings) live under content.<cityId>.* and are rendered through TranslatedField so the English original stays reachable."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "hub": {
+    "title": "Before you go",
+    "subtitle": "Everything that has to happen before the first flight.",
+    "runway": "Runway calculator",
+    "firstMove": "Where should I start?",
+    "checklist": "90-day departure countdown",
+    "taxExit": "Leaving your home country",
+    "budget": "Startup budget"
+  },
+  "runway": {
+    "title": "Runway calculator",
+    "savings": "Savings",
+    "monthlyIncome": "Monthly income",
+    "homeCost": "Cost at home",
+    "targetCost": "Cost in {{city}}",
+    "monthsHome": "{{count}} months at home",
+    "monthsTarget": "{{count}} months in {{city}}",
+    "free": "Free forever, and partner-free — nothing on this screen earns us anything."
+  },
+  "firstMove": {
+    "title": "Where should I start?",
+    "subtitle": "Ranked for first moves: easy visas, soft landings, existing community."
+  },
+  "checklist": {
+    "title": "90-day departure countdown",
+    "daysToGo": "{{count}} days to go",
+    "done": "Done",
+    "todo": "To do"
+  },
+  "taxExit": {
+    "title": "Leaving your home country",
+    "subtitle": "What deregistration actually involves, country by country.",
+    "noLinks": "This section carries no partner links of any kind."
+  },
+  "stage": {
+    "question": "Where are you right now?",
+    "planning": "Still at home, planning",
+    "abroad": "Already abroad",
+    "graduated": "Welcome abroad — your tracker is now active."
+  }
+}

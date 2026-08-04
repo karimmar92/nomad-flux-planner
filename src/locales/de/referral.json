@@ -1,0 +1,31 @@
+{
+  "creator": {
+    "title": "Creator-Programm",
+    "pitch": "30 % jedes von dir vermittelten Abos — jeden Monat, solange die Person bleibt.",
+    "apply": "Für das Programm bewerben",
+    "dashboard": "Creator-Dashboard",
+    "balance": "Verfügbares Guthaben",
+    "pending": "Ausstehend",
+    "paid": "Ausgezahlt",
+    "clicks": "Klicks",
+    "signups": "Registrierungen",
+    "conversions": "Abschlüsse",
+    "link": "Dein Link",
+    "copyLink": "Link kopieren",
+    "qr": "QR-Code"
+  },
+  "user": {
+    "title": "Freund:in einladen",
+    "body": "Sie bekommen einen Gratismonat Pro. Du auch, sobald sie ein Abo abschließen.",
+    "invited_one": "{{count}} Person eingeladen",
+    "invited_other": "{{count}} Personen eingeladen",
+    "freeMonths_one": "{{count}} Gratismonat erhalten",
+    "freeMonths_other": "{{count}} Gratismonate erhalten"
+  },
+  "admin": {
+    "title": "Creator-Bewerbungen",
+    "approve": "Annehmen",
+    "reject": "Ablehnen",
+    "adjustment": "Manuelle Korrektur"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "explore": {
+    "title": "Explorar",
+    "subtitle": "Lo que te cuesta una ciudad y lo que le exige a tu pasaporte.",
+    "search": "Buscar ciudades o países",
+    "filters": {
+      "region": "Región",
+      "maxBudget": "Presupuesto mensual máximo",
+      "nonSchengenOnly": "Solo fuera de Schengen",
+      "all": "Todas"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "cost": "Más baratas",
+      "internet": "Internet más rápido",
+      "safety": "Más seguras",
+      "community": "Comunidad nómada"
+    },
+    "results_one": "{{count}} ciudad",
+    "results_other": "{{count}} ciudades"
+  },
+  "detail": {
+    "costs": "Costes",
+    "liveability": "Habitabilidad",
+    "visa": "Visado",
+    "tax": "Impuestos",
+    "whyHere": "Por qué aquí",
+    "monthlyMid": "Mensual, gama media",
+    "monthlyLean": "Mensual, ajustado",
+    "lastVerified": "Verificado por última vez el {{date}}",
+    "confidence": "Fiabilidad: {{level}}",
+    "nonSchengenBadge": "Fuera de Schengen: no consume tus 90/180 días",
+    "connectivityWarning": "Aviso sobre la conectividad",
+    "save": "Guardar ciudad",
+    "saved": "Guardada"
+  },
+  "scores": {
+    "internet": "Internet",
+    "safety": "Seguridad",
+    "nomadCommunity": "Comunidad nómada",
+    "walkability": "Caminabilidad",
+    "englishFriendly": "Inglés",
+    "weather": "Clima"
+  },
+  "costLines": {
+    "rent1brCentral": "Alquiler — 1 hab., centro",
+    "rent1brOutskirts": "Alquiler — 1 hab., afueras",
+    "colivingRoom": "Habitación en coliving",
+    "coworkingHotDesk": "Puesto en coworking",
+    "groceriesMonthly": "Supermercado",
+    "mealInexpensive": "Comer fuera (por comida)",
+    "utilities": "Suministros",
+    "mobileData": "Datos móviles",
+    "transportMonthly": "Transporte",
+    "gymMonthly": "Gimnasio"
+  }
+}

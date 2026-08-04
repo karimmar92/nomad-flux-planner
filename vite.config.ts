@@ -32,6 +32,8 @@ export default defineConfig({
         devOptions: { enabled: false },
         manifest: false, // served statically from public/manifest.webmanifest
         workbox: {
+          // Includes every locale bundle chunk: someone landing in a new
+          // country with no connectivity must not lose their language.
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json,webmanifest}"],
           navigateFallback: "/",
           // OAuth must always hit the network.

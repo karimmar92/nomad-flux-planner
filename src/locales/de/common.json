@@ -1,0 +1,65 @@
+{
+  "app": { "tagline": "Was dich eine Stadt kostet." },
+  "nav": {
+    "plan": "Planen",
+    "explore": "Entdecken",
+    "arbitrage": "Arbitrage",
+    "compare": "Vergleichen",
+    "tracker": "Tracker",
+    "record": "Nachweise",
+    "pricing": "Preise",
+    "profile": "Profil",
+    "toggleTheme": "Design wechseln"
+  },
+  "footerLinks": {
+    "beforeYouGo": "Bevor du gehst",
+    "community": "Community",
+    "stays": "Unterkünfte",
+    "profile": "Profil",
+    "company": "Brauchst du eine Firma?",
+    "kit": "Nomad-Kit",
+    "business": "Für Teams",
+    "org": "Team-Dashboard",
+    "employerSharing": "Datenfreigabe an Arbeitgeber",
+    "howWeMakeMoney": "Womit wir Geld verdienen",
+    "creatorProgramme": "Creator-Programm",
+    "creatorDashboard": "Creator-Dashboard"
+  },
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "skip": "Überspringen",
+    "retry": "Erneut versuchen",
+    "goHome": "Zur Startseite",
+    "viewDetail": "Details ansehen",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "dismiss": "Ausblenden"
+  },
+  "errors": {
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Die gesuchte Seite existiert nicht oder wurde verschoben.",
+    "genericTitle": "Diese Seite konnte nicht geladen werden",
+    "genericBody": "Bei uns ist etwas schiefgelaufen. Lade die Seite neu oder geh zurück zur Startseite."
+  },
+  "empty": {
+    "noResults": "Zu diesen Filtern passt noch nichts.",
+    "noTrips": "Noch keine Reisen erfasst.",
+    "noDocuments": "Noch keine Dokumente gespeichert."
+  },
+  "language": {
+    "label": "Sprache",
+    "change": "Sprache ändern",
+    "machineBanner": "Diese Seite ist maschinell übersetzt. Maßgeblich ist das englische Original.",
+    "untranslatedBanner": "Diese Seite ist noch nicht auf {{language}} übersetzt und wird auf Englisch angezeigt.",
+    "translatedMarker": "Übersetzt — englisches Original anzeigen",
+    "hideOriginal": "Englisches Original ausblenden",
+    "englishOriginal": "Englisches Original"
+  },
+  "legal": {
+    "disclaimer": "Nur zur Information. Keine Rechts- oder Steuerberatung. Prüfe die Angaben vor der Reise bei der zuständigen Behörde."
+  }
+}

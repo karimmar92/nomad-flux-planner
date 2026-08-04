@@ -113,7 +113,7 @@ function ChecklistPage() {
                 <h2 className="text-sm font-semibold">
                   {title}
                   {current === phase ? (
-                    <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
+                    <span className="ms-2 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary">
                       You are here
                     </span>
                   ) : null}

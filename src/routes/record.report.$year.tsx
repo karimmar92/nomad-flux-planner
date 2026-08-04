@@ -75,11 +75,11 @@ function ReportPage() {
         <p className="max-w-2xl text-sm text-muted-foreground">{REPORT_DISCLAIMER}</p>
         <div className="flex flex-wrap gap-2 pt-1">
           <button onClick={exportPdf} disabled={busy !== null} className="btn-primary">
-            <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+            <Download className="me-1.5 h-3.5 w-3.5" aria-hidden />
             {busy === "pdf" ? "Building PDF…" : "Export PDF"}
           </button>
           <button onClick={exportCsv} disabled={busy !== null} className="btn">
-            <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+            <FileSpreadsheet className="me-1.5 h-3.5 w-3.5" aria-hidden />
             Export CSV
           </button>
           {years
@@ -113,12 +113,12 @@ function ReportPage() {
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">Presence by country</h2>
             <div className="panel overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-start text-xs">
                 <thead className="border-b border-border text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2 font-medium">Country</th>
-                    <th className="px-3 py-2 text-right font-medium">Days</th>
-                    <th className="px-3 py-2 text-right font-medium">Threshold</th>
+                    <th className="px-3 py-2 text-end font-medium">Days</th>
+                    <th className="px-3 py-2 text-end font-medium">Threshold</th>
                     <th className="px-3 py-2 font-medium">Recorded presence</th>
                     <th className="hidden px-3 py-2 font-medium sm:table-cell">Period</th>
                   </tr>
@@ -130,8 +130,8 @@ function ReportPage() {
                         <div className="font-medium">{c.basis.country}</div>
                         <div className="text-[11px] text-muted-foreground">{c.basis.basisLabel}</div>
                       </td>
-                      <td className="num px-3 py-2 text-right tabular-nums">{c.days}</td>
-                      <td className="num px-3 py-2 text-right tabular-nums text-muted-foreground">
+                      <td className="num px-3 py-2 text-end tabular-nums">{c.days}</td>
+                      <td className="num px-3 py-2 text-end tabular-nums text-muted-foreground">
                         {c.basis.thresholdDays}
                       </td>
                       <td className="px-3 py-2">
@@ -233,8 +233,8 @@ function ReportPage() {
               <li
                 key={`${f.kind}-${i}`}
                 className={cn(
-                  "panel border-l-2 p-3",
-                  f.severity === "warning" ? "border-l-accent-warning" : "border-l-border",
+                  "panel border-s-2 p-3",
+                  f.severity === "warning" ? "border-s-accent-warning" : "border-s-border",
                 )}
               >
                 <div className="text-xs font-medium">{f.label}</div>

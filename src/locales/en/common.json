@@ -1,0 +1,67 @@
+{
+  "app": {
+    "tagline": "What a city costs you."
+  },
+  "nav": {
+    "plan": "Plan",
+    "explore": "Explore",
+    "arbitrage": "Arbitrage",
+    "compare": "Compare",
+    "tracker": "Tracker",
+    "record": "Record",
+    "pricing": "Pricing",
+    "profile": "Profile",
+    "toggleTheme": "Toggle theme"
+  },
+  "footerLinks": {
+    "beforeYouGo": "Before you go",
+    "community": "Community",
+    "stays": "Stays",
+    "profile": "Profile",
+    "company": "Do you need a company?",
+    "kit": "Nomad kit",
+    "business": "For teams",
+    "org": "Team dashboard",
+    "employerSharing": "Employer sharing",
+    "howWeMakeMoney": "How we make money",
+    "creatorProgramme": "Creator programme",
+    "creatorDashboard": "Creator dashboard"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "retry": "Try again",
+    "goHome": "Go home",
+    "viewDetail": "View detail",
+    "add": "Add",
+    "remove": "Remove",
+    "dismiss": "Dismiss"
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for doesn't exist or has been moved.",
+    "genericTitle": "This page didn't load",
+    "genericBody": "Something went wrong on our end. You can try refreshing or head back home."
+  },
+  "empty": {
+    "noResults": "Nothing matches these filters yet.",
+    "noTrips": "No trips logged yet.",
+    "noDocuments": "No documents stored yet."
+  },
+  "language": {
+    "label": "Language",
+    "change": "Change language",
+    "machineBanner": "This page is machine translated. The English original is authoritative.",
+    "untranslatedBanner": "This page is not yet translated into {{language}} and is shown in English.",
+    "translatedMarker": "Translated — view English original",
+    "hideOriginal": "Hide English original",
+    "englishOriginal": "English original"
+  },
+  "legal": {
+    "disclaimer": "Informational only. Not legal or tax advice. Verify with the relevant authority before travelling."
+  }
+}

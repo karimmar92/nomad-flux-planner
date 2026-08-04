@@ -59,7 +59,7 @@ function CreatorsPage() {
 
       <section className="panel space-y-2 p-4">
         <h2 className="text-sm font-semibold">The honest caveats</h2>
-        <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
+        <ul className="list-disc space-y-1 ps-4 text-sm text-muted-foreground">
           <li>
             Commission is capped at {CREATOR_PROGRAM.capMonthsPerReferredUser} months per referred
             user. Month 13 pays nothing.

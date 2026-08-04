@@ -226,7 +226,7 @@ function PlanHub() {
               setHomeId(e.target.value);
               patchProfile({ home_city_id: e.target.value });
             }}
-            className="ml-auto rounded-md border border-input bg-surface px-2 py-1 text-xs outline-none focus:border-primary"
+            className="ms-auto rounded-md border border-input bg-surface px-2 py-1 text-xs outline-none focus:border-primary"
             aria-label="Where you live now"
           >
             {CITIES.map((c) => (

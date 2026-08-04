@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Download, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
@@ -26,6 +27,7 @@ import {
 import { auditFileName, auditToCsv, auditToPdf, AUDIT_DISCLAIMER } from "@/lib/org/export";
 import { downloadBlob } from "@/lib/reports/export-csv";
 import { todayIso } from "@/lib/trip-dates";
+import { formatDate } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/org")({
@@ -231,34 +233,34 @@ function RiskTab({
           </div>
         ) : (
           <div className="panel overflow-x-auto p-4">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-start text-sm">
               <thead className="text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-1.5 pr-4 font-medium">Country</th>
-                  <th className="py-1.5 pr-4 font-medium">Employees</th>
-                  <th className="py-1.5 pr-4 font-medium">Total days</th>
-                  <th className="py-1.5 pr-4 font-medium">Longest stay</th>
-                  <th className="py-1.5 pr-4 font-medium">Threshold</th>
+                  <th className="py-1.5 pe-4 font-medium">Country</th>
+                  <th className="py-1.5 pe-4 font-medium">Employees</th>
+                  <th className="py-1.5 pe-4 font-medium">Total days</th>
+                  <th className="py-1.5 pe-4 font-medium">Longest stay</th>
+                  <th className="py-1.5 pe-4 font-medium">Threshold</th>
                   <th className="py-1.5 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {overview.countries.map((c) => (
                   <tr key={c.country_code} className="border-b border-border/60">
-                    <td className="py-1.5 pr-4">
+                    <td className="py-1.5 pe-4">
                       {c.country}
                       {c.peExceeded ? (
-                        <span className="ml-2 text-[11px] text-negative">PE benchmark passed</span>
+                        <span className="ms-2 text-[11px] text-negative">PE benchmark passed</span>
                       ) : c.peApproaching ? (
-                        <span className="ml-2 text-[11px] text-warning">
+                        <span className="ms-2 text-[11px] text-warning">
                           approaching PE benchmark
                         </span>
                       ) : null}
                     </td>
-                    <td className="num py-1.5 pr-4">{c.employeeCount}</td>
-                    <td className="num py-1.5 pr-4">{c.totalDays}</td>
-                    <td className="num py-1.5 pr-4">{c.longestSingleStay}</td>
-                    <td className="num py-1.5 pr-4">
+                    <td className="num py-1.5 pe-4">{c.employeeCount}</td>
+                    <td className="num py-1.5 pe-4">{c.totalDays}</td>
+                    <td className="num py-1.5 pe-4">{c.longestSingleStay}</td>
+                    <td className="num py-1.5 pe-4">
                       {c.thresholdDays}
                       {c.policyMaxDays !== null ? ` · policy ${c.policyMaxDays}` : ""}
                     </td>
@@ -368,24 +370,24 @@ function CountriesTab({ overview }: { overview: Overview }) {
               size="sm"
             />
           </div>
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-start text-sm">
             <thead className="text-muted-foreground">
               <tr className="border-b border-border">
-                <th className="py-1.5 pr-4 font-medium">Employee</th>
-                <th className="py-1.5 pr-4 font-medium">Days</th>
-                <th className="py-1.5 pr-4 font-medium">Longest</th>
+                <th className="py-1.5 pe-4 font-medium">Employee</th>
+                <th className="py-1.5 pe-4 font-medium">Days</th>
+                <th className="py-1.5 pe-4 font-medium">Longest</th>
                 <th className="py-1.5 font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
               {country.members.map((m) => (
                 <tr key={m.user_id} className="border-b border-border/60">
-                  <td className="py-1.5 pr-4">{m.display_name}</td>
-                  <td className="num py-1.5 pr-4">
+                  <td className="py-1.5 pe-4">{m.display_name}</td>
+                  <td className="num py-1.5 pe-4">
                     {m.days}
                     {m.openStay ? " (open)" : ""}
                   </td>
-                  <td className="num py-1.5 pr-4">{m.longestStay}</td>
+                  <td className="num py-1.5 pe-4">{m.longestStay}</td>
                   <td className="py-1.5">
                     <RiskPill risk={m.risk} />
                   </td>
@@ -446,6 +448,7 @@ function RequestsTab({
   overview: Overview;
   onChange: () => void;
 }) {
+  const { i18n } = useTranslation();
   const decide = useServerFn(decideTravelRequest);
   const nameOf = (userId: string) =>
     data.members.find((m) => m.user_id === userId)?.display_name || "Team member";
@@ -492,7 +495,8 @@ function RequestsTab({
                 <RiskPill risk={impact.risk} />
               </div>
               <p className="num text-xs text-muted-foreground">
-                {r.start_date} → {r.end_date} · {impact.requestedDays} days
+                {formatDate(r.start_date, i18n.language)} → {formatDate(r.end_date, i18n.language)} ·{" "}
+                {impact.requestedDays} days
               </p>
               <p className="text-sm">{impact.sentence}</p>
               {r.note ? <p className="text-xs text-muted-foreground">“{r.note}”</p> : null}
@@ -527,8 +531,9 @@ function RequestsTab({
                   {nameOf(r.user_id)} · {r.country_code}
                 </span>
                 <span className="num text-muted-foreground">
-                  {r.start_date} → {r.end_date} · {r.status}
-                  {r.decided_at ? ` · ${r.decided_at.slice(0, 10)}` : ""}
+                  {formatDate(r.start_date, i18n.language)} → {formatDate(r.end_date, i18n.language)} ·{" "}
+                  {r.status}
+                  {r.decided_at ? ` · ${formatDate(r.decided_at, i18n.language)}` : ""}
                 </span>
               </div>
             ))

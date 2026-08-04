@@ -45,7 +45,7 @@ export function TripChecklistCard({ trip }: { trip: Trip }) {
               <button
                 onClick={() => toggle(item.key)}
                 aria-pressed={checked}
-                className="flex w-full items-start gap-2.5 rounded-md px-2 py-1.5 text-left hover:bg-surface-2"
+                className="flex w-full items-start gap-2.5 rounded-md px-2 py-1.5 text-start hover:bg-surface-2"
               >
                 <span
                   className={cn(

@@ -1,0 +1,65 @@
+{
+  "app": { "tagline": "Lo que te cuesta una ciudad." },
+  "nav": {
+    "plan": "Planificar",
+    "explore": "Explorar",
+    "arbitrage": "Arbitraje",
+    "compare": "Comparar",
+    "tracker": "Control de visados",
+    "record": "Registro",
+    "pricing": "Precios",
+    "profile": "Perfil",
+    "toggleTheme": "Cambiar tema"
+  },
+  "footerLinks": {
+    "beforeYouGo": "Antes de irte",
+    "community": "Comunidad",
+    "stays": "Alojamientos",
+    "profile": "Perfil",
+    "company": "¿Necesitas una empresa?",
+    "kit": "Kit nómada",
+    "business": "Para equipos",
+    "org": "Panel del equipo",
+    "employerSharing": "Datos compartidos con la empresa",
+    "howWeMakeMoney": "Cómo ganamos dinero",
+    "creatorProgramme": "Programa de creadores",
+    "creatorDashboard": "Panel de creador"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "retry": "Reintentar",
+    "goHome": "Ir al inicio",
+    "viewDetail": "Ver detalle",
+    "add": "Añadir",
+    "remove": "Quitar",
+    "dismiss": "Descartar"
+  },
+  "errors": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBody": "La página que buscas no existe o se ha movido.",
+    "genericTitle": "Esta página no se cargó",
+    "genericBody": "Algo falló por nuestra parte. Puedes recargar o volver al inicio."
+  },
+  "empty": {
+    "noResults": "Todavía no hay nada que coincida con estos filtros.",
+    "noTrips": "Aún no has registrado ningún viaje.",
+    "noDocuments": "Aún no hay documentos guardados."
+  },
+  "language": {
+    "label": "Idioma",
+    "change": "Cambiar idioma",
+    "machineBanner": "Esta página está traducida automáticamente. El original en inglés es el texto válido.",
+    "untranslatedBanner": "Esta página aún no está traducida al {{language}} y se muestra en inglés.",
+    "translatedMarker": "Traducido — ver el original en inglés",
+    "hideOriginal": "Ocultar el original en inglés",
+    "englishOriginal": "Original en inglés"
+  },
+  "legal": {
+    "disclaimer": "Solo con fines informativos. No es asesoramiento legal ni fiscal. Verifícalo con la autoridad competente antes de viajar."
+  }
+}

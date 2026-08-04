@@ -1,0 +1,42 @@
+{
+  "hub": {
+    "title": "Antes de irte",
+    "subtitle": "Todo lo que tiene que pasar antes del primer vuelo.",
+    "runway": "Calculadora de autonomía",
+    "firstMove": "¿Por dónde empiezo?",
+    "checklist": "Cuenta atrás de 90 días",
+    "taxExit": "Salir de tu país de origen",
+    "budget": "Presupuesto inicial"
+  },
+  "runway": {
+    "title": "Calculadora de autonomía",
+    "savings": "Ahorros",
+    "monthlyIncome": "Ingresos mensuales",
+    "homeCost": "Coste en casa",
+    "targetCost": "Coste en {{city}}",
+    "monthsHome": "{{count}} meses en casa",
+    "monthsTarget": "{{count}} meses en {{city}}",
+    "free": "Gratis para siempre y sin partners: nada de esta pantalla nos genera ingresos."
+  },
+  "firstMove": {
+    "title": "¿Por dónde empiezo?",
+    "subtitle": "Ordenado para una primera mudanza: visados sencillos, aterrizaje suave, comunidad ya existente."
+  },
+  "checklist": {
+    "title": "Cuenta atrás de 90 días",
+    "daysToGo": "Quedan {{count}} días",
+    "done": "Hecho",
+    "todo": "Pendiente"
+  },
+  "taxExit": {
+    "title": "Salir de tu país de origen",
+    "subtitle": "Qué implica realmente darse de baja, país por país.",
+    "noLinks": "Esta sección no contiene ningún enlace de partner."
+  },
+  "stage": {
+    "question": "¿En qué punto estás?",
+    "planning": "Todavía en casa, planificando",
+    "abroad": "Ya en el extranjero",
+    "graduated": "Bienvenido al extranjero: tu control de visados ya está activo."
+  }
+}

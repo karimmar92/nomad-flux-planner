@@ -1,0 +1,57 @@
+{
+  "explore": {
+    "title": "Entdecken",
+    "subtitle": "Was eine Stadt dich kostet — und was sie von deinem Pass verlangt.",
+    "search": "Städte oder Länder suchen",
+    "filters": {
+      "region": "Region",
+      "maxBudget": "Maximales Monatsbudget",
+      "nonSchengenOnly": "Nur Nicht-Schengen",
+      "all": "Alle"
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "cost": "Günstigste",
+      "internet": "Schnellstes Internet",
+      "safety": "Sicherste",
+      "community": "Nomad-Community"
+    },
+    "results_one": "{{count}} Stadt",
+    "results_other": "{{count}} Städte"
+  },
+  "detail": {
+    "costs": "Kosten",
+    "liveability": "Lebensqualität",
+    "visa": "Visum",
+    "tax": "Steuern",
+    "whyHere": "Warum hier",
+    "monthlyMid": "Monatlich, mittlere Kategorie",
+    "monthlyLean": "Monatlich, sparsam",
+    "lastVerified": "Zuletzt geprüft am {{date}}",
+    "confidence": "Verlässlichkeit: {{level}}",
+    "nonSchengenBadge": "Kein Schengen-Staat — verbraucht deine 90/180 Tage nicht",
+    "connectivityWarning": "Warnung zur Internetverbindung",
+    "save": "Stadt speichern",
+    "saved": "Gespeichert"
+  },
+  "scores": {
+    "internet": "Internet",
+    "safety": "Sicherheit",
+    "nomadCommunity": "Nomad-Community",
+    "walkability": "Fußläufigkeit",
+    "englishFriendly": "Englisch",
+    "weather": "Wetter"
+  },
+  "costLines": {
+    "rent1brCentral": "Miete — 1-Zimmer, zentral",
+    "rent1brOutskirts": "Miete — 1-Zimmer, Randlage",
+    "colivingRoom": "Coliving-Zimmer",
+    "coworkingHotDesk": "Coworking-Arbeitsplatz",
+    "groceriesMonthly": "Lebensmittel",
+    "mealInexpensive": "Essen gehen (pro Mahlzeit)",
+    "utilities": "Nebenkosten",
+    "mobileData": "Mobiles Internet",
+    "transportMonthly": "Nahverkehr",
+    "gymMonthly": "Fitnessstudio"
+  }
+}

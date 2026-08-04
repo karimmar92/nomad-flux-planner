@@ -27,6 +27,10 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { useCityContent } from "@/lib/i18n/city-content";
+import { TranslatedField } from "@/components/i18n/TranslatedField";
+import { TranslationStatusBanner } from "@/components/i18n/TranslationStatusBanner";
+import { hreflangLinks } from "@/lib/i18n/hreflang";
 
 export const Route = createFileRoute("/city/$cityId")({
   loader: ({ params }) => {
@@ -47,6 +51,13 @@ export const Route = createFileRoute("/city/$cityId")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+        { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      // One indexable URL per language for the same city.
+      links: [
+        { rel: "canonical", href: `/city/${city.id}` },
+        ...hreflangLinks(`/city/${city.id}`),
       ],
     };
   },
@@ -57,6 +68,7 @@ export const Route = createFileRoute("/city/$cityId")({
 
 function CityDetail() {
   const { city } = Route.useLoaderData();
+  const cityContent = useCityContent();
   const { profile, patchProfile } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [tier, setTier] = useState<"lean" | "mid">("mid");
@@ -78,6 +90,10 @@ function CityDetail() {
 
   return (
     <div className="space-y-4">
+      {/* Honest about provenance: better to say "machine translated" than to
+          present a machine-translated visa rule as authoritative. */}
+      <TranslationStatusBanner namespaces={["cities", "visa"]} />
+
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
@@ -291,7 +307,14 @@ function CityDetail() {
           {city.connectivity_warning ? (
             <p className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
               <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
-              <span>{city.connectivity_warning}</span>
+              <span>
+                {(() => {
+                  const c = cityContent(city.id, "connectivityWarning", city.connectivity_warning);
+                  return c ? (
+                    <TranslatedField translated={c.display} english={c.english} />
+                  ) : null;
+                })()}
+              </span>
             </p>
           ) : null}
         </section>
@@ -406,9 +429,16 @@ function CityDetail() {
                     label="Path to residency"
                     value={nomad.pathToResidency ? "Yes" : "No"}
                   />
-                  {nomad.notes ? (
-                    <p className="pt-1 text-xs text-muted-foreground">{nomad.notes}</p>
-                  ) : null}
+                  {(() => {
+                    const c = cityContent(city.id, "nomadVisaNotes", nomad.notes);
+                    return c ? (
+                      <TranslatedField
+                        translated={c.display}
+                        english={c.english}
+                        className="pt-1 text-xs text-muted-foreground"
+                      />
+                    ) : null;
+                  })()}
                 </div>
               </>
             ) : (
@@ -486,7 +516,7 @@ function CityDetail() {
             <p className="mt-2 text-xs text-muted-foreground">{city.tax.windowNote}</p>
           ) : null}
           {regime ? (
-            <div className="mt-3 rounded-md border-l-2 border-l-primary border border-primary/30 bg-primary/5 p-3">
+            <div className="mt-3 rounded-md border-s-2 border-s-primary border border-primary/30 bg-primary/5 p-3">
               <div className="label-xs text-primary">Special tax regime</div>
               <p className="text-sm font-semibold">{regime.name}</p>
               <p className="num text-sm">{regime.rate}</p>
@@ -499,7 +529,16 @@ function CityDetail() {
               </p>
             </div>
           ) : null}
-          <p className="mt-3 text-sm text-muted-foreground">{city.tax.notes}</p>
+          {(() => {
+            const c = cityContent(city.id, "taxNotes", city.tax.notes);
+            return c ? (
+              <TranslatedField
+                translated={c.display}
+                english={c.english}
+                className="mt-3 text-sm text-muted-foreground"
+              />
+            ) : null;
+          })()}
           {city.tax.foreignIncomeExemptForNomadVisa ? (
             <p className="mt-2 rounded-md border border-positive/40 bg-positive-muted px-3 py-2 text-xs text-positive">
               Foreign-sourced income is generally exempt for nomad-permit holders here.
@@ -509,9 +548,12 @@ function CityDetail() {
       </div>
 
       {/* The honest note */}
-      <section className="panel border-l-2 border-l-primary p-4">
+      <section className="panel border-s-2 border-s-primary p-4">
         <h2 className="mb-2 text-sm font-semibold">The honest note</h2>
-        <p className="text-sm leading-relaxed text-foreground/90">{city.arbitrage_note}</p>
+        {(() => {
+          const c = cityContent(city.id, "arbitrageNote", city.arbitrage_note);
+          return c ? <TranslatedField translated={c.display} english={c.english} /> : null;
+        })()}
       </section>
 
       {/* Before you arrive — deliberately last, after the numbers. Pro subscribers
@@ -546,7 +588,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4">
       <span className="text-muted-foreground">{label}</span>
-      <span className="text-right">{value}</span>
+      <span className="text-end">{value}</span>
     </div>
   );
 }

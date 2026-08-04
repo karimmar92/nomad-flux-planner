@@ -149,7 +149,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   setStep(1);
                 }}
                 className={cn(
-                  "w-full rounded-md border border-border px-3 py-3 text-left hover:border-primary/50",
+                  "w-full rounded-md border border-border px-3 py-3 text-start hover:border-primary/50",
                   stage === value && "border-primary bg-primary/10",
                 )}
               >
@@ -170,7 +170,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   setStep(2);
                 }}
                 className={cn(
-                  "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:border-primary/50",
+                  "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-start text-sm hover:border-primary/50",
                   nationality === code && "border-primary bg-primary/10",
                 )}
               >
@@ -218,7 +218,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   if (value === "employed") setStep(4);
                 }}
                 className={cn(
-                  "w-full rounded-md border border-border px-3 py-2.5 text-left hover:border-primary/50",
+                  "w-full rounded-md border border-border px-3 py-2.5 text-start hover:border-primary/50",
                   incomeType === value && "border-primary bg-primary/10",
                 )}
               >
@@ -291,7 +291,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                   key={city.id}
                   onClick={() => setHomeCity(city.id)}
                   className={cn(
-                    "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:border-primary/50",
+                    "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-start text-sm hover:border-primary/50",
                     homeCity === city.id && "border-primary bg-primary/10",
                   )}
                 >

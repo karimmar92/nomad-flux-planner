@@ -140,7 +140,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <span className="label-xs">{label}</span>
-      <span className="truncate text-right">{value}</span>
+      <span className="truncate text-end">{value}</span>
     </div>
   );
 }

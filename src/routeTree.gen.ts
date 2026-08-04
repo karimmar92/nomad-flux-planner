@@ -26,6 +26,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
+import { Route as LangSplatRouteImport } from './routes/$lang.$'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
@@ -131,6 +132,11 @@ const StaysRoute = StaysRouteImport.update({
 const TrackerRoute = TrackerRouteImport.update({
   id: '/tracker',
   path: '/tracker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LangSplatRoute = LangSplatRouteImport.update({
+  id: '/$lang/$',
+  path: '/$lang/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
+  '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
+  '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
@@ -339,6 +347,7 @@ export interface FileRoutesById {
   '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
+  '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/record'
     | '/stays'
     | '/tracker'
+    | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/stays'
     | '/tracker'
+    | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/record'
     | '/stays'
     | '/tracker'
+    | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
@@ -500,6 +512,7 @@ export interface RootRouteChildren {
   RecordRoute: typeof RecordRouteWithChildren
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
+  LangSplatRoute: typeof LangSplatRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
@@ -635,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/tracker'
       fullPath: '/tracker'
       preLoaderRoute: typeof TrackerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$lang/$': {
+      id: '/$lang/$'
+      path: '/$lang/$'
+      fullPath: '/$lang/$'
+      preLoaderRoute: typeof LangSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -836,6 +856,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecordRoute: RecordRouteWithChildren,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
+  LangSplatRoute: LangSplatRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,

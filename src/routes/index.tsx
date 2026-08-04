@@ -172,12 +172,12 @@ function Explore() {
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search city or country"
-            className="w-full rounded-lg border border-input bg-surface py-2.5 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary"
+            className="w-full rounded-lg border border-input bg-surface py-2.5 ps-9 pe-3 text-sm outline-none transition-colors focus:border-primary"
           />
         </div>
         <button

@@ -1,0 +1,41 @@
+{
+  "card": {
+    "title": "Visa",
+    "touristDays": "Tourist entry: {{days}} days",
+    "ruleType": {
+      "SCHENGEN_90_180": "Schengen 90/180",
+      "FIXED_PER_ENTRY": "Fixed days per entry",
+      "ROLLING_PER_YEAR": "Rolling days per year",
+      "NOMAD_VISA": "Nomad visa route"
+    },
+    "nationalityDependent": "Visa rules vary significantly by passport — confirm for yours.",
+    "trialExpiry": "This policy is a trial currently set to expire {{date}}. Verify before booking a stay past that date.",
+    "nomadVisa": "Nomad visa",
+    "nomadVisaNone": "No dedicated nomad visa.",
+    "durationMonths": "{{count}} months",
+    "minIncome": "Minimum income",
+    "approxCost": "Typical cost",
+    "renewable": "Renewable",
+    "pathToResidency": "Path to residency",
+    "extension": "Extension"
+  },
+  "schengen": {
+    "title": "Schengen 90/180",
+    "daysUsed": "{{used}} of {{total}} days used",
+    "daysRemaining": "{{count}} days remaining today",
+    "mustExitBy": "Must exit by {{date}}",
+    "nextResetOn": "Next day returns on {{date}}",
+    "overstay": "Recorded presence exceeds the 90-day allowance.",
+    "notSchengen": "Not a Schengen country — this stay does not consume your 90/180 allowance."
+  },
+  "borderRun": {
+    "title": "Border run",
+    "subtitle": "Exit options ranked by cost and days available.",
+    "daysAvailable": "{{count}} days available",
+    "nonSchengen": "Non-Schengen"
+  },
+  "disclaimer": {
+    "visa": "Informational only. Not legal advice. Visa rules change without notice — confirm with the embassy or immigration authority of the country you are entering.",
+    "tax": "Informational only. Not tax advice. This records presence; it does not determine residency. Confirm with a qualified adviser in the relevant jurisdiction."
+  }
+}
