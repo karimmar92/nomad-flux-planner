@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
-import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -30,11 +29,6 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -68,25 +62,24 @@ const CityCityIdRoute = CityCityIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityIndexRoute = CommunityIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CommunityRoute,
+  id: '/community/',
+  path: '/community/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityPeerIdRoute = CommunityPeerIdRouteImport.update({
-  id: '/$peerId',
-  path: '/$peerId',
-  getParentRoute: () => CommunityRoute,
+  id: '/community/$peerId',
+  path: '/community/$peerId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => CommunityRoute,
+  id: '/community/requests',
+  path: '/community/requests',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
-  '/community': typeof CommunityRouteWithChildren
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -114,7 +107,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
-  '/community': typeof CommunityRouteWithChildren
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -130,7 +122,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calculator'
-    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
@@ -157,7 +148,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/calculator'
-    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
@@ -172,13 +162,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
-  CommunityRoute: typeof CommunityRouteWithChildren
   CompareRoute: typeof CompareRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   CityCityIdRoute: typeof CityCityIdRoute
+  CommunityPeerIdRoute: typeof CommunityPeerIdRoute
+  CommunityRequestsRoute: typeof CommunityRequestsRoute
+  CommunityIndexRoute: typeof CommunityIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -195,13 +187,6 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -248,55 +233,51 @@ declare module '@tanstack/react-router' {
     }
     '/community/': {
       id: '/community/'
-      path: '/'
+      path: '/community'
       fullPath: '/community/'
       preLoaderRoute: typeof CommunityIndexRouteImport
-      parentRoute: typeof CommunityRoute
+      parentRoute: typeof rootRouteImport
     }
     '/community/$peerId': {
       id: '/community/$peerId'
-      path: '/$peerId'
+      path: '/community/$peerId'
       fullPath: '/community/$peerId'
       preLoaderRoute: typeof CommunityPeerIdRouteImport
-      parentRoute: typeof CommunityRoute
+      parentRoute: typeof rootRouteImport
     }
     '/community/requests': {
       id: '/community/requests'
-      path: '/requests'
+      path: '/community/requests'
       fullPath: '/community/requests'
       preLoaderRoute: typeof CommunityRequestsRouteImport
-      parentRoute: typeof CommunityRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface CommunityRouteChildren {
-  CommunityPeerIdRoute: typeof CommunityPeerIdRoute
-  CommunityRequestsRoute: typeof CommunityRequestsRoute
-  CommunityIndexRoute: typeof CommunityIndexRoute
-}
-
-const CommunityRouteChildren: CommunityRouteChildren = {
-  CommunityPeerIdRoute: CommunityPeerIdRoute,
-  CommunityRequestsRoute: CommunityRequestsRoute,
-  CommunityIndexRoute: CommunityIndexRoute,
-}
-
-const CommunityRouteWithChildren = CommunityRoute._addFileChildren(
-  CommunityRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
-  CommunityRoute: CommunityRouteWithChildren,
   CompareRoute: CompareRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   CityCityIdRoute: CityCityIdRoute,
+  CommunityPeerIdRoute: CommunityPeerIdRoute,
+  CommunityRequestsRoute: CommunityRequestsRoute,
+  CommunityIndexRoute: CommunityIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
