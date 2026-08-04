@@ -99,7 +99,7 @@ function VaultPage() {
 
       {!signedIn ? (
         <div className="panel p-4 text-sm text-muted-foreground">
-          <Link to="/auth" className="underline">
+          <Link to="/auth" search={{ next: "/record/vault" }} className="underline">
             Sign in
           </Link>{" "}
           to store documents. They are encrypted at rest and readable only by your account.
