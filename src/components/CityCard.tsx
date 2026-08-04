@@ -53,9 +53,11 @@ export function CityCard({
       >
         <span
           aria-hidden
-          className="absolute inset-0 grid place-items-center text-5xl opacity-90 drop-shadow"
+          className="absolute inset-0 grid place-items-center"
         >
-          {flagEmoji(city.country_code)}
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/25 text-xl font-semibold text-white backdrop-blur-sm">
+            {city.country_code}
+          </span>
         </span>
         <span
           aria-hidden
