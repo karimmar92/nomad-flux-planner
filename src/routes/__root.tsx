@@ -143,8 +143,19 @@ function RootComponent() {
     void flushQueue();
     const onOnline = () => void flushQueue();
     window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
+    const offUpdate = onServiceWorkerUpdate(() => {
+      toast("New version available", {
+        description: "Reload to get the latest build.",
+        duration: Infinity,
+        action: { label: "Reload", onClick: () => window.location.reload() },
+      });
+    });
+    return () => {
+      window.removeEventListener("online", onOnline);
+      offUpdate();
+    };
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
