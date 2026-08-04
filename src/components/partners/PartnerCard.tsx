@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import {
   partnersByCategory,
+  partnersForRegion,
   partnerUrl,
   type Partner,
   type PartnerCategory,
@@ -20,17 +21,32 @@ export function PartnerCard({
   countryCode,
   citySlug,
   cityId,
+  fromCity,
+  toCity,
+  date,
   variant = "compact",
+  ctaLabel,
 }: {
   partner: Partner;
   placement: PartnerPlacement;
   countryCode?: string;
   citySlug?: string;
   cityId?: string | null;
+  /** Route context, transport partners only. */
+  fromCity?: string;
+  toCity?: string;
+  date?: string;
   /** "row" is the full-width Nomad kit treatment; "compact" is the inline card. */
   variant?: "compact" | "row";
+  ctaLabel?: string;
 }) {
-  const href = partnerUrl(partner, { countryCode: countryCode ?? "", citySlug: citySlug ?? "" });
+  const href = partnerUrl(partner, {
+    countryCode: countryCode ?? "",
+    citySlug: citySlug ?? "",
+    fromCity: fromCity ?? "",
+    toCity: toCity ?? "",
+    date: date ?? "",
+  });
   const onClick = () =>
     logPartnerClick({ partner_id: partner.id, placement, city_id: cityId ?? null });
 
@@ -51,7 +67,7 @@ export function PartnerCard({
             onClick={onClick}
             className="shrink-0 rounded-full bg-accent-positive-muted px-4 py-2 text-sm font-semibold text-accent-positive transition-colors hover:bg-accent-positive hover:text-background"
           >
-            Compare plans
+            {ctaLabel ?? "Compare plans"}
           </a>
         </div>
         <p className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground/80">

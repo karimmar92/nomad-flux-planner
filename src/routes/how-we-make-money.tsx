@@ -35,13 +35,23 @@ function HowWeMakeMoney() {
           people pay for it — that is the whole business model.
         </p>
         <p>
-          <strong>Affiliate commissions are secondary.</strong> When you buy an eSIM or an insurance
-          policy through a link here, we may earn a commission at no extra cost to you. Every such
-          link carries a visible disclosure directly beneath it.
+          <strong>Affiliate commissions are secondary.</strong> When you buy an eSIM, an insurance
+          policy or a ticket through a link here, we may earn a commission at no extra cost to you.
+          Every such link carries a visible disclosure directly beneath it.
+        </p>
+        <p>
+          <strong>Transport links follow a stricter rule.</strong> An eSIM is destination-agnostic
+          — which one you need depends on where you already decided to go. Transport is not: it
+          would pay us for you to move more often, and moving less is usually cheaper, calmer and
+          better for your work and your tax position. So transport links appear only where a move
+          is already decided or already forced by a visa deadline: the border-run planner, a trip
+          you have just saved, and the Nomad kit reference list. Never on Explore, never as a
+          route suggestion, and never in a notification. No fare alerts, ever.
         </p>
         <p>
           <strong>Commissions never affect city rankings or cost data.</strong> Explore ordering,
-          the Compare table, the arbitrage calculator and every city score are computed only from
+          the Compare table, the arbitrage calculator, the border-run ranking and every city score
+          are computed only from
           your income, your filters and our seed data. Those modules are structurally
           partner-free: no affiliate link may be rendered in them, and every affiliate URL in the
           app lives in one config file so this is verifiable rather than promised.

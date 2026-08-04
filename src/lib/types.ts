@@ -154,6 +154,12 @@ export type City = {
   visa: Visa;
   tax: Tax;
   arbitrage_note: string;
+  /** IATA code of the airport actually used to reach the city. */
+  nearest_airport_iata: string;
+  /** City ids reachable by ground transport in roughly 12 hours or less.
+   *  Deliberately conservative — an empty array falls back to air routing
+   *  rather than inventing a bus that does not exist. */
+  overland_neighbours: string[];
   last_verified: string;
   confidence: Confidence;
 };

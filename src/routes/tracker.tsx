@@ -18,7 +18,11 @@ import {
 } from "@/lib/trip-dates";
 import { CITIES } from "@/lib/cities";
 import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
-import { useTrips } from "@/lib/store";
+import { useProfile, useTrips } from "@/lib/store";
+import { buildBorderRunPlan } from "@/lib/border-run";
+import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
+import { TransportGroup } from "@/components/partners/TransportGroup";
+import { getCity } from "@/lib/cities";
 import { flagEmoji } from "@/lib/arbitrage";
 import { EmptyState, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
@@ -85,6 +89,7 @@ const PALETTE = [
 
 function Tracker() {
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
+  const { profile } = useProfile();
   const today = useMemo(() => todayIso(), []);
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
   const [justAdded, setJustAdded] = useState<Trip | null>(null);
@@ -97,6 +102,20 @@ function Tracker() {
     [engineTrips, plannedEntry],
   );
   const plannerLastDay = plannerDays > 0 ? addDaysIso(plannedEntry, plannerDays - 1) : null;
+
+  // Border-run planner. Deadline-triggered only — never a speculative prompt.
+  const borderRun = useMemo(
+    () =>
+      buildBorderRunPlan({
+        trips,
+        today,
+        profile: {
+          monthly_income_usd: profile.monthly_income_usd,
+          home_city_id: profile.home_city_id,
+        },
+      }),
+    [trips, today, profile.monthly_income_usd, profile.home_city_id],
+  );
 
   const countries = Array.from(new Set(trips.map((t) => t.country_code)));
   const colorFor = (code: string) =>
@@ -153,6 +172,10 @@ function Tracker() {
             </div>
           ))}
         </div>
+      ) : null}
+
+      {borderRun ? (
+        <BorderRunCard plan={borderRun} isPro={profile.plan === "pro"} />
       ) : null}
 
       {/* Schengen engine */}
@@ -264,7 +287,14 @@ function Tracker() {
       />
 
       {justAdded ? (
-        <TripConfirmKit trip={justAdded} onDismiss={() => setJustAdded(null)} />
+        <TripConfirmKit
+          trip={justAdded}
+          originCityName={
+            (currentTripCity(trips, today) ??
+              (profile.home_city_id ? getCity(profile.home_city_id)?.city : undefined)) ?? null
+          }
+          onDismiss={() => setJustAdded(null)}
+        />
       ) : null}
 
       <section className="space-y-2">
@@ -468,7 +498,24 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
  * Highest-intent moment in the app: a future trip was just logged. Shown once,
  * dismissible, and only for future entry dates.
  */
-function TripConfirmKit({ trip, onDismiss }: { trip: Trip; onDismiss: () => void }) {
+/** City the user is in right now, used as the origin for a booked journey. */
+function currentTripCity(trips: Trip[], today: string): string | null {
+  const open = trips.find(
+    (t) => t.entry_date <= today && (t.exit_date === null || t.exit_date >= today),
+  );
+  return open?.city_id ? (getCity(open.city_id)?.city ?? null) : null;
+}
+
+function TripConfirmKit({
+  trip,
+  originCityName,
+  onDismiss,
+}: {
+  trip: Trip;
+  originCityName: string | null;
+  onDismiss: () => void;
+}) {
+  const destination = trip.city_id ? getCity(trip.city_id) : undefined;
   const parts = trip.entry_date.split("-").map(Number) as [number, number, number];
   const label = new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
@@ -510,6 +557,19 @@ function TripConfirmKit({ trip, onDismiss }: { trip: Trip; onDismiss: () => void
           countryCode={trip.country_code}
           cityId={trip.city_id}
         />
+        {/* Transport is permitted here: the trip is already saved, with a
+            future entry date and a known origin. The decision is made. */}
+        {originCityName && destination ? (
+          <TransportGroup
+            placement="trip_confirm"
+            region={destination.region}
+            fromCity={originCityName}
+            toCity={destination.city}
+            date={trip.entry_date}
+            cityId={trip.city_id}
+            title={`Getting there — ${originCityName} → ${destination.city}`}
+          />
+        ) : null}
       </div>
     </section>
   );

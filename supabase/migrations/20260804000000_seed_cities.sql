@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS public.cities (
   visa jsonb NOT NULL,
   tax jsonb NOT NULL,
   arbitrage_note text NOT NULL,
+  nearest_airport_iata text,
+  overland_neighbours text[] NOT NULL DEFAULT '{}',
   last_verified date NOT NULL,
   confidence text NOT NULL CHECK (confidence IN ('low','medium','high')),
   created_at timestamptz NOT NULL DEFAULT now()
@@ -75,3 +77,32 @@ ON CONFLICT (id) DO UPDATE SET
   arbitrage_note = EXCLUDED.arbitrage_note,
   last_verified = EXCLUDED.last_verified,
   confidence = EXCLUDED.confidence;
+
+-- Airport + conservative overland-neighbour graph for the border-run planner.
+-- Empty arrays are deliberate: an unknown ground route must fall back to air
+-- routing rather than inventing a bus that does not exist.
+UPDATE public.cities SET nearest_airport_iata = 'LIS', overland_neighbours = '{}'::text[] WHERE id = 'lisbon-pt';
+UPDATE public.cities SET nearest_airport_iata = 'CNX', overland_neighbours = ARRAY['bangkok-th']::text[] WHERE id = 'chiang-mai-th';
+UPDATE public.cities SET nearest_airport_iata = 'BKK', overland_neighbours = ARRAY['chiang-mai-th','ho-chi-minh-vn']::text[] WHERE id = 'bangkok-th';
+UPDATE public.cities SET nearest_airport_iata = 'MEX', overland_neighbours = '{}'::text[] WHERE id = 'mexico-city-mx';
+UPDATE public.cities SET nearest_airport_iata = 'MDE', overland_neighbours = '{}'::text[] WHERE id = 'medellin-co';
+UPDATE public.cities SET nearest_airport_iata = 'EZE', overland_neighbours = '{}'::text[] WHERE id = 'buenos-aires-ar';
+UPDATE public.cities SET nearest_airport_iata = 'DPS', overland_neighbours = '{}'::text[] WHERE id = 'bali-id';
+UPDATE public.cities SET nearest_airport_iata = 'TBS', overland_neighbours = '{}'::text[] WHERE id = 'tbilisi-ge';
+UPDATE public.cities SET nearest_airport_iata = 'BUD', overland_neighbours = ARRAY['belgrade-rs','prague-cz']::text[] WHERE id = 'budapest-hu';
+UPDATE public.cities SET nearest_airport_iata = 'BEG', overland_neighbours = ARRAY['budapest-hu','tirana-al']::text[] WHERE id = 'belgrade-rs';
+UPDATE public.cities SET nearest_airport_iata = 'IST', overland_neighbours = '{}'::text[] WHERE id = 'istanbul-tr';
+UPDATE public.cities SET nearest_airport_iata = 'WAW', overland_neighbours = ARRAY['prague-cz']::text[] WHERE id = 'warsaw-pl';
+UPDATE public.cities SET nearest_airport_iata = 'PRG', overland_neighbours = ARRAY['budapest-hu','warsaw-pl']::text[] WHERE id = 'prague-cz';
+UPDATE public.cities SET nearest_airport_iata = 'LPA', overland_neighbours = '{}'::text[] WHERE id = 'las-palmas-es';
+UPDATE public.cities SET nearest_airport_iata = 'ATH', overland_neighbours = '{}'::text[] WHERE id = 'athens-gr';
+UPDATE public.cities SET nearest_airport_iata = 'TLL', overland_neighbours = '{}'::text[] WHERE id = 'tallinn-ee';
+UPDATE public.cities SET nearest_airport_iata = 'DXB', overland_neighbours = '{}'::text[] WHERE id = 'dubai-ae';
+UPDATE public.cities SET nearest_airport_iata = 'KUL', overland_neighbours = '{}'::text[] WHERE id = 'kuala-lumpur-my';
+UPDATE public.cities SET nearest_airport_iata = 'SGN', overland_neighbours = ARRAY['bangkok-th']::text[] WHERE id = 'ho-chi-minh-vn';
+UPDATE public.cities SET nearest_airport_iata = 'TPE', overland_neighbours = '{}'::text[] WHERE id = 'taipei-tw';
+UPDATE public.cities SET nearest_airport_iata = 'ICN', overland_neighbours = '{}'::text[] WHERE id = 'seoul-kr';
+UPDATE public.cities SET nearest_airport_iata = 'CPT', overland_neighbours = '{}'::text[] WHERE id = 'cape-town-za';
+UPDATE public.cities SET nearest_airport_iata = 'MRU', overland_neighbours = '{}'::text[] WHERE id = 'mauritius-mu';
+UPDATE public.cities SET nearest_airport_iata = 'TIA', overland_neighbours = ARRAY['belgrade-rs']::text[] WHERE id = 'tirana-al';
+UPDATE public.cities SET nearest_airport_iata = 'CUN', overland_neighbours = '{}'::text[] WHERE id = 'playa-del-carmen-mx';

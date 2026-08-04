@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
+import { TransportGroup } from "@/components/partners/TransportGroup";
 import { APP_NAME } from "@/lib/app";
 
 export const Route = createFileRoute("/kit")({
   head: () => ({
     meta: [
-      { title: `Nomad kit — eSIM and insurance | ${APP_NAME}` },
+      { title: `Nomad kit — eSIM, insurance and transport | ${APP_NAME}` },
       {
         name: "description",
         content:
@@ -70,10 +71,20 @@ function KitPage() {
         />
       </div>
 
+      <div className="space-y-3">
+        {/* Reference list, not a prompt: no origin, no dates, no fares. */}
+        <TransportGroup placement="kit_page" variant="row" title="Getting there" />
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Listed for when you already know you&apos;re moving. We never suggest a journey you
+          weren&apos;t going to make — no route ideas on Explore, no fare alerts.
+        </p>
+      </div>
+
       <footer className="space-y-2 border-t border-border pt-4">
         <p className="text-xs leading-relaxed text-muted-foreground">
-          We only earn from eSIM and insurance links. Commissions never affect city rankings or
-          cost data.
+          We only earn from eSIM, insurance and transport links. Commissions never affect city
+          rankings or cost data, and transport links only appear once a move is already decided
+          or forced by a visa deadline.
         </p>
         <Link
           to="/how-we-make-money"
