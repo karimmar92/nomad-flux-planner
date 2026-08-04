@@ -34,6 +34,7 @@ import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
+import { Route as PlanIndexRouteImport } from './routes/plan.index'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
@@ -170,6 +171,11 @@ const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   path: '/community/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanIndexRoute = PlanIndexRouteImport.update({
+  id: '/plan/',
+  path: '/plan/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
+  '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/setup/company': typeof SetupCompanyRoute
   '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
+  '/plan': typeof PlanIndexRoute
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
+  '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/setup/company'
     | '/business/'
     | '/community/'
+    | '/plan/'
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/setup/company'
     | '/business'
     | '/community'
+    | '/plan'
     | '/record'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/setup/company'
     | '/business/'
     | '/community/'
+    | '/plan/'
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -452,6 +464,7 @@ export interface RootRouteChildren {
   SetupCompanyRoute: typeof SetupCompanyRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
+  PlanIndexRoute: typeof PlanIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
@@ -634,6 +647,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plan/': {
+      id: '/plan/'
+      path: '/plan'
+      fullPath: '/plan/'
+      preLoaderRoute: typeof PlanIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/record/': {
       id: '/record/'
       path: '/'
@@ -737,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupCompanyRoute: SetupCompanyRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
+  PlanIndexRoute: PlanIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
