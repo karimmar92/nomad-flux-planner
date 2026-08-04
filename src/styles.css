@@ -73,6 +73,13 @@
   --positive: oklch(0.8 0.15 78);
   --positive-muted: oklch(0.8 0.15 78 / 12%);
   --warning: oklch(0.78 0.13 60);
+
+  /* Partner / kit accents — semantic, never hardcoded in components. */
+  --accent-positive: oklch(0.8 0.15 160);
+  --accent-positive-muted: oklch(0.8 0.15 160 / 14%);
+  --accent-warning: oklch(0.83 0.14 85);
+  --accent-warning-muted: oklch(0.83 0.14 85 / 14%);
+
   --negative: oklch(0.62 0.16 22);
   --negative-muted: oklch(0.62 0.16 22 / 14%);
   --destructive: oklch(0.62 0.16 22);
