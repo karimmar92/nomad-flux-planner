@@ -32,6 +32,7 @@ import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
+import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
@@ -154,6 +155,11 @@ const RecordIndexRoute = RecordIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RecordRoute,
 } as any)
+const RecordVaultRoute = RecordVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => RecordRoute,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community': typeof CommunityIndexRoute
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community'
     | '/record'
     | '/.lovable/oauth/consent'
@@ -344,6 +355,7 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -543,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordIndexRouteImport
       parentRoute: typeof RecordRoute
     }
+    '/record/vault': {
+      id: '/record/vault'
+      path: '/vault'
+      fullPath: '/record/vault'
+      preLoaderRoute: typeof RecordVaultRouteImport
+      parentRoute: typeof RecordRoute
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -575,11 +594,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface RecordRouteChildren {
+  RecordVaultRoute: typeof RecordVaultRoute
   RecordIndexRoute: typeof RecordIndexRoute
   RecordReportYearRoute: typeof RecordReportYearRoute
 }
 
 const RecordRouteChildren: RecordRouteChildren = {
+  RecordVaultRoute: RecordVaultRoute,
   RecordIndexRoute: RecordIndexRoute,
   RecordReportYearRoute: RecordReportYearRoute,
 }
