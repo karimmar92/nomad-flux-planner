@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { idbSet } from "../offline/idb";
 import { enqueue } from "../offline/sync-queue";
-import { toDayIndex, todayIso } from "../trip-dates";
+import { todayIso } from "../trip-dates";
+import { toDayIndex } from "../schengen";
 
 /**
  * The "before you go" plan. One per user — someone only leaves for the first
