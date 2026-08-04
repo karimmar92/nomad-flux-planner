@@ -7,7 +7,6 @@ import {
   rankExitOptions,
 } from "./border-run";
 import { getCity } from "./cities";
-import { SCHENGEN_COUNTRIES } from "./schengen";
 import type { Trip } from "./types";
 
 const trip = (over: Partial<Trip>): Trip => ({
