@@ -6,7 +6,7 @@ create table if not exists public.partner_clicks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete set null,
   partner_id text not null,
-  placement text not null check (placement in ('city_detail', 'trip_confirm', 'visa_card', 'kit_page', 'border_run')),
+  placement text not null check (placement in ('city_detail', 'trip_confirm', 'visa_card', 'kit_page', 'border_run', 'onboarding')),
   city_id text,
   created_at timestamptz not null default now()
 );
