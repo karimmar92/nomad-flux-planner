@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS public.cities (
   visa jsonb NOT NULL,
   tax jsonb NOT NULL,
   arbitrage_note text NOT NULL,
+  nearest_airport_iata text,
+  overland_neighbours text[] NOT NULL DEFAULT '{}',
   last_verified date NOT NULL,
   confidence text NOT NULL CHECK (confidence IN ('low','medium','high')),
   created_at timestamptz NOT NULL DEFAULT now()
