@@ -41,6 +41,8 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const [nationality, setNationality] = useState(profile.nationality);
   const [income, setIncome] = useState<string>(profile.monthly_income_usd?.toString() ?? "");
   const [incomeType, setIncomeType] = useState<IncomeType>(profile.income_type);
+  const [bankingDismissed, setBankingDismissed] = useState(false);
+
   const [homeCity, setHomeCity] = useState<string | null>(profile.home_city_id);
 
   const finish = (skipped: boolean) => {
