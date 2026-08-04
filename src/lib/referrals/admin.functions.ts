@@ -36,7 +36,7 @@ export type AdminOverview = {
     creator_id: string | null;
     kind: string;
     severity: string;
-    detail: Record<string, unknown>;
+    detail: Record<string, number | string>;
     status: string;
     created_at: string;
   }[];
