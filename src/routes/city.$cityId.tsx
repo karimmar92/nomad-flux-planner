@@ -14,7 +14,13 @@ import {
   touristDaysFor,
   touristDaysWithExtension,
 } from "@/lib/arbitrage";
-import { SCORE_LABELS, SCORE_MAX, VISA_RULE_DESCRIPTIONS, VISA_RULE_LABELS } from "@/lib/types";
+import {
+  SCORE_LABELS,
+  SCORE_MAX,
+  VISA_RULE_DESCRIPTIONS,
+  VISA_RULE_LABELS,
+  type VisaRuleType,
+} from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -62,6 +68,7 @@ function CityDetail() {
   const nomadIncome = nomadIncomeMonthly(city);
   const clearsIncome = nomadIncome != null ? (income ?? 0) >= nomadIncome : false;
   const schengen = isSchengenCity(city);
+  const ruleType = city.visa.ruleType as VisaRuleType;
   const lines = costLines(city);
   const maxLine = Math.max(...lines.map((l) => l.amount));
   const taxWarning = taxYearWarning(city);
@@ -296,10 +303,10 @@ function CityDetail() {
                   : "No standard extension"
               }
             />
-            <Stat label="Rule" value={VISA_RULE_LABELS[city.visa.ruleType]} size="sm" />
+            <Stat label="Rule" value={VISA_RULE_LABELS[ruleType]} size="sm" />
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            {VISA_RULE_DESCRIPTIONS[city.visa.ruleType]}
+            {VISA_RULE_DESCRIPTIONS[ruleType]}
           </p>
           {city.visa.maxDaysPerCalendarYear ? (
             <p className="mt-2 text-sm text-muted-foreground">
