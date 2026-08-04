@@ -11,13 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
-import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
+import { Route as CommunityIndexRouteImport } from './routes/community.index'
+import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
+import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -27,11 +29,6 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -64,87 +61,116 @@ const CityCityIdRoute = CityCityIdRouteImport.update({
   path: '/city/$cityId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityIndexRoute = CommunityIndexRouteImport.update({
+  id: '/community/',
+  path: '/community/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityPeerIdRoute = CommunityPeerIdRouteImport.update({
+  id: '/community/$peerId',
+  path: '/community/$peerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
+  id: '/community/requests',
+  path: '/community/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
-  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
+  '/community/': typeof CommunityIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
-  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
+  '/community': typeof CommunityIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
-  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
+  '/community/': typeof CommunityIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/calculator'
-    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
+    | '/community/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculator'
-    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
+    | '/community'
   id:
     | '__root__'
     | '/'
     | '/calculator'
-    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
+    | '/community/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
-  CommunityRoute: typeof CommunityRoute
   CompareRoute: typeof CompareRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   CityCityIdRoute: typeof CityCityIdRoute
+  CommunityPeerIdRoute: typeof CommunityPeerIdRoute
+  CommunityRequestsRoute: typeof CommunityRequestsRoute
+  CommunityIndexRoute: typeof CommunityIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -161,13 +187,6 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -212,30 +231,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CityCityIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community/': {
+      id: '/community/'
+      path: '/community'
+      fullPath: '/community/'
+      preLoaderRoute: typeof CommunityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/$peerId': {
+      id: '/community/$peerId'
+      path: '/community/$peerId'
+      fullPath: '/community/$peerId'
+      preLoaderRoute: typeof CommunityPeerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/requests': {
+      id: '/community/requests'
+      path: '/community/requests'
+      fullPath: '/community/requests'
+      preLoaderRoute: typeof CommunityRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
-  CommunityRoute: CommunityRoute,
   CompareRoute: CompareRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   CityCityIdRoute: CityCityIdRoute,
+  CommunityPeerIdRoute: CommunityPeerIdRoute,
+  CommunityRequestsRoute: CommunityRequestsRoute,
+  CommunityIndexRoute: CommunityIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
