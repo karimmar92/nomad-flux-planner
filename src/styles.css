@@ -41,6 +41,10 @@
   --color-negative-muted: var(--negative-muted);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-accent-positive: var(--accent-positive);
+  --color-accent-positive-muted: var(--accent-positive-muted);
+  --color-accent-warning: var(--accent-warning);
+  --color-accent-warning-muted: var(--accent-warning-muted);
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
@@ -69,6 +73,13 @@
   --positive: oklch(0.8 0.15 78);
   --positive-muted: oklch(0.8 0.15 78 / 12%);
   --warning: oklch(0.78 0.13 60);
+
+  /* Partner / kit accents — semantic, never hardcoded in components. */
+  --accent-positive: oklch(0.8 0.15 160);
+  --accent-positive-muted: oklch(0.8 0.15 160 / 14%);
+  --accent-warning: oklch(0.83 0.14 85);
+  --accent-warning-muted: oklch(0.83 0.14 85 / 14%);
+
   --negative: oklch(0.62 0.16 22);
   --negative-muted: oklch(0.62 0.16 22 / 14%);
   --destructive: oklch(0.62 0.16 22);
@@ -101,6 +112,12 @@
   --positive: oklch(0.55 0.14 62);
   --positive-muted: oklch(0.55 0.14 62 / 12%);
   --warning: oklch(0.62 0.14 62);
+
+  --accent-positive: oklch(0.52 0.13 162);
+  --accent-positive-muted: oklch(0.52 0.13 162 / 12%);
+  --accent-warning: oklch(0.62 0.13 78);
+  --accent-warning-muted: oklch(0.62 0.13 78 / 14%);
+
   --negative: oklch(0.52 0.19 25);
   --negative-muted: oklch(0.52 0.19 25 / 12%);
   --destructive: oklch(0.52 0.19 25);
