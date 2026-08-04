@@ -128,8 +128,9 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Numbers are the hero: tabular everywhere they appear. */
+  /* Numbers are the hero: tabular mono everywhere they appear. */
   .num {
+    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
