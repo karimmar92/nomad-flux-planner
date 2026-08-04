@@ -119,8 +119,8 @@ function Explore() {
         />
       ) : null}
 
-      {/* Hero stat panel — mirrors the tracker dashboard's big-number card */}
-      <section className="panel overflow-hidden">
+      {/* Hero stat panel — soft card, big number */}
+      <section className="overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <span className="label-xs">Arbitrage overview</span>
           <span className="label-xs">
@@ -161,7 +161,7 @@ function Explore() {
               </p>
               <Link
                 to="/profile"
-                className="mt-4 inline-flex rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground"
+                className="mt-4 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
               >
                 Enter income
               </Link>
@@ -172,25 +172,62 @@ function Explore() {
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute start-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search city or country"
-            className="w-full rounded-lg border border-input bg-surface py-2.5 ps-9 pe-3 text-sm outline-none transition-colors focus:border-primary"
+            placeholder={`Search ${CITIES.length} cities`}
+            className="w-full rounded-full border border-border bg-card py-3 ps-11 pe-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors focus:border-primary"
           />
         </div>
         <button
           onClick={() => setFiltersOpen((v) => !v)}
+          aria-label="Filters"
           className={cn(
-            "flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm transition-colors",
-            filtersOpen && "border-primary bg-primary/10 text-primary",
+            "grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors",
+            filtersOpen && "border-primary bg-primary text-primary-foreground",
           )}
         >
           <SlidersHorizontal className="h-4 w-4" />
-          Filters
         </button>
       </div>
+
+      {/* Quick chips — same state as the full filter panel, no separate logic */}
+      <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+        <QuickChip
+          active={!nomadOnly && !outsideSchengen && maxBudget >= 5000 && region === "all"}
+          onClick={() => {
+            setNomadOnly(false);
+            setOutsideSchengen(false);
+            setMaxBudget(5000);
+            setRegion("all");
+          }}
+        >
+          All
+        </QuickChip>
+        <QuickChip
+          active={maxBudget <= 1500}
+          onClick={() => setMaxBudget(maxBudget <= 1500 ? 5000 : 1500)}
+        >
+          Under {formatUsd(1500)}
+        </QuickChip>
+        <QuickChip active={nomadOnly} onClick={() => setNomadOnly((v) => !v)}>
+          Nomad visa
+        </QuickChip>
+        <QuickChip active={outsideSchengen} onClick={() => setOutsideSchengen((v) => !v)}>
+          Non-Schengen
+        </QuickChip>
+        {REGIONS.map((r) => (
+          <QuickChip
+            key={r}
+            active={region === r}
+            onClick={() => setRegion(region === r ? "all" : r)}
+          >
+            {r}
+          </QuickChip>
+        ))}
+      </div>
+
 
       {filtersOpen ? (
         <div className="panel grid gap-5 p-4 sm:grid-cols-2">
