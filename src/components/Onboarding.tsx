@@ -34,10 +34,19 @@ const INCOME_TYPES: [IncomeType, string, string][] = [
   ["founder", "Founder", "Own company, variable draw"],
 ];
 
-/** Four-step, skippable first-run flow. Writes straight into the profile. */
+const STEP_TITLES = [
+  "Where are you now?",
+  "Your passport",
+  "Your income",
+  "How you earn",
+  "Where you live",
+];
+
+/** Five-step, skippable first-run flow. Writes straight into the profile. */
 export function Onboarding({ onDone }: { onDone: () => void }) {
   const { profile, patchProfile } = useProfile();
   const [step, setStep] = useState(0);
+  const [stage, setStage] = useState<UserStage>(profile.stage);
   const [nationality, setNationality] = useState(profile.nationality);
   const [income, setIncome] = useState<string>(profile.monthly_income_usd?.toString() ?? "");
   const [incomeType, setIncomeType] = useState<IncomeType>(profile.income_type);
@@ -48,8 +57,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const finish = (skipped: boolean) => {
     patchProfile(
       skipped
-        ? { onboarded: true }
+        ? { stage, onboarded: true }
         : {
+            stage,
             nationality,
             monthly_income_usd: income ? Number(income) : null,
             income_type: incomeType,
@@ -66,10 +76,10 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="label-xs">
-              {APP_NAME} · step {step + 1} of 4
+              {APP_NAME} · step {step + 1} of {STEP_TITLES.length}
             </p>
             <h2 className="text-lg font-semibold">
-              {["Your passport", "Your income", "How you earn", "Where you are now"][step]}
+              {STEP_TITLES[step]}
             </h2>
           </div>
           <button
@@ -81,7 +91,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         </div>
 
         <div className="mb-5 flex gap-1">
-          {[0, 1, 2, 3].map((i) => (
+          {STEP_TITLES.map((_, i) => (
             <div
               key={i}
               className={cn("h-1 flex-1 rounded-full", i <= step ? "bg-primary" : "bg-surface-2")}
@@ -90,13 +100,51 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         </div>
 
         {step === 0 ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              The app works differently depending on where you are in this. Both paths are free to
+              switch between later.
+            </p>
+            {(
+              [
+                [
+                  "abroad",
+                  "I'm already living abroad",
+                  "Day counters, visa deadlines and your record of presence.",
+                ],
+                [
+                  "planning",
+                  "I'm planning my first move",
+                  "Runway, where to start, and the countdown to departure.",
+                ],
+              ] as [UserStage, string, string][]
+            ).map(([value, label, blurb]) => (
+              <button
+                key={value}
+                onClick={() => {
+                  setStage(value);
+                  setStep(1);
+                }}
+                className={cn(
+                  "w-full rounded-md border border-border px-3 py-3 text-left hover:border-primary/50",
+                  stage === value && "border-primary bg-primary/10",
+                )}
+              >
+                <span className="block text-sm font-medium">{label}</span>
+                <span className="block text-xs text-muted-foreground">{blurb}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {step === 1 ? (
           <div className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto">
             {NATIONALITIES.map(([code, name]) => (
               <button
                 key={code}
                 onClick={() => {
                   setNationality(code);
-                  setStep(1);
+                  setStep(2);
                 }}
                 className={cn(
                   "flex items-center gap-2 rounded-md border border-border px-3 py-2 text-left text-sm hover:border-primary/50",
@@ -110,7 +158,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           </div>
         ) : null}
 
-        {step === 1 ? (
+        {step === 2 ? (
           <div>
             <label className="label-xs" htmlFor="ob-income">
               Monthly income (USD)

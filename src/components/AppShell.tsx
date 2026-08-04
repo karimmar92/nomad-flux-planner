@@ -9,12 +9,13 @@ import {
   Sun,
   Tag,
   UserRound,
+  PlaneTakeoff,
 } from "lucide-react";
 import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
-import { useTheme } from "@/lib/store";
+import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
