@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   CalendarClock,
   Compass,
+  FolderLock,
   Calculator,
   GitCompareArrows,
   Moon,
@@ -22,6 +23,7 @@ const NAV = [
   { to: "/calculator", label: "Arbitrage", icon: Calculator },
   { to: "/compare", label: "Compare", icon: GitCompareArrows },
   { to: "/tracker", label: "Tracker", icon: CalendarClock },
+  { to: "/record", label: "Record", icon: FolderLock },
   { to: "/pricing", label: "Pricing", icon: Tag },
 ] as const;
 
@@ -104,7 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-6 border-t border-border bg-background/95 backdrop-blur md:hidden">
         {NAV.map((item) => (
           <Link
             key={item.to}

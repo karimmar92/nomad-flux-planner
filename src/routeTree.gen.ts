@@ -21,6 +21,7 @@ import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RecordRouteImport } from './routes/record'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -30,8 +31,11 @@ import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
+import { Route as RecordIndexRouteImport } from './routes/record.index'
+import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
 import { Route as ApiPublicWebhooksStripeRouteImport } from './routes/api/public/webhooks/stripe'
 
 const IndexRoute = IndexRouteImport.update({
@@ -94,6 +98,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordRoute = RecordRouteImport.update({
+  id: '/record',
+  path: '/record',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaysRoute = StaysRouteImport.update({
   id: '/stays',
   path: '/stays',
@@ -141,6 +150,16 @@ const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   path: '/community/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordIndexRoute = RecordIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RecordRoute,
+} as any)
+const RecordVaultRoute = RecordVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => RecordRoute,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -152,6 +171,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const RecordReportYearRoute = RecordReportYearRouteImport.update({
+  id: '/report/$year',
+  path: '/report/$year',
+  getParentRoute: () => RecordRoute,
+} as any)
 const ApiPublicWebhooksStripeRoute = ApiPublicWebhooksStripeRouteImport.update({
   id: '/api/public/webhooks/stripe',
   path: '/api/public/webhooks/stripe',
@@ -171,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -179,9 +204,12 @@ export interface FileRoutesByFullPath {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community/': typeof CommunityIndexRoute
+  '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesByTo {
@@ -205,9 +233,12 @@ export interface FileRoutesByTo {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community': typeof CommunityIndexRoute
+  '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRoutesById {
@@ -224,6 +255,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/record': typeof RecordRouteWithChildren
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -232,9 +264,12 @@ export interface FileRoutesById {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/record/vault': typeof RecordVaultRoute
   '/community/': typeof CommunityIndexRoute
+  '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/record/report/$year': typeof RecordReportYearRoute
   '/api/public/webhooks/stripe': typeof ApiPublicWebhooksStripeRoute
 }
 export interface FileRouteTypes {
@@ -252,6 +287,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
+    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -260,9 +296,12 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community/'
+    | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -286,9 +325,12 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community'
+    | '/record'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   id:
     | '__root__'
@@ -304,6 +346,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/pricing'
     | '/profile'
+    | '/record'
     | '/stays'
     | '/tracker'
     | '/.mcp/list-tools'
@@ -312,9 +355,12 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/record/vault'
     | '/community/'
+    | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/record/report/$year'
     | '/api/public/webhooks/stripe'
   fileRoutesById: FileRoutesById
 }
@@ -331,6 +377,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
+  RecordRoute: typeof RecordRouteWithChildren
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -431,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/record': {
+      id: '/record'
+      path: '/record'
+      fullPath: '/record'
+      preLoaderRoute: typeof RecordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stays': {
       id: '/stays'
       path: '/stays'
@@ -494,6 +548,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/record/': {
+      id: '/record/'
+      path: '/'
+      fullPath: '/record/'
+      preLoaderRoute: typeof RecordIndexRouteImport
+      parentRoute: typeof RecordRoute
+    }
+    '/record/vault': {
+      id: '/record/vault'
+      path: '/vault'
+      fullPath: '/record/vault'
+      preLoaderRoute: typeof RecordVaultRouteImport
+      parentRoute: typeof RecordRoute
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -508,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/record/report/$year': {
+      id: '/record/report/$year'
+      path: '/report/$year'
+      fullPath: '/record/report/$year'
+      preLoaderRoute: typeof RecordReportYearRouteImport
+      parentRoute: typeof RecordRoute
+    }
     '/api/public/webhooks/stripe': {
       id: '/api/public/webhooks/stripe'
       path: '/api/public/webhooks/stripe'
@@ -517,6 +592,21 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface RecordRouteChildren {
+  RecordVaultRoute: typeof RecordVaultRoute
+  RecordIndexRoute: typeof RecordIndexRoute
+  RecordReportYearRoute: typeof RecordReportYearRoute
+}
+
+const RecordRouteChildren: RecordRouteChildren = {
+  RecordVaultRoute: RecordVaultRoute,
+  RecordIndexRoute: RecordIndexRoute,
+  RecordReportYearRoute: RecordReportYearRoute,
+}
+
+const RecordRouteWithChildren =
+  RecordRoute._addFileChildren(RecordRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -531,6 +621,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
+  RecordRoute: RecordRouteWithChildren,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
