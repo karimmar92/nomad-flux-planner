@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_SCRIPT = `try{var t=JSON.parse(localStorage.getItem('driftly.theme')||'"dark"');document.documentElement.classList.add(t==='light'?'light':'dark')}catch(e){document.documentElement.classList.add('dark')}`;
+const THEME_SCRIPT = `try{var t=JSON.parse(localStorage.getItem('driftly.theme')||'"light"');document.documentElement.classList.add(t==='dark'?'dark':'light')}catch(e){document.documentElement.classList.add('light')}`;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (

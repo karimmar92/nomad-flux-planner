@@ -116,10 +116,10 @@ export function useSavedCities() {
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
-    const stored = (read<string>(KEYS.theme, "dark") as "dark" | "light") ?? "dark";
+    const stored = (read<string>(KEYS.theme, "light") as "dark" | "light") ?? "light";
     setTheme(stored);
   }, []);
 

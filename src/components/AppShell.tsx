@@ -59,13 +59,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <OfflineBanner />
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded bg-primary text-[13px] font-bold text-primary-foreground">
-              {APP_NAME.charAt(0)}
-            </span>
-            <span className="text-sm font-semibold tracking-tight">{APP_NAME}</span>
+            <span className="text-xl font-bold tracking-tight text-primary">{APP_NAME}</span>
           </Link>
+
 
           <nav className="ms-4 hidden items-center gap-1 md:flex">
             {NAV.map((item) => (
@@ -146,20 +144,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-6 border-t border-border bg-background/95 backdrop-blur md:hidden">
+      <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-2xl border border-border bg-card/95 px-1 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur md:hidden">
         {NAV.map((item) => (
           <Link
             key={item.to}
             to={item.to}
             className={cn(
-              "flex flex-col items-center gap-0.5 py-2 text-[10px] text-muted-foreground",
+              "flex flex-1 flex-col items-center gap-1 rounded-xl py-1 text-[10px] text-muted-foreground",
             )}
-            activeProps={{ className: "text-primary" }}
+            activeProps={{ className: "text-primary font-medium [&>span]:bg-primary/10" }}
             activeOptions={{ exact: item.to === "/" }}
           >
-            <item.icon className="h-4 w-4" />
+            <span className="grid h-7 w-7 place-items-center rounded-full">
+              <item.icon className="h-4 w-4" />
+            </span>
             {t(item.labelKey)}
           </Link>
+
         ))}
       </nav>
     </div>
