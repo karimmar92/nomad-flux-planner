@@ -100,42 +100,44 @@
 }
 
 .light {
-  --background: oklch(0.98 0.004 250);
-  --foreground: oklch(0.2 0.025 264);
+  /* Warm cream paper, deep clay-red brand, blue for money kept. */
+  --background: oklch(0.968 0.012 60);
+  --foreground: oklch(0.26 0.02 45);
   --surface: oklch(1 0 0);
-  --surface-2: oklch(0.96 0.005 250);
+  --surface-2: oklch(0.965 0.014 62);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.025 264);
+  --card-foreground: oklch(0.26 0.02 45);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.025 264);
+  --popover-foreground: oklch(0.26 0.02 45);
 
-  --primary: oklch(0.62 0.15 55);
-  --primary-foreground: oklch(0.99 0.004 250);
-  --secondary: oklch(0.95 0.006 250);
-  --secondary-foreground: oklch(0.24 0.025 264);
-  --muted: oklch(0.95 0.006 250);
-  --muted-foreground: oklch(0.48 0.02 258);
-  --accent: oklch(0.94 0.008 250);
-  --accent-foreground: oklch(0.24 0.025 264);
+  --primary: oklch(0.45 0.15 32);
+  --primary-foreground: oklch(0.985 0.008 60);
+  --secondary: oklch(0.955 0.016 62);
+  --secondary-foreground: oklch(0.3 0.02 45);
+  --muted: oklch(0.955 0.016 62);
+  --muted-foreground: oklch(0.56 0.02 50);
+  --accent: oklch(0.94 0.02 60);
+  --accent-foreground: oklch(0.3 0.02 45);
 
-  --positive: oklch(0.55 0.14 62);
-  --positive-muted: oklch(0.55 0.14 62 / 12%);
-  --warning: oklch(0.62 0.14 62);
+  --positive: oklch(0.55 0.17 253);
+  --positive-muted: oklch(0.55 0.17 253 / 10%);
+  --warning: oklch(0.66 0.14 70);
 
   --accent-positive: oklch(0.52 0.13 162);
   --accent-positive-muted: oklch(0.52 0.13 162 / 12%);
   --accent-warning: oklch(0.62 0.13 78);
   --accent-warning-muted: oklch(0.62 0.13 78 / 14%);
 
-  --negative: oklch(0.52 0.19 25);
-  --negative-muted: oklch(0.52 0.19 25 / 12%);
-  --destructive: oklch(0.52 0.19 25);
+  --negative: oklch(0.55 0.19 27);
+  --negative-muted: oklch(0.55 0.19 27 / 10%);
+  --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.99 0.004 250);
 
-  --border: oklch(0.9 0.007 250);
-  --input: oklch(0.9 0.007 250);
-  --ring: oklch(0.62 0.15 55 / 45%);
+  --border: oklch(0.915 0.014 62);
+  --input: oklch(0.915 0.014 62);
+  --ring: oklch(0.45 0.15 32 / 40%);
 }
+
 
 @layer base {
   * {
