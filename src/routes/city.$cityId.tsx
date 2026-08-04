@@ -288,12 +288,25 @@ function CityDetail() {
             />
             <ScoreBar label={SCORE_LABELS.weather} value={city.scores.weather} max={SCORE_MAX} />
           </div>
+          {city.connectivity_warning ? (
+            <p className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>{city.connectivity_warning}</span>
+            </p>
+          ) : null}
         </section>
 
         {/* Visa */}
         <section className="panel p-4">
           <h2 className="mb-3 text-sm font-semibold">Visa</h2>
+          {city.visa.nationalityDependent ? (
+            <p className="mb-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>Visa rules vary significantly by passport — confirm for yours.</span>
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-4">
+
             <Stat
               label="Visa-free tourist days"
               value={touristDays === 0 ? "Visa required" : `${touristDays} days`}
@@ -328,8 +341,25 @@ function CityDetail() {
             </p>
           )}
 
+          {city.visa.notes ? (
+            <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+              {city.visa.notes}
+            </p>
+          ) : null}
+          {city.visa.policyTrialExpiry ? (
+            <p className="mt-2 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>
+                These visa-free policies are trials, currently set to expire{" "}
+                {city.visa.policyTrialExpiry}. Verified {city.last_verified}. If your stay runs
+                past that date, confirm the rules before booking anything.
+              </span>
+            </p>
+          ) : null}
+
           <div className="mt-4 rounded-md border border-border p-3">
             <div className="label-xs">Nomad visa</div>
+
             {nomad ? (
               <>
                 <div className="text-sm font-semibold">{nomad.name}</div>
@@ -362,6 +392,9 @@ function CityDetail() {
                       </span>
                     }
                   />
+                  {nomad.approxCostUSD ? (
+                    <Row label="Typical cost" value={`${formatUsd(nomad.approxCostUSD)}`} />
+                  ) : null}
                   {nomad.durationMonths ? (
                     <Row label="Duration" value={`${nomad.durationMonths} months`} />
                   ) : null}

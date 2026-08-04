@@ -100,10 +100,12 @@ export const VISA_RULE_DESCRIPTIONS: Record<VisaRuleType, string> = {
 export type NomadVisa = {
   name: string;
   exists: boolean;
-  minMonthlyIncomeUSD?: number;
+  minMonthlyIncomeUSD?: number | null;
   minAnnualIncomeUSD?: number;
   requiredSavingsUSD?: number;
   alternativeSavingsUSD?: number;
+  /** Typical all-in cost of obtaining the permit, USD. */
+  approxCostUSD?: number;
   durationMonths?: number;
   staysPerEntryDays?: number;
   renewable?: boolean;
@@ -118,6 +120,13 @@ export type Visa = {
   extensionDays?: number;
   windowDays?: number | null;
   maxDaysPerCalendarYear?: number;
+  /** True where the headline allowance differs sharply by passport (China).
+   *  The UI must then refuse to present one number as universal. */
+  nationalityDependent?: boolean;
+  /** ISO date. Set where the current policy is a trial with a known end date. */
+  policyTrialExpiry?: string;
+  /** Free-text caveats shown under the visa card. */
+  notes?: string;
   nomadVisa: NomadVisa;
 };
 
@@ -154,6 +163,9 @@ export type City = {
   visa: Visa;
   tax: Tax;
   arbitrage_note: string;
+  /** Where the headline Mbps figure is misleading (Great Firewall, villa wifi).
+   *  Rendered as an amber row inside the liveability/scores section. */
+  connectivity_warning?: string | null;
   /** IATA code of the airport actually used to reach the city. */
   nearest_airport_iata: string;
   /** City ids reachable by ground transport in roughly 12 hours or less.

@@ -21,6 +21,7 @@ type SeedCity = {
   visa: Visa;
   tax: Tax;
   arbitrageNote: string;
+  connectivityWarning?: string;
   nearestAirportIata: string;
   overlandNeighbours: string[];
 };
@@ -46,6 +47,7 @@ function toCity(row: SeedCity): City {
     visa: row.visa,
     tax: row.tax,
     arbitrage_note: row.arbitrageNote,
+    connectivity_warning: row.connectivityWarning ?? null,
     nearest_airport_iata: row.nearestAirportIata,
     overland_neighbours: row.overlandNeighbours ?? [],
     last_verified: SEED_LAST_VERIFIED,
