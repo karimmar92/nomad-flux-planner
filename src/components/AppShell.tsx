@@ -95,6 +95,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/profile" className="hover:text-foreground">
           Profile
         </Link>
+        <Link to="/setup/company" className="hover:text-foreground">
+          Do you need a company?
+        </Link>
         <Link to="/kit" className="hover:text-foreground">
           Nomad kit
         </Link>

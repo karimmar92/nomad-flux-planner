@@ -97,13 +97,43 @@ function KitPage() {
       */}
       <BankingGroup placement="kit_page" title="Money" />
 
+      {/*
+        Company formation is NOT listed here as a partner card, even though the
+        Nomad kit is the catalogue surface. It pays the most of anything in the
+        stack, and a link with no context is exactly how people end up in a
+        $25,000 Form 5472 obligation that helps them not at all. The links live
+        behind the eligibility tool, which is capable of concluding "don't".
+        See the FORMATION RULE in src/config/partners.ts.
+      */}
+      <section className="space-y-3">
+        <h2 className="label-xs font-semibold">Company</h2>
+        <Link
+          to="/setup/company"
+          className="block rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent-positive/40"
+        >
+          <p className="text-base font-bold leading-tight tracking-tight text-foreground">
+            Do you actually need a US LLC?
+          </p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            Six questions on residency, clients and US presence. For most people with a real tax
+            residency the answer is no, and we say so — CFC rules look through the company and tax
+            the profit where you live.
+          </p>
+          <span className="mt-3 inline-block text-sm font-semibold text-accent-positive">
+            Run the check
+          </span>
+        </Link>
+      </section>
+
       <footer className="space-y-2 border-t border-border pt-4">
         <p className="text-xs leading-relaxed text-muted-foreground">
-          We only earn from eSIM, insurance, transport and multi-currency account links.
-          Commissions never affect city rankings or cost data, transport links only appear once a
-          move is already decided or forced by a visa deadline, and no other screen in {APP_NAME}
-          shows more than a single link.
+          We only earn from eSIM, insurance, transport, multi-currency account and company
+          formation links. Commissions never affect city rankings or cost data, transport links
+          only appear once a move is already decided or forced by a visa deadline, formation links
+          appear only where forming a company is plausibly useful for you, and no other screen in{" "}
+          {APP_NAME} shows more than a single link.
         </p>
+
 
         <Link
           to="/how-we-make-money"

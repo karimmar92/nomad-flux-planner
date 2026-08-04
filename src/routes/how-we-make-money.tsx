@@ -58,6 +58,18 @@ function HowWeMakeMoney() {
           Nomad kit page, and are deliberately kept away from anything about tax residency.
         </p>
         <p>
+          <strong>Company formation is the one we most want you to distrust.</strong> It pays more
+          than everything else here put together — up to $1,500 a referral — so we built it as a
+          questionnaire that is capable of telling you not to do it, rather than as a card. If you
+          are tax resident in the UK, Germany, Australia or 50-odd other countries, controlled-
+          foreign-company rules let the tax authority look through a US LLC and tax the profits as
+          yours whether or not you took a distribution, so it changes nothing about your bill. On
+          that outcome we show no link at all, and it is the most common outcome. A foreign-owned
+          single-member LLC also has to file Form 5472 every year even at zero US tax, and the
+          penalty is $25,000 per form, per year — a fact almost nobody selling formations leads
+          with. We would rather say that than earn the commission.
+        </p>
+        <p>
           <strong>One link per screen, at most.</strong> No screen in {APP_NAME} shows more than a
           single partner card. If a screen wants two, they go on the Nomad kit page instead. The
           risk from here is not too little revenue — it is this app quietly turning into a link
