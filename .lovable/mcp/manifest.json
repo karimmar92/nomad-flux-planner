@@ -1,0 +1,235 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://blwxzzdeccumewmaaqqi.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "driftly-nomad-navigator",
+      "version": "0.1.0",
+      "title": "Driftly: Nomad Navigator"
+    },
+    "tools": [
+      {
+        "name": "list_cities",
+        "title": "List cities",
+        "description": "List Driftly's cities with monthly cost of living, and — when a monthly income is given — the surplus and savings rate you'd have there. Supports region, budget and visa filters.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "monthlyIncomeUsd": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Your monthly income in USD, used to compute surplus and savings rate."
+            },
+            "region": {
+              "type": "string",
+              "description": "Filter by region, e.g. 'Europe' or 'Asia'."
+            },
+            "maxMonthlyCostUsd": {
+              "type": "number",
+              "description": "Only cities at or under this monthly cost."
+            },
+            "nomadVisaOnly": {
+              "type": "boolean",
+              "description": "Only cities with a digital nomad visa."
+            },
+            "excludeSchengen": {
+              "type": "boolean",
+              "description": "Exclude cities that burn the shared Schengen 90/180 allowance."
+            },
+            "limit": {
+              "type": "number",
+              "description": "Maximum number of cities to return (default 25)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_city",
+        "title": "Get city detail",
+        "description": "Full Driftly profile for one city: itemised costs, quality-of-life scores, visa rules, nomad visa requirements and tax residency triggers.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "cityId": {
+              "type": "string",
+              "description": "City id (e.g. 'lisbon-pt') or a city name such as 'Lisbon'."
+            },
+            "monthlyIncomeUsd": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Monthly income in USD to personalise surplus and savings rate."
+            }
+          },
+          "required": [
+            "cityId"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "compare_cities",
+        "title": "Compare cities",
+        "description": "Side-by-side geo-arbitrage comparison of two or more Driftly cities for a given monthly income, including annual surplus and months needed to reach a savings target.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "cityIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Two or more city ids or names."
+            },
+            "monthlyIncomeUsd": {
+              "type": "number",
+              "description": "Monthly income in USD."
+            },
+            "savingsTargetUsd": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Optional savings target to compute months-to-target per city."
+            },
+            "tier": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "lean",
+                    "mid"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Cost basis: 'lean' or 'mid' (default)."
+            }
+          },
+          "required": [
+            "cityIds",
+            "monthlyIncomeUsd"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "schengen_check",
+        "title": "Check Schengen 90/180",
+        "description": "Run Driftly's Schengen 90/180 engine over a list of trips: days used and remaining in the rolling 180-day window, compliance status, the next date a full 90-day stay is possible, and the longest legal stay from a planned entry date.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "trips": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "countryCode": {
+                    "type": "string",
+                    "description": "ISO-2 country code, e.g. 'PT'."
+                  },
+                  "entryDate": {
+                    "type": "string",
+                    "description": "Entry date, YYYY-MM-DD. The entry day counts."
+                  },
+                  "exitDate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Exit date YYYY-MM-DD, or null if still there. The exit day counts."
+                  },
+                  "purpose": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "tourist",
+                          "nomad_visa",
+                          "residence"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "'residence' trips do not consume the short-stay allowance."
+                  }
+                },
+                "required": [
+                  "countryCode",
+                  "entryDate",
+                  "exitDate",
+                  "purpose"
+                ],
+                "additionalProperties": false
+              },
+              "description": "All trips to consider, Schengen and non-Schengen."
+            },
+            "referenceDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Date to evaluate against, YYYY-MM-DD. Defaults to today (UTC)."
+            },
+            "plannedEntryDate": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Optional future entry date to test the longest legal consecutive stay."
+            }
+          },
+          "required": [
+            "trips"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
