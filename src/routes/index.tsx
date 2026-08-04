@@ -4,7 +4,7 @@
  * decides what the app recommends, and that must depend only on the user's
  * income, their filters and the seed data — never on commission.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
@@ -48,6 +48,7 @@ function Explore() {
   const { profile, hydrated } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<string>("all");
   const [maxBudget, setMaxBudget] = useState(4000);
@@ -108,7 +109,14 @@ function Explore() {
   return (
     <div className="space-y-6">
       {hydrated && !profile.onboarded && showOnboarding ? (
-        <Onboarding onDone={() => setShowOnboarding(false)} />
+        <Onboarding
+          onDone={(stage) => {
+            setShowOnboarding(false);
+            // Planning-track users land on the runway calculator, not on a
+            // ranking of cities they cannot yet act on.
+            if (stage === "planning") void navigate({ to: "/plan" });
+          }}
+        />
       ) : null}
 
       {/* Hero stat panel — mirrors the tracker dashboard's big-number card */}

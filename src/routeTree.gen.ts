@@ -20,6 +20,7 @@ import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as OrgRouteImport } from './routes/org'
+import { Route as PlanRouteImport } from './routes/plan'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
@@ -34,6 +35,10 @@ import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
+import { Route as PlanIndexRouteImport } from './routes/plan.index'
+import { Route as PlanChecklistRouteImport } from './routes/plan.checklist'
+import { Route as PlanCostsRouteImport } from './routes/plan.costs'
+import { Route as PlanTaxExitRouteImport } from './routes/plan.tax-exit'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
@@ -96,6 +101,11 @@ const McpRoute = McpRouteImport.update({
 const OrgRoute = OrgRouteImport.update({
   id: '/org',
   path: '/org',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -170,6 +180,26 @@ const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   path: '/community/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanIndexRoute = PlanIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlanRoute,
+} as any)
+const PlanChecklistRoute = PlanChecklistRouteImport.update({
+  id: '/checklist',
+  path: '/checklist',
+  getParentRoute: () => PlanRoute,
+} as any)
+const PlanCostsRoute = PlanCostsRouteImport.update({
+  id: '/costs',
+  path: '/costs',
+  getParentRoute: () => PlanRoute,
+} as any)
+const PlanTaxExitRoute = PlanTaxExitRouteImport.update({
+  id: '/tax-exit',
+  path: '/tax-exit',
+  getParentRoute: () => PlanRoute,
+} as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -224,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/plan': typeof PlanRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -236,11 +267,15 @@ export interface FileRoutesByFullPath {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
+  '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -270,11 +305,15 @@ export interface FileRoutesByTo {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
+  '/plan': typeof PlanIndexRoute
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -294,6 +333,7 @@ export interface FileRoutesById {
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/plan': typeof PlanRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -306,11 +346,15 @@ export interface FileRoutesById {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
+  '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -331,6 +375,7 @@ export interface FileRouteTypes {
     | '/kit'
     | '/mcp'
     | '/org'
+    | '/plan'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -343,11 +388,15 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/plan/checklist'
+    | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business/'
     | '/community/'
+    | '/plan/'
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -377,11 +426,15 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/plan/checklist'
+    | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business'
     | '/community'
+    | '/plan'
     | '/record'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -400,6 +453,7 @@ export interface FileRouteTypes {
     | '/kit'
     | '/mcp'
     | '/org'
+    | '/plan'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -412,11 +466,15 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/plan/checklist'
+    | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business/'
     | '/community/'
+    | '/plan/'
     | '/record/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -436,6 +494,7 @@ export interface RootRouteChildren {
   KitRoute: typeof KitRoute
   McpRoute: typeof McpRoute
   OrgRoute: typeof OrgRoute
+  PlanRoute: typeof PlanRouteWithChildren
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
@@ -536,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -634,6 +700,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plan/': {
+      id: '/plan/'
+      path: '/'
+      fullPath: '/plan/'
+      preLoaderRoute: typeof PlanIndexRouteImport
+      parentRoute: typeof PlanRoute
+    }
+    '/plan/checklist': {
+      id: '/plan/checklist'
+      path: '/checklist'
+      fullPath: '/plan/checklist'
+      preLoaderRoute: typeof PlanChecklistRouteImport
+      parentRoute: typeof PlanRoute
+    }
+    '/plan/costs': {
+      id: '/plan/costs'
+      path: '/costs'
+      fullPath: '/plan/costs'
+      preLoaderRoute: typeof PlanCostsRouteImport
+      parentRoute: typeof PlanRoute
+    }
+    '/plan/tax-exit': {
+      id: '/plan/tax-exit'
+      path: '/tax-exit'
+      fullPath: '/plan/tax-exit'
+      preLoaderRoute: typeof PlanTaxExitRouteImport
+      parentRoute: typeof PlanRoute
+    }
     '/record/': {
       id: '/record/'
       path: '/'
@@ -693,6 +787,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PlanRouteChildren {
+  PlanChecklistRoute: typeof PlanChecklistRoute
+  PlanCostsRoute: typeof PlanCostsRoute
+  PlanTaxExitRoute: typeof PlanTaxExitRoute
+  PlanIndexRoute: typeof PlanIndexRoute
+}
+
+const PlanRouteChildren: PlanRouteChildren = {
+  PlanChecklistRoute: PlanChecklistRoute,
+  PlanCostsRoute: PlanCostsRoute,
+  PlanTaxExitRoute: PlanTaxExitRoute,
+  PlanIndexRoute: PlanIndexRoute,
+}
+
+const PlanRouteWithChildren = PlanRoute._addFileChildren(PlanRouteChildren)
+
 interface RecordRouteChildren {
   RecordVaultRoute: typeof RecordVaultRoute
   RecordIndexRoute: typeof RecordIndexRoute
@@ -720,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   KitRoute: KitRoute,
   McpRoute: McpRoute,
   OrgRoute: OrgRoute,
+  PlanRoute: PlanRouteWithChildren,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,

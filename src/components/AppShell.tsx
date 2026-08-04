@@ -9,27 +9,45 @@ import {
   Sun,
   Tag,
   UserRound,
+  PlaneTakeoff,
 } from "lucide-react";
 import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
-import { useTheme } from "@/lib/store";
+import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-const NAV = [
+type NavItem = { to: string; label: string; icon: typeof Compass };
+
+/**
+ * People who have not left yet have no trips, so the tracker and the record
+ * layer are empty noise to them. The planning track leads instead, and the
+ * tracker reappears at graduation.
+ */
+const NAV_PLANNING: NavItem[] = [
+  { to: "/plan", label: "Plan", icon: PlaneTakeoff },
+  { to: "/", label: "Explore", icon: Compass },
+  { to: "/calculator", label: "Arbitrage", icon: Calculator },
+  { to: "/compare", label: "Compare", icon: GitCompareArrows },
+  { to: "/pricing", label: "Pricing", icon: Tag },
+];
+
+const NAV_ABROAD: NavItem[] = [
   { to: "/", label: "Explore", icon: Compass },
   { to: "/calculator", label: "Arbitrage", icon: Calculator },
   { to: "/compare", label: "Compare", icon: GitCompareArrows },
   { to: "/tracker", label: "Tracker", icon: CalendarClock },
   { to: "/record", label: "Record", icon: FolderLock },
   { to: "/pricing", label: "Pricing", icon: Tag },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
+  const { profile } = useProfile();
+  const NAV = profile.stage === "planning" ? NAV_PLANNING : NAV_ABROAD;
   // Country + dates only, and only for people who are in an organisation.
   useOrgTripSync();
 
@@ -86,6 +104,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
 
       <div className="mx-auto mb-20 flex w-full max-w-6xl flex-wrap gap-4 px-4 text-xs text-muted-foreground md:mb-6">
+        <Link to="/plan" className="hover:text-foreground">
+          Before you go
+        </Link>
         <Link to="/community" className="hover:text-foreground">
           Community
         </Link>

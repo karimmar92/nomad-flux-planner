@@ -165,6 +165,13 @@ export type City = {
 };
 
 export type IncomeType = "employed" | "freelance" | "founder";
+
+/**
+ * Which track the user is on. "planning" people have no trips yet, so the
+ * tracker is noise to them and the runway calculator is the whole product.
+ * Set on first run and again at the graduation handoff.
+ */
+export type UserStage = "planning" | "abroad";
 export type Plan = "free" | "pro";
 
 export type Profile = {
@@ -176,6 +183,7 @@ export type Profile = {
   currency_display: string;
   savings_usd: number | null;
   plan: Plan;
+  stage: UserStage;
   onboarded: boolean;
 };
 
