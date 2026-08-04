@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Profile, Trip } from "./types";
+import { idbSet } from "./offline/idb";
+import { enqueue } from "./offline/sync-queue";
+import { cacheProfile, cacheTrips } from "./offline/cache";
 
 /**
  * Local persistence layer. Every read/write goes through here so swapping in
@@ -35,9 +38,24 @@ function read<T>(key: string, fallback: T): T {
   }
 }
 
+/**
+ * Offline-first write path. The local write is synchronous and always wins;
+ * the IndexedDB mirror makes it durable and the queued op reconciles later.
+ * Nothing on this path awaits the network — the user must never wait on a
+ * request to log an entry date.
+ */
 function write(key: string, value: unknown) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(key, JSON.stringify(value));
+  void idbSet(key, value);
+  if (key === KEYS.profile) {
+    cacheProfile(value as Profile);
+    void enqueue({ entity: "profile", action: "upsert", payload: value });
+  }
+  if (key === KEYS.trips) {
+    cacheTrips(value as Trip[]);
+    void enqueue({ entity: "trip", action: "upsert", payload: value });
+  }
   window.dispatchEvent(new CustomEvent("driftly:store", { detail: key }));
 }
 
