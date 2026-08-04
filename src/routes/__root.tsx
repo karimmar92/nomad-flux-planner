@@ -15,6 +15,9 @@ import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { APP_NAME, APP_TAGLINE } from "@/lib/app";
 import { ReferralCapture } from "@/components/referrals/ReferralCapture";
+import { registerServiceWorker } from "@/lib/pwa/register-sw";
+import { warmCityCache } from "@/lib/offline/cache";
+import { flushQueue } from "@/lib/offline/sync-queue";
 
 function NotFoundComponent() {
   return (
@@ -88,6 +91,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Personalised geo-arbitrage and visa compliance for freelancers and remote workers.",
       },
       { property: "og:type", content: "website" },
+      { name: "theme-color", content: "#1e1e21" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: APP_NAME },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -98,7 +104,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
@@ -126,6 +134,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Offline-first: register the (guarded) service worker, cache the whole
+  // 25-city dataset locally on every open, and drain any queued writes.
+  useEffect(() => {
+    registerServiceWorker();
+    void warmCityCache();
+    void flushQueue();
+    const onOnline = () => void flushQueue();
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

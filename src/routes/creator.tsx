@@ -8,6 +8,7 @@ import { formatUsd, CREATOR_PROGRAM } from "@/lib/referrals/config";
 import { pct } from "@/lib/referrals/commission";
 import { ReferralLinkCard } from "@/components/referrals/ReferralLinkCard";
 import { Stat } from "@/components/Primitives";
+import { RequiresNetwork } from "@/components/OfflineBanner";
 
 export const Route = createFileRoute("/creator")({
   head: () => ({
@@ -32,6 +33,8 @@ export const Route = createFileRoute("/creator")({
 
 function CreatorPage() {
   const { signedIn, ready } = useSession();
+  // Commission figures are server-derived from the append-only ledger, so this
+  // screen genuinely needs a connection. Say so rather than spinning.
   const fetchDashboard = useServerFn(getCreatorDashboard);
   const { data, isLoading } = useQuery({
     queryKey: ["creator-dashboard"],
@@ -52,7 +55,12 @@ function CreatorPage() {
     );
   }
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading)
+    return (
+      <RequiresNetwork reason="Creator dashboard needs a connection — commission is calculated server-side from the ledger.">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </RequiresNetwork>
+    );
 
   if (!data?.isCreator) {
     return (

@@ -10,6 +10,8 @@ import {
   UserRound,
 } from "lucide-react";
 import { AuthButton } from "@/components/AuthButton";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
 import { useTheme } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -28,6 +30,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <OfflineBanner />
+
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
           <Link to="/" className="flex items-center gap-2">
@@ -71,7 +75,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:pb-10">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:pb-10">
+        <ArrivalGate />
+        {children}
+      </main>
 
       <div className="mx-auto mb-20 flex w-full max-w-6xl flex-wrap gap-4 px-4 text-xs text-muted-foreground md:mb-6">
         <Link to="/community" className="hover:text-foreground">

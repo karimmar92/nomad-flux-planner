@@ -244,6 +244,7 @@ export const PARTNER_FREE_ZONES = [
  * it.
  */
 export const TRANSPORT_FREE_ZONES = [
+  "src/components/arrival/ArrivalCard.tsx", // They have just arrived; do not sell them the next flight
   "src/routes/index.tsx", // Explore — never suggest a journey to a city they're browsing
   "src/routes/compare.tsx", // Compare — a comparison must not become a booking funnel
   "src/routes/calculator.tsx", // Arbitrage calculator
@@ -261,6 +262,7 @@ export const TRANSPORT_FREE_ZONES = [
  */
 export const BANKING_FREE_ZONES = [
   ...PARTNER_FREE_ZONES,
+  "src/components/arrival/ArrivalCard.tsx", // Arrival is not a moment to sell an account
   "src/routes/city.$cityId.tsx", // Tax card, residency triggers, special regimes — see the comment there
   "src/routes/tracker.tsx", // Day counters sit next to residency thresholds
   "src/components/borderrun/BorderRunCard.tsx", // A forced move is not a moment to sell an account
@@ -279,6 +281,18 @@ export const BANKING_PLACEMENTS = ["kit_page", "onboarding"] as const;
 export type PartnerPlacement =
   | "city_detail"
   | "trip_confirm"
+  /**
+   * 1-7 days before an entry date, or before a forced Schengen exit. This
+   * replaced the arrival placement: at arrival the user has no connectivity,
+   * so an eSIM offer there is unsellable at the exact moment of need.
+   */
+  | "pre_departure"
+  /**
+   * After a confirmed country change. Visa fact first, commercial second,
+   * dismissible, never rendered offline, and suppressed entirely if the user
+   * already ticked eSIM on their pre-departure checklist.
+   */
+  | "arrival"
   | "visa_card"
   | "kit_page"
   | "border_run"

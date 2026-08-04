@@ -1,0 +1,17 @@
+{
+  "name": "Driftly — geo-arbitrage & visa compliance",
+  "short_name": "Driftly",
+  "description": "Offline-first visa tracker, Schengen 90/180 engine and city cost data for freelancers and remote workers.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1e1e21",
+  "theme_color": "#1e1e21",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
