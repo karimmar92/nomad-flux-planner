@@ -9,6 +9,7 @@ import {
   Tag,
   UserRound,
 } from "lucide-react";
+import { AuthButton } from "@/components/AuthButton";
 import { APP_NAME } from "@/lib/app";
 import { useTheme } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
+            <AuthButton />
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
