@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 import { useProfile } from "@/lib/store";
@@ -70,10 +70,30 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
     onDone(stage);
   };
 
+  // A first-run modal that traps the user is worse than no onboarding: Escape
+  // and a backdrop click both dismiss it, and dismissing marks it done for good.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") finish(true);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-0 backdrop-blur sm:items-center sm:p-4">
-      <div className="panel w-full max-w-md p-5 sm:rounded-lg">
-        <div className="mb-4 flex items-center justify-between">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-0 backdrop-blur sm:items-center sm:p-4"
+      onClick={() => finish(true)}
+      role="presentation"
+    >
+      <div
+        className="panel w-full max-w-md p-5 sm:rounded-lg"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${APP_NAME} setup`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="label-xs">
               {APP_NAME} · step {step + 1} of {STEP_TITLES.length}
@@ -84,11 +104,14 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
           </div>
           <button
             onClick={() => finish(true)}
-            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+            aria-label="Skip setup"
+            className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/50 hover:bg-surface-2"
           >
             Skip
+            <X className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
+
 
         <div className="mb-5 flex gap-1">
           {STEP_TITLES.map((_, i) => (

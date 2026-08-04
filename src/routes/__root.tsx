@@ -13,9 +13,10 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { APP_NAME, APP_TAGLINE } from "@/lib/app";
 import { ReferralCapture } from "@/components/referrals/ReferralCapture";
-import { registerServiceWorker } from "@/lib/pwa/register-sw";
+import { onServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa/register-sw";
 import { warmCityCache } from "@/lib/offline/cache";
 import { flushQueue } from "@/lib/offline/sync-queue";
 
@@ -143,8 +144,19 @@ function RootComponent() {
     void flushQueue();
     const onOnline = () => void flushQueue();
     window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
+    const offUpdate = onServiceWorkerUpdate(() => {
+      toast("New version available", {
+        description: "Reload to get the latest build.",
+        duration: Infinity,
+        action: { label: "Reload", onClick: () => window.location.reload() },
+      });
+    });
+    return () => {
+      window.removeEventListener("online", onOnline);
+      offUpdate();
+    };
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>

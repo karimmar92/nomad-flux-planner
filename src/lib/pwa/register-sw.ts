@@ -55,3 +55,24 @@ export function registerServiceWorker(): void {
     });
   });
 }
+
+/**
+ * A new build has taken control of the page. Workbox is configured with
+ * skipWaiting + clientsClaim so the new service worker activates immediately,
+ * but the already-open tab keeps running the old JS until it reloads — hence
+ * the visible prompt rather than a silent swap.
+ */
+export function onServiceWorkerUpdate(notify: () => void): () => void {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return () => {};
+  let hadController = Boolean(navigator.serviceWorker.controller);
+  const handler = () => {
+    // The first controller on a fresh load is not an update.
+    if (!hadController) {
+      hadController = true;
+      return;
+    }
+    notify();
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", handler);
+  return () => navigator.serviceWorker.removeEventListener("controllerchange", handler);
+}
