@@ -19,6 +19,7 @@ import { basisFor } from "@/lib/reports/tax-report";
 
 export type PresenceRow = {
   user_id: string;
+  trip_id?: string;
   country_code: string;
   entry_date: string;
   exit_date: string | null;

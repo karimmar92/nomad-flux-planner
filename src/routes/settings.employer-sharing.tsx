@@ -80,7 +80,9 @@ function EmployerSharing() {
 
   if (ctx.isLoading || shared.isLoading) {
     return (
-      <RequiresNetwork reason="This screen deliberately reads the employer's own view, so it needs a connection — showing you a cached copy could tell you something friendlier than the truth." />
+      <RequiresNetwork reason="This screen deliberately reads the employer's own view, so it needs a connection — showing you a cached copy could tell you something friendlier than the truth.">
+        <div />
+      </RequiresNetwork>
     );
   }
 
