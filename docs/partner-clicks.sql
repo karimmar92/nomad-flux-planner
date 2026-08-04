@@ -25,8 +25,11 @@ create policy "anyone can log a click"
 
 -- Transport placements are limited to 'border_run', 'trip_confirm' and
 -- 'kit_page' by product rule (see the TRANSPORT RULE in src/config/partners.ts).
+-- Banking placements are limited to 'kit_page' and 'onboarding' (BANKING RULE),
+-- and never appear on city detail, in the tracker, or in the border-run planner.
 -- Logged so we can tell whether the border-run planner actually earns or is
 -- just a nice feature. Both outcomes are fine — we should know which.
+
 
 create index if not exists partner_clicks_placement_idx
   on public.partner_clicks (placement, created_at desc);
