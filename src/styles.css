@@ -41,8 +41,8 @@
   --color-negative-muted: var(--negative-muted);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 :root {
@@ -128,8 +128,9 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Numbers are the hero: tabular everywhere they appear. */
+  /* Numbers are the hero: tabular mono everywhere they appear. */
   .num {
+    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
