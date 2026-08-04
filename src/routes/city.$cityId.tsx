@@ -392,6 +392,9 @@ function CityDetail() {
                       </span>
                     }
                   />
+                  {nomad.approxCostUSD ? (
+                    <Row label="Typical cost" value={`${formatUsd(nomad.approxCostUSD)}`} />
+                  ) : null}
                   {nomad.durationMonths ? (
                     <Row label="Duration" value={`${nomad.durationMonths} months`} />
                   ) : null}
