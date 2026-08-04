@@ -15,6 +15,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
 import { useTheme } from "@/lib/store";
+import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -29,6 +30,8 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
+  // Country + dates only, and only for people who are in an organisation.
+  useOrgTripSync();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
