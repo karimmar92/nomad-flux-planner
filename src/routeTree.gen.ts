@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculatorRouteImport } from './routes/calculator'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 
@@ -25,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const CalculatorRoute = CalculatorRouteImport.update({
   id: '/calculator',
   path: '/calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompareRoute = CompareRouteImport.update({
@@ -42,6 +49,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaysRoute = StaysRouteImport.update({
+  id: '/stays',
+  path: '/stays',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackerRoute = TrackerRouteImport.update({
   id: '/tracker',
   path: '/tracker',
@@ -56,18 +68,22 @@ const CityCityIdRoute = CityCityIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
 }
@@ -75,9 +91,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calculator': typeof CalculatorRoute
+  '/community': typeof CommunityRoute
   '/compare': typeof CompareRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
 }
@@ -86,27 +104,33 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/calculator'
+    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
+    | '/stays'
     | '/tracker'
     | '/city/$cityId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculator'
+    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
+    | '/stays'
     | '/tracker'
     | '/city/$cityId'
   id:
     | '__root__'
     | '/'
     | '/calculator'
+    | '/community'
     | '/compare'
     | '/pricing'
     | '/profile'
+    | '/stays'
     | '/tracker'
     | '/city/$cityId'
   fileRoutesById: FileRoutesById
@@ -114,9 +138,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculatorRoute: typeof CalculatorRoute
+  CommunityRoute: typeof CommunityRoute
   CompareRoute: typeof CompareRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
+  StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   CityCityIdRoute: typeof CityCityIdRoute
 }
@@ -135,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/calculator'
       fullPath: '/calculator'
       preLoaderRoute: typeof CalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compare': {
@@ -158,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stays': {
+      id: '/stays'
+      path: '/stays'
+      fullPath: '/stays'
+      preLoaderRoute: typeof StaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tracker': {
       id: '/tracker'
       path: '/tracker'
@@ -178,9 +218,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculatorRoute: CalculatorRoute,
+  CommunityRoute: CommunityRoute,
   CompareRoute: CompareRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
+  StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   CityCityIdRoute: CityCityIdRoute,
 }

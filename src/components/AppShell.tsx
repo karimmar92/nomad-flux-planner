@@ -71,6 +71,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:pb-10">{children}</main>
 
+      <div className="mx-auto mb-20 flex w-full max-w-6xl flex-wrap gap-4 px-4 text-xs text-muted-foreground md:mb-6">
+        <Link to="/community" className="hover:text-foreground">
+          Community
+        </Link>
+        <Link to="/stays" className="hover:text-foreground">
+          Stays
+        </Link>
+        <Link to="/profile" className="hover:text-foreground">
+          Profile
+        </Link>
+      </div>
+
       <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur md:hidden">
         {NAV.map((item) => (
           <Link
