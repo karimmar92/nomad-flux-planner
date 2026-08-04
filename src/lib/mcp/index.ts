@@ -18,5 +18,8 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listCitiesTool, getCityTool, compareCitiesTool, schengenCheckTool],
+  // Cast: tools declare no outputSchema, which trips exactOptionalPropertyTypes.
+  tools: [listCitiesTool, getCityTool, compareCitiesTool, schengenCheckTool] as Parameters<
+    typeof defineMcp
+  >[0]["tools"],
 });
