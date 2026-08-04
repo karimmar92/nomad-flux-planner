@@ -35,6 +35,7 @@ import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
+import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
@@ -172,6 +173,11 @@ const RecordVaultRoute = RecordVaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => RecordRoute,
 } as any)
+const SettingsEmployerSharingRoute = SettingsEmployerSharingRouteImport.update({
+  id: '/settings/employer-sharing',
+  path: '/settings/employer-sharing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -218,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
   '/record': typeof RecordIndexRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
     | '/business/'
     | '/community/'
     | '/record/'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
     | '/business'
     | '/community'
     | '/record'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
     | '/business/'
     | '/community/'
     | '/record/'
@@ -411,6 +423,7 @@ export interface RootRouteChildren {
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
+  SettingsEmployerSharingRoute: typeof SettingsEmployerSharingRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -602,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordVaultRouteImport
       parentRoute: typeof RecordRoute
     }
+    '/settings/employer-sharing': {
+      id: '/settings/employer-sharing'
+      path: '/settings/employer-sharing'
+      fullPath: '/settings/employer-sharing'
+      preLoaderRoute: typeof SettingsEmployerSharingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -672,6 +692,7 @@ const rootRouteChildren: RootRouteChildren = {
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
+  SettingsEmployerSharingRoute: SettingsEmployerSharingRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
