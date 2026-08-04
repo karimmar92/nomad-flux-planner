@@ -9,17 +9,19 @@ import { APP_NAME } from "@/lib/app";
 export const Route = createFileRoute("/kit")({
   head: () => ({
     meta: [
-      { title: `Nomad kit — eSIM, insurance and transport | ${APP_NAME}` },
+      { title: `Nomad kit — eSIM, cover, transport and money | ${APP_NAME}` },
       {
         name: "description",
         content:
-          "Our editorial comparison of nomad eSIMs and health cover, with the caveats that actually matter. Affiliate links, clearly labelled.",
+          "Our editorial comparison of nomad eSIMs, health cover, transport and multi-currency accounts, with the caveats that actually matter. Affiliate links, clearly labelled.",
       },
-      { property: "og:title", content: `Nomad kit — eSIM and insurance | ${APP_NAME}` },
+      { property: "og:title", content: `Nomad kit — eSIM, cover and money | ${APP_NAME}` },
       {
         property: "og:description",
-        content: "eSIM and insurance options compared with our own notes, not the partners'.",
+        content:
+          "eSIM, insurance, transport and multi-currency accounts compared with our own notes, not the partners'.",
       },
+
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
