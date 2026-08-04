@@ -23,6 +23,7 @@ import {
 } from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
+import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
