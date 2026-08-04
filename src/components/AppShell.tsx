@@ -1,0 +1,92 @@
+import { Link } from "@tanstack/react-router";
+import {
+  CalendarClock,
+  Compass,
+  Calculator,
+  GitCompareArrows,
+  Moon,
+  Sun,
+  Tag,
+  UserRound,
+} from "lucide-react";
+import { APP_NAME } from "@/lib/app";
+import { useTheme } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
+
+const NAV = [
+  { to: "/", label: "Explore", icon: Compass },
+  { to: "/calculator", label: "Arbitrage", icon: Calculator },
+  { to: "/compare", label: "Compare", icon: GitCompareArrows },
+  { to: "/tracker", label: "Tracker", icon: CalendarClock },
+  { to: "/pricing", label: "Pricing", icon: Tag },
+] as const;
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="grid h-6 w-6 place-items-center rounded bg-primary text-[13px] font-bold text-primary-foreground">
+              {APP_NAME.charAt(0)}
+            </span>
+            <span className="text-sm font-semibold tracking-tight">{APP_NAME}</span>
+          </Link>
+
+          <nav className="ml-4 hidden items-center gap-1 md:flex">
+            {NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                activeProps={{ className: "bg-surface-2 text-foreground" }}
+                activeOptions={{ exact: item.to === "/" }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+              className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <Link
+              to="/profile"
+              aria-label="Profile"
+              className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+            >
+              <UserRound className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:pb-10">{children}</main>
+
+      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-5 border-t border-border bg-background/95 backdrop-blur md:hidden">
+        {NAV.map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className={cn(
+              "flex flex-col items-center gap-0.5 py-2 text-[10px] text-muted-foreground",
+            )}
+            activeProps={{ className: "text-primary" }}
+            activeOptions={{ exact: item.to === "/" }}
+          >
+            <item.icon className="h-4 w-4" />
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+}
