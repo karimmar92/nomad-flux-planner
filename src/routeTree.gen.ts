@@ -19,6 +19,7 @@ import { Route as CreatorsRouteImport } from './routes/creators'
 import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OrgRouteImport } from './routes/org'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
@@ -89,6 +90,11 @@ const KitRoute = KitRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrgRoute = OrgRouteImport.update({
+  id: '/org',
+  path: '/org',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -411,6 +423,7 @@ export interface RootRouteChildren {
   HowWeMakeMoneyRoute: typeof HowWeMakeMoneyRoute
   KitRoute: typeof KitRoute
   McpRoute: typeof McpRoute
+  OrgRoute: typeof OrgRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
@@ -501,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/org': {
+      id: '/org'
+      path: '/org'
+      fullPath: '/org'
+      preLoaderRoute: typeof OrgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -679,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowWeMakeMoneyRoute: HowWeMakeMoneyRoute,
   KitRoute: KitRoute,
   McpRoute: McpRoute,
+  OrgRoute: OrgRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
