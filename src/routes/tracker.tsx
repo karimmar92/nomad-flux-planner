@@ -255,7 +255,16 @@ function Tracker() {
         )}
       </section>
 
-      <AddTrip onAdd={addTrip} />
+      <AddTrip
+        onAdd={(trip) => {
+          addTrip(trip);
+          setJustAdded(trip.entry_date > today ? trip : null);
+        }}
+      />
+
+      {justAdded ? (
+        <TripConfirmKit trip={justAdded} onDismiss={() => setJustAdded(null)} />
+      ) : null}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Your trips</h2>
