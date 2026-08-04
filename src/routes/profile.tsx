@@ -5,6 +5,9 @@ import { flagEmoji } from "@/lib/arbitrage";
 import { APP_NAME } from "@/lib/app";
 import type { IncomeType } from "@/lib/types";
 import { EmptyState } from "@/components/Primitives";
+import { UserReferralCard } from "@/components/referrals/UserReferralCard";
+import { HeardAboutField } from "@/components/referrals/HeardAboutField";
+import { useSession } from "@/lib/use-session";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -29,6 +32,7 @@ const NATIONALITIES = ["GB", "US", "CA", "AU", "DE", "FR", "NL", "IE", "ZA", "IN
 function ProfilePage() {
   const { profile, patchProfile } = useProfile();
   const { saved, toggle } = useSavedCities();
+  const { signedIn } = useSession();
 
   return (
     <div className="space-y-4">
@@ -116,6 +120,11 @@ function ProfilePage() {
         </Field>
       </section>
 
+      {/* Program B — free months only. The cash creator programme lives at /creator. */}
+      <UserReferralCard signedIn={signedIn} />
+
+      <HeardAboutField signedIn={signedIn} />
+
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Saved cities</h2>
         {saved.length === 0 ? (
@@ -161,6 +170,10 @@ function ProfilePage() {
         ·{" "}
         <Link to="/how-we-make-money" className="hover:text-foreground">
           How we make money
+        </Link>{" "}
+        ·{" "}
+        <Link to="/creators" className="hover:text-foreground">
+          Creator programme
         </Link>
       </p>
 
