@@ -43,7 +43,7 @@ const STEP_TITLES = [
 ];
 
 /** Five-step, skippable first-run flow. Writes straight into the profile. */
-export function Onboarding({ onDone }: { onDone: () => void }) {
+export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
   const { profile, patchProfile } = useProfile();
   const [step, setStep] = useState(0);
   const [stage, setStage] = useState<UserStage>(profile.stage);
@@ -67,7 +67,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             onboarded: true,
           },
     );
-    onDone();
+    onDone(stage);
   };
 
   return (

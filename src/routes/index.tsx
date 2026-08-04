@@ -4,12 +4,11 @@
  * decides what the app recommends, and that must depend only on the user's
  * income, their filters and the seed data — never on commission.
  */
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
-import { readProfile } from "@/lib/store";
 import { EmptyState } from "@/components/Primitives";
 import { CITIES, REGIONS } from "@/lib/cities";
 import {
@@ -111,11 +110,11 @@ function Explore() {
     <div className="space-y-6">
       {hydrated && !profile.onboarded && showOnboarding ? (
         <Onboarding
-          onDone={() => {
+          onDone={(stage) => {
             setShowOnboarding(false);
             // Planning-track users land on the runway calculator, not on a
             // ranking of cities they cannot yet act on.
-            if (readProfile().stage === "planning") void navigate({ to: "/plan" });
+            if (stage === "planning") void navigate({ to: "/plan" });
           }}
         />
       ) : null}
