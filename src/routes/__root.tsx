@@ -110,7 +110,7 @@ const THEME_SCRIPT = `try{var t=JSON.parse(localStorage.getItem('driftly.theme')
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
