@@ -8,7 +8,6 @@ import { Link } from "@tanstack/react-router";
 import { Heart, Wifi, BadgeCheck, ShieldCheck } from "lucide-react";
 import {
   computeArbitrage,
-  flagEmoji,
   formatUsd,
   isSchengenCity,
   monthlyCost,
