@@ -20,6 +20,7 @@ import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as OrgRouteImport } from './routes/org'
+import { Route as PlanRouteImport } from './routes/plan'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
@@ -99,6 +100,11 @@ const OrgRoute = OrgRouteImport.update({
   path: '/org',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -172,9 +178,9 @@ const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanIndexRoute = PlanIndexRouteImport.update({
-  id: '/plan/',
-  path: '/plan/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlanRoute,
 } as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/plan': typeof PlanRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -302,6 +309,7 @@ export interface FileRoutesById {
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/plan': typeof PlanRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -340,6 +348,7 @@ export interface FileRouteTypes {
     | '/kit'
     | '/mcp'
     | '/org'
+    | '/plan'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -411,6 +420,7 @@ export interface FileRouteTypes {
     | '/kit'
     | '/mcp'
     | '/org'
+    | '/plan'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -448,6 +458,7 @@ export interface RootRouteChildren {
   KitRoute: typeof KitRoute
   McpRoute: typeof McpRoute
   OrgRoute: typeof OrgRoute
+  PlanRoute: typeof PlanRouteWithChildren
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
@@ -464,7 +475,6 @@ export interface RootRouteChildren {
   SetupCompanyRoute: typeof SetupCompanyRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
-  PlanIndexRoute: typeof PlanIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicWebhooksStripeRoute: typeof ApiPublicWebhooksStripeRoute
@@ -547,6 +557,13 @@ declare module '@tanstack/react-router' {
       path: '/org'
       fullPath: '/org'
       preLoaderRoute: typeof OrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -649,10 +666,10 @@ declare module '@tanstack/react-router' {
     }
     '/plan/': {
       id: '/plan/'
-      path: '/plan'
+      path: '/'
       fullPath: '/plan/'
       preLoaderRoute: typeof PlanIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof PlanRoute
     }
     '/record/': {
       id: '/record/'
@@ -713,6 +730,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface PlanRouteChildren {
+  PlanIndexRoute: typeof PlanIndexRoute
+}
+
+const PlanRouteChildren: PlanRouteChildren = {
+  PlanIndexRoute: PlanIndexRoute,
+}
+
+const PlanRouteWithChildren = PlanRoute._addFileChildren(PlanRouteChildren)
+
 interface RecordRouteChildren {
   RecordVaultRoute: typeof RecordVaultRoute
   RecordIndexRoute: typeof RecordIndexRoute
@@ -740,6 +767,7 @@ const rootRouteChildren: RootRouteChildren = {
   KitRoute: KitRoute,
   McpRoute: McpRoute,
   OrgRoute: OrgRoute,
+  PlanRoute: PlanRouteWithChildren,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
@@ -757,7 +785,6 @@ const rootRouteChildren: RootRouteChildren = {
   SetupCompanyRoute: SetupCompanyRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
-  PlanIndexRoute: PlanIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicWebhooksStripeRoute: ApiPublicWebhooksStripeRoute,
