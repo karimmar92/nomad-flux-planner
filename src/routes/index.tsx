@@ -106,47 +106,77 @@ function Explore() {
   const best = cities[0] ? computeArbitrage(cities[0], income) : null;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {hydrated && !profile.onboarded && showOnboarding ? (
         <Onboarding onDone={() => setShowOnboarding(false)} />
       ) : null}
 
-      <section className="panel p-4">
-        <h1 className="text-xl font-semibold tracking-tight">
-          {income
-            ? `On ${formatUsd(income)}/mo, here's what you'd keep.`
-            : "Add your income to personalise every number."}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {income && best && cities[0]
-            ? `Best right now: ${cities[0].city} — ${formatUsd(best.surplusMonthly)}/mo surplus, ${best.savingsRate.toFixed(0)}% savings rate. Visa-free tourist days there: ${touristDaysFor(cities[0])}.`
-            : "Every figure below is generic until we know your income and passport."}
-        </p>
-        {!income ? (
-          <Link
-            to="/profile"
-            className="mt-3 inline-flex rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Enter income
-          </Link>
-        ) : null}
+      {/* Hero stat panel — mirrors the tracker dashboard's big-number card */}
+      <section className="panel overflow-hidden">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <span className="label-xs">Arbitrage overview</span>
+          <span className="label-xs">
+            {cities.length}/{CITIES.length} cities
+          </span>
+        </div>
+        <div className="px-4 py-5">
+          {income && best && cities[0] ? (
+            <>
+              <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+                <span className="num text-5xl font-semibold leading-none text-positive">
+                  {formatUsd(best.surplusMonthly)}
+                </span>
+                <span className="pb-1 text-sm text-muted-foreground">
+                  /mo kept in {cities[0].city}
+                </span>
+              </div>
+              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+                <div
+                  className="h-full rounded-full bg-positive"
+                  style={{ width: `${Math.max(0, Math.min(100, best.savingsRate))}%` }}
+                />
+              </div>
+              <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <HeroStat label="Savings rate" value={`${best.savingsRate.toFixed(0)}%`} />
+                <HeroStat label="Monthly cost" value={formatUsd(best.cost)} />
+                <HeroStat label="Per year" value={formatUsd(best.surplusAnnual)} />
+                <HeroStat label="Visa-free days" value={`${touristDaysFor(cities[0])}`} />
+              </dl>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Add your income to personalise every number.
+              </h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Every figure below is generic until we know your income and passport.
+              </p>
+              <Link
+                to="/profile"
+                className="mt-4 inline-flex rounded-lg bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground"
+              >
+                Enter income
+              </Link>
+            </>
+          )}
+        </div>
       </section>
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search city or country"
-            className="w-full rounded-md border border-input bg-surface py-2 pl-8 pr-3 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-input bg-surface py-2.5 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary"
           />
         </div>
         <button
           onClick={() => setFiltersOpen((v) => !v)}
           className={cn(
-            "flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm",
-            filtersOpen && "border-primary text-primary",
+            "flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm transition-colors",
+            filtersOpen && "border-primary bg-primary/10 text-primary",
           )}
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -155,13 +185,13 @@ function Explore() {
       </div>
 
       {filtersOpen ? (
-        <div className="panel grid gap-4 p-4 sm:grid-cols-2">
+        <div className="panel grid gap-5 p-4 sm:grid-cols-2">
           <div>
             <label className="label-xs">Region</label>
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
+              className="mt-1.5 w-full rounded-lg border border-input bg-surface px-2.5 py-2 text-sm"
             >
               <option value="all">All regions</option>
               {REGIONS.map((r) => (
@@ -176,7 +206,7 @@ function Explore() {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
-              className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
+              className="mt-1.5 w-full rounded-lg border border-input bg-surface px-2.5 py-2 text-sm"
             >
               <option value="savings">Highest savings</option>
               <option value="cheapest">Cheapest</option>
@@ -225,29 +255,45 @@ function Explore() {
         </div>
       ) : null}
 
-      {cities.length === 0 ? (
-        <EmptyState
-          title="No cities match those filters"
-          body="Loosen the budget or internet minimum to see more of the 25-city dataset."
-        />
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {cities.map((city) => (
-            <CityCard
-              key={city.id}
-              city={city}
-              income={income}
-              saved={saved.includes(city.id)}
-              onToggleSave={() => toggle(city.id)}
-            />
-          ))}
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="label-xs">Cities</h2>
+          <span className="num text-xs text-muted-foreground">{cities.length}</span>
         </div>
-      )}
 
-      <p className="text-xs text-muted-foreground">
-        Showing {cities.length} of {CITIES.length} cities. Cost figures carry a last-verified date
-        on each city page.
+        {cities.length === 0 ? (
+          <EmptyState
+            title="No cities match those filters"
+            body="Loosen the budget or internet minimum to see more of the 25-city dataset."
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {cities.map((city) => (
+              <CityCard
+                key={city.id}
+                city={city}
+                income={income}
+                saved={saved.includes(city.id)}
+                onToggleSave={() => toggle(city.id)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <p className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
+        Cost figures are estimates and carry a last-verified date on each city page. Always confirm
+        visa and tax rules with official authorities.
       </p>
+    </div>
+  );
+}
+
+function HeroStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-surface-2 px-3 py-2">
+      <dt className="label-xs">{label}</dt>
+      <dd className="num mt-0.5 text-base font-semibold">{value}</dd>
     </div>
   );
 }
