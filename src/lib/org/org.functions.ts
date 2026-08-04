@@ -320,16 +320,17 @@ export const decideTravelRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; status: "approved" | "declined"; note?: string }) => d)
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = {
+    const patch = {
       status: data.status,
       decided_by: context.userId,
       decided_at: new Date().toISOString(),
+      ...(data.note ? { note: data.note.slice(0, 500) } : {}),
     };
-    if (data.note) patch['note'] = data.note.slice(0, 500);
     const { error } = await context.supabase
       .from("travel_requests")
       .update(patch)
       .eq("id", data.id);
+
     if (error) throw new Error(error.message);
     return { ok: true };
   });
