@@ -67,13 +67,38 @@ function cautionFor(city: City): string | null {
   return null;
 }
 
+/**
+ * Gates, applied before any scoring. A first move needs an existing arrival
+ * infrastructure — coworking, short lets that answer emails in English, other
+ * people who did it last month — and that is not something a low cost of
+ * living substitutes for. Cities that fail a gate are not ranked lower, they
+ * are not shown, and the page says why.
+ */
+export const FIRST_MOVE_GATES = {
+  minNomadCommunity: 4.5,
+  minSafety: 3.5,
+  minInternetMbps: 90,
+  /** Above this, the runway maths stops working for most first movers. */
+  maxLeanMonthlyUsd: 2000,
+} as const;
+
+export function passesFirstMoveGates(city: City): boolean {
+  return (
+    city.scores.nomadCommunity >= FIRST_MOVE_GATES.minNomadCommunity &&
+    city.scores.safety >= FIRST_MOVE_GATES.minSafety &&
+    city.scores.internetSpeedMbps >= FIRST_MOVE_GATES.minInternetMbps &&
+    city.costs.totalMonthlyLean <= FIRST_MOVE_GATES.maxLeanMonthlyUsd
+  );
+}
+
 export function rankForFirstMove(cities: City[], limit = 6): FirstMovePick[] {
+  const eligible = cities.filter(passesFirstMoveGates);
   const leanCosts = cities.map((c) => c.costs.totalMonthlyLean);
   const min = Math.min(...leanCosts);
   const max = Math.max(...leanCosts);
   const w = FIRST_MOVE_WEIGHTS;
 
-  return cities
+  return eligible
     .map((city) => {
       const s = city.scores;
       const score =
