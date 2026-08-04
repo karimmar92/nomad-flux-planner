@@ -38,6 +38,7 @@ import { Route as CommunityRequestsRouteImport } from './routes/community.reques
 import { Route as PlanIndexRouteImport } from './routes/plan.index'
 import { Route as PlanChecklistRouteImport } from './routes/plan.checklist'
 import { Route as PlanCostsRouteImport } from './routes/plan.costs'
+import { Route as PlanTaxExitRouteImport } from './routes/plan.tax-exit'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
@@ -194,6 +195,11 @@ const PlanCostsRoute = PlanCostsRouteImport.update({
   path: '/costs',
   getParentRoute: () => PlanRoute,
 } as any)
+const PlanTaxExitRoute = PlanTaxExitRouteImport.update({
+  id: '/tax-exit',
+  path: '/tax-exit',
+  getParentRoute: () => PlanRoute,
+} as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -263,6 +269,7 @@ export interface FileRoutesByFullPath {
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
+  '/plan/tax-exit': typeof PlanTaxExitRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/community/requests'
     | '/plan/checklist'
     | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/community/requests'
     | '/plan/checklist'
     | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -457,6 +468,7 @@ export interface FileRouteTypes {
     | '/community/requests'
     | '/plan/checklist'
     | '/plan/costs'
+    | '/plan/tax-exit'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -709,6 +721,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanCostsRouteImport
       parentRoute: typeof PlanRoute
     }
+    '/plan/tax-exit': {
+      id: '/plan/tax-exit'
+      path: '/tax-exit'
+      fullPath: '/plan/tax-exit'
+      preLoaderRoute: typeof PlanTaxExitRouteImport
+      parentRoute: typeof PlanRoute
+    }
     '/record/': {
       id: '/record/'
       path: '/'
@@ -771,12 +790,14 @@ declare module '@tanstack/react-router' {
 interface PlanRouteChildren {
   PlanChecklistRoute: typeof PlanChecklistRoute
   PlanCostsRoute: typeof PlanCostsRoute
+  PlanTaxExitRoute: typeof PlanTaxExitRoute
   PlanIndexRoute: typeof PlanIndexRoute
 }
 
 const PlanRouteChildren: PlanRouteChildren = {
   PlanChecklistRoute: PlanChecklistRoute,
   PlanCostsRoute: PlanCostsRoute,
+  PlanTaxExitRoute: PlanTaxExitRoute,
   PlanIndexRoute: PlanIndexRoute,
 }
 
