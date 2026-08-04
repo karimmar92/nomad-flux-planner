@@ -21,6 +21,11 @@ import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useProfile, useTrips } from "@/lib/store";
 import { buildBorderRunPlan } from "@/lib/border-run";
 import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
+import { detectPreDeparture, PRE_DEPARTURE_MAX_DAYS } from "@/lib/pre-departure";
+import { PreDepartureCard } from "@/components/predeparture/PreDepartureCard";
+import { TripChecklistCard } from "@/components/predeparture/TripChecklist";
+import { hasTickedEsimAnywhere } from "@/lib/checklist";
+import { toDayIndex } from "@/lib/schengen";
 import { TransportGroup } from "@/components/partners/TransportGroup";
 import { getCity } from "@/lib/cities";
 import { flagEmoji } from "@/lib/arbitrage";
@@ -93,6 +98,7 @@ function Tracker() {
   const today = useMemo(() => todayIso(), []);
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
   const [justAdded, setJustAdded] = useState<Trip | null>(null);
+  const [preDepartureDismissed, setPreDepartureDismissed] = useState(false);
 
   const engineTrips = useMemo(() => toEngineTrips(trips), [trips]);
   const schengen = useMemo(() => schengenStatus(engineTrips, today), [engineTrips, today]);
@@ -115,6 +121,25 @@ function Tracker() {
         },
       }),
     [trips, today, profile.monthly_income_usd, profile.home_city_id],
+  );
+
+  /**
+   * Pre-departure, not arrival. An eSIM offer on arrival is unsellable —
+   * no roaming, no usable WiFi, immigration queue. This fires 1-7 days out,
+   * when buying one is actually possible.
+   */
+  const preDeparture = useMemo(() => detectPreDeparture(trips, today), [trips, today]);
+
+  /** Upcoming trips that deserve a cached, offline-readable checklist. */
+  const upcomingTrips = useMemo(
+    () =>
+      trips
+        .filter((t) => {
+          const d = toDayIndex(t.entry_date) - toDayIndex(today);
+          return d >= 0 && d <= 60;
+        })
+        .sort((a, b) => (a.entry_date < b.entry_date ? -1 : 1)),
+    [trips, today],
   );
 
   const countries = Array.from(new Set(trips.map((t) => t.country_code)));
@@ -176,6 +201,16 @@ function Tracker() {
 
       {borderRun ? (
         <BorderRunCard plan={borderRun} isPro={profile.plan === "pro"} />
+      ) : null}
+
+      {preDeparture && !preDepartureDismissed ? (
+        <PreDepartureCard
+          trigger={preDeparture}
+          /* One card per screen: the border-run card already holds it. */
+          showPartnerCard={!borderRun}
+          esimAlreadyTicked={hasTickedEsimAnywhere()}
+          onDismiss={() => setPreDepartureDismissed(true)}
+        />
       ) : null}
 
       {/* Schengen engine */}
@@ -295,11 +330,19 @@ function Tracker() {
           }
           /* One card per screen: the border-run card already carries this
              screen's single partner link when a deadline is live. */
-          showPartnerCard={!borderRun}
+          showPartnerCard={!borderRun && !(preDeparture && !preDepartureDismissed)}
           onDismiss={() => setJustAdded(null)}
         />
       ) : null}
 
+
+      {upcomingTrips.length > 0 ? (
+        <div className="space-y-3">
+          {upcomingTrips.slice(0, 3).map((trip) => (
+            <TripChecklistCard key={trip.id} trip={trip} />
+          ))}
+        </div>
+      ) : null}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Your trips</h2>
