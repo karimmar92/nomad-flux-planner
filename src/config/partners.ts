@@ -316,6 +316,12 @@ export const PARTNER_FREE_ZONES = [
   "src/lib/arbitrage.ts", // City scoring, cost maths and ordering
   "src/lib/cities.ts", // Seed data and city ordering
   "src/components/CityCard.tsx", // Ranked list row
+  "src/routes/plan.index.tsx", // Runway calculator and the first-move ranking
+  "src/routes/plan.costs.tsx", // Setup budget — a cost estimate must not be a shopping list
+  "src/routes/plan.tax-exit.tsx", // Home tax exit: no links of any kind, see the file header
+  "src/lib/plan/runway.ts", // Runway and setup-budget maths
+  "src/lib/plan/first-timer.ts", // First-move ranking
+  "src/lib/plan/tax-exit.ts", // Tax-exit notes
 ] as const;
 
 /**
@@ -399,6 +405,13 @@ export type PartnerPlacement =
    * See FORMATION RULE and DISQUALIFYING_OUTCOMES.
    */
   | "company_tool"
+  /**
+   * A single item on the pre-departure countdown checklist, and only where
+   * buying the thing IS the next action (eSIM at 7 days, insurance at 60).
+   * The checklist renders at most one card in total — see nextPurchaseTask()
+   * in src/lib/plan/departure.ts.
+   */
+  | "plan_checklist"
   | "onboarding";
 
 /**

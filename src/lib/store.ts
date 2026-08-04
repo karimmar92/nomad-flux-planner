@@ -25,6 +25,7 @@ export const DEFAULT_PROFILE: Profile = {
   currency_display: "USD",
   savings_usd: null,
   plan: "free",
+  stage: "abroad",
   onboarded: false,
 };
 
