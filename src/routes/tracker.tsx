@@ -21,7 +21,7 @@ import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useProfile, useTrips } from "@/lib/store";
 import { buildBorderRunPlan } from "@/lib/border-run";
 import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
-import { detectPreDeparture, PRE_DEPARTURE_MAX_DAYS } from "@/lib/pre-departure";
+import { detectPreDeparture } from "@/lib/pre-departure";
 import { PreDepartureCard } from "@/components/predeparture/PreDepartureCard";
 import { TripChecklistCard } from "@/components/predeparture/TripChecklist";
 import { hasTickedEsimAnywhere } from "@/lib/checklist";
