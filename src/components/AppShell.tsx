@@ -95,6 +95,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/kit" className="hover:text-foreground">
           Nomad kit
         </Link>
+        <Link to="/business" className="hover:text-foreground">
+          For teams
+        </Link>
+        <Link to="/org" className="hover:text-foreground">
+          Team dashboard
+        </Link>
+        <Link to="/settings/employer-sharing" className="hover:text-foreground">
+          Employer sharing
+        </Link>
         <Link to="/how-we-make-money" className="hover:text-foreground">
           How we make money
         </Link>

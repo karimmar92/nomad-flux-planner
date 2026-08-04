@@ -14,6 +14,7 @@ import {
   leaveOrganisation,
 } from "@/lib/org/org.functions";
 import { buildOrgOverview, PE_BENCHMARK_LABEL } from "@/lib/org/presence";
+import { TravelRequestForm } from "@/components/org/TravelRequestForm";
 import { todayIso } from "@/lib/trip-dates";
 
 export const Route = createFileRoute("/settings/employer-sharing")({
@@ -229,6 +230,32 @@ function EmployerSharing() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="panel space-y-3 p-4">
+        <h2 className="text-sm font-semibold">Propose a trip</h2>
+        <p className="text-sm text-muted-foreground">
+          Where a policy requires approval, this sends the dates and the resulting day count — and
+          nothing else — to your admin.
+        </p>
+        <TravelRequestForm
+          orgId={membership.org_id}
+          rows={rows}
+          policies={ctx.data?.policies ?? []}
+          userId={rows[0]?.user_id ?? ""}
+        />
+        {(ctx.data?.requests ?? []).length > 0 ? (
+          <ul className="space-y-1 text-sm">
+            {(ctx.data?.requests ?? []).map((r) => (
+              <li key={r.id} className="flex flex-wrap justify-between gap-2">
+                <span>
+                  {r.country_code} · {r.start_date} → {r.end_date}
+                </span>
+                <span className="text-muted-foreground">{r.status}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
 
       <section className="panel space-y-2 p-4">

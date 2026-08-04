@@ -9,7 +9,6 @@ import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
 import { useSession } from "@/lib/use-session";
 import {
-  createTravelRequest,
   decideTravelRequest,
   deletePolicy,
   getEmployerDashboard,
@@ -716,9 +715,4 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
       </section>
     </div>
   );
-}
-
-/** Employee-side entry point for proposing a trip, used from the tracker. */
-export function useCreateTravelRequest() {
-  return useServerFn(createTravelRequest);
 }
