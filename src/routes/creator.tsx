@@ -55,7 +55,12 @@ function CreatorPage() {
     );
   }
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading)
+    return (
+      <RequiresNetwork reason="Creator dashboard needs a connection — commission is calculated server-side from the ledger.">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </RequiresNetwork>
+    );
 
   if (!data?.isCreator) {
     return (

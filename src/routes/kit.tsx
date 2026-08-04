@@ -54,12 +54,15 @@ function KitPage() {
         </p>
       </header>
 
-      <PartnerGroup
-        category="esim"
-        placement="kit_page"
-        title="Connectivity"
-        variant="row"
-      />
+      {/* Partner links are outbound purchases: disabled, with a reason, offline. */}
+      <RequiresNetwork reason="Offline — partner links open once you're back online. Buy your eSIM before you fly.">
+        <PartnerGroup
+          category="esim"
+          placement="kit_page"
+          title="Connectivity"
+          variant="row"
+        />
+      </RequiresNetwork>
 
       <div className="space-y-3">
         <div className="flex items-start gap-3 rounded-xl border border-accent-warning/30 bg-accent-warning-muted p-4">

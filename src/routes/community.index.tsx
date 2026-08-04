@@ -129,6 +129,10 @@ function CommunityRadar() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4 py-2">
+      {/* Radar is inherently a shared, live surface — it cannot work offline. */}
+      <RequiresNetwork reason="Radar needs a connection — it shows who is nearby right now.">
+        <></>
+      </RequiresNetwork>
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <span className="label-xs">Community</span>
