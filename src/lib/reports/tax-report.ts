@@ -19,7 +19,14 @@
  * =========================================================================
  */
 import { CITIES } from "@/lib/cities";
-import { fromDayIndex, schengenDaysUsed, toDayIndex, SCHENGEN_MAX_DAYS } from "@/lib/schengen";
+import {
+  fromDayIndex,
+  schengenDaysUsed,
+  toDayIndex,
+  SCHENGEN_COUNTRIES,
+  SCHENGEN_MAX_DAYS,
+} from "@/lib/schengen";
+import { toEngineTrips } from "@/lib/trip-dates";
 import type { Trip } from "@/lib/types";
 
 /* -------------------------------------------------------------------- */
@@ -305,6 +312,7 @@ export function schengenYearSummary(
   const start = toDayIndex(isoFromParts(year, 0, 1));
   const end = Math.min(toDayIndex(isoFromParts(year, 11, 31)), toDayIndex(todayIso));
 
+  const engineTrips = toEngineTrips(trips);
   let maxWindowDays = 0;
   let maxWindowDate: string | null = null;
   const exceededDates: string[] = [];
@@ -312,7 +320,7 @@ export function schengenYearSummary(
 
   for (let d = start; d <= end; d++) {
     const iso = fromDayIndex(d);
-    const used = schengenDaysUsed(trips, iso);
+    const used = schengenDaysUsed(engineTrips, iso);
     if (used > maxWindowDays) {
       maxWindowDays = used;
       maxWindowDate = iso;
@@ -320,15 +328,13 @@ export function schengenYearSummary(
     if (used > SCHENGEN_MAX_DAYS) exceededDates.push(iso);
   }
 
+  // Membership comes from the engine's own list, never a local copy of it.
   for (const trip of trips) {
     if (trip.purpose === "residence") continue;
+    if (!SCHENGEN_COUNTRIES.has(trip.country_code.toUpperCase())) continue;
     const entry = toDayIndex(trip.entry_date);
     const exit = trip.exit_date ? toDayIndex(trip.exit_date) : end;
-    for (let d = Math.max(entry, start); d <= Math.min(exit, end); d++) {
-      // Only Schengen trips contribute to schengenDaysUsed; reuse that engine's
-      // notion of membership rather than re-deriving it here.
-      if (schengenDaysUsed([trip], fromDayIndex(d)) > 0) inSchengen.add(d);
-    }
+    for (let d = Math.max(entry, start); d <= Math.min(exit, end); d++) inSchengen.add(d);
   }
 
   return {

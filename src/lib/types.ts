@@ -189,4 +189,6 @@ export type Trip = {
   exit_date: string | null; // null = currently there
   purpose: TripPurpose;
   notes: string;
+  /** When the entry was logged. Drives the report's retrospective-entry flag. */
+  created_at?: string;
 };
