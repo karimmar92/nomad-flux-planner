@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as CreatorRouteImport } from './routes/creator'
+import { Route as CreatorsRouteImport } from './routes/creators'
 import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -48,6 +50,16 @@ const CalculatorRoute = CalculatorRouteImport.update({
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorRoute = CreatorRouteImport.update({
+  id: '/creator',
+  path: '/creator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorsRoute = CreatorsRouteImport.update({
+  id: '/creators',
+  path: '/creators',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowWeMakeMoneyRoute = HowWeMakeMoneyRouteImport.update({
@@ -139,6 +151,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/creator': typeof CreatorRoute
+  '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
@@ -161,6 +175,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/creator': typeof CreatorRoute
+  '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
@@ -184,6 +200,8 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/calculator': typeof CalculatorRoute
   '/compare': typeof CompareRoute
+  '/creator': typeof CreatorRoute
+  '/creators': typeof CreatorsRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
@@ -208,6 +226,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calculator'
     | '/compare'
+    | '/creator'
+    | '/creators'
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
@@ -230,6 +250,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calculator'
     | '/compare'
+    | '/creator'
+    | '/creators'
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
@@ -252,6 +274,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/calculator'
     | '/compare'
+    | '/creator'
+    | '/creators'
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
@@ -275,6 +299,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CalculatorRoute: typeof CalculatorRoute
   CompareRoute: typeof CompareRoute
+  CreatorRoute: typeof CreatorRoute
+  CreatorsRoute: typeof CreatorsRoute
   HowWeMakeMoneyRoute: typeof HowWeMakeMoneyRoute
   KitRoute: typeof KitRoute
   McpRoute: typeof McpRoute
@@ -321,6 +347,20 @@ declare module '@tanstack/react-router' {
       path: '/compare'
       fullPath: '/compare'
       preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator': {
+      id: '/creator'
+      path: '/creator'
+      fullPath: '/creator'
+      preLoaderRoute: typeof CreatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creators': {
+      id: '/creators'
+      path: '/creators'
+      fullPath: '/creators'
+      preLoaderRoute: typeof CreatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-we-make-money': {
@@ -443,6 +483,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CalculatorRoute: CalculatorRoute,
   CompareRoute: CompareRoute,
+  CreatorRoute: CreatorRoute,
+  CreatorsRoute: CreatorsRoute,
   HowWeMakeMoneyRoute: HowWeMakeMoneyRoute,
   KitRoute: KitRoute,
   McpRoute: McpRoute,
