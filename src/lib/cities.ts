@@ -21,6 +21,8 @@ type SeedCity = {
   visa: Visa;
   tax: Tax;
   arbitrageNote: string;
+  nearestAirportIata: string;
+  overlandNeighbours: string[];
 };
 
 /** Dataset-wide verification date. Every row carries it in the UI. */
@@ -44,6 +46,8 @@ function toCity(row: SeedCity): City {
     visa: row.visa,
     tax: row.tax,
     arbitrage_note: row.arbitrageNote,
+    nearest_airport_iata: row.nearestAirportIata,
+    overland_neighbours: row.overlandNeighbours ?? [],
     last_verified: SEED_LAST_VERIFIED,
     confidence: (LOW_CONFIDENCE_IDS.has(row.id) ? "low" : "medium") as Confidence,
   };
