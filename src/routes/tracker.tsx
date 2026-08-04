@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { addDays, differenceInCalendarDays, format, subDays } from "date-fns";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import {
-  SCHENGEN_LIMIT_DAYS,
-  calculateSchengenStatus,
-  dayKey,
-  daysInCountryTaxYear,
-  isSchengen,
-  maxStayFromEntry,
-  toDay,
+  SCHENGEN_COUNTRIES,
+  SCHENGEN_MAX_DAYS,
+  maxStayFrom,
+  schengenStatus,
 } from "@/lib/schengen";
+import {
+  addDaysIso,
+  daysInCountryTaxYear,
+  inclusiveDays,
+  monthYearLabel,
+  schengenWindowDays,
+  todayIso,
+  toEngineTrips,
+} from "@/lib/trip-dates";
 import { CITIES } from "@/lib/cities";
 import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useTrips } from "@/lib/store";
@@ -79,14 +84,17 @@ const PALETTE = [
 
 function Tracker() {
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
-  const today = useMemo(() => toDay(new Date()), []);
-  const [plannedEntry, setPlannedEntry] = useState(dayKey(addDays(today, 30)));
+  const today = useMemo(() => todayIso(), []);
+  const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
 
-  const schengen = useMemo(() => calculateSchengenStatus(trips, today), [trips, today]);
-  const planner = useMemo(
-    () => maxStayFromEntry(trips, toDay(plannedEntry)),
-    [trips, plannedEntry],
+  const engineTrips = useMemo(() => toEngineTrips(trips), [trips]);
+  const schengen = useMemo(() => schengenStatus(engineTrips, today), [engineTrips, today]);
+  const windowDays = useMemo(() => schengenWindowDays(trips, today), [trips, today]);
+  const plannerDays = useMemo(
+    () => maxStayFrom(engineTrips, plannedEntry),
+    [engineTrips, plannedEntry],
   );
+  const plannerLastDay = plannerDays > 0 ? addDaysIso(plannedEntry, plannerDays - 1) : null;
 
   const countries = Array.from(new Set(trips.map((t) => t.country_code)));
   const colorFor = (code: string) =>
@@ -99,11 +107,12 @@ function Tracker() {
   });
 
   const alerts = [
-    ...(schengen.daysUsed / SCHENGEN_LIMIT_DAYS >= 0.75
+    ...(schengen.status !== "ok"
       ? [
           {
-            level: schengen.daysUsed / SCHENGEN_LIMIT_DAYS >= 0.9 ? "high" : "warn",
-            text: `Schengen: ${schengen.daysUsed} of 90 days used in the current rolling window. ${schengen.daysRemaining} remaining today.`,
+            level:
+              schengen.status === "warning" ? "warn" : "high",
+            text: `Schengen: ${schengen.used} of ${SCHENGEN_MAX_DAYS} days used in the current rolling window. ${schengen.remaining} remaining today.`,
           },
         ]
       : []),
@@ -148,22 +157,22 @@ function Tracker() {
       <section className="panel p-4">
         <h2 className="mb-3 text-sm font-semibold">Schengen 90/180</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="Days used" value={schengen.daysUsed} hint="in trailing 180 days" />
+          <Stat label="Days used" value={schengen.used} hint="in trailing 180 days" />
           <Stat
             label="Days remaining"
-            value={schengen.daysRemaining}
-            tone={schengen.daysRemaining <= 9 ? "negative" : "positive"}
+            value={schengen.remaining}
+            tone={schengen.status === "ok" ? "positive" : "negative"}
             size="lg"
           />
-          <Stat label="Window opened" value={schengen.windowStart} size="sm" />
+          <Stat label="Window opened" value={addDaysIso(today, -179)} size="sm" />
           <Stat
             label="Full 90 available from"
-            value={schengen.nextFullResetDate}
+            value={schengen.nextFullNinety ?? "beyond 400 days"}
             size="sm"
             hint="earliest date for a fresh full stay"
           />
         </div>
-        {schengen.overstayed ? (
+        {schengen.status === "violation" ? (
           <p className="mt-3 rounded-md border border-negative/50 bg-negative-muted px-3 py-2 text-xs text-negative">
             Your logged trips exceed 90 days in the current window.
           </p>
@@ -183,8 +192,8 @@ function Tracker() {
             />
             <p className="num text-sm">
               you could stay{" "}
-              <span className="font-semibold text-primary">{planner.maxDays} days</span>
-              {planner.lastLegalDay ? ` — until ${planner.lastLegalDay}` : ""}
+              <span className="font-semibold text-primary">{plannerDays} days</span>
+              {plannerLastDay ? ` — until ${plannerLastDay}` : ""}
             </p>
           </div>
         </div>
@@ -196,7 +205,7 @@ function Tracker() {
         {trips.length === 0 ? (
           <p className="text-sm text-muted-foreground">Log a trip to draw your timeline.</p>
         ) : (
-          <Timeline trips={trips} today={today} colorFor={colorFor} schengenDays={new Set(schengen.occupiedDays)} />
+          <Timeline trips={trips} today={today} colorFor={colorFor} schengenDays={windowDays} />
         )}
       </section>
 
@@ -267,7 +276,7 @@ function Tracker() {
                   <div className="min-w-0 flex-1">
                     <div className="font-medium">
                       {flagEmoji(trip.country_code)} {countryName(trip.country_code)}
-                      {isSchengen(trip.country_code) ? (
+                      {SCHENGEN_COUNTRIES.has(trip.country_code) ? (
                         <span className="ml-2 rounded border border-border px-1 text-[10px] text-muted-foreground">
                           Schengen
                         </span>
@@ -275,11 +284,7 @@ function Tracker() {
                     </div>
                     <div className="num text-xs text-muted-foreground">
                       {trip.entry_date} → {trip.exit_date ?? "still here"} ·{" "}
-                      {differenceInCalendarDays(
-                        toDay(trip.exit_date ?? dayKey(today)),
-                        toDay(trip.entry_date),
-                      ) + 1}{" "}
-                      days · {trip.purpose.replace("_", " ")}
+                      {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days · {trip.purpose.replace("_", " ")}
                     </div>
                   </div>
                   <button
@@ -307,18 +312,17 @@ function Timeline({
   schengenDays,
 }: {
   trips: Trip[];
-  today: Date;
+  today: string;
   colorFor: (code: string) => string | undefined;
   schengenDays: Set<string>;
 }) {
-  const start = subDays(today, 364);
-  const days = Array.from({ length: 365 }, (_, i) => addDays(start, i));
+  const start = addDaysIso(today, -364);
+  const days = Array.from({ length: 365 }, (_, i) => addDaysIso(start, i));
 
-  const countryOn = (day: Date) => {
-    const key = dayKey(day);
+  const countryOn = (key: string) => {
     for (const trip of trips) {
       const entry = trip.entry_date;
-      const exit = trip.exit_date ?? dayKey(today);
+      const exit = trip.exit_date ?? today;
       if (key >= entry && key <= exit) return trip.country_code;
     }
     return null;
@@ -331,8 +335,8 @@ function Timeline({
           const code = countryOn(day);
           return (
             <div
-              key={dayKey(day)}
-              title={`${dayKey(day)}${code ? ` — ${countryName(code)}` : ""}`}
+              key={day}
+              title={`${day}${code ? ` — ${countryName(code)}` : ""}`}
               className="h-full flex-1"
               style={{ background: code ? colorFor(code) : "var(--surface-2)" }}
             />
@@ -342,10 +346,10 @@ function Timeline({
       <div className="mt-1 flex h-1.5 w-full gap-px">
         {days.map((day) => (
           <div
-            key={`s-${dayKey(day)}`}
+            key={`s-${day}`}
             className="h-full flex-1"
             style={{
-              background: schengenDays.has(dayKey(day))
+              background: schengenDays.has(day)
                 ? "var(--negative)"
                 : "transparent",
             }}
@@ -353,9 +357,9 @@ function Timeline({
         ))}
       </div>
       <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-        <span>{format(start, "MMM yyyy")}</span>
+        <span>{monthYearLabel(start)}</span>
         <span>Red strip = days counted in the current Schengen window</span>
-        <span>{format(today, "MMM yyyy")}</span>
+        <span>{monthYearLabel(today)}</span>
       </div>
     </div>
   );
@@ -363,7 +367,7 @@ function Timeline({
 
 function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
   const [country, setCountry] = useState("PT");
-  const [entry, setEntry] = useState(dayKey(new Date()));
+  const [entry, setEntry] = useState(() => todayIso());
   const [exit, setExit] = useState("");
   const [stillHere, setStillHere] = useState(false);
   const [purpose, setPurpose] = useState<TripPurpose>("tourist");
