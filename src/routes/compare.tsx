@@ -4,7 +4,10 @@ import {
   computeArbitrage,
   flagEmoji,
   formatUsd,
+  isSchengenCity,
   monthlyCost,
+  nomadIncomeMonthly,
+  taxYearLabel,
   touristDaysFor,
 } from "@/lib/arbitrage";
 import { useProfile } from "@/lib/store";
@@ -152,9 +155,9 @@ function ComparePage() {
               <CompareRow
                 label="Internet"
                 cities={selected}
-                value={(c) => `${c.scores.internet_mbps} Mbps`}
-                best={bestOf((c) => c.scores.internet_mbps)}
-                raw={(c) => c.scores.internet_mbps}
+                value={(c) => `${c.scores.internetSpeedMbps} Mbps`}
+                best={bestOf((c) => c.scores.internetSpeedMbps)}
+                raw={(c) => c.scores.internetSpeedMbps}
               />
               <CompareRow
                 label="Safety"
@@ -166,52 +169,50 @@ function ComparePage() {
               <CompareRow
                 label="Nomad community"
                 cities={selected}
-                value={(c) => c.scores.community.toFixed(1)}
-                best={bestOf((c) => c.scores.community)}
-                raw={(c) => c.scores.community}
+                value={(c) => c.scores.nomadCommunity.toFixed(1)}
+                best={bestOf((c) => c.scores.nomadCommunity)}
+                raw={(c) => c.scores.nomadCommunity}
               />
               <CompareRow
-                label={`Tourist days (${profile.nationality})`}
+                label="Visa-free tourist days"
                 cities={selected}
-                value={(c) => `${touristDaysFor(c, profile.nationality)}`}
-                best={bestOf((c) => touristDaysFor(c, profile.nationality))}
-                raw={(c) => touristDaysFor(c, profile.nationality)}
+                value={(c) => `${touristDaysFor(c)}`}
+                best={bestOf((c) => touristDaysFor(c))}
+                raw={(c) => touristDaysFor(c)}
               />
               <CompareRow
                 label="Nomad visa"
                 cities={selected}
-                value={(c) => c.visa.nomad_visa?.name ?? "None"}
+                value={(c) => (c.visa.nomadVisa.exists ? c.visa.nomadVisa.name : "None")}
               />
               <CompareRow
                 label="Visa income req."
                 cities={selected}
-                value={(c) =>
-                  c.visa.nomad_visa
-                    ? c.visa.nomad_visa.income_usd_monthly === 0
-                      ? "None"
-                      : formatUsd(c.visa.nomad_visa.income_usd_monthly)
-                    : "—"
-                }
+                value={(c) => {
+                  const req = nomadIncomeMonthly(c);
+                  if (!c.visa.nomadVisa.exists) return "—";
+                  return req == null ? "Savings-based" : formatUsd(req);
+                }}
               />
               <CompareRow
                 label="Schengen"
                 cities={selected}
-                value={(c) => (c.visa.schengen ? "Yes" : "No")}
+                value={(c) => (isSchengenCity(c) ? "Yes — burns 90/180" : "No")}
               />
               <CompareRow
                 label="Tax residency trigger"
                 cities={selected}
-                value={(c) => `${c.tax.residency_trigger_days} days`}
+                value={(c) => `${c.tax.residencyTriggerDays} days`}
               />
               <CompareRow
                 label="Tax year"
                 cities={selected}
-                value={(c) => c.tax.tax_year}
+                value={(c) => taxYearLabel(c)}
               />
               <CompareRow
                 label="Special regime"
                 cities={selected}
-                value={(c) => c.tax.special_regime ?? "None"}
+                value={(c) => c.tax.specialRegime?.name ?? "None"}
               />
             </tbody>
           </table>

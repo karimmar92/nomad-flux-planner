@@ -11,17 +11,27 @@ import type { Trip } from "./types";
 /**
  * Countries in the Schengen area (ISO-2). Used by the rolling 90/180 engine.
  */
-export const SCHENGEN_COUNTRIES = [
+/**
+ * ISO-3166-1 alpha-2 codes of every Schengen member state.
+ *
+ * REVIEW ANNUALLY: membership changes (Bulgaria and Romania joined in full in
+ * 2025; further accessions are possible). A stale list silently miscounts the
+ * 90/180 window, so re-verify this against the EU Commission list each year.
+ */
+export const schengen_countries = [
   "AT", "BE", "BG", "HR", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS",
   "IT", "LV", "LI", "LT", "LU", "MT", "NL", "NO", "PL", "PT", "RO", "SK", "SI",
   "ES", "SE", "CH",
 ];
 
+/** Backwards-compatible alias. */
+export const SCHENGEN_COUNTRIES = schengen_countries;
+
 export const SCHENGEN_LIMIT_DAYS = 90;
 export const SCHENGEN_WINDOW_DAYS = 180;
 
 export function isSchengen(countryCode: string): boolean {
-  return SCHENGEN_COUNTRIES.includes(countryCode.toUpperCase());
+  return schengen_countries.includes(countryCode.toUpperCase());
 }
 
 /** Parse a yyyy-MM-dd string into a date-only value. Never compare timestamps. */
