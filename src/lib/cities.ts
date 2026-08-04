@@ -1,3 +1,9 @@
+/**
+ * PARTNER-FREE ZONE (see PARTNER_FREE_ZONES in src/config/partners.ts).
+ * No affiliate link may ever be rendered here. The seed dataset and city ordering
+ * decides what the app recommends, and that must depend only on the user's
+ * income, their filters and the seed data — never on commission.
+ */
 import seed from "@/data/seed-cities.json";
 import type { City, Confidence, Costs, Scores, Tax, Visa } from "./types";
 

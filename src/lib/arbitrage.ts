@@ -1,3 +1,9 @@
+/**
+ * PARTNER-FREE ZONE (see PARTNER_FREE_ZONES in src/config/partners.ts).
+ * No affiliate link may ever be rendered here. City scoring, cost maths and ordering
+ * decides what the app recommends, and that must depend only on the user's
+ * income, their filters and the seed data — never on commission.
+ */
 import {
   MONTHLY_COST_KEYS,
   REFERENCE_COST_KEYS,

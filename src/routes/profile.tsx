@@ -155,6 +155,16 @@ function ProfilePage() {
       </section>
 
       <p className="text-xs text-muted-foreground">
+        <Link to="/kit" className="text-primary underline-offset-2 hover:underline">
+          Nomad kit — eSIM &amp; insurance
+        </Link>{" "}
+        ·{" "}
+        <Link to="/how-we-make-money" className="hover:text-foreground">
+          How we make money
+        </Link>
+      </p>
+
+      <p className="text-xs text-muted-foreground">
         Plan: <span className="font-medium capitalize text-foreground">{profile.plan}</span> ·{" "}
         <Link to="/pricing" className="text-primary underline-offset-2 hover:underline">
           See Pro
