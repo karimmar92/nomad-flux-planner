@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       commission_ledger: {
         Row: {
           amount_cents: number
@@ -96,6 +117,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          intro_note: string
+          recipient_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["connection_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intro_note: string
+          recipient_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["connection_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intro_note?: string
+          recipient_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["connection_status"]
+        }
+        Relationships: []
       }
       creator_applications: {
         Row: {
@@ -323,6 +371,38 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          body: string
+          connection_id: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          connection_id: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          connection_id?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_members: {
         Row: {
           created_at: string
@@ -441,45 +521,111 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_clicks: {
+        Row: {
+          city_id: string | null
+          created_at: string
+          id: string
+          partner_id: string
+          placement: string
+          user_id: string | null
+        }
+        Insert: {
+          city_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id: string
+          placement: string
+          user_id?: string | null
+        }
+        Update: {
+          city_id?: string | null
+          created_at?: string
+          id?: string
+          partner_id?: string
+          placement?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          availability: string
+          avatar_url: string | null
+          bio: string | null
+          cell_lat: number | null
+          cell_lng: number | null
           created_at: string
           display_name: string | null
           free_months_granted: number
+          headline: string | null
           heard_about: string | null
           id: string
+          last_active_at: string | null
+          links: Json
+          looking_for: string[]
           plan: string
+          radar_city_id: string | null
           referral_code: string
           referral_program: string | null
           referred_at: string | null
           referred_by: string | null
+          skills: string[]
+          timezone: string | null
           updated_at: string
+          visibility: Database["public"]["Enums"]["radar_visibility"]
         }
         Insert: {
+          availability?: string
+          avatar_url?: string | null
+          bio?: string | null
+          cell_lat?: number | null
+          cell_lng?: number | null
           created_at?: string
           display_name?: string | null
           free_months_granted?: number
+          headline?: string | null
           heard_about?: string | null
           id: string
+          last_active_at?: string | null
+          links?: Json
+          looking_for?: string[]
           plan?: string
+          radar_city_id?: string | null
           referral_code: string
           referral_program?: string | null
           referred_at?: string | null
           referred_by?: string | null
+          skills?: string[]
+          timezone?: string | null
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["radar_visibility"]
         }
         Update: {
+          availability?: string
+          avatar_url?: string | null
+          bio?: string | null
+          cell_lat?: number | null
+          cell_lng?: number | null
           created_at?: string
           display_name?: string | null
           free_months_granted?: number
+          headline?: string | null
           heard_about?: string | null
           id?: string
+          last_active_at?: string | null
+          links?: Json
+          looking_for?: string[]
           plan?: string
+          radar_city_id?: string | null
           referral_code?: string
           referral_program?: string | null
           referred_at?: string | null
           referred_by?: string | null
+          skills?: string[]
+          timezone?: string | null
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["radar_visibility"]
         }
         Relationships: [
           {
@@ -489,7 +635,35 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "radar_profiles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      radar_waitlist: {
+        Row: {
+          city_id: string
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
       }
       referral_clicks: {
         Row: {
@@ -512,6 +686,36 @@ export type Database = {
           id?: string
           landing_path?: string | null
           program?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reported_id: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reported_id: string
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reported_id?: string
+          reporter_id?: string
+          status?: string
         }
         Relationships: []
       }
@@ -653,10 +857,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_referral_rewards_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "radar_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_referral_rewards_referrer_id_fkey"
             columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_referral_rewards_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "radar_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -725,8 +943,61 @@ export type Database = {
           },
         ]
       }
+      radar_profiles: {
+        Row: {
+          availability: string | null
+          avatar_url: string | null
+          bio: string | null
+          cell_lat: number | null
+          cell_lng: number | null
+          display_name: string | null
+          headline: string | null
+          id: string | null
+          last_active_at: string | null
+          links: Json | null
+          looking_for: string[] | null
+          radar_city_id: string | null
+          skills: string[] | null
+          timezone: string | null
+        }
+        Insert: {
+          availability?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          cell_lat?: never
+          cell_lng?: never
+          display_name?: string | null
+          headline?: string | null
+          id?: string | null
+          last_active_at?: never
+          links?: Json | null
+          looking_for?: string[] | null
+          radar_city_id?: string | null
+          skills?: string[] | null
+          timezone?: string | null
+        }
+        Update: {
+          availability?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          cell_lat?: never
+          cell_lng?: never
+          display_name?: string | null
+          headline?: string | null
+          id?: string | null
+          last_active_at?: never
+          links?: Json | null
+          looking_for?: string[] | null
+          radar_city_id?: string | null
+          skills?: string[] | null
+          timezone?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
+      cell_occupancy: { Args: { _lat: number; _lng: number }; Returns: number }
       creator_balance: {
         Args: { _creator_id: string }
         Returns: {
@@ -736,6 +1007,7 @@ export type Database = {
           pending_cents: number
         }[]
       }
+      delete_my_radar_data: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -754,6 +1026,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "creator" | "user"
+      connection_status: "pending" | "accepted" | "declined"
       document_type:
         | "passport"
         | "visa_approval"
@@ -761,6 +1034,14 @@ export type Database = {
         | "proof_of_address"
         | "onward_ticket"
         | "vaccination"
+        | "other"
+      radar_visibility: "ghost" | "city" | "radar"
+      report_reason:
+        | "spam"
+        | "harassment"
+        | "romantic_advance"
+        | "impersonation"
+        | "safety_concern"
         | "other"
     }
     CompositeTypes: {
@@ -890,6 +1171,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "creator", "user"],
+      connection_status: ["pending", "accepted", "declined"],
       document_type: [
         "passport",
         "visa_approval",
@@ -897,6 +1179,15 @@ export const Constants = {
         "proof_of_address",
         "onward_ticket",
         "vaccination",
+        "other",
+      ],
+      radar_visibility: ["ghost", "city", "radar"],
+      report_reason: [
+        "spam",
+        "harassment",
+        "romantic_advance",
+        "impersonation",
+        "safety_concern",
         "other",
       ],
     },
