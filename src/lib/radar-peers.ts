@@ -319,3 +319,25 @@ export const RADAR_WAITLIST_COUNTS: Record<string, number> = {
 export function waitingCount(cityId: string): number {
   return RADAR_WAITLIST_COUNTS[cityId] ?? 12;
 }
+
+/** Incoming intro requests waiting in the inbox on first run. */
+export const SEED_INCOMING = [
+  {
+    id: "conn-seed-adaeze",
+    requester_id: "p-adaeze",
+    recipient_id: "me",
+    status: "pending" as const,
+    intro_note:
+      "Saw you work on data pipelines. I have two EU climate-reporting pilots and no ingestion layer. Coffee at Milk & Madu this week?",
+    created_at: new Date(BASE_NOW - 5 * 3_600_000).toISOString(),
+  },
+  {
+    id: "conn-seed-mara",
+    requester_id: "p-mara",
+    recipient_id: "me",
+    status: "pending" as const,
+    intro_note:
+      "I'm scoping a ledger rebuild and could use a second pair of eyes for two days. Paid, short, no meetings culture.",
+    created_at: new Date(BASE_NOW - 26 * 3_600_000).toISOString(),
+  },
+];

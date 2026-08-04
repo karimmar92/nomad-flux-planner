@@ -6,7 +6,7 @@ import {
   type LatLng,
   type Visibility,
 } from "./geoprivacy";
-import { RADAR_PEERS } from "./radar-peers";
+import { RADAR_PEERS, SEED_INCOMING } from "./radar-peers";
 import type { Block, Connection, RadarProfile, Report } from "./radar-types";
 import { RADAR_CITY_ID } from "./radar-types";
 
@@ -142,7 +142,7 @@ export function useMyRadar() {
 }
 
 export function useConnections() {
-  const { value, update, hydrated } = useStored<Connection[]>(KEYS.connections, []);
+  const { value, update, hydrated } = useStored<Connection[]>(KEYS.connections, SEED_INCOMING);
 
   const request = useCallback(
     (recipientId: string, note: string) => {

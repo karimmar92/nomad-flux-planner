@@ -19,6 +19,8 @@ import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
+import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
+import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +72,16 @@ const CommunityIndexRoute = CommunityIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CommunityRoute,
 } as any)
+const CommunityPeerIdRoute = CommunityPeerIdRouteImport.update({
+  id: '/$peerId',
+  path: '/$peerId',
+  getParentRoute: () => CommunityRoute,
+} as any)
+const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => CommunityRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,6 +93,8 @@ export interface FileRoutesByFullPath {
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
   '/community/': typeof CommunityIndexRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +106,8 @@ export interface FileRoutesByTo {
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
   '/community': typeof CommunityIndexRoute
 }
 export interface FileRoutesById {
@@ -105,6 +121,8 @@ export interface FileRoutesById {
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/city/$cityId': typeof CityCityIdRoute
+  '/community/$peerId': typeof CommunityPeerIdRoute
+  '/community/requests': typeof CommunityRequestsRoute
   '/community/': typeof CommunityIndexRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +137,8 @@ export interface FileRouteTypes {
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
     | '/community/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +150,8 @@ export interface FileRouteTypes {
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
     | '/community'
   id:
     | '__root__'
@@ -142,6 +164,8 @@ export interface FileRouteTypes {
     | '/stays'
     | '/tracker'
     | '/city/$cityId'
+    | '/community/$peerId'
+    | '/community/requests'
     | '/community/'
   fileRoutesById: FileRoutesById
 }
@@ -229,14 +253,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityIndexRouteImport
       parentRoute: typeof CommunityRoute
     }
+    '/community/$peerId': {
+      id: '/community/$peerId'
+      path: '/$peerId'
+      fullPath: '/community/$peerId'
+      preLoaderRoute: typeof CommunityPeerIdRouteImport
+      parentRoute: typeof CommunityRoute
+    }
+    '/community/requests': {
+      id: '/community/requests'
+      path: '/requests'
+      fullPath: '/community/requests'
+      preLoaderRoute: typeof CommunityRequestsRouteImport
+      parentRoute: typeof CommunityRoute
+    }
   }
 }
 
 interface CommunityRouteChildren {
+  CommunityPeerIdRoute: typeof CommunityPeerIdRoute
+  CommunityRequestsRoute: typeof CommunityRequestsRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
 }
 
 const CommunityRouteChildren: CommunityRouteChildren = {
+  CommunityPeerIdRoute: CommunityPeerIdRoute,
+  CommunityRequestsRoute: CommunityRequestsRoute,
   CommunityIndexRoute: CommunityIndexRoute,
 }
 
