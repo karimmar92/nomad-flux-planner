@@ -37,6 +37,7 @@ import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 import { Route as PlanIndexRouteImport } from './routes/plan.index'
 import { Route as PlanChecklistRouteImport } from './routes/plan.checklist'
+import { Route as PlanCostsRouteImport } from './routes/plan.costs'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
@@ -188,6 +189,11 @@ const PlanChecklistRoute = PlanChecklistRouteImport.update({
   path: '/checklist',
   getParentRoute: () => PlanRoute,
 } as any)
+const PlanCostsRoute = PlanCostsRouteImport.update({
+  id: '/costs',
+  path: '/costs',
+  getParentRoute: () => PlanRoute,
+} as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/plan/checklist': typeof PlanChecklistRoute
+  '/plan/costs': typeof PlanCostsRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -371,6 +380,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/plan/checklist'
+    | '/plan/costs'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/plan/checklist'
+    | '/plan/costs'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -445,6 +456,7 @@ export interface FileRouteTypes {
     | '/community/$peerId'
     | '/community/requests'
     | '/plan/checklist'
+    | '/plan/costs'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -690,6 +702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanChecklistRouteImport
       parentRoute: typeof PlanRoute
     }
+    '/plan/costs': {
+      id: '/plan/costs'
+      path: '/costs'
+      fullPath: '/plan/costs'
+      preLoaderRoute: typeof PlanCostsRouteImport
+      parentRoute: typeof PlanRoute
+    }
     '/record/': {
       id: '/record/'
       path: '/'
@@ -751,11 +770,13 @@ declare module '@tanstack/react-router' {
 
 interface PlanRouteChildren {
   PlanChecklistRoute: typeof PlanChecklistRoute
+  PlanCostsRoute: typeof PlanCostsRoute
   PlanIndexRoute: typeof PlanIndexRoute
 }
 
 const PlanRouteChildren: PlanRouteChildren = {
   PlanChecklistRoute: PlanChecklistRoute,
+  PlanCostsRoute: PlanCostsRoute,
   PlanIndexRoute: PlanIndexRoute,
 }
 
