@@ -59,13 +59,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       <OfflineBanner />
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
           <Link to="/" className="flex items-center gap-2">
-            <span className="grid h-6 w-6 place-items-center rounded bg-primary text-[13px] font-bold text-primary-foreground">
-              {APP_NAME.charAt(0)}
-            </span>
-            <span className="text-sm font-semibold tracking-tight">{APP_NAME}</span>
+            <span className="text-xl font-bold tracking-tight text-primary">{APP_NAME}</span>
           </Link>
+
 
           <nav className="ms-4 hidden items-center gap-1 md:flex">
             {NAV.map((item) => (
