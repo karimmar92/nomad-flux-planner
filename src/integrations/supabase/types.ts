@@ -198,6 +198,54 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          expires_on: string | null
+          file_name: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          notes: string
+          storage_path: string
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          expires_on?: string | null
+          file_name: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          notes?: string
+          storage_path: string
+          title: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          expires_on?: string | null
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          notes?: string
+          storage_path?: string
+          title?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fraud_flags: {
         Row: {
           created_at: string
@@ -415,6 +463,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "creator" | "user"
+      document_type:
+        | "passport"
+        | "visa_approval"
+        | "insurance"
+        | "proof_of_address"
+        | "onward_ticket"
+        | "vaccination"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -543,6 +599,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "creator", "user"],
+      document_type: [
+        "passport",
+        "visa_approval",
+        "insurance",
+        "proof_of_address",
+        "onward_ticket",
+        "vaccination",
+        "other",
+      ],
     },
   },
 } as const
