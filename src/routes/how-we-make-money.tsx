@@ -49,6 +49,21 @@ function HowWeMakeMoney() {
           route suggestion, and never in a notification. No fare alerts, ever.
         </p>
         <p>
+          <strong>Banking links are information, not advice.</strong> We list multi-currency
+          accounts only — the ones you use instead of local banking. We will never link you to
+          opening a local bank account, and never to the agencies charging $200–500 for
+          &quot;account opening assistance&quot;, a space with real scams targeting exactly this
+          audience. Where local banking matters for a city, we write it in the city note with no
+          link attached. These links carry a standing disclaimer, live in their own section of the
+          Nomad kit page, and are deliberately kept away from anything about tax residency.
+        </p>
+        <p>
+          <strong>One link per screen, at most.</strong> No screen in {APP_NAME} shows more than a
+          single partner card. If a screen wants two, they go on the Nomad kit page instead. The
+          risk from here is not too little revenue — it is this app quietly turning into a link
+          farm.
+        </p>
+        <p>
           <strong>Commissions never affect city rankings or cost data.</strong> Explore ordering,
           the Compare table, the arbitrage calculator, the border-run ranking and every city score
           are computed only from
@@ -63,6 +78,18 @@ function HowWeMakeMoney() {
         <p>
           <strong>No ads.</strong> No banners, no interstitials, no third-party ad network, ever.
         </p>
+      </section>
+
+      <section className="panel p-4">
+        <h2 className="mb-2 text-sm font-semibold">Current partners</h2>
+        <ul className="space-y-1 text-sm text-muted-foreground">
+          {PARTNERS.map((p) => (
+            <li key={p.id}>
+              <span className="text-foreground">{p.name}</span> — {p.category}
+            </li>
+          ))}
+        </ul>
+
       </section>
 
       <section className="panel p-4">
