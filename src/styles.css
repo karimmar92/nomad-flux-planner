@@ -112,6 +112,12 @@
   --positive: oklch(0.55 0.14 62);
   --positive-muted: oklch(0.55 0.14 62 / 12%);
   --warning: oklch(0.62 0.14 62);
+
+  --accent-positive: oklch(0.52 0.13 162);
+  --accent-positive-muted: oklch(0.52 0.13 162 / 12%);
+  --accent-warning: oklch(0.62 0.13 78);
+  --accent-warning-muted: oklch(0.62 0.13 78 / 14%);
+
   --negative: oklch(0.52 0.19 25);
   --negative-muted: oklch(0.52 0.19 25 / 12%);
   --destructive: oklch(0.52 0.19 25);
