@@ -15,6 +15,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
 import { useTheme } from "@/lib/store";
+import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -29,6 +30,8 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
+  // Country + dates only, and only for people who are in an organisation.
+  useOrgTripSync();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -94,6 +97,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Link>
         <Link to="/kit" className="hover:text-foreground">
           Nomad kit
+        </Link>
+        <Link to="/business" className="hover:text-foreground">
+          For teams
+        </Link>
+        <Link to="/org" className="hover:text-foreground">
+          Team dashboard
+        </Link>
+        <Link to="/settings/employer-sharing" className="hover:text-foreground">
+          Employer sharing
         </Link>
         <Link to="/how-we-make-money" className="hover:text-foreground">
           How we make money

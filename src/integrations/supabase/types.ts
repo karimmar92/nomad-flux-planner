@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      b2b_leads: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          team_size: number | null
+          work_email: string
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          team_size?: number | null
+          work_email: string
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          team_size?: number | null
+          work_email?: string
+        }
+        Relationships: []
+      }
       commission_ledger: {
         Row: {
           amount_cents: number
@@ -290,6 +323,124 @@ export type Database = {
           },
         ]
       }
+      org_members: {
+        Row: {
+          created_at: string
+          id: string
+          invite_email: string | null
+          joined_at: string | null
+          left_at: string | null
+          org_id: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_email?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          org_id: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_email?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          org_id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_policies: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          id: string
+          max_days: number
+          note: string
+          org_id: string
+          requires_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          max_days: number
+          note?: string
+          org_id: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          max_days?: number
+          note?: string
+          org_id?: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_policies_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organisations: {
+        Row: {
+          billing_email: string
+          created_at: string
+          id: string
+          name: string
+          plan: string
+          seats_purchased: number
+          updated_at: string
+        }
+        Insert: {
+          billing_email: string
+          created_at?: string
+          id?: string
+          name: string
+          plan?: string
+          seats_purchased?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_email?: string
+          created_at?: string
+          id?: string
+          name?: string
+          plan?: string
+          seats_purchased?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -361,6 +512,98 @@ export type Database = {
           id?: string
           landing_path?: string | null
           program?: string
+        }
+        Relationships: []
+      }
+      travel_requests: {
+        Row: {
+          country_code: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          end_date: string
+          id: string
+          note: string
+          org_id: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          end_date: string
+          id?: string
+          note?: string
+          org_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          end_date?: string
+          id?: string
+          note?: string
+          org_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_requests_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          city_id: string | null
+          country_code: string
+          created_at: string
+          entry_date: string
+          exit_date: string | null
+          id: string
+          notes: string
+          purpose: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          city_id?: string | null
+          country_code: string
+          created_at?: string
+          entry_date: string
+          exit_date?: string | null
+          id?: string
+          notes?: string
+          purpose?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          city_id?: string | null
+          country_code?: string
+          created_at?: string
+          entry_date?: string
+          exit_date?: string | null
+          id?: string
+          notes?: string
+          purpose?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -441,7 +684,47 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      org_member_directory: {
+        Row: {
+          display_name: string | null
+          invite_email: string | null
+          joined_at: string | null
+          member_id: string | null
+          org_id: string | null
+          role: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_member_presence: {
+        Row: {
+          country_code: string | null
+          entry_date: string | null
+          exit_date: string | null
+          logged_at: string | null
+          org_id: string | null
+          trip_id: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       creator_balance: {
@@ -458,6 +741,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
     }

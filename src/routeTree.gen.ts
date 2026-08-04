@@ -19,6 +19,7 @@ import { Route as CreatorsRouteImport } from './routes/creators'
 import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OrgRouteImport } from './routes/org'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
@@ -27,12 +28,15 @@ import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
+import { Route as BusinessIndexRouteImport } from './routes/business.index'
+import { Route as BusinessExplainRouteImport } from './routes/business.explain'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
+import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
@@ -88,6 +92,11 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrgRoute = OrgRouteImport.update({
+  id: '/org',
+  path: '/org',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
@@ -130,6 +139,16 @@ const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
   path: '/admin/creators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessIndexRoute = BusinessIndexRouteImport.update({
+  id: '/business/',
+  path: '/business/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessExplainRoute = BusinessExplainRouteImport.update({
+  id: '/business/explain',
+  path: '/business/explain',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CityCityIdRoute = CityCityIdRouteImport.update({
   id: '/city/$cityId',
   path: '/city/$cityId',
@@ -159,6 +178,11 @@ const RecordVaultRoute = RecordVaultRouteImport.update({
   id: '/vault',
   path: '/vault',
   getParentRoute: () => RecordRoute,
+} as any)
+const SettingsEmployerSharingRoute = SettingsEmployerSharingRouteImport.update({
+  id: '/settings/employer-sharing',
+  path: '/settings/employer-sharing',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
@@ -193,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -201,10 +226,13 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
+  '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -223,6 +251,7 @@ export interface FileRoutesByTo {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -230,10 +259,13 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
+  '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
   '/record': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -253,6 +285,7 @@ export interface FileRoutesById {
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
   '/mcp': typeof McpRoute
+  '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -261,10 +294,13 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
   '/record/vault': typeof RecordVaultRoute
+  '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
+  '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/record/': typeof RecordIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -285,6 +321,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -293,10 +330,13 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
+    | '/business/'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -315,6 +355,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -322,10 +363,13 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
+    | '/business'
     | '/community'
     | '/record'
     | '/.lovable/oauth/consent'
@@ -344,6 +388,7 @@ export interface FileRouteTypes {
     | '/how-we-make-money'
     | '/kit'
     | '/mcp'
+    | '/org'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -352,10 +397,13 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
     | '/record/vault'
+    | '/settings/employer-sharing'
+    | '/business/'
     | '/community/'
     | '/record/'
     | '/.lovable/oauth/consent'
@@ -375,6 +423,7 @@ export interface RootRouteChildren {
   HowWeMakeMoneyRoute: typeof HowWeMakeMoneyRoute
   KitRoute: typeof KitRoute
   McpRoute: typeof McpRoute
+  OrgRoute: typeof OrgRoute
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
@@ -383,9 +432,12 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
+  BusinessExplainRoute: typeof BusinessExplainRoute
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
+  SettingsEmployerSharingRoute: typeof SettingsEmployerSharingRoute
+  BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -464,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/org': {
+      id: '/org'
+      path: '/org'
+      fullPath: '/org'
+      preLoaderRoute: typeof OrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pricing': {
       id: '/pricing'
       path: '/pricing'
@@ -520,6 +579,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCreatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/': {
+      id: '/business/'
+      path: '/business'
+      fullPath: '/business/'
+      preLoaderRoute: typeof BusinessIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/explain': {
+      id: '/business/explain'
+      path: '/business/explain'
+      fullPath: '/business/explain'
+      preLoaderRoute: typeof BusinessExplainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/city/$cityId': {
       id: '/city/$cityId'
       path: '/city/$cityId'
@@ -561,6 +634,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/record/vault'
       preLoaderRoute: typeof RecordVaultRouteImport
       parentRoute: typeof RecordRoute
+    }
+    '/settings/employer-sharing': {
+      id: '/settings/employer-sharing'
+      path: '/settings/employer-sharing'
+      fullPath: '/settings/employer-sharing'
+      preLoaderRoute: typeof SettingsEmployerSharingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
@@ -619,6 +699,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowWeMakeMoneyRoute: HowWeMakeMoneyRoute,
   KitRoute: KitRoute,
   McpRoute: McpRoute,
+  OrgRoute: OrgRoute,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
@@ -628,9 +709,12 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
+  BusinessExplainRoute: BusinessExplainRoute,
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
+  SettingsEmployerSharingRoute: SettingsEmployerSharingRoute,
+  BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
