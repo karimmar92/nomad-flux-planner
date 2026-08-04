@@ -459,7 +459,7 @@ function GeorgiaBlock() {
         answer.{" "}
         <Link
           to="/city/$cityId"
-          params={{ cityId: "tbilisi" }}
+          params={{ cityId: "tbilisi-ge" }}
           className="underline hover:text-foreground"
         >
           Tbilisi in the city data
