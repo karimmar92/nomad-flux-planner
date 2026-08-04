@@ -288,12 +288,25 @@ function CityDetail() {
             />
             <ScoreBar label={SCORE_LABELS.weather} value={city.scores.weather} max={SCORE_MAX} />
           </div>
+          {city.connectivity_warning ? (
+            <p className="mt-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>{city.connectivity_warning}</span>
+            </p>
+          ) : null}
         </section>
 
         {/* Visa */}
         <section className="panel p-4">
           <h2 className="mb-3 text-sm font-semibold">Visa</h2>
+          {city.visa.nationalityDependent ? (
+            <p className="mb-3 flex items-start gap-2 rounded-md border border-[var(--warning)]/50 bg-[var(--warning)]/10 px-3 py-2 text-xs font-medium text-[var(--warning)]">
+              <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
+              <span>Visa rules vary significantly by passport — confirm for yours.</span>
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-4">
+
             <Stat
               label="Visa-free tourist days"
               value={touristDays === 0 ? "Visa required" : `${touristDays} days`}
