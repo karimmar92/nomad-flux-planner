@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 import { useProfile } from "@/lib/store";
