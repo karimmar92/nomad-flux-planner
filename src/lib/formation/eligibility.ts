@@ -93,6 +93,13 @@ const NOT_ADVICE =
 
 export const FORMATION_DISCLAIMER = NOT_ADVICE;
 
+/** "United Kingdom" reads wrong without an article; a handful of names need one. */
+function the(name: string): string {
+  return /^(United|Netherlands|Philippines|Czechia$)/.test(name) && name !== "Czechia"
+    ? `the ${name}`
+    : name;
+}
+
 function clientsLine(a: FormationAnswers): string {
   if (a.clients.includes("eu") || a.clients.includes("uk")) {
     return "Your clients are in the EU or UK. Many of them will ask for a VAT number or an EU/UK invoice, and a US LLC does not give you either — an EU structure may be the closer fit.";
@@ -147,8 +154,8 @@ export function evaluate(a: FormationAnswers): Verdict {
   if (cfc) {
     return {
       kind: "cfc_lookthrough",
-      headline: `A US LLC will likely be looked through and taxed in ${cfc.name} anyway.`,
-      summary: `You told us you are tax resident in ${cfc.name}. Countries with controlled-foreign-company rules attribute the company's profits to you directly and tax them at local rates, whether or not you took a distribution. On that basis a US LLC would not reduce your personal tax bill — it would mainly change how you get paid, and add a US filing obligation on top of your existing one.`,
+      headline: `A US LLC will likely be looked through and taxed in ${the(cfc.name)} anyway.`,
+      summary: `You told us you are tax resident in ${the(cfc.name)}. Countries with controlled-foreign-company rules attribute the company's profits to you directly and tax them at local rates, whether or not you took a distribution. On that basis a US LLC would not reduce your personal tax bill — it would mainly change how you get paid, and add a US filing obligation on top of your existing one.`,
       reasons: [
         `${cfc.name}: ${cfc.rule}`,
         "Running the company yourself, from where you live, is usually what triggers this. There is no substance elsewhere to point at.",
@@ -245,8 +252,8 @@ export function evaluate(a: FormationAnswers): Verdict {
   if (territorial) {
     return {
       kind: "territorial",
-      headline: `A US LLC may be genuinely useful from ${territorial.name} — if you keep up with the filings.`,
-      summary: `${territorial.name} taxes on a territorial or remittance basis, so foreign-source income is often outside the local net, and there is generally no look-through rule pulling the company's profits onto your personal return. That is the situation where a US LLC does something real. What it costs you is an annual compliance obligation that does not go away, including ${FORM_5472.title.split(" (")[0]}, where the penalty is ${FORM_5472.penaltyLabel}.`,
+      headline: `A US LLC may be genuinely useful from ${the(territorial.name)} — if you keep up with the filings.`,
+      summary: `${the(territorial.name)} taxes on a territorial or remittance basis, so foreign-source income is often outside the local net, and there is generally no look-through rule pulling the company's profits onto your personal return. That is the situation where a US LLC does something real. What it costs you is an annual compliance obligation that does not go away, including ${FORM_5472.title.split(" (")[0]}, where the penalty is ${FORM_5472.penaltyLabel}.`,
       reasons: [
         `${territorial.name}: ${territorial.rule}`,
         a.formallyExited
