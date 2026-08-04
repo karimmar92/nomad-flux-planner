@@ -1,20 +1,26 @@
+import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 import {
+  isCataloguePlacement,
   partnersByCategory,
-  partnersForRegion,
   partnerUrl,
   type Partner,
   type PartnerCategory,
   type PartnerPlacement,
 } from "@/config/partners";
 import { logPartnerClick } from "@/lib/partner-clicks";
+import { registerPartnerCard } from "./card-budget";
 
 /**
  * The only component allowed to render an outbound partner link.
  * Always renders the disclosure directly beneath the link, always logs the
  * click, always uses rel="sponsored noopener".
+ *
+ * One card per screen: outside the Nomad kit catalogue, a group renders a
+ * single card. registerPartnerCard() catches regressions in development.
  */
+
 export function PartnerCard({
   partner,
   placement,
@@ -49,6 +55,11 @@ export function PartnerCard({
   });
   const onClick = () =>
     logPartnerClick({ partner_id: partner.id, placement, city_id: cityId ?? null });
+
+  useEffect(() => {
+    registerPartnerCard(partner.id, placement);
+  }, [partner.id, placement]);
+
 
   if (variant === "row") {
     return (
@@ -117,7 +128,11 @@ export function PartnerGroup({
   cityId?: string | null;
   variant?: "compact" | "row";
 }) {
-  const partners = partnersByCategory(category);
+  const all = partnersByCategory(category);
+  // One card per screen outside the Nomad kit catalogue. First in editorial
+  // order, never by payout. The rest live on /kit — that is what it is for.
+  const partners = isCataloguePlacement(placement) ? all : all.slice(0, 1);
+  if (partners.length === 0) return null;
 
   if (variant === "row") {
     return (
@@ -141,7 +156,7 @@ export function PartnerGroup({
   return (
     <div>
       <div className="label-xs mb-2">{title}</div>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2">
         {partners.map((p) => (
           <PartnerCard
             key={p.id}
@@ -153,6 +168,14 @@ export function PartnerGroup({
           />
         ))}
       </div>
+      {all.length > partners.length ? (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          <Link to="/kit" className="underline hover:text-foreground">
+            The rest of the options are on the Nomad kit page
+          </Link>
+        </p>
+      ) : null}
     </div>
   );
+
 }

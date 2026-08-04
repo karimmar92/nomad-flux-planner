@@ -2,22 +2,26 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { TransportGroup } from "@/components/partners/TransportGroup";
+import { BankingGroup } from "@/components/partners/BankingGroup";
+
 import { APP_NAME } from "@/lib/app";
 
 export const Route = createFileRoute("/kit")({
   head: () => ({
     meta: [
-      { title: `Nomad kit — eSIM, insurance and transport | ${APP_NAME}` },
+      { title: `Nomad kit — eSIM, cover, transport and money | ${APP_NAME}` },
       {
         name: "description",
         content:
-          "Our editorial comparison of nomad eSIMs and health cover, with the caveats that actually matter. Affiliate links, clearly labelled.",
+          "Our editorial comparison of nomad eSIMs, health cover, transport and multi-currency accounts, with the caveats that actually matter. Affiliate links, clearly labelled.",
       },
-      { property: "og:title", content: `Nomad kit — eSIM and insurance | ${APP_NAME}` },
+      { property: "og:title", content: `Nomad kit — eSIM, cover and money | ${APP_NAME}` },
       {
         property: "og:description",
-        content: "eSIM and insurance options compared with our own notes, not the partners'.",
+        content:
+          "eSIM, insurance, transport and multi-currency accounts compared with our own notes, not the partners'.",
       },
+
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -80,12 +84,23 @@ function KitPage() {
         </p>
       </div>
 
+      {/*
+        Money. Deliberately its own section, far from anything about tax
+        residency: banking beside a residency trigger reads as tax structuring
+        advice. Multi-currency accounts only — never local account opening,
+        and never the agencies selling help with it. See the BANKING RULE in
+        src/config/partners.ts.
+      */}
+      <BankingGroup placement="kit_page" title="Money" />
+
       <footer className="space-y-2 border-t border-border pt-4">
         <p className="text-xs leading-relaxed text-muted-foreground">
-          We only earn from eSIM, insurance and transport links. Commissions never affect city
-          rankings or cost data, and transport links only appear once a move is already decided
-          or forced by a visa deadline.
+          We only earn from eSIM, insurance, transport and multi-currency account links.
+          Commissions never affect city rankings or cost data, transport links only appear once a
+          move is already decided or forced by a visa deadline, and no other screen in {APP_NAME}
+          shows more than a single link.
         </p>
+
         <Link
           to="/how-we-make-money"
           className="inline-block text-xs font-semibold text-accent-positive underline-offset-4 hover:underline"

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import {
@@ -293,9 +293,13 @@ function Tracker() {
             (currentTripCity(trips, today) ??
               (profile.home_city_id ? getCity(profile.home_city_id)?.city : undefined)) ?? null
           }
+          /* One card per screen: the border-run card already carries this
+             screen's single partner link when a deadline is live. */
+          showPartnerCard={!borderRun}
           onDismiss={() => setJustAdded(null)}
         />
       ) : null}
+
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Your trips</h2>
@@ -509,10 +513,12 @@ function currentTripCity(trips: Trip[], today: string): string | null {
 function TripConfirmKit({
   trip,
   originCityName,
+  showPartnerCard,
   onDismiss,
 }: {
   trip: Trip;
   originCityName: string | null;
+  showPartnerCard: boolean;
   onDismiss: () => void;
 }) {
   const destination = trip.city_id ? getCity(trip.city_id) : undefined;
@@ -523,12 +529,18 @@ function TripConfirmKit({
     timeZone: "UTC",
   }).format(new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])));
 
+  // One card per screen. The journey is the thing that's just been decided, so
+  // routing wins when we know both ends; otherwise data on landing. Everything
+  // else is on /kit — this card never becomes a stack of links.
+  const showTransport = showPartnerCard && Boolean(originCityName && destination);
+  const showEsim = showPartnerCard && !showTransport;
+
   return (
     <section className="panel border-l-2 border-l-primary p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">
-            Arriving in {countryName(trip.country_code)} on {label}. Sorted for data and cover?
+            Arriving in {countryName(trip.country_code)} on {label}.
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
             Our notes, not the partners&apos;. Dismiss if you&apos;re already set.
@@ -542,24 +554,19 @@ function TripConfirmKit({
           <X className="h-4 w-4" />
         </button>
       </div>
-      <div className="mt-3 space-y-4">
-        <PartnerGroup
-          category="esim"
-          placement="trip_confirm"
-          title="eSIM"
-          countryCode={trip.country_code}
-          cityId={trip.city_id}
-        />
-        <PartnerGroup
-          category="insurance"
-          placement="trip_confirm"
-          title="Health cover"
-          countryCode={trip.country_code}
-          cityId={trip.city_id}
-        />
+      <div className="mt-3 space-y-3">
+        {showEsim ? (
+          <PartnerGroup
+            category="esim"
+            placement="trip_confirm"
+            title="eSIM"
+            countryCode={trip.country_code}
+            cityId={trip.city_id}
+          />
+        ) : null}
         {/* Transport is permitted here: the trip is already saved, with a
             future entry date and a known origin. The decision is made. */}
-        {originCityName && destination ? (
+        {showTransport && originCityName && destination ? (
           <TransportGroup
             placement="trip_confirm"
             region={destination.region}
@@ -570,7 +577,13 @@ function TripConfirmKit({
             title={`Getting there — ${originCityName} → ${destination.city}`}
           />
         ) : null}
+        <p className="text-[11px] text-muted-foreground">
+          <Link to="/kit" className="underline hover:text-foreground">
+            Cover, data and accounts are all on the Nomad kit page
+          </Link>
+        </p>
       </div>
     </section>
   );
 }
+
