@@ -2,7 +2,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { CITIES } from "@/lib/cities";
 import { useProfile } from "@/lib/store";
-import type { IncomeType } from "@/lib/types";
+import type { IncomeType, UserStage } from "@/lib/types";
 import { APP_NAME } from "@/lib/app";
 import { flagEmoji } from "@/lib/arbitrage";
 import { cn } from "@/lib/utils";
@@ -175,7 +175,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               Everything in {APP_NAME} is computed from this number. You can change it any time.
             </p>
             <button
-              onClick={() => setStep(2)}
+              onClick={() => setStep(3)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
               Continue
@@ -183,7 +183,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           </div>
         ) : null}
 
-        {step === 2 ? (
+        {step === 3 ? (
           <div className="space-y-2">
             {INCOME_TYPES.map(([value, label, hint]) => (
               <button
@@ -192,7 +192,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                   setIncomeType(value);
                   // Freelance and founder stay on this step for a beat: it's the
                   // one moment a business account is genuinely relevant.
-                  if (value === "employed") setStep(3);
+                  if (value === "employed") setStep(4);
                 }}
                 className={cn(
                   "w-full rounded-md border border-border px-3 py-2.5 text-left hover:border-primary/50",
@@ -251,7 +251,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             ) : null}
 
             <button
-              onClick={() => setStep(3)}
+              onClick={() => setStep(4)}
               className="mt-2 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
               Continue
@@ -260,7 +260,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         ) : null}
 
 
-        {step === 3 ? (
+        {step === 4 ? (
           <div>
             <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
               {CITIES.map((city) => (
@@ -281,7 +281,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               onClick={() => finish(false)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Show me my numbers
+              {stage === "planning" ? "Show me my runway" : "Show me my numbers"}
             </button>
           </div>
         ) : null}
