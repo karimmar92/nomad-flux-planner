@@ -124,7 +124,7 @@ function BusinessPage() {
           {[
             {
               t: "Permanent-establishment exposure",
-              d: `Per country: how many employees, total days and the longest single stay. Flagged against the ${PE_BENCHMARK_LABEL.toLowerCase()}.`,
+              d: `Per country: how many employees, total days and the longest single stay. Flagged against the ${PE_BENCHMARK_LABEL}.`,
             },
             {
               t: "Policy limits you set",
