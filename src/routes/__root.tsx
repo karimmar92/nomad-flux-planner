@@ -13,9 +13,10 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { APP_NAME, APP_TAGLINE } from "@/lib/app";
 import { ReferralCapture } from "@/components/referrals/ReferralCapture";
-import { registerServiceWorker } from "@/lib/pwa/register-sw";
+import { onServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa/register-sw";
 import { warmCityCache } from "@/lib/offline/cache";
 import { flushQueue } from "@/lib/offline/sync-queue";
 
