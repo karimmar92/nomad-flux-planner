@@ -28,6 +28,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
+import { Route as BusinessExplainRouteImport } from './routes/business.explain'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
@@ -136,6 +137,11 @@ const BusinessIndexRoute = BusinessIndexRouteImport.update({
   path: '/business/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessExplainRoute = BusinessExplainRouteImport.update({
+  id: '/business/explain',
+  path: '/business/explain',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CityCityIdRoute = CityCityIdRouteImport.update({
   id: '/city/$cityId',
   path: '/city/$cityId',
@@ -207,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -332,6 +342,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/creators'
+    | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
@@ -395,6 +407,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
+  BusinessExplainRoute: typeof BusinessExplainRoute
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
@@ -540,6 +553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/explain': {
+      id: '/business/explain'
+      path: '/business/explain'
+      fullPath: '/business/explain'
+      preLoaderRoute: typeof BusinessExplainRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/city/$cityId': {
       id: '/city/$cityId'
       path: '/city/$cityId'
@@ -648,6 +668,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
+  BusinessExplainRoute: BusinessExplainRoute,
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
