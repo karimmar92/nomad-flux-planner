@@ -58,6 +58,31 @@
  *      jurisdictions. See BANKING_FREE_ZONES.
  *
  * ---------------------------------------------------------------------------
+ * FORMATION RULE (highest payout in the stack — read all of it)
+ * ---------------------------------------------------------------------------
+ * Company formation pays up to $1,500 a referral, which makes it the single
+ * most likely thing in this file to corrupt the product. The defence is
+ * structural, not a promise: the eligibility tool at /setup/company decides
+ * the outcome first, in a module that cannot see this file
+ * (src/lib/formation/eligibility.ts), and only a qualifying outcome may render
+ * a formation partner.
+ *
+ *   The tool must remain capable of concluding "don't do this". If a change
+ *   ever makes every path show a link, the feature has been corrupted.
+ *
+ * The nomad space is full of "US LLC, 0% tax" content that is misleading, and
+ * people are hurt by it. Three facts it omits, all surfaced by the tool:
+ *   1. CFC rules. 50+ countries look through the LLC and tax the profits as
+ *      yours whether or not you took a distribution.
+ *   2. "Tax resident of nowhere" is not a status. Citizenship or last
+ *      residence usually still claims you.
+ *   3. Form 5472 is mandatory for a foreign-owned single-member LLC even at
+ *      zero US tax, and the penalty is $25,000 per form, per year.
+ *
+ * Never a projected saving. A specific number is the line between information
+ * and regulated tax advice. See DISQUALIFYING_OUTCOMES below.
+ *
+ * ---------------------------------------------------------------------------
  * ONE CARD PER SCREEN (applies to every category)
  * ---------------------------------------------------------------------------
  * There are four affiliate categories now. No screen may display more than one
@@ -69,7 +94,12 @@
  * enforce this by rendering a single card outside the catalogue.
  */
 
-export type PartnerCategory = "esim" | "insurance" | "transport" | "banking";
+export type PartnerCategory =
+  | "esim"
+  | "insurance"
+  | "transport"
+  | "banking"
+  | "formation";
 
 /**
  * Categories of partner we will never carry, whatever they pay.
@@ -80,6 +110,8 @@ export const PROHIBITED_PARTNER_TYPES = [
   "account-opening-assistance", // $200-500 agencies targeting this exact audience
   "residency-by-investment", // Same risk class, worse
   "tax-structuring-services", // Regulated advice we are not licensed to sell
+  "offshore-nominee-directors", // Same category of harm as the LLC myth, one step worse
+  "citizenship-by-investment", // Not a product we will ever monetise
   "banner-ad-networks", // No ads, ever
 ] as const;
 
@@ -119,6 +151,29 @@ export interface Partner {
 export const BANKING_DISCLAIMER =
   "Information only, not financial advice. Availability, fees and features depend on your country of residence. Check the provider's terms.";
 
+
+/**
+ * Verdicts from src/lib/formation/eligibility.ts on which formation links must
+ * NEVER render. Load-bearing: the CFC outcome is the most common real-world
+ * answer, and showing no link there is the entire integrity of the feature.
+ *
+ * The UI reads `verdict.showPartners`, which the engine sets; this list is the
+ * written record of why, and the thing to check a change against.
+ */
+export const DISQUALIFYING_OUTCOMES = [
+  "cfc_lookthrough", // Resident of a look-through country: an LLC does not reduce their tax bill
+  "no_residency", // No settled residency: residency comes before a company, always
+  "us_person", // US citizen: worldwide taxation follows the passport, the LLC changes nothing
+  "us_presence", // US physical presence: needs professional review before anything is formed
+  "unclear", // No documented rule for their country: we do not guess for money
+] as const;
+
+/**
+ * Standing disclaimer on every formation placement, in the same style as the
+ * banking one. Information, never advice, never a projected saving.
+ */
+export const FORMATION_DISCLAIMER =
+  "Information only, not legal or tax advice. These factors may make an LLC unsuitable for you. Speak to a qualified adviser before forming a company.";
 
 export const PARTNERS: Partner[] = [
   {
@@ -217,6 +272,33 @@ export const PARTNERS: Partner[] = [
     disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
     note: "Strong app and card. Availability and features vary a lot by country of residence — check yours before relying on it.",
   },
+  // Formation — subject to the FORMATION RULE above. These render on exactly
+  // one outcome of the eligibility tool, and never on a DISQUALIFYING_OUTCOMES
+  // verdict. Notes carry the ongoing obligation, not just the setup fee.
+  {
+    id: "doola",
+    name: "doola",
+    category: "formation",
+    urlTemplate: "https://doola.com/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "US LLC formation plus registered agent and EIN. Ongoing compliance is a separate annual cost.",
+  },
+  {
+    id: "firstbase",
+    name: "Firstbase",
+    category: "formation",
+    urlTemplate: "https://firstbase.io/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "US LLC or C-Corp. Choose C-Corp only if you intend to raise venture funding.",
+  },
+  {
+    id: "xolo",
+    name: "Xolo",
+    category: "formation",
+    urlTemplate: "https://xolo.io/?ref=REPLACE_ME",
+    disclosure: "Affiliate link — we earn a commission at no extra cost to you.",
+    note: "Estonian OÜ via e-Residency, and a solo freelancer product. Better fit than a US LLC if your clients are in the EU.",
+  },
 ];
 
 /**
@@ -269,6 +351,22 @@ export const BANKING_FREE_ZONES = [
   "notifications", // No financial promotions pushed at anyone
 ] as const;
 
+/**
+ * Formation-specific lint zone. A formation link outside the eligibility tool
+ * has, by definition, skipped the question of whether it suits the person.
+ */
+export const FORMATION_FREE_ZONES = [
+  ...PARTNER_FREE_ZONES,
+  "src/routes/city.$cityId.tsx", // Tax card and special regimes — reads as tax structuring
+  "src/routes/tracker.tsx", // Day counters sit next to residency thresholds
+  "src/routes/record.report.$year.tsx", // The tax report must never sell a remedy
+  "src/components/arrival/ArrivalCard.tsx",
+  "notifications",
+] as const;
+
+/** The only placement a formation link may use. */
+export const FORMATION_PLACEMENTS = ["company_tool"] as const;
+
 /** Placements where a transport link is permitted. Nowhere else. */
 export const TRANSPORT_PLACEMENTS = ["border_run", "trip_confirm", "kit_page"] as const;
 
@@ -296,6 +394,11 @@ export type PartnerPlacement =
   | "visa_card"
   | "kit_page"
   | "border_run"
+  /**
+   * The results page of /setup/company, and only on a qualifying verdict.
+   * See FORMATION RULE and DISQUALIFYING_OUTCOMES.
+   */
+  | "company_tool"
   | "onboarding";
 
 /**
@@ -304,7 +407,7 @@ export type PartnerPlacement =
  * carry a second link.
  */
 export const MAX_PARTNER_CARDS_PER_SCREEN = 1;
-export const CATALOGUE_PLACEMENTS: PartnerPlacement[] = ["kit_page"];
+export const CATALOGUE_PLACEMENTS: PartnerPlacement[] = ["kit_page", "company_tool"];
 
 export function isCataloguePlacement(placement: PartnerPlacement): boolean {
   return CATALOGUE_PLACEMENTS.includes(placement);

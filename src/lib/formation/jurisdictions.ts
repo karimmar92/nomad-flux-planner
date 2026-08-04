@@ -65,7 +65,7 @@ export const CFC_COUNTRIES: CfcCountry[] = [
   { code: "LU", name: "Luxembourg", rule: "ATAD CFC rules." },
   { code: "MT", name: "Malta", rule: "ATAD CFC rules; management and control can make the company Maltese-resident." },
   { code: "CY", name: "Cyprus", rule: "ATAD CFC rules; management and control test for corporate residence." },
-  { code: "DE_CH", name: "Switzerland", rule: "No formal CFC regime, but effective-management rules can make the company Swiss-resident and taxable here." },
+  { code: "CH", name: "Switzerland", rule: "No formal CFC regime, but effective-management rules can make the company Swiss-resident and taxable here." },
   { code: "JP", name: "Japan", rule: "Anti-tax-haven (CFC) rules attribute foreign subsidiary income to the Japanese resident." },
   { code: "KR", name: "South Korea", rule: "CFC rules attribute retained income of a low-taxed foreign company." },
   { code: "CN", name: "China", rule: "CFC rules under the Enterprise Income Tax Law, plus place-of-management residence." },
