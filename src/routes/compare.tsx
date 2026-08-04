@@ -16,7 +16,7 @@ import type { City } from "@/lib/types";
 
 export const Route = createFileRoute("/compare")({
   validateSearch: (search: Record<string, unknown>) => ({
-    cities: typeof search.cities === "string" ? search.cities : "",
+    cities: typeof search['cities'] === "string" ? (search['cities'] as string) : "",
   }),
   head: () => ({
     meta: [
@@ -71,7 +71,7 @@ function ComparePage() {
             <button
               key={city.id}
               onClick={() =>
-                setIds(active ? ids.filter((i) => i !== city.id) : [...ids, city.id])
+                setIds(active ? ids.filter((i: string) => i !== city.id) : [...ids, city.id])
               }
               disabled={!active && ids.length >= 4}
               className={cn(
