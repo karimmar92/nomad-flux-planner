@@ -163,6 +163,9 @@ export type City = {
   visa: Visa;
   tax: Tax;
   arbitrage_note: string;
+  /** Where the headline Mbps figure is misleading (Great Firewall, villa wifi).
+   *  Rendered as an amber row inside the liveability/scores section. */
+  connectivity_warning?: string | null;
   /** IATA code of the airport actually used to reach the city. */
   nearest_airport_iata: string;
   /** City ids reachable by ground transport in roughly 12 hours or less.
