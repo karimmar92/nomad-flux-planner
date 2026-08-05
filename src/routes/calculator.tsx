@@ -47,12 +47,12 @@ function CalculatorPage() {
   const [focusId, setFocusId] = useState<string>(CITIES[0]!.id);
   const focusCity = CITIES.find((c) => c.id === focusId) ?? CITIES[0]!;
   const focusArb = computeArbitrage(focusCity, inc, tier);
-  const best = rows[0];
 
   const rows = CITIES.map((city) => {
     const arb = computeArbitrage(city, inc, tier);
     return { city, arb, months: monthsToTarget(arb.surplusMonthly, targetNum) };
   }).sort((a, b) => b.arb.surplusMonthly - a.arb.surplusMonthly);
+  const best = rows[0];
 
   const rankingTable = (
       <section className="panel overflow-hidden">
