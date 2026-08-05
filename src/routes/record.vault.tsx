@@ -17,6 +17,9 @@ import {
 import { CITIES } from "@/lib/cities";
 import { useOnline } from "@/lib/offline/use-online";
 import { useSession } from "@/lib/use-session";
+import { useProfile } from "@/lib/store";
+import { isPro } from "@/lib/entitlements";
+import { ProPrompt } from "@/components/ProGate";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/record/vault")({
@@ -44,6 +47,8 @@ const COUNTRIES = Array.from(new Set(CITIES.map((c) => c.country_code))).sort();
 function VaultPage() {
   const { documents, refresh, setDocuments } = useVault();
   const { signedIn } = useSession();
+  const { profile } = useProfile();
+  const pro = isPro(profile.plan);
   const online = useOnline();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -97,7 +102,12 @@ function VaultPage() {
         </section>
       ) : null}
 
-      {!signedIn ? (
+      {!pro ? (
+        <ProPrompt
+          title="The vault is Pro"
+          body="Passport, visa approvals and insurance certificates in a private bucket, cached on this device so they open with no signal. Trip logging stays free forever."
+        />
+      ) : !signedIn ? (
         <div className="panel p-4 text-sm text-muted-foreground">
           <Link to="/auth" search={{ next: "/record/vault" }} className="underline">
             Sign in
