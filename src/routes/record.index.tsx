@@ -5,7 +5,9 @@ import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { useVault } from "@/lib/documents/use-vault";
 import { expiryState } from "@/lib/documents/vault";
 import { yearsWithData } from "@/lib/reports/tax-report";
-import { useTrips } from "@/lib/store";
+import { useProfile, useTrips } from "@/lib/store";
+import { FREE_CALENDAR_HORIZON_DAYS, isPro } from "@/lib/entitlements";
+import { ProBadge, ProPrompt } from "@/components/ProGate";
 import { todayIso } from "@/lib/trip-dates";
 
 export const Route = createFileRoute("/record/")({
@@ -32,6 +34,8 @@ export const Route = createFileRoute("/record/")({
 function RecordHub() {
   const { trips } = useTrips();
   const { documents } = useVault();
+  const { profile } = useProfile();
+  const pro = isPro(profile.plan);
   const years = yearsWithData(trips, todayIso());
   const expiring = documents.filter((d) => {
     const s = expiryState(d);
@@ -54,7 +58,9 @@ function RecordHub() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Link to="/record/vault" className="panel group p-4 transition-colors hover:bg-surface-2">
           <FolderLock className="h-5 w-5 text-muted-foreground" aria-hidden />
-          <h2 className="mt-2 text-sm font-semibold">Document vault</h2>
+          <h2 className="mt-2 flex items-center gap-2 text-sm font-semibold">
+            Document vault {pro ? null : <ProBadge />}
+          </h2>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             Passport, visa approvals, insurance certificates. Encrypted at rest, private to you, and
             cached on this device so a border check never depends on signal.
@@ -67,7 +73,9 @@ function RecordHub() {
 
         <div className="panel p-4">
           <ScrollText className="h-5 w-5 text-muted-foreground" aria-hidden />
-          <h2 className="mt-2 text-sm font-semibold">Year-end presence record</h2>
+          <h2 className="mt-2 flex items-center gap-2 text-sm font-semibold">
+            Year-end presence record {pro ? null : <ProBadge />}
+          </h2>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             Days per country against each country&rsquo;s day-count threshold, with the entry and exit
             log behind it. Evidence for an adviser, not a conclusion.
@@ -98,7 +106,19 @@ function RecordHub() {
           Visa expiries, renewal windows, passport validity, document expiry and typical filing
           deadlines, merged and sorted.
         </p>
-        <ComplianceCalendar trips={trips} documents={documents} />
+        {/* Free shows the next 30 days — enough to never miss something
+            imminent. The forward horizon is the paid part. */}
+        <ComplianceCalendar
+          trips={trips}
+          documents={documents}
+          {...(pro ? {} : { horizonDays: FREE_CALENDAR_HORIZON_DAYS })}
+        />
+        {pro ? null : (
+          <ProPrompt
+            title={`Showing the next ${FREE_CALENDAR_HORIZON_DAYS} days`}
+            body="Pro shows every dated obligation ahead of you — renewal windows, passport validity and filing deadlines months out, while you can still act on them."
+          />
+        )}
       </section>
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">{LEGAL_DISCLAIMER}</p>

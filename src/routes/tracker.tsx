@@ -35,6 +35,8 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { isPro as planIsPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 import type { Trip, TripPurpose } from "@/lib/types";
 import { formatDate, formatDateLong } from "@/lib/i18n/format";
 
@@ -110,6 +112,7 @@ function Tracker() {
     () => maxStayFrom(engineTrips, plannedEntry),
     [engineTrips, plannedEntry],
   );
+  const proPlanning = planIsPro(profile.plan);
   const plannerLastDay = plannerDays > 0 ? addDaysIso(plannedEntry, plannerDays - 1) : null;
 
   // Border-run planner. Deadline-triggered only — never a speculative prompt.
@@ -241,25 +244,50 @@ function Tracker() {
           </p>
         ) : null}
 
-        <div className="mt-4 rounded-md border border-border p-3">
-          <label className="label-xs" htmlFor="planner">
-            If I enter on…
-          </label>
-          <div className="mt-1 flex flex-wrap items-center gap-3">
-            <input
-              id="planner"
-              type="date"
-              value={plannedEntry}
-              onChange={(e) => setPlannedEntry(e.target.value)}
-              className="rounded-md border border-input bg-surface px-2 py-1.5 text-sm"
-            />
-            <p className="num text-sm">
-              you could stay{" "}
-              <span className="font-semibold text-primary">{plannerDays} days</span>
-              {plannerLastDay ? ` — until ${formatDate(plannerLastDay, i18n.language)}` : ""}
-            </p>
+        {/* FORWARD PLANNING IS PRO. Today's status above is free forever —
+            the alarm is free, the answer to "what now?" is paid. */}
+        {proPlanning ? (
+          <div className="mt-4 rounded-md border border-border p-3">
+            <label className="label-xs" htmlFor="planner">
+              If I enter on…
+            </label>
+            <div className="mt-1 flex flex-wrap items-center gap-3">
+              <input
+                id="planner"
+                type="date"
+                value={plannedEntry}
+                onChange={(e) => setPlannedEntry(e.target.value)}
+                className="rounded-md border border-input bg-surface px-2 py-1.5 text-sm"
+              />
+              <p className="num text-sm">
+                you could stay{" "}
+                <span className="font-semibold text-primary">{plannerDays} days</span>
+                {plannerLastDay ? ` — until ${formatDate(plannerLastDay, i18n.language)}` : ""}
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <LockedPreview
+            className="mt-4"
+            headline={`Entering ${formatDate(plannedEntry, i18n.language)} gives you a legal stay — Pro shows how long`}
+            detail="Plan any future entry date, and a whole year of trips, against your rolling window."
+          >
+            <div className="rounded-md border border-border p-3">
+              <div className="label-xs">If I enter on…</div>
+              <div className="mt-1 flex flex-wrap items-center gap-3">
+                <span className="rounded-md border border-input bg-surface px-2 py-1.5 text-sm">
+                  {formatDate(plannedEntry, i18n.language)}
+                </span>
+                <p className="num text-sm">
+                  you could stay{" "}
+                  <span className="font-semibold text-primary">{plannerDays} days</span>
+                  {plannerLastDay ? ` — until ${formatDate(plannerLastDay, i18n.language)}` : ""}
+                </p>
+              </div>
+            </div>
+          </LockedPreview>
+        )}
+
       </section>
 
       {/* Timeline */}

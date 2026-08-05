@@ -11,6 +11,8 @@ import { computeArbitrage, flagEmoji, formatUsd, monthsToTarget } from "@/lib/ar
 import { useProfile } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { isPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 
 export const Route = createFileRoute("/calculator")({
   head: () => ({
@@ -39,71 +41,20 @@ function CalculatorPage() {
 
   const inc = income ? Number(income) : null;
   const targetNum = target ? Number(target) : 0;
+  // FREE: arbitrage against one chosen city. PRO: the ranking across all of
+  // them, plus the savings-target column.
+  const pro = isPro(profile.plan);
+  const [focusId, setFocusId] = useState<string>(CITIES[0]!.id);
+  const focusCity = CITIES.find((c) => c.id === focusId) ?? CITIES[0]!;
+  const focusArb = computeArbitrage(focusCity, inc, tier);
 
   const rows = CITIES.map((city) => {
     const arb = computeArbitrage(city, inc, tier);
     return { city, arb, months: monthsToTarget(arb.surplusMonthly, targetNum) };
   }).sort((a, b) => b.arb.surplusMonthly - a.arb.surplusMonthly);
+  const best = rows[0];
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Arbitrage calculator</h1>
-        <p className="text-sm text-muted-foreground">
-          Every city ranked by what you&apos;d actually keep.
-        </p>
-      </div>
-
-      <section className="panel grid gap-4 p-4 sm:grid-cols-3">
-        <div>
-          <label className="label-xs" htmlFor="calc-income">
-            Monthly income (USD)
-          </label>
-          <input
-            id="calc-income"
-            inputMode="numeric"
-            value={income}
-            onChange={(e) => {
-              const v = e.target.value.replace(/\D/g, "");
-              setIncome(v);
-              patchProfile({ monthly_income_usd: v ? Number(v) : null });
-            }}
-            placeholder="5000"
-            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
-          />
-        </div>
-        <div>
-          <label className="label-xs" htmlFor="calc-target">
-            Savings target (USD)
-          </label>
-          <input
-            id="calc-target"
-            inputMode="numeric"
-            value={target}
-            onChange={(e) => setTarget(e.target.value.replace(/\D/g, ""))}
-            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
-          />
-        </div>
-        <div>
-          <span className="label-xs">Cost tier</span>
-          <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
-            {(["lean", "mid"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTier(t)}
-                className={cn(
-                  "flex-1 rounded px-2 py-1.5",
-                  tier === t ? "bg-primary text-primary-foreground" : "text-muted-foreground",
-                )}
-              >
-                {t === "mid" ? "Mid-range" : "Lean"}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* The shareable table */}
+  const rankingTable = (
       <section className="panel overflow-hidden">
         <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
           <h2 className="text-sm font-semibold">
@@ -167,6 +118,132 @@ function CalculatorPage() {
           city page shows its last-verified date.
         </p>
       </section>
+  );
+
+  const rankingSection = pro ? (
+    rankingTable
+  ) : (
+    <>
+      <section className="panel p-4">
+        <h2 className="text-sm font-semibold">
+          {flagEmoji(focusCity.country_code)} {focusCity.city} on {inc ? formatUsd(inc) : "your income"}
+        </h2>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <div className="label-xs">Cost/mo</div>
+            <div className="num text-lg font-semibold">{formatUsd(focusArb.cost)}</div>
+          </div>
+          <div>
+            <div className="label-xs">Surplus/mo</div>
+            <div
+              className={cn(
+                "num text-lg font-semibold",
+                inc ? (focusArb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
+              )}
+            >
+              {inc ? formatUsd(focusArb.surplusMonthly) : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="label-xs">Surplus/yr</div>
+            <div className="num text-lg font-semibold">
+              {inc ? formatUsd(focusArb.surplusAnnual) : "—"}
+            </div>
+          </div>
+        </div>
+      </section>
+      <LockedPreview
+        headline={
+          inc && best
+            ? `Best of ${CITIES.length} cities is ${best.city.city} · ${formatUsd(best.arb.surplusMonthly)}/mo surplus`
+            : `All ${CITIES.length} cities ranked by what you would keep`
+        }
+        detail="Pro ranks every city at once on your income and shows how long each one takes to hit a savings target."
+      >
+        {rankingTable}
+      </LockedPreview>
+    </>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Arbitrage calculator</h1>
+        <p className="text-sm text-muted-foreground">
+          Every city ranked by what you&apos;d actually keep.
+        </p>
+      </div>
+
+      <section className="panel grid gap-4 p-4 sm:grid-cols-3">
+        <div>
+          <label className="label-xs" htmlFor="calc-income">
+            Monthly income (USD)
+          </label>
+          <input
+            id="calc-income"
+            inputMode="numeric"
+            value={income}
+            onChange={(e) => {
+              const v = e.target.value.replace(/\D/g, "");
+              setIncome(v);
+              patchProfile({ monthly_income_usd: v ? Number(v) : null });
+            }}
+            placeholder="5000"
+            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
+          />
+        </div>
+        {pro ? (
+          <div>
+            <label className="label-xs" htmlFor="calc-target">
+              Savings target (USD)
+            </label>
+            <input
+              id="calc-target"
+              inputMode="numeric"
+              value={target}
+              onChange={(e) => setTarget(e.target.value.replace(/\D/g, ""))}
+              className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
+            />
+          </div>
+        ) : (
+          <div>
+            <label className="label-xs" htmlFor="calc-city">
+              City
+            </label>
+            <select
+              id="calc-city"
+              value={focusId}
+              onChange={(e) => setFocusId(e.target.value)}
+              className="mt-1 w-full rounded-md border border-input bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
+            >
+              {CITIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.city}, {c.country}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div>
+          <span className="label-xs">Cost tier</span>
+          <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
+            {(["lean", "mid"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTier(t)}
+                className={cn(
+                  "flex-1 rounded px-2 py-1.5",
+                  tier === t ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
+                {t === "mid" ? "Mid-range" : "Lean"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {rankingSection}
     </div>
   );
 }
