@@ -8,6 +8,8 @@ import { flagEmoji, formatUsd } from "@/lib/arbitrage";
 import { TransportGroup } from "@/components/partners/TransportGroup";
 import { formatDateLong } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
+import { isEmergency } from "@/lib/entitlements";
+import { EmergencyUnlockNote, LockedPreview } from "@/components/ProGate";
 
 /**
  * Border-run planner. Deadline-triggered only — this card never appears
@@ -23,7 +25,7 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
   const unlocked = isPro || emergency;
   const visible = unlocked ? options : options.slice(0, 1);
   const locked = unlocked ? [] : options.slice(1);
-  const cheapest = [...options].sort((a, b) => a.city.cost_mid_usd - b.city.cost_mid_usd)[0];
+  const cheapest = [...options].sort((a, b) => a.monthlyCost - b.monthlyCost)[0];
 
 
   return (
