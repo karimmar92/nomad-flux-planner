@@ -87,26 +87,30 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
           ))}
         </ol>
 
-        {!isPro && options.length > 1 ? (
-          <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-border bg-surface-2 p-3">
-            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">
-                {options.length - 1} more exit options, fully ranked
-              </p>
-              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                Pro shows every destination with its cost delta, days available and nomad-visa
-                eligibility against your income.
-              </p>
-            </div>
-            <Link
-              to="/pricing"
-              className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-            >
-              See Pro
-            </Link>
-          </div>
+        {locked.length > 0 ? (
+          <LockedPreview
+            className="mt-2"
+            headline={`${options.length} exit options found · cheapest is ${cheapest ? cheapest.city.city : "—"}`}
+            detail="Pro shows every destination ranked, with its cost delta, days available and nomad-visa eligibility against your income."
+          >
+            <ol className="space-y-2">
+              {locked.map((option, i) => (
+                <OptionRow
+                  key={option.city.id}
+                  rank={i + 2}
+                  option={option}
+                  origin={origin.city}
+                  departOn={departOn}
+                  expanded={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </ol>
+          </LockedPreview>
         ) : null}
+
+        {emergency && !isPro && options.length > 1 ? <EmergencyUnlockNote /> : null}
+
       </div>
     </section>
   );
