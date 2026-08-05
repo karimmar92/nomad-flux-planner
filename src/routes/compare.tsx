@@ -17,6 +17,8 @@ import {
   touristDaysFor,
 } from "@/lib/arbitrage";
 import { useProfile } from "@/lib/store";
+import { isPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 import { EmptyState } from "@/components/Primitives";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
@@ -54,6 +56,27 @@ function ComparePage() {
   const ids = raw.split(",").filter(Boolean).slice(0, 4);
   const selected = ids.map(getCity).filter(Boolean) as City[];
 
+  const proCompare = isPro(profile.plan);
+
+  const cheapest = selected.length
+    ? [...selected].sort((a, b) => monthlyCost(a) - monthlyCost(b))[0]!
+    : null;
+  const bestSurplus =
+    income && selected.length
+      ? [...selected].sort(
+          (a, b) =>
+            computeArbitrage(b, income).surplusMonthly -
+            computeArbitrage(a, income).surplusMonthly,
+        )[0]!
+      : null;
+  // The headline is the real answer. Only the detail behind it is obscured.
+  const headline = [
+    cheapest ? `Cheapest is ${cheapest.city}` : null,
+    bestSurplus ? `biggest surplus is ${bestSurplus.city}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   const setIds = (next: string[]) =>
     navigate({ search: { cities: next.slice(0, 4).join(",") } });
 
@@ -64,42 +87,7 @@ function ComparePage() {
     return target;
   };
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Compare</h1>
-        <p className="text-sm text-muted-foreground">
-          Pick 2–4 cities. The URL is shareable, numbers stay personal to whoever opens it.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {CITIES.map((city) => {
-          const active = ids.includes(city.id);
-          return (
-            <button
-              key={city.id}
-              onClick={() =>
-                setIds(active ? ids.filter((i: string) => i !== city.id) : [...ids, city.id])
-              }
-              disabled={!active && ids.length >= 4}
-              className={cn(
-                "rounded-full border border-border px-3 py-1.5 text-xs disabled:opacity-40",
-                active && "border-primary bg-primary/10 text-primary",
-              )}
-            >
-              {flagEmoji(city.country_code)} {city.city}
-            </button>
-          );
-        })}
-      </div>
-
-      {selected.length < 2 ? (
-        <EmptyState
-          title="Select at least two cities"
-          body="Comparison rows highlight the best value per line — cheapest cost, largest surplus, fastest internet, most visa days."
-        />
-      ) : (
+  const tableEl = (
         <div className="panel overflow-x-auto hide-scrollbar">
           <table className="w-full min-w-[600px] text-sm">
             <thead>
@@ -223,6 +211,56 @@ function ComparePage() {
             </tbody>
           </table>
         </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight">Compare</h1>
+        <p className="text-sm text-muted-foreground">
+          Pick 2–4 cities. The URL is shareable, numbers stay personal to whoever opens it.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {CITIES.map((city) => {
+          const active = ids.includes(city.id);
+          return (
+            <button
+              key={city.id}
+              onClick={() =>
+                setIds(active ? ids.filter((i: string) => i !== city.id) : [...ids, city.id])
+              }
+              disabled={!active && ids.length >= 4}
+              className={cn(
+                "rounded-full border border-border px-3 py-1.5 text-xs disabled:opacity-40",
+                active && "border-primary bg-primary/10 text-primary",
+              )}
+            >
+              {flagEmoji(city.country_code)} {city.city}
+            </button>
+          );
+        })}
+      </div>
+
+      {selected.length < 2 ? (
+        <EmptyState
+          title="Select at least two cities"
+          body="Comparison rows highlight the best value per line — cheapest cost, largest surplus, fastest internet, most visa days."
+        />
+      ) : (
+        <>
+          {proCompare ? (
+            tableEl
+          ) : (
+            <LockedPreview
+              headline={headline}
+              detail="Pro puts 2–4 cities side by side: cost, surplus, savings rate, visa days, tax triggers and scores, with the best value per row highlighted."
+            >
+              {tableEl}
+            </LockedPreview>
+          )}
+        </>
       )}
 
       <LegalFooter />
