@@ -8,6 +8,8 @@ import { buildTaxReport, yearsWithData } from "@/lib/reports/tax-report";
 import { useProfile, useTrips } from "@/lib/store";
 import { todayIso } from "@/lib/trip-dates";
 import { cn } from "@/lib/utils";
+import { isPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 
 export const Route = createFileRoute("/record/report/$year")({
   head: ({ params }) => ({
@@ -37,6 +39,13 @@ function ReportPage() {
 
   const report = useMemo(() => buildTaxReport(trips, year, todayIso()), [trips, year]);
   const years = yearsWithData(trips, todayIso());
+  const pro = isPro(profile.plan);
+  const topCountry = [...report.countries].sort((a, b) => b.days - a.days)[0];
+  const overThreshold = report.countries.filter((c) => c.exceedsThreshold).length;
+  const headline = topCountry
+    ? `${report.countries.length} countries recorded · most days in ${topCountry.basis.country} (${topCountry.days})` +
+      (overThreshold > 0 ? ` · ${overThreshold} above threshold` : "")
+    : `Presence record for ${year}`;
 
   async function exportPdf() {
     setBusy("pdf");
@@ -74,14 +83,23 @@ function ReportPage() {
         <h1 className="text-xl font-semibold tracking-tight">Presence record {year}</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">{REPORT_DISCLAIMER}</p>
         <div className="flex flex-wrap gap-2 pt-1">
-          <button onClick={exportPdf} disabled={busy !== null} className="btn-primary">
-            <Download className="me-1.5 h-3.5 w-3.5" aria-hidden />
-            {busy === "pdf" ? "Building PDF…" : "Export PDF"}
-          </button>
-          <button onClick={exportCsv} disabled={busy !== null} className="btn">
-            <FileSpreadsheet className="me-1.5 h-3.5 w-3.5" aria-hidden />
-            Export CSV
-          </button>
+          {pro ? (
+            <>
+              <button onClick={exportPdf} disabled={busy !== null} className="btn-primary">
+                <Download className="me-1.5 h-3.5 w-3.5" aria-hidden />
+                {busy === "pdf" ? "Building PDF…" : "Export PDF"}
+              </button>
+              <button onClick={exportCsv} disabled={busy !== null} className="btn">
+                <FileSpreadsheet className="me-1.5 h-3.5 w-3.5" aria-hidden />
+                Export CSV
+              </button>
+            </>
+          ) : (
+            <Link to="/pricing" className="btn-primary">
+              <Download className="me-1.5 h-3.5 w-3.5" aria-hidden />
+              PDF and CSV export is Pro
+            </Link>
+          )}
           {years
             .filter((y) => y !== year)
             .map((y) => (
