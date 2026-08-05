@@ -47,11 +47,123 @@ function CalculatorPage() {
   const [focusId, setFocusId] = useState<string>(CITIES[0]!.id);
   const focusCity = CITIES.find((c) => c.id === focusId) ?? CITIES[0]!;
   const focusArb = computeArbitrage(focusCity, inc, tier);
+  const best = rows[0];
 
   const rows = CITIES.map((city) => {
     const arb = computeArbitrage(city, inc, tier);
     return { city, arb, months: monthsToTarget(arb.surplusMonthly, targetNum) };
   }).sort((a, b) => b.arb.surplusMonthly - a.arb.surplusMonthly);
+
+  const rankingTable = (
+      <section className="panel overflow-hidden">
+        <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
+          <h2 className="text-sm font-semibold">
+            {inc ? `${formatUsd(inc)}/mo across ${CITIES.length} cities` : "Enter an income"}
+          </h2>
+          <span className="label-xs">{APP_NAME}</span>
+        </div>
+        <div className="overflow-x-auto hide-scrollbar">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-start">
+                <Th>City</Th>
+                <Th right>Cost/mo</Th>
+                <Th right>Surplus/mo</Th>
+                <Th right>Surplus/yr</Th>
+                <Th right>Rate</Th>
+                <Th right>To {formatUsd(targetNum)}</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(({ city, arb, months }) => (
+                <tr key={city.id} className="border-b border-border/60 last:border-0">
+                  <td className="px-4 py-2.5">
+                    <Link
+                      to="/city/$cityId"
+                      params={{ cityId: city.id }}
+                      className="flex items-center gap-2 hover:text-primary"
+                    >
+                      <span aria-hidden>{flagEmoji(city.country_code)}</span>
+                      <span className="font-medium">{city.city}</span>
+                      <span className="text-xs text-muted-foreground">{city.country}</span>
+                    </Link>
+                  </td>
+                  <Td right>{formatUsd(arb.cost)}</Td>
+                  <Td
+                    right
+                    className={cn(
+                      "font-semibold",
+                      inc ? (arb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
+                    )}
+                  >
+                    {inc ? formatUsd(arb.surplusMonthly) : "—"}
+                  </Td>
+                  <Td right>{inc ? formatUsd(arb.surplusAnnual) : "—"}</Td>
+                  <Td right>{inc ? `${arb.savingsRate.toFixed(0)}%` : "—"}</Td>
+                  <Td right>
+                    {!inc || months == null
+                      ? "Never"
+                      : months < 12
+                        ? `${months.toFixed(1)} mo`
+                        : `${(months / 12).toFixed(1)} yr`}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
+          Surplus = income − (rent central + coworking + groceries + eating out + utilities +
+          mobile + transport + gym) at the {tier === "mid" ? "mid-range" : "lean"} tier. Each
+          city page shows its last-verified date.
+        </p>
+      </section>
+  );
+
+  const rankingSection = pro ? (
+    rankingTable
+  ) : (
+    <>
+      <section className="panel p-4">
+        <h2 className="text-sm font-semibold">
+          {flagEmoji(focusCity.country_code)} {focusCity.city} on {inc ? formatUsd(inc) : "your income"}
+        </h2>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
+          <div>
+            <div className="label-xs">Cost/mo</div>
+            <div className="num text-lg font-semibold">{formatUsd(focusArb.cost)}</div>
+          </div>
+          <div>
+            <div className="label-xs">Surplus/mo</div>
+            <div
+              className={cn(
+                "num text-lg font-semibold",
+                inc ? (focusArb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
+              )}
+            >
+              {inc ? formatUsd(focusArb.surplusMonthly) : "—"}
+            </div>
+          </div>
+          <div>
+            <div className="label-xs">Surplus/yr</div>
+            <div className="num text-lg font-semibold">
+              {inc ? formatUsd(focusArb.surplusAnnual) : "—"}
+            </div>
+          </div>
+        </div>
+      </section>
+      <LockedPreview
+        headline={
+          inc && best
+            ? `Best of ${CITIES.length} cities is ${best.city.city} · ${formatUsd(best.arb.surplusMonthly)}/mo surplus`
+            : `All ${CITIES.length} cities ranked by what you would keep`
+        }
+        detail="Pro ranks every city at once on your income and shows how long each one takes to hit a savings target."
+      >
+        {rankingTable}
+      </LockedPreview>
+    </>
+  );
 
   return (
     <div className="space-y-4">
@@ -131,70 +243,7 @@ function CalculatorPage() {
         </div>
       </section>
 
-      {/* The shareable table */}
-      <section className="panel overflow-hidden">
-        <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold">
-            {inc ? `${formatUsd(inc)}/mo across ${CITIES.length} cities` : "Enter an income"}
-          </h2>
-          <span className="label-xs">{APP_NAME}</span>
-        </div>
-        <div className="overflow-x-auto hide-scrollbar">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-border text-start">
-                <Th>City</Th>
-                <Th right>Cost/mo</Th>
-                <Th right>Surplus/mo</Th>
-                <Th right>Surplus/yr</Th>
-                <Th right>Rate</Th>
-                <Th right>To {formatUsd(targetNum)}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ city, arb, months }) => (
-                <tr key={city.id} className="border-b border-border/60 last:border-0">
-                  <td className="px-4 py-2.5">
-                    <Link
-                      to="/city/$cityId"
-                      params={{ cityId: city.id }}
-                      className="flex items-center gap-2 hover:text-primary"
-                    >
-                      <span aria-hidden>{flagEmoji(city.country_code)}</span>
-                      <span className="font-medium">{city.city}</span>
-                      <span className="text-xs text-muted-foreground">{city.country}</span>
-                    </Link>
-                  </td>
-                  <Td right>{formatUsd(arb.cost)}</Td>
-                  <Td
-                    right
-                    className={cn(
-                      "font-semibold",
-                      inc ? (arb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
-                    )}
-                  >
-                    {inc ? formatUsd(arb.surplusMonthly) : "—"}
-                  </Td>
-                  <Td right>{inc ? formatUsd(arb.surplusAnnual) : "—"}</Td>
-                  <Td right>{inc ? `${arb.savingsRate.toFixed(0)}%` : "—"}</Td>
-                  <Td right>
-                    {!inc || months == null
-                      ? "Never"
-                      : months < 12
-                        ? `${months.toFixed(1)} mo`
-                        : `${(months / 12).toFixed(1)} yr`}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-          Surplus = income − (rent central + coworking + groceries + eating out + utilities +
-          mobile + transport + gym) at the {tier === "mid" ? "mid-range" : "lean"} tier. Each
-          city page shows its last-verified date.
-        </p>
-      </section>
+      {rankingSection}
     </div>
   );
 }
