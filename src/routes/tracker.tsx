@@ -35,6 +35,8 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { isPro as planIsPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 import type { Trip, TripPurpose } from "@/lib/types";
 import { formatDate, formatDateLong } from "@/lib/i18n/format";
 
@@ -110,6 +112,7 @@ function Tracker() {
     () => maxStayFrom(engineTrips, plannedEntry),
     [engineTrips, plannedEntry],
   );
+  const proPlanning = planIsPro(profile.plan);
   const plannerLastDay = plannerDays > 0 ? addDaysIso(plannedEntry, plannerDays - 1) : null;
 
   // Border-run planner. Deadline-triggered only — never a speculative prompt.
