@@ -38,12 +38,17 @@ export function ComplianceCalendar({
   trips,
   documents,
   limit,
+  horizonDays,
 }: {
   trips: Trip[];
   documents: VaultDocument[];
   limit?: number;
+  /** Free plan only sees this far ahead; Pro sees the whole horizon. */
+  horizonDays?: number;
 }) {
-  const all = buildComplianceCalendar(trips, documents);
+  const all = buildComplianceCalendar(trips, documents).filter(
+    (o) => horizonDays == null || o.daysAway <= horizonDays,
+  );
   const items = limit ? all.slice(0, limit) : all;
 
   if (items.length === 0) {
