@@ -126,7 +126,7 @@ function ReportPage() {
           </Link>{" "}
           and this becomes a full record — including trips you add retrospectively.
         </div>
-      ) : (
+      ) : pro ? (
         <>
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">Presence by country</h2>
@@ -212,6 +212,95 @@ function ReportPage() {
             ))}
           </section>
         </>
+      ) : (
+        <LockedPreview
+          headline={headline}
+          detail="Pro opens the full presence record — days per country against each threshold, the entry and exit log behind it, and PDF or CSV export for your adviser."
+        >
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">Presence by country</h2>
+            <div className="panel overflow-x-auto">
+              <table className="w-full text-start text-xs">
+                <thead className="border-b border-border text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 font-medium">Country</th>
+                    <th className="px-3 py-2 text-end font-medium">Days</th>
+                    <th className="px-3 py-2 text-end font-medium">Threshold</th>
+                    <th className="px-3 py-2 font-medium">Recorded presence</th>
+                    <th className="hidden px-3 py-2 font-medium sm:table-cell">Period</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.countries.map((c) => (
+                    <tr key={c.basis.country_code} className="border-b border-border/50 last:border-0">
+                      <td className="px-3 py-2">
+                        <div className="font-medium">{c.basis.country}</div>
+                        <div className="text-[11px] text-muted-foreground">{c.basis.basisLabel}</div>
+                      </td>
+                      <td className="num px-3 py-2 text-end tabular-nums">{c.days}</td>
+                      <td className="num px-3 py-2 text-end tabular-nums text-muted-foreground">
+                        {c.basis.thresholdDays}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={cn(
+                            "rounded px-1.5 py-0.5 text-[11px]",
+                            c.exceedsThreshold
+                              ? "bg-accent-warning/10 text-accent-warning"
+                              : "bg-surface-2 text-muted-foreground",
+                          )}
+                        >
+                          {c.exceedsThreshold ? "exceeds threshold" : "below threshold"}
+                        </span>
+                      </td>
+                      <td className="num hidden px-3 py-2 text-[11px] text-muted-foreground sm:table-cell">
+                        {c.periodStart} → {c.periodEnd}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Day count is one test among several. Ties such as a permanent home, family or centre of
+              economic interest can matter more. Non-calendar tax years are used where they apply.
+            </p>
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold">Entry and exit log</h2>
+            {report.countries.map((c) => (
+              <div key={c.basis.country_code} className="panel p-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="text-sm font-medium">{c.basis.country}</h3>
+                  <span className="num text-xs text-muted-foreground">
+                    {c.days} days · {c.periodStart} → {c.periodEnd}
+                  </span>
+                </div>
+                <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                  {c.basis.otherTests}
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {c.segments.map((s) => (
+                    <li
+                      key={s.tripId}
+                      className="num flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground"
+                    >
+                      <span className="text-foreground">
+                        {s.countedFrom} → {s.countedTo}
+                      </span>
+                      <span>{s.daysInPeriod}d</span>
+                      <span>{s.purpose.replace("_", " ")}</span>
+                      {s.openEnded ? (
+                        <span className="text-accent-warning">no exit recorded</span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        </LockedPreview>
       )}
 
       <section className="space-y-2">
