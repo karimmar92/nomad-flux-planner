@@ -11,6 +11,8 @@ import { computeArbitrage, flagEmoji, formatUsd, monthsToTarget } from "@/lib/ar
 import { useProfile } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { isPro } from "@/lib/entitlements";
+import { LockedPreview } from "@/components/ProGate";
 
 export const Route = createFileRoute("/calculator")({
   head: () => ({
@@ -39,6 +41,12 @@ function CalculatorPage() {
 
   const inc = income ? Number(income) : null;
   const targetNum = target ? Number(target) : 0;
+  // FREE: arbitrage against one chosen city. PRO: the ranking across all of
+  // them, plus the savings-target column.
+  const pro = isPro(profile.plan);
+  const [focusId, setFocusId] = useState<string>(CITIES[0]!.id);
+  const focusCity = CITIES.find((c) => c.id === focusId) ?? CITIES[0]!;
+  const focusArb = computeArbitrage(focusCity, inc, tier);
 
   const rows = CITIES.map((city) => {
     const arb = computeArbitrage(city, inc, tier);
@@ -72,18 +80,38 @@ function CalculatorPage() {
             className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
           />
         </div>
-        <div>
-          <label className="label-xs" htmlFor="calc-target">
-            Savings target (USD)
-          </label>
-          <input
-            id="calc-target"
-            inputMode="numeric"
-            value={target}
-            onChange={(e) => setTarget(e.target.value.replace(/\D/g, ""))}
-            className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
-          />
-        </div>
+        {pro ? (
+          <div>
+            <label className="label-xs" htmlFor="calc-target">
+              Savings target (USD)
+            </label>
+            <input
+              id="calc-target"
+              inputMode="numeric"
+              value={target}
+              onChange={(e) => setTarget(e.target.value.replace(/\D/g, ""))}
+              className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-lg font-semibold outline-none focus:border-primary"
+            />
+          </div>
+        ) : (
+          <div>
+            <label className="label-xs" htmlFor="calc-city">
+              City
+            </label>
+            <select
+              id="calc-city"
+              value={focusId}
+              onChange={(e) => setFocusId(e.target.value)}
+              className="mt-1 w-full rounded-md border border-input bg-surface px-3 py-2.5 text-sm outline-none focus:border-primary"
+            >
+              {CITIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.city}, {c.country}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <span className="label-xs">Cost tier</span>
           <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
