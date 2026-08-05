@@ -15,12 +15,26 @@ import {
 import type { City } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Deterministic warm hue per city so the cover band is stable across renders. */
+/**
+ * Deterministic cover band per city, stable across renders.
+ *
+ * Hue is deliberately constrained to a warm earth band (~15°–85° in oklch)
+ * rather than the full spectrum. Free-running hues produced lime greens and
+ * pinks that clashed with the terracotta palette and read as broken image
+ * placeholders instead of a designed surface. Chroma is kept low for the same
+ * reason — these are backgrounds, not focal points.
+ *
+ * If real photography is added later, this becomes the fallback for cities
+ * with no image rather than the default.
+ */
 function coverStyle(id: string) {
-  let h = 0;
-  for (let i = 0; i < id.length; i += 1) h = (h * 31 + id.charCodeAt(i)) % 360;
+  let n = 0;
+  for (let i = 0; i < id.length; i += 1) n = (n * 31 + id.charCodeAt(i)) % 997;
+  const hue = 15 + (n % 70);
+  const light = 0.62 + ((n >> 3) % 5) * 0.02;
+  const chroma = 0.05 + ((n >> 6) % 4) * 0.012;
   return {
-    backgroundImage: `linear-gradient(140deg, oklch(0.72 0.12 ${h}), oklch(0.55 0.13 ${(h + 40) % 360}))`,
+    backgroundImage: `linear-gradient(140deg, oklch(${light} ${chroma} ${hue}), oklch(${(light - 0.12).toFixed(2)} ${(chroma + 0.02).toFixed(3)} ${hue + 22}))`,
   };
 }
 

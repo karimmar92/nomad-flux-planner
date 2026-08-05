@@ -16,6 +16,19 @@ dist-ssr
 .nitro
 *.local
 
+# Secrets
+# .env itself is tracked on purpose — Lovable manages it and it holds only
+# publishable values (Supabase URL, project id, anon key), all of which ship
+# in the browser bundle anyway.
+#
+# ANY REAL SECRET GOES IN .env.local, WHICH IS NEVER COMMITTED.
+# That means the Unsplash access key, Stripe secret key, service_role key,
+# and anything else that must not be public. Vite loads .env.local after .env
+# and it takes precedence, so it also works for overriding values locally.
+.env.local
+.env.*.local
+.env.production
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
