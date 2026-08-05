@@ -18,7 +18,13 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
   const { i18n } = useTranslation();
   const { deadline, origin, departOn, options } = plan;
   const [openId, setOpenId] = useState<string | null>(options[0]?.city.id ?? null);
-  const visible = isPro ? options : options.slice(0, 1);
+  // EMERGENCY RULE: over a limit, or inside 7 days of one, the gate comes off.
+  const emergency = isEmergency(deadline);
+  const unlocked = isPro || emergency;
+  const visible = unlocked ? options : options.slice(0, 1);
+  const locked = unlocked ? [] : options.slice(1);
+  const cheapest = [...options].sort((a, b) => a.city.cost_mid_usd - b.city.cost_mid_usd)[0];
+
 
   return (
     <section
