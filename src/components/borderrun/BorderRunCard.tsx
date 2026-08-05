@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Lock, Plane, TrainFront, TriangleAlert } from "lucide-react";
+import { ChevronDown, Plane, TrainFront, TriangleAlert } from "lucide-react";
 import type { BorderRunPlan, ExitOption } from "@/lib/border-run";
 import { RANK_WEIGHTS } from "@/lib/border-run";
 import { useTranslation } from "react-i18next";
