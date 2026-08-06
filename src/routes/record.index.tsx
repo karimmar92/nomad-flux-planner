@@ -7,7 +7,9 @@ import { expiryState } from "@/lib/documents/vault";
 import { yearsWithData } from "@/lib/reports/tax-report";
 import { useProfile, useTrips } from "@/lib/store";
 import { FREE_CALENDAR_HORIZON_DAYS, isPro } from "@/lib/entitlements";
-import { ProBadge, ProPrompt } from "@/components/ProGate";
+import { LockedPreview, ProBadge } from "@/components/ProGate";
+import { buildComplianceCalendar } from "@/lib/compliance-calendar";
+
 import { todayIso } from "@/lib/trip-dates";
 
 export const Route = createFileRoute("/record/")({
