@@ -63,6 +63,64 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+        /* ---------------- plan provisioning ----------------
+         *
+         * Stripe is the source of truth for entitlement. `profiles.plan` is
+         * write-protected against end users by a trigger (see
+         * 20260806140000_security_linter_fixes.sql) precisely so that the only
+         * way to hold a paid tier is to have paid — this handler, running as
+         * service_role, is the sole writer.
+         *
+         * Downgrade on deletion is as important as upgrade on creation. A
+         * cancelled subscription that leaves someone on Pro is revenue lost
+         * silently and forever, because nobody complains about that bug.
+         */
+        if (
+          event.type === "checkout.session.completed" ||
+          event.type === "customer.subscription.created" ||
+          event.type === "customer.subscription.updated" ||
+          event.type === "customer.subscription.deleted"
+        ) {
+          const { planForPriceId } = await import("@/config/stripe-prices");
+
+          const userId: string | null =
+            object["metadata"]?.["user_id"] ?? object["client_reference_id"] ?? null;
+          const customerId: string | null =
+            typeof object["customer"] === "string" ? object["customer"] : null;
+          if (!userId) return Response.json({ received: true, skipped: "no_user_reference" });
+
+          // Statuses that entitle. `past_due` deliberately still entitles:
+          // a failed card retry should not lock someone out of their passport
+          // vault mid-trip. Stripe cancels after its retry schedule, and the
+          // deletion event below is what actually downgrades.
+          const status: string = object["status"] ?? "active";
+          const entitled = ["active", "trialing", "past_due"].includes(status);
+
+          const priceId: string | null =
+            object["items"]?.["data"]?.[0]?.["price"]?.["id"] ??
+            object["plan"]?.["id"] ??
+            null;
+
+          const plan =
+            event.type === "customer.subscription.deleted" || !entitled
+              ? "free"
+              : (priceId && planForPriceId(priceId)) ||
+                (object["metadata"]?.["plan"] as string | undefined) ||
+                null;
+
+          if (!plan) {
+            return Response.json({ received: true, skipped: "unmapped_price", priceId });
+          }
+
+          const patch: Record<string, unknown> = { plan };
+          if (customerId) patch["stripe_customer_id"] = customerId;
+
+          const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
+          if (error) return new Response(error.message, { status: 500 });
+
+          return Response.json({ received: true, plan, user_id: userId });
+        }
+
         /* ---------------- accrual ---------------- */
         if (event.type === "invoice.paid") {
           const invoiceId: string | null = object["id"] ?? null;
