@@ -128,15 +128,15 @@
       "title": "Pro",
       "recommended": "Recommended",
       "priceMonthly": "$9",
-      "perMonth": "/mo",
-      "yearlyNote": "or $69/yr — two months free",
+      "perMonth": "/mo + VAT",
+      "yearlyNote": "or $69/yr + VAT — two months free",
       "everyCity": "Every city in the dataset",
       "personalisedArbitrage": "Personalised arbitrage across every city",
       "compare": "Side-by-side compare, 2–4 cities",
       "unlimitedTrips": "Unlimited trips and timeline history",
       "dataExport": "Data export",
-      "goProMonthly": "Go Pro — $9/mo",
-      "yearlyCta": "$69/yr"
+      "goProMonthly": "Go Pro — $9/mo + VAT",
+      "yearlyCta": "$69/yr + VAT"
     },
     "toast": {
       "checkoutSoonTitle": "Checkout is coming soon",

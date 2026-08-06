@@ -12,12 +12,12 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Unlimited trip tracking, free forever. Pro at $9/mo adds the border-run planner, forward planning, alerts, exports, the vault and full city ranking.",
+          "Unlimited trip tracking, free forever. Pro at $9/mo + VAT adds the border-run planner, forward planning, alerts, exports, the vault and full city ranking.",
       },
       { property: "og:title", content: `Pricing | ${APP_NAME}` },
       {
         property: "og:description",
-        content: "Free to put your data in. Pro at $9/mo to get the answers out.",
+        content: "Free to put your data in. Pro at $9/mo + VAT to get the answers out.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -111,15 +111,18 @@ function Pricing() {
           </div>
           <div className="num mt-1 text-3xl font-semibold">
             $9
-            <span className="text-base font-normal text-muted-foreground">/mo</span>
+            <span className="text-base font-normal text-muted-foreground">/mo + VAT</span>
           </div>
-          {/* PAngV: once checkout is live, consumer prices must be shown as the
-              total payable INCLUDING VAT. VAT on digital services is due in the
-              customer's country (OSS), so this line needs to become a gross
-              price — or state that VAT is added — before the first charge. */}
+          {/* PAngV BLOCKER before the first charge: a price shown to CONSUMERS
+              must be the total payable INCLUDING VAT — "+ VAT" is lawful for
+              business buyers but not for consumers. VAT on digital services is
+              due in the customer's country (OSS), so the gross figure differs
+              per country. Resolve by either showing a gross price per the
+              visitor's country, or moving to a single gross price, before
+              checkout goes live. */}
           <p className="text-xs text-muted-foreground">
             The forward-looking and the exportable. Billed monthly or yearly. Checkout is not open
-            yet — prices shown are indicative and will be confirmed including VAT.
+            yet — VAT is added at your country&apos;s rate and shown before you pay.
           </p>
           <ul className="mt-4 space-y-2 text-sm">
             {PRO.map((f) => (
