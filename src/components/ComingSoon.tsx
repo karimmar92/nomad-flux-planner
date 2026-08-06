@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { joinWaitlist } from "@/lib/waitlist.functions";
+import { alreadyJoinedLocally, submitWaitlist } from "@/lib/waitlist";
 
-/** Waitlist capture. Writes locally until the `waitlist` table is live. */
+/** Waitlist capture. Writes to the `waitlist` table, with an offline fallback
+ *  that drains through the sync queue when connectivity returns. */
 export function ComingSoon({
   title,
   feature,
@@ -13,21 +17,38 @@ export function ComingSoon({
   plan: string;
   bullets: string[];
 }) {
+  const join = useServerFn(joinWaitlist);
   const [email, setEmail] = useState("");
-  const [done, setDone] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [state, setState] = useState<"idle" | "joined" | "already" | "queued">("idle");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       toast.error("Enter a valid email address");
       return;
     }
-    const key = "driftly.waitlist";
-    const existing = JSON.parse(window.localStorage.getItem(key) ?? "[]");
-    existing.push({ email, feature, created_at: new Date().toISOString() });
-    window.localStorage.setItem(key, JSON.stringify(existing));
-    setDone(true);
-    toast.success("You're on the list");
+    if (alreadyJoinedLocally(feature)) {
+      setState("already");
+      toast.message("You're already on the list");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await submitWaitlist(join, { email, feature });
+      setState(result);
+      toast[result === "already" ? "message" : "success"](
+        result === "already"
+          ? "You're already on the list"
+          : result === "queued"
+            ? "Saved offline — we'll send it when you're back online"
+            : "You're on the list",
+      );
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not sign you up. Try again.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -47,9 +68,13 @@ export function ComingSoon({
         ))}
       </ul>
 
-      {done ? (
+      {state !== "idle" ? (
         <div className="panel p-4 text-sm text-positive">
-          Registered. We&apos;ll email you when {feature} opens.
+          {state === "already"
+            ? `You're already on the list for ${feature}.`
+            : state === "queued"
+              ? `Saved on this device. We'll register you for ${feature} as soon as you're online.`
+              : `Registered. We'll email you when ${feature} opens.`}
         </div>
       ) : (
         <form onSubmit={submit} className="flex gap-2">
@@ -60,8 +85,11 @@ export function ComingSoon({
             placeholder="you@example.com"
             className="flex-1 rounded-md border border-input bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
-          <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-            Notify me
+          <button
+            disabled={busy}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          >
+            {busy ? "Sending…" : "Notify me"}
           </button>
         </form>
       )}
