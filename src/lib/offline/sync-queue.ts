@@ -65,19 +65,42 @@ export async function flushQueue(): Promise<void> {
     const queue = await readQueue();
     if (queue.length === 0) return;
 
+    // Waitlist signups are public inserts: they do NOT need an account, so
+    // they drain before the auth check. Anything that fails stays queued.
+    const waitlistOps = queue.filter((op) => op.entity === "waitlist");
+    const failedWaitlist: SyncOp[] = [];
+    if (waitlistOps.length > 0) {
+      const { joinWaitlist } = await import("@/lib/waitlist.functions");
+      for (const op of waitlistOps) {
+        try {
+          await joinWaitlist({
+            data: op.payload as Parameters<typeof joinWaitlist>[0]["data"],
+          });
+        } catch {
+          failedWaitlist.push(op);
+        }
+      }
+    }
+
+    const rest = queue.filter((op) => op.entity !== "waitlist");
+
     const { supabase } = await import("@/integrations/supabase/client");
     const { data } = await supabase.auth.getSession();
     const userId = data.session?.user.id;
-    // No account yet — keep everything queued rather than dropping it.
-    if (!userId) return;
+    // No account yet — keep everything else queued rather than dropping it.
+    if (!userId) {
+      await idbSet(QUEUE_KEY, [...failedWaitlist, ...rest]);
+      notify();
+      return;
+    }
 
-    const lastTripOp = [...queue].reverse().find((op) => op.entity === "trip");
+    const lastTripOp = [...rest].reverse().find((op) => op.entity === "trip");
     if (lastTripOp && Array.isArray(lastTripOp.payload)) {
       const { pushTrips } = await import("./trip-sync");
       await pushTrips(userId, lastTripOp.payload as Parameters<typeof pushTrips>[1]);
     }
 
-    await idbSet(QUEUE_KEY, []);
+    await idbSet(QUEUE_KEY, failedWaitlist);
     notify();
   } catch {
     // Leave the queue intact so the next flush retries. Never clear on failure.
