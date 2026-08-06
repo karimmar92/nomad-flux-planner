@@ -1047,6 +1047,25 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      radar_peers: {
+        Args: never
+        Returns: {
+          availability: string
+          avatar_url: string
+          bio: string
+          cell_lat: number
+          cell_lng: number
+          display_name: string
+          headline: string
+          id: string
+          last_active_at: string
+          links: Json
+          looking_for: string[]
+          radar_city_id: string
+          skills: string[]
+          timezone: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "creator" | "user"
