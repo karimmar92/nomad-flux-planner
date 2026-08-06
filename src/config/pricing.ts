@@ -129,8 +129,3 @@ export function tier(id: PlanId): Tier {
 }
 
 export const PAID_TIERS = TIERS.filter((t) => t.monthlyUsd > 0);
-
-/** "$29" / "Free" — the headline figure only. */
-export function formatPrice(usd: number): string {
-  return usd === 0 ? "Free" : `$${usd}`;
-}

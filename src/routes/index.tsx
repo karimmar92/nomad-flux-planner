@@ -201,9 +201,11 @@ export function Explore() {
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-semibold tracking-tight">
+              {/* h2, not h1 — the page heading is above. Two h1s on one page
+                  is both an accessibility fault and an SEO one. */}
+              <h2 className="text-2xl font-semibold tracking-tight">
                 Add your income to personalise every number.
-              </h1>
+              </h2>
               <p className="mt-1.5 text-sm text-muted-foreground">
                 Every figure below is generic until we know your income and passport.
               </p>

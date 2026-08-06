@@ -42,29 +42,6 @@ export const PRICING_FAQ: FaqItem[] = [
   },
 ];
 
-export const PRODUCT_FAQ: FaqItem[] = [
-  {
-    q: "Do I need an account to try it?",
-    a: "No. Trips log straight to your device and the tracker works signed out. An account adds sync across devices, the vault and backup — but you can use the counter first and decide later.",
-  },
-  {
-    q: "Does it work offline, at the border?",
-    a: "Yes. Your trips, day counts and any vault documents you have already opened are cached on the device, so the app works in an immigration hall with no signal. New uploads and syncing need a connection.",
-  },
-  {
-    q: "How accurate is the Schengen calculation?",
-    a: "It implements the rolling 90/180 rule with both entry and exit days counted as full days, and is covered by a test suite that runs in multiple timezones. Where a trip has no exit date yet, it is counted only up to today — never beyond.",
-  },
-  {
-    q: "Where is my data stored, and who can see it?",
-    a: "In the EU, on infrastructure with row-level security so your rows are readable only by your account. There are no analytics or tracking scripts. Document vault access additionally requires a second factor, so a stolen password alone does not open your passport scans.",
-  },
-  {
-    q: "What happens if I want to leave?",
-    a: "Download everything as JSON, CSV and PDF, then delete your account in-app. Deletion removes your files, your rows and your local caches — not a support ticket, a button.",
-  },
-];
-
 export function FaqList({ items }: { items: FaqItem[] }) {
   return (
     <div className="divide-y divide-border overflow-hidden rounded-lg border border-border">

@@ -42,12 +42,17 @@ export const Route = createFileRoute("/landing")({
           "Rolling Schengen 90/180 counting, per-country tax day counters and a permanent record of where you have been. Free to log trips, forever.",
       },
       { property: "og:title", content: `${APP_NAME} — Know how many days you have left` },
+      // "/" renders this same component, so this URL is a duplicate. Keep it
+      // out of the index and point the canonical at the homepage rather than
+      // letting two URLs compete for the same terms.
+      { name: "robots", content: "noindex, follow" },
       {
         property: "og:description",
         content:
           "A visa day tracker and cost-of-living record for people who work from more than one country.",
       },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Landing,
 });
