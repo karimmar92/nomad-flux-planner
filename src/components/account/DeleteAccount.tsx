@@ -103,10 +103,18 @@ export function DeleteAccount() {
             profile and connections. This cannot be undone and we cannot recover
             it for you.
           </p>
+          {/*
+            This previously claimed payout records were kept but anonymised.
+            That was not true: commission_ledger.creator_id is NOT NULL and
+            references creators.id, whose user_id is NOT NULL, so the chain
+            forces the ledger to be deleted with the account. Claiming
+            otherwise in a deletion dialogue would be a false statement about
+            what we do with someone's data — the one place it must be exact.
+            See 20260807140000_fix_delete_my_account.sql.
+          */}
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            Payout records tied to the creator programme are kept but
-            anonymised — accounting rules require us to retain them, and they no
-            longer identify you.
+            If you took part in the creator programme, those records are deleted
+            too. Nothing about you is retained.
           </p>
 
           {!open ? (
