@@ -24,10 +24,14 @@ export type Billing = "monthly" | "annual";
 export function PricingTable({
   compact = false,
   onChoose,
+  busyPlan = null,
 }: {
   /** Homepage variant: fewer feature lines, no long copy. */
   compact?: boolean;
   onChoose?: (tier: Tier, billing: Billing) => void;
+  /** Tier whose checkout is being created — disables the button so a double
+   *  click cannot open two Stripe sessions. */
+  busyPlan?: string | null;
 }) {
   const [billing, setBilling] = useState<Billing>("annual");
 
@@ -57,6 +61,7 @@ export function PricingTable({
             tier={t}
             billing={billing}
             compact={compact}
+            busy={busyPlan === t.id}
             {...(onChoose ? { onChoose } : {})}
           />
         ))}
@@ -76,11 +81,13 @@ function TierCard({
   billing,
   compact,
   onChoose,
+  busy = false,
 }: {
   tier: Tier;
   billing: Billing;
   compact: boolean;
   onChoose?: (tier: Tier, billing: Billing) => void;
+  busy?: boolean;
 }) {
   const free = tier.monthlyUsd === 0;
   const shown = billing === "annual" ? annualMonthlyEquivalentUsd(tier) : tier.monthlyUsd;
@@ -156,14 +163,16 @@ function TierCard({
       ) : (
         <button
           onClick={() => onChoose?.(tier, billing)}
+          disabled={busy}
           className={cn(
+            busy && "opacity-60",
             "mt-5 rounded-md py-2.5 text-sm font-medium",
             tier.recommended
               ? "bg-primary text-primary-foreground"
               : "border border-border",
           )}
         >
-          Choose {tier.name}
+          {busy ? "Opening checkout…" : `Choose ${tier.name}`}
         </button>
       )}
     </div>

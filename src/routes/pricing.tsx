@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -6,7 +7,9 @@ import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
 import { PricingTable } from "@/components/PricingTable";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
-import { tier } from "@/config/pricing";
+import { tier, type PlanId } from "@/config/pricing";
+import { createCheckoutSession } from "@/lib/billing/billing.functions";
+import { useSession } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
 export const Route = createFileRoute("/pricing")({
@@ -32,6 +35,9 @@ export const Route = createFileRoute("/pricing")({
 function Pricing() {
   const { t } = useTranslation("common");
   const { profile, patchProfile } = useProfile();
+  const { signedIn } = useSession();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState<PlanId | null>(null);
 
   return (
     <div className="space-y-6">
@@ -70,11 +76,29 @@ function Pricing() {
       </div>
 
       <PricingTable
-        onChoose={() =>
-          toast(t("pricing.toast.checkoutSoonTitle"), {
-            description: t("pricing.toast.checkoutSoonDescription"),
+        busyPlan={busy}
+        onChoose={(chosen, billing) => {
+          if (!signedIn) {
+            void navigate({ to: "/auth", search: { next: "/pricing" } });
+            return;
+          }
+          setBusy(chosen.id);
+          createCheckoutSession({
+            data: {
+              plan: chosen.id,
+              interval: billing === "annual" ? "yearly" : "monthly",
+              seats: chosen.perSeat ? 5 : 1,
+            },
           })
-        }
+            .then((r) => {
+              window.location.href = r.url;
+            })
+            .catch((e: Error) => {
+              setBusy(null);
+              // Billing not configured yet reads as a bug unless it is named.
+              toast("Checkout is not available", { description: e.message });
+            });
+        }}
       />
 
       <section className="panel flex items-start gap-2.5 p-4">
