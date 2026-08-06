@@ -30,6 +30,19 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 function createSupabaseAdminClient() {
+  // Defence in depth. Nothing should ever reach this in a browser — the key is
+  // read from process.env with no VITE_ prefix, so Vite cannot inline it, and
+  // every call site uses a dynamic import inside a server handler. But if a
+  // future top-level import ever pulls this module into the client bundle,
+  // fail loudly here rather than shipping an RLS-bypassing client to users.
+  // (If Lovable regenerates this file, re-add this guard —
+  // src/lib/server-only.test.ts also catches the mistake at test time.)
+  if (typeof window !== 'undefined') {
+    throw new Error(
+      '[Supabase] client.server.ts was loaded in the browser. The service-role key must never reach the client — import it dynamically inside a server handler instead.',
+    );
+  }
+
   const SUPABASE_URL = process.env['SUPABASE_URL'];
   const SUPABASE_SERVICE_ROLE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
