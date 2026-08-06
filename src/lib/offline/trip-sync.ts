@@ -66,15 +66,61 @@ function fromRow(row: RemoteTrip): Trip {
 }
 
 /**
- * Push local trips to the server. Upsert on primary key, so re-running is
- * harmless and a trip edited offline overwrites its own remote row.
+ * Fingerprint of a trip's syncable content. `updated_at` is excluded — it
+ * changes on every write and would make every row look dirty forever.
+ */
+function fingerprint(t: Trip): string {
+  return [t.country_code, t.city_id ?? "", t.entry_date, t.exit_date ?? "", t.purpose, t.notes ?? ""].join(
+    "",
+  );
+}
+
+const PUSHED_KEY = "trips.pushed";
+
+/**
+ * Push only the trips that actually changed.
+ *
+ * WHY: the sync queue carries the FULL trips array as its payload, so a naive
+ * implementation upserts every row on every edit. Adding trip #50 wrote 50
+ * rows; logging 50 trips one at a time cost 1,275 row-writes instead of 50.
+ * Quadratic in the size of someone's history — and this product is explicitly
+ * for people accumulating years of it, so the worst case lands on exactly the
+ * users you most want.
+ *
+ * We keep a fingerprint of what was last confirmed on the server and send the
+ * difference. Steady state for "user logs one trip" is one row.
+ *
+ * The fingerprint map is advisory: if it is lost or stale, the next push is
+ * simply larger. It can never cause a missed write, because a row absent from
+ * the map is always treated as dirty.
  */
 export async function pushTrips(userId: string, trips: Trip[]): Promise<number> {
   if (trips.length === 0) return 0;
-  const rows = trips.map((t) => toRow(t, userId));
+
+  const { idbGet, idbSet } = await import("./idb");
+  const pushed = (await idbGet<Record<string, string>>(PUSHED_KEY)) ?? {};
+
+  const dirty = trips.filter((t) => pushed[t.id] !== fingerprint(t));
+  if (dirty.length === 0) return 0;
+
+  const rows = dirty.map((t) => toRow(t, userId));
   const { error } = await supabase.from("trips").upsert(rows, { onConflict: "id" });
   if (error) throw new Error(error.message);
+
+  // Record only what the server confirmed, and prune ids no longer held
+  // locally so the map cannot grow without bound.
+  const next: Record<string, string> = {};
+  for (const t of trips) next[t.id] = pushed[t.id] ?? "";
+  for (const t of dirty) next[t.id] = fingerprint(t);
+  await idbSet(PUSHED_KEY, next);
+
   return rows.length;
+}
+
+/** Forget what was pushed — used on sign-out and account deletion. */
+export async function resetPushState(): Promise<void> {
+  const { idbSet } = await import("./idb");
+  await idbSet(PUSHED_KEY, {});
 }
 
 /** Fetch every trip the server holds for this user. */

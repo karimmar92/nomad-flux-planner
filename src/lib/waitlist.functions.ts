@@ -54,7 +54,14 @@ export const joinWaitlist = createServerFn({ method: "POST" })
     });
 
     if (error) {
+      // Already on the list — not a failure from the visitor's point of view.
       if (error.code === "23505") return { ok: true, already: true };
+      // Rate limited (see 20260806120000_rate_limit_anon_inserts.sql). A real
+      // person never hits five signups a minute, so this is a script. Report
+      // success rather than an error: telling an attacker which requests were
+      // blocked lets them tune around the limit, and there is no legitimate
+      // visitor to apologise to.
+      if (error.code === "53400") return { ok: true, already: true };
       throw new Error(error.message);
     }
     return { ok: true, already: false };
