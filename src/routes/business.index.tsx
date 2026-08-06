@@ -5,6 +5,8 @@ import { Check, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { submitB2bLead } from "@/lib/org/org.functions";
+import { joinWaitlist } from "@/lib/waitlist.functions";
+import { submitWaitlist } from "@/lib/waitlist";
 import { B2B_PRICING, annualPerSeatMonthly, annualTotal, monthlyTotal, usd } from "@/lib/org/pricing";
 import { PE_BENCHMARK_LABEL } from "@/lib/org/presence";
 
