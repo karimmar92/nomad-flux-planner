@@ -54,7 +54,15 @@
   --color-accent-positive-muted: var(--accent-positive-muted);
   --color-accent-warning: var(--accent-warning);
   --color-accent-warning-muted: var(--accent-warning-muted);
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-soft: var(--brand-soft);
+  --color-info: var(--info);
+  --color-info-muted: var(--info-muted);
+  /* Manrope for UI, Newsreader for display headings — the prototype pairing.
+     The serif is what makes it read as editorial rather than dashboard, so it
+     belongs on hero and section headings, never on data or labels. */
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -100,24 +108,48 @@
 }
 
 .light {
-  /* Warm cream paper, deep clay-red brand, blue for money kept. */
-  --background: oklch(0.968 0.012 60);
-  --foreground: oklch(0.26 0.02 45);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.965 0.014 62);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.26 0.02 45);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.26 0.02 45);
+  /*
+   * Palette mapped from the Driftly prototype design tokens.
+   *
+   * Source tokens (prototype):
+   *   --bg   97% 0.012 65   --surface   99% 0.006 70
+   *   --ink  20% 0.02  60   --ink-soft  45% 0.02  60
+   *   --line 89% 0.012 60
+   *   --clay 62% 0.16  42   --clay-deep 48% 0.15 40   --clay-soft 94% 0.035 42
+   *   --teal 38% 0.06 195   --teal-soft 94% 0.02 195
+   *
+   * ONE DELIBERATE DEVIATION: --primary uses clay-DEEP, not clay.
+   * The prototype's clay sits at 62% lightness. White text on it measures
+   * roughly 2.9:1, well under the 4.5:1 WCAG AA minimum, so it cannot carry a
+   * filled button. clay-deep at 48% measures ~5.5:1 and passes. Clay is kept
+   * as --brand-bright for borders, icons and accents on light backgrounds,
+   * where it is decorative rather than load-bearing.
+   */
+  --background: oklch(0.97 0.012 65);
+  --foreground: oklch(0.2 0.02 60);
+  --surface: oklch(0.99 0.006 70);
+  --surface-2: oklch(0.955 0.016 64);
+  --card: oklch(0.99 0.006 70);
+  --card-foreground: oklch(0.2 0.02 60);
+  --popover: oklch(0.99 0.006 70);
+  --popover-foreground: oklch(0.2 0.02 60);
 
-  --primary: oklch(0.45 0.15 32);
-  --primary-foreground: oklch(0.985 0.008 60);
-  --secondary: oklch(0.955 0.016 62);
-  --secondary-foreground: oklch(0.3 0.02 45);
-  --muted: oklch(0.955 0.016 62);
-  --muted-foreground: oklch(0.56 0.02 50);
-  --accent: oklch(0.94 0.02 60);
-  --accent-foreground: oklch(0.3 0.02 45);
+  --primary: oklch(0.48 0.15 40);
+  --primary-foreground: oklch(0.99 0.006 70);
+  /* The prototype's brighter clay — accents only, never a text background. */
+  --brand-bright: oklch(0.62 0.16 42);
+  --brand-soft: oklch(0.94 0.035 42);
+  --secondary: oklch(0.955 0.016 64);
+  --secondary-foreground: oklch(0.28 0.02 60);
+  --muted: oklch(0.955 0.016 64);
+  --muted-foreground: oklch(0.45 0.02 60);
+  --accent: oklch(0.94 0.035 42);
+  --accent-foreground: oklch(0.28 0.02 60);
+
+  /* Teal is the prototype's secondary accent — used for calm, informational
+     emphasis so it never competes with clay (actions) or the money colours. */
+  --info: oklch(0.38 0.06 195);
+  --info-muted: oklch(0.94 0.02 195);
 
   --positive: oklch(0.55 0.17 253);
   --positive-muted: oklch(0.55 0.17 253 / 10%);
@@ -133,9 +165,9 @@
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.99 0.004 250);
 
-  --border: oklch(0.915 0.014 62);
-  --input: oklch(0.915 0.014 62);
-  --ring: oklch(0.45 0.15 32 / 40%);
+  --border: oklch(0.89 0.012 60);
+  --input: oklch(0.89 0.012 60);
+  --ring: oklch(0.48 0.15 40 / 40%);
 }
 
 
