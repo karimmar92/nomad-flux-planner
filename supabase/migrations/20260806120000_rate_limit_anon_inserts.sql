@@ -164,8 +164,16 @@ CREATE TRIGGER rl_connections
 -- 30/min. One row per user, partner, placement and day is all the measurement
 -- needs — we care which placements earn, not how many times someone clicked.
 
+-- NOTE: click_day is a plain column with a DEFAULT, not a generated column.
+-- `GENERATED ALWAYS AS ((created_at AT TIME ZONE 'UTC')::date) STORED` looks
+-- cleaner but does not apply: timezone() is marked STABLE rather than IMMUTABLE
+-- (timezone definitions can change), and both generated columns and index
+-- expressions require IMMUTABLE. Postgres rejects it with
+-- "generation expression is not immutable". Column defaults have no such
+-- restriction, so the value is set on insert instead.
+
 ALTER TABLE public.partner_clicks
-  ADD COLUMN IF NOT EXISTS click_day date GENERATED ALWAYS AS ((created_at AT TIME ZONE 'UTC')::date) STORED;
+  ADD COLUMN IF NOT EXISTS click_day date NOT NULL DEFAULT ((now() AT TIME ZONE 'UTC')::date);
 
 CREATE UNIQUE INDEX IF NOT EXISTS partner_clicks_daily_unique
   ON public.partner_clicks (user_id, partner_id, placement, click_day)

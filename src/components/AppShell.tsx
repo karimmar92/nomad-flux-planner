@@ -133,6 +133,15 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link to="/settings/employer-sharing" className="hover:text-foreground">
           {t("footerLinks.employerSharing")}
         </Link>
+        {/*
+          TEMPORARY. The landing page belongs at "/" for logged-out visitors,
+          with Explore moving elsewhere — that is a routing decision, not a
+          footer link. This exists so the page is reachable for review before
+          that call is made. Remove it once the root route is settled.
+        */}
+        <Link to="/landing" className="hover:text-foreground">
+          Landing (preview)
+        </Link>
         <Link to="/how-we-make-money" className="hover:text-foreground">
           {t("footerLinks.howWeMakeMoney")}
         </Link>
