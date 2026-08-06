@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { joinWaitlist } from "@/lib/waitlist.functions";
+import { alreadyJoinedLocally, submitWaitlist } from "@/lib/waitlist";
 import { Inbox, LocateFixed, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { APP_NAME } from "@/lib/app";
