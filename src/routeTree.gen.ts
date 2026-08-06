@@ -23,6 +23,7 @@ import { Route as LandingRouteImport } from './routes/landing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as OrgRouteImport } from './routes/org'
 import { Route as PlanRouteImport } from './routes/plan'
+import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
@@ -42,6 +43,7 @@ import { Route as PlanIndexRouteImport } from './routes/plan.index'
 import { Route as PlanChecklistRouteImport } from './routes/plan.checklist'
 import { Route as PlanCostsRouteImport } from './routes/plan.costs'
 import { Route as PlanTaxExitRouteImport } from './routes/plan.tax-exit'
+import { Route as PlansPlanIdRouteImport } from './routes/plans.$planId'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
@@ -119,6 +121,11 @@ const OrgRoute = OrgRouteImport.update({
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlansRoute = PlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -218,6 +225,11 @@ const PlanTaxExitRoute = PlanTaxExitRouteImport.update({
   path: '/tax-exit',
   getParentRoute: () => PlanRoute,
 } as any)
+const PlansPlanIdRoute = PlansPlanIdRouteImport.update({
+  id: '/$planId',
+  path: '/$planId',
+  getParentRoute: () => PlansRoute,
+} as any)
 const RecordIndexRoute = RecordIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -275,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
   '/plan': typeof PlanRouteWithChildren
+  '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -291,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
+  '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -317,6 +331,7 @@ export interface FileRoutesByTo {
   '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/stays': typeof StaysRoute
@@ -332,6 +347,7 @@ export interface FileRoutesByTo {
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
+  '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -360,6 +376,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
   '/plan': typeof PlanRouteWithChildren
+  '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
@@ -376,6 +393,7 @@ export interface FileRoutesById {
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
+  '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
@@ -405,6 +423,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/org'
     | '/plan'
+    | '/plans'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -421,6 +440,7 @@ export interface FileRouteTypes {
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
+    | '/plans/$planId'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -447,6 +467,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/mcp'
     | '/org'
+    | '/plans'
     | '/pricing'
     | '/profile'
     | '/stays'
@@ -462,6 +483,7 @@ export interface FileRouteTypes {
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
+    | '/plans/$planId'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -489,6 +511,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/org'
     | '/plan'
+    | '/plans'
     | '/pricing'
     | '/profile'
     | '/record'
@@ -505,6 +528,7 @@ export interface FileRouteTypes {
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
+    | '/plans/$planId'
     | '/record/vault'
     | '/settings/employer-sharing'
     | '/setup/company'
@@ -533,6 +557,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   OrgRoute: typeof OrgRoute
   PlanRoute: typeof PlanRouteWithChildren
+  PlansRoute: typeof PlansRouteWithChildren
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
@@ -653,6 +678,13 @@ declare module '@tanstack/react-router' {
       path: '/plan'
       fullPath: '/plan'
       preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plans': {
+      id: '/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof PlansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -788,6 +820,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlanTaxExitRouteImport
       parentRoute: typeof PlanRoute
     }
+    '/plans/$planId': {
+      id: '/plans/$planId'
+      path: '/$planId'
+      fullPath: '/plans/$planId'
+      preLoaderRoute: typeof PlansPlanIdRouteImport
+      parentRoute: typeof PlansRoute
+    }
     '/record/': {
       id: '/record/'
       path: '/'
@@ -863,6 +902,16 @@ const PlanRouteChildren: PlanRouteChildren = {
 
 const PlanRouteWithChildren = PlanRoute._addFileChildren(PlanRouteChildren)
 
+interface PlansRouteChildren {
+  PlansPlanIdRoute: typeof PlansPlanIdRoute
+}
+
+const PlansRouteChildren: PlansRouteChildren = {
+  PlansPlanIdRoute: PlansPlanIdRoute,
+}
+
+const PlansRouteWithChildren = PlansRoute._addFileChildren(PlansRouteChildren)
+
 interface RecordRouteChildren {
   RecordVaultRoute: typeof RecordVaultRoute
   RecordIndexRoute: typeof RecordIndexRoute
@@ -893,6 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   OrgRoute: OrgRoute,
   PlanRoute: PlanRouteWithChildren,
+  PlansRoute: PlansRouteWithChildren,
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
