@@ -208,10 +208,18 @@ function Tracker() {
         </div>
       ) : null}
 
+      {/*
+        The full ranked list is an entitlement, so this asks canUse() rather
+        than comparing against a single tier — a literal === "pro" check would
+        re-gate Starter and Teams customers.
+
+        NOTE: this comment sits OUTSIDE the ternary on purpose. A brace-wrapped
+        JSX comment placed inside the parenthesised branch below is a syntax
+        error — JSX comments are only valid where children are expected, and
+        inside parentheses the braces parse as an object literal instead.
+        That exact mistake blanked the entire app. Keep comments out here.
+      */}
       {borderRun ? (
-        {/* The full ranked list is a Starter feature, so this must ask the
-            entitlement rather than compare to a single tier — a literal
-            === "pro" check would re-gate Starter and Teams customers. */}
         <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
       ) : null}
 
