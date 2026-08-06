@@ -90,14 +90,7 @@ export async function deleteAccount(): Promise<DeletionResult> {
 
   const filesRemoved = await deleteStorageObjects(userId);
 
-  // `delete_my_account` is defined in
-  // supabase/migrations/20260805090000_delete_my_account.sql but will not
-  // appear in integrations/supabase/types.ts until that migration has been
-  // applied and the types regenerated. The cast keeps the build green in the
-  // meantime — remove it once the generated types include the function, so
-  // that a future rename fails at compile time rather than at runtime.
-  const rpc = supabase.rpc as unknown as (fn: string) => Promise<{ error: { message: string } | null }>;
-  const { error } = await rpc("delete_my_account");
+  const { error } = await supabase.rpc("delete_my_account");
   if (error) throw new Error(error.message);
 
   await clearLocalData();
