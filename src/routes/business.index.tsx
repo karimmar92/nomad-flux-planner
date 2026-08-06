@@ -216,6 +216,7 @@ function BusinessPage() {
 
 function LeadForm() {
   const submit = useServerFn(submitB2bLead);
+  const joinList = useServerFn(joinWaitlist);
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -242,6 +243,11 @@ function LeadForm() {
           message: form.message,
         },
       });
+      // The lead row is the conversation; the waitlist row is the demand
+      // signal. A duplicate here is expected and handled as "already".
+      void submitWaitlist(joinList, { email: form.work_email, feature: "b2b" }).catch(
+        () => {},
+      );
       setSent(true);
       toast.success("Thanks — we'll be in touch within a working day.");
     } catch (err) {
