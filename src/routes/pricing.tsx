@@ -55,7 +55,7 @@ const PRO = [
 
 function Pricing() {
   const { t } = useTranslation("common");
-  const { profile } = useProfile();
+  const { profile, patchProfile } = useProfile();
 
   return (
     <div className="space-y-5">
@@ -65,6 +65,24 @@ function Pricing() {
           Free to put your data in. Pro to get the answers out. You are on the{" "}
           <span className="font-medium capitalize text-foreground">{profile.plan}</span> plan.
         </p>
+      </div>
+
+      {/* TEMP until billing exists: local-only Pro preview so Pro features can
+          be tested end to end. Remove when a real checkout flips profile.plan. */}
+      <div className="panel flex items-center justify-between gap-3 p-4">
+        <div>
+          <div className="text-sm font-semibold">Pro preview (testing)</div>
+          <p className="text-xs text-muted-foreground">
+            Billing isn&apos;t wired up yet. This toggles Pro on this device only, so the
+            gated features can be tried before checkout exists.
+          </p>
+        </div>
+        <button
+          onClick={() => patchProfile({ plan: profile.plan === "pro" ? "free" : "pro" })}
+          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary"
+        >
+          {profile.plan === "pro" ? "Switch to Free" : "Enable Pro preview"}
+        </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
