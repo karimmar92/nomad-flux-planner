@@ -20,7 +20,7 @@ import { useSession } from "@/lib/use-session";
 import { StepUpGate } from "@/components/account/StepUpGate";
 import { useProfile } from "@/lib/store";
 import { isPro } from "@/lib/entitlements";
-import { ProPrompt } from "@/components/ProGate";
+import { LockedPreview } from "@/components/ProGate";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/record/vault")({
@@ -104,11 +104,29 @@ function VaultPage() {
       ) : null}
 
       {!pro ? (
-        <ProPrompt
-          title="The vault is Pro"
-          body="Passport, visa approvals and insurance certificates in a private bucket, cached on this device so they open with no signal. Trip logging stays free forever."
-        />
+        <LockedPreview
+          headline={
+            documents.length > 0
+              ? `${documents.length} document${documents.length === 1 ? "" : "s"} on this device${expiring.length > 0 ? ` · ${expiring.length} approaching expiry` : ""}`
+              : "Passport, visa approval, insurance — three files, readable with no signal"
+          }
+          detail="Pro stores them in a private bucket only your account can read, tracks expiry dates, and caches a copy on this device. Trip logging stays free forever."
+        >
+          <div className="space-y-2">
+            {["Passport", "Visa approval", "Insurance certificate"].map((title) => (
+              <div key={title} className="panel flex items-center gap-3 p-3">
+                <FileWarning className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium">{title}</div>
+                  <div className="text-xs text-muted-foreground">Expires in 8 months</div>
+                </div>
+                <span className="num text-xs text-muted-foreground">PDF</span>
+              </div>
+            ))}
+          </div>
+        </LockedPreview>
       ) : !signedIn ? (
+
         <div className="panel p-4 text-sm text-muted-foreground">
           <Link to="/auth" search={{ next: "/record/vault" }} className="underline">
             Sign in

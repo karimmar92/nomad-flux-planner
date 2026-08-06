@@ -900,6 +900,30 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          city_id: string | null
+          created_at: string
+          email: string
+          feature: string
+          id: string
+        }
+        Insert: {
+          city_id?: string | null
+          created_at?: string
+          email: string
+          feature: string
+          id?: string
+        }
+        Update: {
+          city_id?: string | null
+          created_at?: string
+          email?: string
+          feature?: string
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       org_member_directory: {

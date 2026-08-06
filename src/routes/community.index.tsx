@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { joinWaitlist } from "@/lib/waitlist.functions";
+import { alreadyJoinedLocally, submitWaitlist } from "@/lib/waitlist";
 import { Inbox, LocateFixed, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { APP_NAME } from "@/lib/app";
@@ -287,7 +290,10 @@ function CommunityRadar() {
 
 function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
   const { join, joined } = useRadarWaitlist();
+  const submitFn = useServerFn(joinWaitlist);
   const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [queued, setQueued] = useState(false);
   const done = joined(cityId);
 
   return (
@@ -304,19 +310,47 @@ function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
       </p>
       {done ? (
         <p className="text-sm text-positive">
-          You&apos;re on the list. We&apos;ll email you when {cityName} opens.
+          {queued
+            ? `Saved on this device. We'll register you for ${cityName} as soon as you're online.`
+            : `You're on the list. We'll email you when ${cityName} opens.`}
         </p>
       ) : (
         <form
           className="flex gap-2"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             if (!/^\S+@\S+\.\S+$/.test(email)) {
               toast.error("Enter a valid email address");
               return;
             }
-            join(email, cityId);
-            toast.success("Added to the list");
+            if (alreadyJoinedLocally("radar_city", cityId)) {
+              join(email, cityId);
+              toast.message("You're already on the list");
+              return;
+            }
+            setBusy(true);
+            try {
+              const result = await submitWaitlist(submitFn, {
+                email,
+                feature: "radar_city",
+                city_id: cityId,
+              });
+              join(email, cityId);
+              setQueued(result === "queued");
+              toast[result === "already" ? "message" : "success"](
+                result === "already"
+                  ? "You're already on the list"
+                  : result === "queued"
+                    ? "Saved offline — we'll send it when you're back online"
+                    : "Added to the list",
+              );
+            } catch (err) {
+              toast.error(
+                err instanceof Error ? err.message : "Could not add you. Try again.",
+              );
+            } finally {
+              setBusy(false);
+            }
           }}
         >
           <input
@@ -326,8 +360,11 @@ function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
             placeholder="you@example.com"
             className="flex-1 rounded-md border border-input bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
-          <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-            Notify me
+          <button
+            disabled={busy}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          >
+            {busy ? "Sending…" : "Notify me"}
           </button>
         </form>
       )}

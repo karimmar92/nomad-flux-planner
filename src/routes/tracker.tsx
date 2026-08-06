@@ -406,7 +406,11 @@ function Tracker() {
           <p className="text-foreground">
             Saved on this device only. If you clear your browser or switch
             phones, these trips are gone.{" "}
-            <Link to="/auth" className="font-medium text-primary underline">
+            <Link
+              to="/auth"
+              search={{ next: "/tracker" }}
+              className="font-medium text-primary underline"
+            >
               Create an account
             </Link>{" "}
             and everything you have already logged is uploaded automatically.
