@@ -1,6 +1,7 @@
 import { APP_NAME } from "@/lib/app";
 import { REPORT_DISCLAIMER, reportFileName } from "./export-csv";
 import type { TaxReport } from "./tax-report";
+import { SEED_LAST_VERIFIED } from "@/lib/cities";
 
 /**
  * Client-side PDF generation, so the report can be produced with no network —
@@ -48,6 +49,18 @@ export async function taxReportToPdf(report: TaxReport, ownerName: string): Prom
       `Covers ${report.countries.length} ${report.countries.length === 1 ? "country" : "countries"} with recorded presence.`,
   );
   body(REPORT_DISCLAIMER, 10);
+  y += 6;
+
+  // ---- How the days were counted -----------------------------------
+  // Printed before the numbers, not buried at the end: an accountant checking
+  // a figure needs the rule that produced it, and a report queried months
+  // later must be reproducible from what is on the page.
+  heading("How these days were counted", 12);
+  for (const note of report.methodNotes) body(`• ${note}`, 9);
+  body(
+    `Counting method version ${report.methodVersion}. Country dataset verified ${SEED_LAST_VERIFIED}.`,
+    9,
+  );
   y += 6;
 
   // ---- Presence by country ----------------------------------------
@@ -154,6 +167,13 @@ export async function taxReportToPdf(report: TaxReport, ownerName: string): Prom
     const lines = doc.splitTextToSize(REPORT_DISCLAIMER, pageWidth - margin * 2 - 60);
     doc.text(lines, margin, h - 34);
     doc.text(`${i} / ${pages}`, pageWidth - margin, h - 34, { align: "right" });
+    // Provenance on every page, so a detached page is still traceable.
+    doc.text(
+      `Method v${report.methodVersion} · generated ${report.generatedAt.slice(0, 10)}`,
+      pageWidth - margin,
+      h - 24,
+      { align: "right" },
+    );
     doc.setTextColor(0);
   }
 

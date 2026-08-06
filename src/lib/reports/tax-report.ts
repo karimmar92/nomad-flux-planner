@@ -202,9 +202,37 @@ export type RegimePointer = {
   note: string;
 };
 
+/**
+ * Counting-method version. BUMP THIS whenever the arithmetic changes — day
+ * counting, the open-trip cap, period boundaries or threshold data.
+ *
+ * Why it matters: someone may hand a report to a tax authority and be asked
+ * about a number months later. Without knowing which method produced it, you
+ * cannot reproduce or defend that figure, and a silent engine change makes two
+ * reports for the same year disagree with no visible reason. This is also the
+ * accuracy limb of GDPR Art. 5(1)(d) in practice.
+ *
+ * History:
+ *   1  Initial: inclusive day counting, open trips capped at today or period
+ *      end (whichever is earlier), thresholds from the seed dataset.
+ */
+export const COUNTING_METHOD_VERSION = 1;
+
+/** Plain-language statement of the rules behind every figure. Printed on exports. */
+export const COUNTING_METHOD_NOTES = [
+  "Both the arrival day and the departure day count as days of presence.",
+  "A trip with no exit date is counted only up to today, or the end of the period if that is earlier — never beyond.",
+  "Each country is counted over its own tax-year period, which is not always January to December.",
+  "Day-count thresholds come from this app's country dataset; see the report header for the dataset date.",
+] as const;
+
 export type TaxReport = {
   year: number;
   generatedAt: string;
+  /** Method that produced these figures. See COUNTING_METHOD_VERSION. */
+  methodVersion: number;
+  /** The rules applied, printed alongside the numbers. */
+  methodNotes: readonly string[];
   countries: CountryBlock[];
   schengen: SchengenYearSummary;
   dataQuality: DataQualityFlag[];
@@ -287,6 +315,8 @@ export function buildTaxReport(trips: Trip[], year: number, todayIso: string): T
   return {
     year,
     generatedAt: new Date().toISOString(),
+    methodVersion: COUNTING_METHOD_VERSION,
+    methodNotes: COUNTING_METHOD_NOTES,
     countries,
     schengen: schengenYearSummary(trips, year, todayIso),
     dataQuality: dataQualityFlags(trips, year, todayIso),

