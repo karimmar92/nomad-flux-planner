@@ -124,27 +124,33 @@ export function CityCard({
         </div>
       </div>
 
-      <Link
-        to="/city/$cityId"
-        params={{ cityId: city.id }}
-        className="flex items-center justify-between border-t border-border px-4 py-2.5"
-      >
-        <span className="label-xs">Arbitrage</span>
-        <span
-          className={cn(
-            "num text-lg font-semibold",
-            income == null
-              ? "text-muted-foreground"
-              : positive
-                ? "text-positive"
-                : "text-negative",
-          )}
+      {/*
+        The arbitrage row only renders once an income is known.
+
+        It previously showed "add income" on every card — thirty identical
+        prompts down the page, which reads as noise rather than an invitation
+        and makes the grid look broken. The ask now happens once, in a banner
+        above the grid; the moment income is set, every card fills in at once,
+        which is a far better payoff than thirty separate nudges.
+      */}
+      {income == null ? null : (
+        <Link
+          to="/city/$cityId"
+          params={{ cityId: city.id }}
+          className="flex items-center justify-between border-t border-border px-4 py-2.5"
         >
-          {income == null
-            ? "add income"
-            : `${positive ? "+" : "−"}${formatUsd(Math.abs(arb.surplusMonthly))}/mo`}
-        </span>
-      </Link>
+          <span className="label-xs">You&apos;d keep</span>
+          <span
+            className={cn(
+              "num text-lg font-semibold",
+              positive ? "text-positive" : "text-negative",
+            )}
+          >
+            {positive ? "+" : "−"}
+            {formatUsd(Math.abs(arb.surplusMonthly))}/mo
+          </span>
+        </Link>
+      )}
     </article>
   );
 }

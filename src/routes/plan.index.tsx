@@ -42,7 +42,7 @@ export const Route = createFileRoute("/plan/")({
       {
         property: "og:description",
         content:
-          "Your savings, turned into months of runway in 25 cities — plus a 90-day departure checklist.",
+          `Your savings, turned into months of runway in ${CITIES.length} cities — plus a 90-day departure checklist.`,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -266,8 +266,8 @@ function PlanHub() {
       <section className="space-y-3">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="text-base font-semibold">Where should I start?</h2>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">
-            All 25 cities <ArrowRight className="inline h-3 w-3" />
+          <Link to="/explore" className="text-xs text-muted-foreground hover:text-foreground">
+            All {CITIES.length} cities <ArrowRight className="inline h-3 w-3" />
           </Link>
         </div>
         <p className="max-w-3xl text-xs leading-relaxed text-muted-foreground">{FIRST_MOVE_RATIONALE}</p>

@@ -31,14 +31,14 @@ type NavItem = { to: string; labelKey: string; icon: typeof Compass };
  */
 const NAV_PLANNING: NavItem[] = [
   { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
-  { to: "/", labelKey: "nav.explore", icon: Compass },
+  { to: "/explore", labelKey: "nav.explore", icon: Compass },
   { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
   { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
   { to: "/pricing", labelKey: "nav.pricing", icon: Tag },
 ];
 
 const NAV_ABROAD: NavItem[] = [
-  { to: "/", labelKey: "nav.explore", icon: Compass },
+  { to: "/explore", labelKey: "nav.explore", icon: Compass },
   { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
   { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
   { to: "/tracker", labelKey: "nav.tracker", icon: CalendarClock },

@@ -15,7 +15,6 @@ import {
   TIERS,
   annualMonthlyEquivalentUsd,
   annualUsd,
-  formatPrice,
   type Tier,
 } from "@/config/pricing";
 import { cn } from "@/lib/utils";

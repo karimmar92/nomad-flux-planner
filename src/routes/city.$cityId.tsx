@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Bookmark, Check, GitCompareArrows, Plus, TriangleAlert, X } from "lucide-react";
 import { getCity } from "@/lib/cities";
 import {
+  type CostTier,
   computeArbitrage,
   costLines,
   flagEmoji,
@@ -23,6 +24,7 @@ import {
 } from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { isPaid } from "@/lib/entitlements";
+import { formatLocal } from "@/lib/fx";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -72,7 +74,7 @@ function CityDetail() {
   const cityContent = useCityContent();
   const { profile, patchProfile } = useProfile();
   const { saved, toggle } = useSavedCities();
-  const [tier, setTier] = useState<"lean" | "mid">("mid");
+  const [tier, setTier] = useState<CostTier>("mid");
   const [showMath, setShowMath] = useState(false);
 
   const income = profile.monthly_income_usd;
@@ -156,9 +158,11 @@ function CityDetail() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <Stat label="Your income" value={`${formatUsd(income)}`} hint="per month" />
               <Stat
-                label={`Cost here (${tier})`}
+                label={`Cost here (${tier === "mid" ? "mid-range" : tier})`}
                 value={formatUsd(arb.cost)}
-                hint="per month"
+                // Same local-currency treatment as the calculator — one city
+                // should never show its cost two different ways.
+                hint={formatLocal(arb.cost, city.local_currency) ?? "per month"}
               />
               <Stat
                 label="Monthly surplus"
@@ -598,12 +602,12 @@ function TierToggle({
   tier,
   onChange,
 }: {
-  tier: "lean" | "mid";
-  onChange: (t: "lean" | "mid") => void;
+  tier: CostTier;
+  onChange: (t: CostTier) => void;
 }) {
   return (
     <div className="flex rounded-md border border-border p-0.5 text-xs">
-      {(["lean", "mid"] as const).map((t) => (
+      {(["lean", "mid", "luxury"] as const).map((t) => (
         <button
           key={t}
           onClick={() => onChange(t)}
@@ -612,7 +616,7 @@ function TierToggle({
             tier === t ? "bg-primary text-primary-foreground" : "text-muted-foreground",
           )}
         >
-          {t === "mid" ? "mid-range" : "lean"}
+          {t === "mid" ? "mid-range" : t}
         </button>
       ))}
     </div>

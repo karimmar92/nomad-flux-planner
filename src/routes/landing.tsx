@@ -17,6 +17,7 @@
  * must be traceable to something real in the repo.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PricingTable } from "@/components/PricingTable";
 import {
   ArrowRight,
   CalendarClock,
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/landing")({
   component: Landing,
 });
 
-function Landing() {
+export function Landing() {
   const cityCount = CITIES.length;
 
   return (
@@ -83,7 +84,7 @@ function Landing() {
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <Link
-            to="/"
+            to="/explore"
             className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-surface-2"
           >
             Browse {cityCount} cities
@@ -246,45 +247,15 @@ function Landing() {
           holding it hostage would be indefensible. Pro is for the forward-looking
           parts: planning ahead, alerts, reports and exports.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="panel space-y-2 p-5">
-            <h3 className="text-sm font-semibold">Free</h3>
-            <p className="text-2xl font-semibold tabular-nums">€0</p>
-            <ul className="space-y-1.5 pt-1 text-sm text-muted-foreground">
-              {[
-                "Unlimited trip logging",
-                "Rolling Schengen status",
-                "Every country day counter",
-                `All ${cityCount} cities and costs`,
-                "Works offline",
-              ].map((f) => (
-                <li key={f} className="flex gap-2">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-positive" aria-hidden />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="panel space-y-2 border-primary/40 p-5">
-            <h3 className="text-sm font-semibold">Pro</h3>
-            <p className="text-2xl font-semibold tabular-nums">
-              €9<span className="text-sm font-normal text-muted-foreground">/month</span>
-            </p>
-            <ul className="space-y-1.5 pt-1 text-sm text-muted-foreground">
-              {[
-                "Plan future entries against your window",
-                "Ranked exits when a deadline hits",
-                "Threshold alerts at 75% and 90%",
-                "Year-end presence report and exports",
-                "Document vault",
-              ].map((f) => (
-                <li key={f} className="flex gap-2">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-positive" aria-hidden />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Rendered from src/config/pricing.ts. This section used to hold a
+            hand-written two-tier table at €9 — it drifted the moment pricing
+            changed, and a landing page quoting a price the checkout does not
+            charge is the worst possible inconsistency to ship. One source. */}
+        <PricingTable compact />
+        <div className="text-center">
+          <Link to="/pricing" className="text-sm text-primary underline-offset-2 hover:underline">
+            Full plan comparison
+          </Link>
         </div>
         <p className="text-center text-xs text-muted-foreground">
           If you are within seven days of a deadline or already over a limit, the full

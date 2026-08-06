@@ -10,7 +10,8 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
 import { EmptyState } from "@/components/Primitives";
-import { LandingSections } from "@/components/marketing/LandingSections";
+import { Landing } from "./landing";
+import { useSession } from "@/lib/use-session";
 import { CITIES, REGIONS } from "@/lib/cities";
 import {
   computeArbitrage,
@@ -27,25 +28,58 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${APP_NAME} — what a city costs you, not what it costs` },
+      // "/" is the landing page for signed-out visitors, so the metadata
+      // describes the product rather than the city grid (that is /explore).
+      { title: `${APP_NAME} — know how many days you have left, everywhere` },
       {
         name: "description",
         content:
-          "Personalised cost-of-living arbitrage for freelancers: see what you'd keep each month in every city, given your income and passport.",
+          "Track your Schengen 90/180 allowance and tax-residency days as you travel. Alerts before you cross a line, and a year-end presence record for your accountant. Free to track, no account needed.",
       },
-      { property: "og:title", content: `${APP_NAME} — personalised geo-arbitrage` },
+      { property: "og:title", content: `${APP_NAME} — visa and tax day tracking for nomads` },
       {
         property: "og:description",
-        content: "See what you'd keep each month in every city, given your income and passport.",
+        content:
+          "Rolling 90/180 counter, per-country tax day counts, border-run planning and an exportable presence record.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Explore,
+  component: Home,
 });
+
+/**
+ * "/" serves two different audiences, so it renders two different things.
+ *
+ * Signed out: the landing page. Someone arriving cold needs to know what this
+ * is before they see thirty city cards and an arbitrage column that means
+ * nothing without their income.
+ *
+ * Signed in: straight to Explore. A returning user should not scroll past
+ * marketing to reach their own tool.
+ *
+ * The city grid is still reachable signed-out at /explore — browsing is the
+ * acquisition surface and gating it would cost more traffic than it earns.
+ */
+function Home() {
+  const { signedIn, ready } = useSession();
+
+  // Render nothing rather than flashing the wrong page for a frame while the
+  // session resolves — the flicker reads as a bug.
+  if (!ready) return null;
+
+  if (signedIn) return <Explore />;
+
+  // One landing page, defined in ./landing.tsx and rendered here. Two
+  // implementations of the same page is how a price gets updated in one place
+  // and not the other.
+  return <Landing />;
+}
 
 type SortKey = "savings" | "cheapest" | "internet" | "weather";
 
-function Explore() {
+export function Explore() {
   const { profile, hydrated } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -119,6 +153,19 @@ function Explore() {
           }}
         />
       ) : null}
+
+      {/* Explore needs to say what it is. Someone landing here from search or
+          from the landing page's "Browse cities" button previously met a
+          filter panel and a column of dollar figures with no explanation of
+          what was being compared or why the numbers were generic. */}
+      <header className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight">Explore cities</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          What each city costs, and what you would keep there each month once your income is
+          entered. Every figure carries a last-verified date, and the downsides are printed on the
+          city page rather than hidden.
+        </p>
+      </header>
 
       {/* Hero stat panel — soft card, big number */}
       <section className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -307,10 +354,31 @@ function Explore() {
           <span className="num text-xs text-muted-foreground">{cities.length}</span>
         </div>
 
+        {/*
+          One ask, above the grid — not "add income" repeated on all thirty
+          cards. The personalised surplus is the whole product, so the prompt
+          has to be visible, but thirty of them reads as noise and makes the
+          grid look unfinished. Set it once and every card fills in together.
+        */}
+        {income == null ? (
+          <Link
+            to="/profile"
+            className="flex items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3"
+          >
+            <span className="text-sm">
+              <span className="font-medium">Add your income</span>
+              <span className="block text-xs text-muted-foreground">
+                See what you&apos;d keep each month in every city, not just what it costs.
+              </span>
+            </span>
+            <span className="shrink-0 text-sm font-medium text-primary">Add</span>
+          </Link>
+        ) : null}
+
         {cities.length === 0 ? (
           <EmptyState
             title="No cities match those filters"
-            body="Loosen the budget or internet minimum to see more of the 25-city dataset."
+            body={`Loosen the budget or internet minimum to see more of the ${CITIES.length}-city dataset.`}
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -327,11 +395,10 @@ function Explore() {
         )}
       </section>
 
-      {/* Marketing sections sit BELOW the working explorer, not above it.
-          Someone who arrives already convinced gets the tool first; someone
-          still deciding scrolls and finds the features, the price and the
-          data-handling answers without leaving the page or booking a call. */}
-      <LandingSections />
+      {/* Marketing sections deliberately NOT rendered here any more. They now
+          live on the signed-out "/" alongside the hero. A signed-in user
+          browsing cities does not need the pitch again, and a signed-out user
+          reaching /explore came here to browse, not to be sold to. */}
 
       <p className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
         Cost figures are estimates and carry a last-verified date on each city page. Always confirm

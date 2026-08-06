@@ -145,7 +145,7 @@ function RootComponent() {
   useTripReconcile();
 
   // Offline-first: register the (guarded) service worker, cache the whole
-  // 25-city dataset locally on every open, and drain any queued writes.
+  // city dataset locally on every open, and drain any queued writes.
   useEffect(() => {
     registerServiceWorker();
     void warmCityCache();
