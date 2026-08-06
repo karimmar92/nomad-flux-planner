@@ -134,14 +134,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           {t("footerLinks.employerSharing")}
         </Link>
         {/*
-          TEMPORARY. The landing page belongs at "/" for logged-out visitors,
-          with Explore moving elsewhere — that is a routing decision, not a
-          footer link. This exists so the page is reachable for review before
-          that call is made. Remove it once the root route is settled.
+          NO LINK TO /landing HERE — deliberately.
+
+          A previous version added one, and it broke the entire app: AppShell
+          renders on every page, TanStack Router validates `to` against the
+          generated route tree, and `/landing` was not in it. One invalid link
+          in a shared shell takes down every route at once.
+
+          Use a plain <a href> if a temporary link is needed before the route
+          tree is regenerated — it bypasses route validation. Better still,
+          settle the routing first: the landing page belongs at "/" for
+          logged-out visitors, not in a footer.
         */}
-        <Link to="/landing" className="hover:text-foreground">
-          Landing (preview)
-        </Link>
         <Link to="/how-we-make-money" className="hover:text-foreground">
           {t("footerLinks.howWeMakeMoney")}
         </Link>

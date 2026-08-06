@@ -29,8 +29,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { APP_NAME } from "@/lib/app";
-import { CITIES } from "@/lib/cities";
-import { SEED_LAST_VERIFIED } from "@/lib/cities";
+import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
