@@ -524,6 +524,7 @@ export type Database = {
       partner_clicks: {
         Row: {
           city_id: string | null
+          click_day: string
           created_at: string
           id: string
           partner_id: string
@@ -532,6 +533,7 @@ export type Database = {
         }
         Insert: {
           city_id?: string | null
+          click_day?: string
           created_at?: string
           id?: string
           partner_id: string
@@ -540,6 +542,7 @@ export type Database = {
         }
         Update: {
           city_id?: string | null
+          click_day?: string
           created_at?: string
           id?: string
           partner_id?: string
@@ -662,6 +665,24 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+        }
+        Relationships: []
+      }
+      rate_limit_buckets: {
+        Row: {
+          bucket_key: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          hits?: number
+          window_start: string
+        }
+        Update: {
+          bucket_key?: string
+          hits?: number
+          window_start?: string
         }
         Relationships: []
       }
@@ -1021,6 +1042,7 @@ export type Database = {
     }
     Functions: {
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
+      caller_bucket_key: { Args: never; Returns: string }
       cell_occupancy: { Args: { _lat: number; _lng: number }; Returns: number }
       creator_balance: {
         Args: { _creator_id: string }
@@ -1031,6 +1053,7 @@ export type Database = {
           pending_cents: number
         }[]
       }
+      delete_my_account: { Args: never; Returns: undefined }
       delete_my_radar_data: { Args: never; Returns: undefined }
       has_role: {
         Args: {

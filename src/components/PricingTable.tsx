@@ -58,7 +58,7 @@ export function PricingTable({
             tier={t}
             billing={billing}
             compact={compact}
-            onChoose={onChoose}
+            {...(onChoose ? { onChoose } : {})}
           />
         ))}
       </div>
