@@ -1053,6 +1053,7 @@ export type Database = {
           pending_cents: number
         }[]
       }
+      delete_my_account: { Args: never; Returns: undefined }
       delete_my_radar_data: { Args: never; Returns: undefined }
       has_role: {
         Args: {
