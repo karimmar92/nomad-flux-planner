@@ -195,7 +195,6 @@ function PeerDetail() {
                 </li>
                 );
               })}
-              ))}
             </ul>
           </div>
         ) : null}

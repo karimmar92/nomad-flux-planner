@@ -16,8 +16,10 @@ import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CreatorRouteImport } from './routes/creator'
 import { Route as CreatorTermsRouteImport } from './routes/creator-terms'
 import { Route as CreatorsRouteImport } from './routes/creators'
+import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as HowWeMakeMoneyRouteImport } from './routes/how-we-make-money'
 import { Route as KitRouteImport } from './routes/kit'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as OrgRouteImport } from './routes/org'
 import { Route as PlanRouteImport } from './routes/plan'
@@ -84,6 +86,11 @@ const CreatorsRoute = CreatorsRouteImport.update({
   path: '/creators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmergencyRoute = EmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HowWeMakeMoneyRoute = HowWeMakeMoneyRouteImport.update({
   id: '/how-we-make-money',
   path: '/how-we-make-money',
@@ -92,6 +99,11 @@ const HowWeMakeMoneyRoute = HowWeMakeMoneyRouteImport.update({
 const KitRoute = KitRouteImport.update({
   id: '/kit',
   path: '/kit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -256,8 +268,10 @@ export interface FileRoutesByFullPath {
   '/creator': typeof CreatorRoute
   '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
+  '/emergency': typeof EmergencyRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
+  '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
   '/plan': typeof PlanRouteWithChildren
@@ -297,8 +311,10 @@ export interface FileRoutesByTo {
   '/creator': typeof CreatorRoute
   '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
+  '/emergency': typeof EmergencyRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
+  '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
   '/pricing': typeof PricingRoute
@@ -337,8 +353,10 @@ export interface FileRoutesById {
   '/creator': typeof CreatorRoute
   '/creator-terms': typeof CreatorTermsRoute
   '/creators': typeof CreatorsRoute
+  '/emergency': typeof EmergencyRoute
   '/how-we-make-money': typeof HowWeMakeMoneyRoute
   '/kit': typeof KitRoute
+  '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
   '/plan': typeof PlanRouteWithChildren
@@ -380,8 +398,10 @@ export interface FileRouteTypes {
     | '/creator'
     | '/creator-terms'
     | '/creators'
+    | '/emergency'
     | '/how-we-make-money'
     | '/kit'
+    | '/landing'
     | '/mcp'
     | '/org'
     | '/plan'
@@ -421,8 +441,10 @@ export interface FileRouteTypes {
     | '/creator'
     | '/creator-terms'
     | '/creators'
+    | '/emergency'
     | '/how-we-make-money'
     | '/kit'
+    | '/landing'
     | '/mcp'
     | '/org'
     | '/pricing'
@@ -460,8 +482,10 @@ export interface FileRouteTypes {
     | '/creator'
     | '/creator-terms'
     | '/creators'
+    | '/emergency'
     | '/how-we-make-money'
     | '/kit'
+    | '/landing'
     | '/mcp'
     | '/org'
     | '/plan'
@@ -502,8 +526,10 @@ export interface RootRouteChildren {
   CreatorRoute: typeof CreatorRoute
   CreatorTermsRoute: typeof CreatorTermsRoute
   CreatorsRoute: typeof CreatorsRoute
+  EmergencyRoute: typeof EmergencyRoute
   HowWeMakeMoneyRoute: typeof HowWeMakeMoneyRoute
   KitRoute: typeof KitRoute
+  LandingRoute: typeof LandingRoute
   McpRoute: typeof McpRoute
   OrgRoute: typeof OrgRoute
   PlanRoute: typeof PlanRouteWithChildren
@@ -580,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreatorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/emergency': {
+      id: '/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/how-we-make-money': {
       id: '/how-we-make-money'
       path: '/how-we-make-money'
@@ -592,6 +625,13 @@ declare module '@tanstack/react-router' {
       path: '/kit'
       fullPath: '/kit'
       preLoaderRoute: typeof KitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -846,8 +886,10 @@ const rootRouteChildren: RootRouteChildren = {
   CreatorRoute: CreatorRoute,
   CreatorTermsRoute: CreatorTermsRoute,
   CreatorsRoute: CreatorsRoute,
+  EmergencyRoute: EmergencyRoute,
   HowWeMakeMoneyRoute: HowWeMakeMoneyRoute,
   KitRoute: KitRoute,
+  LandingRoute: LandingRoute,
   McpRoute: McpRoute,
   OrgRoute: OrgRoute,
   PlanRoute: PlanRouteWithChildren,

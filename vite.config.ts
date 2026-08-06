@@ -8,6 +8,23 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+/**
+ * The Lovable MCP plugin crashes on Windows.
+ *
+ * Its assertContains() compares a POSIX-normalised root against a raw
+ * platform path, so on Windows it sees
+ *   "C:/Users/.../nomad-flux-planner"  vs  "C:\Users\...\nomad-flux-planner\src\routes"
+ * decides the second is not inside the first, and refuses to start the dev
+ * server. Lovable's own container is Linux, so the bug never surfaces there.
+ *
+ * The plugin only powers Lovable's in-editor MCP tooling — it contributes
+ * nothing to the app itself — so skipping it on Windows costs nothing locally
+ * and leaves the hosted build untouched.
+ *
+ * Remove this guard once the plugin handles win32 separators.
+ */
+const isWindows = process.platform === "win32";
+
 export default defineConfig({
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
@@ -16,7 +33,7 @@ export default defineConfig({
   },
   vite: {
     plugins: [
-      mcpPlugin(),
+      ...(isWindows ? [] : [mcpPlugin()]),
       /**
        * Offline-first. The app is most useful in an immigration hall with no
        * connectivity, so the shell and every already-visited page must be
