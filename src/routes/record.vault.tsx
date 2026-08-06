@@ -17,6 +17,7 @@ import {
 import { CITIES } from "@/lib/cities";
 import { useOnline } from "@/lib/offline/use-online";
 import { useSession } from "@/lib/use-session";
+import { StepUpGate } from "@/components/account/StepUpGate";
 import { useProfile } from "@/lib/store";
 import { isPro } from "@/lib/entitlements";
 import { ProPrompt } from "@/components/ProGate";
@@ -115,11 +116,13 @@ function VaultPage() {
           to store documents. They are encrypted at rest and readable only by your account.
         </div>
       ) : (
-        <UploadForm
-          disabled={!online}
-          onError={setError}
-          onAdded={() => void refresh()}
-        />
+        <StepUpGate onVerified={() => void refresh()}>
+          <UploadForm
+            disabled={!online}
+            onError={setError}
+            onAdded={() => void refresh()}
+          />
+        </StepUpGate>
       )}
 
       {!online ? (

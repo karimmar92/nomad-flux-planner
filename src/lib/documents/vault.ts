@@ -82,6 +82,13 @@ export async function readCachedFile(id: string): Promise<Blob | null> {
  * and whenever the vault page opens online.
  */
 export async function syncVault(): Promise<VaultDocument[]> {
+  // Step-up guard. At aal1 the RLS policies filter every row WITHOUT an
+  // error, so the select below would "succeed" with an empty list and
+  // writeCachedDocuments([]) would wipe the device cache — hiding exactly
+  // the offline copies the vault exists to keep. Never sync below aal2.
+  const { hasAal2 } = await import("../mfa");
+  if (!(await hasAal2())) return readCachedDocuments();
+
   const { data, error } = await supabase
     .from("documents")
     .select("id, title, type, country_code, expires_on, storage_path, file_name, file_size, mime_type, notes, created_at")

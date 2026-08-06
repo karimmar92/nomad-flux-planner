@@ -75,6 +75,19 @@ export async function deleteAccount(): Promise<DeletionResult> {
   const userId = data.session?.user.id;
   if (!userId) throw new Error("You are not signed in.");
 
+  // Step-up guard. The vault's RLS requires aal2, and it filters SILENTLY:
+  // at aal1 the storage list below returns empty with no error, this function
+  // would skip file deletion, and the RPC would then delete the rows — leaving
+  // passport scans orphaned in the bucket while we report success. If the user
+  // has MFA, deletion requires a verified session. (Users without MFA cannot
+  // have vault files, so aal1 is safe for them.)
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && aal.currentLevel !== "aal2" && aal.nextLevel === "aal2") {
+    throw new Error(
+      "Please verify your authenticator code first (open the vault to do so), then retry deletion.",
+    );
+  }
+
   const filesRemoved = await deleteStorageObjects(userId);
 
   // `delete_my_account` is defined in
