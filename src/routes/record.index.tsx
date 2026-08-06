@@ -113,12 +113,15 @@ function RecordHub() {
           documents={documents}
           {...(pro ? {} : { horizonDays: FREE_CALENDAR_HORIZON_DAYS })}
         />
-        {pro ? null : (
-          <ProPrompt
-            title={`Showing the next ${FREE_CALENDAR_HORIZON_DAYS} days`}
-            body="Pro shows every dated obligation ahead of you — renewal windows, passport validity and filing deadlines months out, while you can still act on them."
-          />
+        {pro || beyond.length === 0 ? null : (
+          <LockedPreview
+            headline={`${beyond.length} more dated obligation${beyond.length === 1 ? "" : "s"} further out · next is ${beyond[0]!.title}`}
+            detail="Pro shows every dated obligation ahead of you — renewal windows, passport validity and filing deadlines months out, while you can still act on them."
+          >
+            <ComplianceCalendar trips={trips} documents={documents} />
+          </LockedPreview>
         )}
+
       </section>
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">{LEGAL_DISCLAIMER}</p>
