@@ -5,6 +5,8 @@ import { Check, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { submitB2bLead } from "@/lib/org/org.functions";
+import { joinWaitlist } from "@/lib/waitlist.functions";
+import { submitWaitlist } from "@/lib/waitlist";
 import { B2B_PRICING, annualPerSeatMonthly, annualTotal, monthlyTotal, usd } from "@/lib/org/pricing";
 import { PE_BENCHMARK_LABEL } from "@/lib/org/presence";
 
@@ -214,6 +216,7 @@ function BusinessPage() {
 
 function LeadForm() {
   const submit = useServerFn(submitB2bLead);
+  const joinList = useServerFn(joinWaitlist);
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -240,6 +243,11 @@ function LeadForm() {
           message: form.message,
         },
       });
+      // The lead row is the conversation; the waitlist row is the demand
+      // signal. A duplicate here is expected and handled as "already".
+      void submitWaitlist(joinList, { email: form.work_email, feature: "b2b" }).catch(
+        () => {},
+      );
       setSent(true);
       toast.success("Thanks — we'll be in touch within a working day.");
     } catch (err) {
