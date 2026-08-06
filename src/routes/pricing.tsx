@@ -113,8 +113,13 @@ function Pricing() {
             $9
             <span className="text-base font-normal text-muted-foreground">/mo</span>
           </div>
+          {/* PAngV: once checkout is live, consumer prices must be shown as the
+              total payable INCLUDING VAT. VAT on digital services is due in the
+              customer's country (OSS), so this line needs to become a gross
+              price — or state that VAT is added — before the first charge. */}
           <p className="text-xs text-muted-foreground">
-            The forward-looking and the exportable. Billed monthly or yearly.
+            The forward-looking and the exportable. Billed monthly or yearly. Checkout is not open
+            yet — prices shown are indicative and will be confirmed including VAT.
           </p>
           <ul className="mt-4 space-y-2 text-sm">
             {PRO.map((f) => (
@@ -152,12 +157,17 @@ function Pricing() {
       <section className="panel flex items-start gap-2.5 p-4">
         <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
         <p className="text-xs leading-relaxed text-muted-foreground">
-          Nothing is ever gated mid-emergency. If you are over a limit, or within seven days of
-          one, the full ranked{" "}
+          {/* Scoped deliberately. The unlock covers the border-run list only —
+              exports, alerts and the vault stay gated. "Nothing is ever gated
+              mid-emergency" read as a broader promise than the code keeps, and
+              a published promise about a paid service is one you can be held
+              to. src/lib/entitlements.test.ts pins both halves. */}
+          You are never left stranded behind the paywall. If you are over a limit, or within seven
+          days of one, the full ranked{" "}
           <Link to="/tracker" className="underline hover:text-foreground">
             border-run list
           </Link>{" "}
-          opens regardless of plan. Someone about to overstay is not someone to charge $9.
+          opens regardless of plan. Someone about to overstay is not someone to charge.
         </p>
       </section>
     </div>
