@@ -19,7 +19,7 @@ import { useOnline } from "@/lib/offline/use-online";
 import { useSession } from "@/lib/use-session";
 import { useProfile } from "@/lib/store";
 import { isPro } from "@/lib/entitlements";
-import { ProPrompt } from "@/components/ProGate";
+import { LockedPreview } from "@/components/ProGate";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/record/vault")({
