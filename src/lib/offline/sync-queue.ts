@@ -11,7 +11,7 @@ import { idbGet, idbSet } from "./idb";
 
 export type SyncOp = {
   id: string;
-  entity: "trip" | "profile" | "checklist" | "arrival" | "departure_plan";
+  entity: "trip" | "profile" | "checklist" | "arrival" | "departure_plan" | "waitlist";
   action: "upsert" | "delete";
   payload: unknown;
   queuedAt: string;
