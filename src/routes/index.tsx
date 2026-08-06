@@ -10,6 +10,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
 import { EmptyState } from "@/components/Primitives";
+import { LandingSections } from "@/components/marketing/LandingSections";
 import { CITIES, REGIONS } from "@/lib/cities";
 import {
   computeArbitrage,
@@ -325,6 +326,12 @@ function Explore() {
           </div>
         )}
       </section>
+
+      {/* Marketing sections sit BELOW the working explorer, not above it.
+          Someone who arrives already convinced gets the tool first; someone
+          still deciding scrolls and finds the features, the price and the
+          data-handling answers without leaving the page or booking a call. */}
+      <LandingSections />
 
       <p className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
         Cost figures are estimates and carry a last-verified date on each city page. Always confirm

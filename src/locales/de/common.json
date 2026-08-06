@@ -127,16 +127,11 @@
     "pro": {
       "title": "Pro",
       "recommended": "Empfohlen",
-      "priceMonthly": "9 $",
-      "perMonth": "/Monat zzgl. MwSt.",
-      "yearlyNote": "oder 69 $/Jahr zzgl. MwSt. — zwei Monate gratis",
       "everyCity": "Jede Stadt im Datensatz",
       "personalisedArbitrage": "Personalisierte Arbitrage für jede Stadt",
       "compare": "Direktvergleich, 2–4 Städte",
       "unlimitedTrips": "Unbegrenzte Reisen und Zeitachsenverlauf",
-      "dataExport": "Datenexport",
-      "goProMonthly": "Pro werden — 9 $/Monat zzgl. MwSt.",
-      "yearlyCta": "69 $/Jahr zzgl. MwSt."
+      "dataExport": "Datenexport"
     },
     "toast": {
       "checkoutSoonTitle": "Checkout kommt bald",

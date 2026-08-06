@@ -127,16 +127,11 @@
     "pro": {
       "title": "Pro",
       "recommended": "Recomendado",
-      "priceMonthly": "9 $",
-      "perMonth": "/mes + IVA",
-      "yearlyNote": "o 69 $/año + IVA — dos meses gratis",
       "everyCity": "Todas las ciudades del conjunto de datos",
       "personalisedArbitrage": "Arbitraje personalizado en cada ciudad",
       "compare": "Comparación lado a lado, 2–4 ciudades",
       "unlimitedTrips": "Viajes ilimitados e historial de línea de tiempo",
-      "dataExport": "Exportación de datos",
-      "goProMonthly": "Hazte Pro — 9 $/mes + IVA",
-      "yearlyCta": "69 $/año + IVA"
+      "dataExport": "Exportación de datos"
     },
     "toast": {
       "checkoutSoonTitle": "El pago llegará pronto",

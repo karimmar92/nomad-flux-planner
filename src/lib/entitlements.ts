@@ -11,7 +11,7 @@
  * EMERGENCY RULE (non-negotiable): nothing is ever gated mid-emergency. If a
  * user is over a limit or inside 7 days of a deadline they see the full
  * border-run list regardless of plan. Someone about to overstay is not the
- * person to extract $9 from.
+ * person to extract a subscription from.
  */
 import type { Plan } from "./types";
 
