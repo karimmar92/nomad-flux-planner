@@ -39,7 +39,11 @@ function RecordHub() {
   const { profile } = useProfile();
   const pro = isPro(profile.plan);
   const years = yearsWithData(trips, todayIso());
+  const beyond = buildComplianceCalendar(trips, documents).filter(
+    (o) => o.daysAway > FREE_CALENDAR_HORIZON_DAYS,
+  );
   const expiring = documents.filter((d) => {
+
     const s = expiryState(d);
     return s && s.severity !== "ok";
   }).length;
