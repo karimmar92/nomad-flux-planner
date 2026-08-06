@@ -22,6 +22,7 @@ import {
   type VisaRuleType,
 } from "@/lib/types";
 import { useProfile, useSavedCities } from "@/lib/store";
+import { isPaid } from "@/lib/entitlements";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -559,7 +560,7 @@ function CityDetail() {
       {/* Before you arrive — deliberately last, after the numbers. Pro subscribers
           paid to not be sold to while browsing, so they never see this. Skipped
           entirely when the visa card already carried this screen's one card. */}
-      {profile.plan === "pro" || nomad ? null : (
+      {isPaid(profile.plan) || nomad ? null : (
 
         <section className="panel p-4">
           <h2 className="text-sm font-semibold">Before you arrive</h2>

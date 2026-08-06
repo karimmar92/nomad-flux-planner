@@ -29,12 +29,45 @@ export const PRO_FEATURES = [
 
 export type ProFeature = (typeof PRO_FEATURES)[number];
 
-export function isPro(plan: Plan): boolean {
-  return plan === "pro";
+/**
+ * Tiers are cumulative: every tier includes everything below it. Ranking them
+ * once here means a new tier cannot accidentally *remove* access — a bug that
+ * would be invisible until a paying customer lost a feature they had.
+ */
+const PLAN_RANK: Record<Plan, number> = { free: 0, starter: 1, pro: 2, teams: 3 };
+
+/** Lowest tier that unlocks each paid feature. */
+const FEATURE_MIN_PLAN: Record<ProFeature, Plan> = {
+  border_run_full: "starter",
+  forward_planning: "starter",
+  threshold_alerts: "starter",
+  calendar_horizon: "starter",
+  compare: "starter",
+  tax_report: "pro",
+  exports: "pro",
+  vault: "pro",
+  arbitrage_ranking: "pro",
+};
+
+export function atLeast(plan: Plan, minimum: Plan): boolean {
+  return PLAN_RANK[plan] >= PLAN_RANK[minimum];
 }
 
-export function canUse(plan: Plan, _feature: ProFeature): boolean {
-  return isPro(plan);
+/**
+ * Kept as the name the codebase already uses. It means "on a paid plan", and
+ * gates the Pro-tier feature set specifically — not merely "paying".
+ */
+export function isPro(plan: Plan): boolean {
+  return atLeast(plan, "pro");
+}
+
+/** True when the plan is paid at all, whatever the tier. */
+export function isPaid(plan: Plan): boolean {
+  return atLeast(plan, "starter");
+}
+
+export function canUse(plan: Plan, feature: ProFeature): boolean {
+  return atLeast(plan, FEATURE_MIN_PLAN[feature]);
 }
 
 /** Free users see the compliance calendar this far ahead. */

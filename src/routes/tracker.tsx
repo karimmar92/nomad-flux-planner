@@ -36,7 +36,7 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
-import { isPro as planIsPro } from "@/lib/entitlements";
+import { isPro as planIsPro, canUse } from "@/lib/entitlements";
 import { LockedPreview } from "@/components/ProGate";
 import type { Trip, TripPurpose } from "@/lib/types";
 import { formatDate, formatDateLong } from "@/lib/i18n/format";
@@ -209,7 +209,10 @@ function Tracker() {
       ) : null}
 
       {borderRun ? (
-        <BorderRunCard plan={borderRun} isPro={profile.plan === "pro"} />
+        {/* The full ranked list is a Starter feature, so this must ask the
+            entitlement rather than compare to a single tier — a literal
+            === "pro" check would re-gate Starter and Teams customers. */}
+        <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
       ) : null}
 
       {preDeparture && !preDepartureDismissed ? (

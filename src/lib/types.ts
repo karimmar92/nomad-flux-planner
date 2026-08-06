@@ -184,7 +184,8 @@ export type IncomeType = "employed" | "freelance" | "founder";
  * Set on first run and again at the graduation handoff.
  */
 export type UserStage = "planning" | "abroad";
-export type Plan = "free" | "pro";
+/** Tier ids mirror src/config/pricing.ts. Order matters: see PLAN_RANK. */
+export type Plan = "free" | "starter" | "pro" | "teams";
 
 export type Profile = {
   display_name: string;
