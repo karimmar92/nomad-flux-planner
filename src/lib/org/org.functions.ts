@@ -8,6 +8,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { email, integer, requiredText } from "@/lib/validate";
 import { EMPLOYER_DIRECTORY_FIELDS, EMPLOYER_PRESENCE_FIELDS } from "./fields";
 import type { MemberRef, OrgPolicy, PresenceRow } from "./presence";
 
@@ -187,15 +188,23 @@ export const getEmployerDashboard = createServerFn({ method: "GET" })
 
 export const createOrganisation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; billing_email: string; seats: number }) => d)
+  // Types are erased at runtime, so the wire payload is whatever the caller
+  // sent. Validate here rather than trusting the annotation: previously a
+  // non-string name threw a TypeError inside the handler and a non-numeric
+  // seats value became NaN on its way into the insert.
+  .inputValidator((d: { name: string; billing_email: string; seats: number }) => ({
+    name: requiredText(d?.name, "Organisation name", 120),
+    billing_email: email(d?.billing_email, "Billing email"),
+    seats: integer(d?.seats, "Seats", 10, 5000),
+  }))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: org, error } = await supabase
       .from("organisations")
       .insert({
-        name: data.name.trim().slice(0, 120),
-        billing_email: data.billing_email.trim().slice(0, 200),
-        seats_purchased: Math.max(10, Math.min(5000, Math.round(data.seats))),
+        name: data.name,
+        billing_email: data.billing_email,
+        seats_purchased: data.seats,
       })
       .select("id")
       .single();

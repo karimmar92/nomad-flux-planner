@@ -4,6 +4,7 @@ import { ArrowLeft, Ban, Flag, Send } from "lucide-react";
 import { toast } from "sonner";
 import { APP_NAME } from "@/lib/app";
 import { lastSeenLabel } from "@/lib/geoprivacy";
+import { safeUrl } from "@/lib/validate";
 import {
   RADAR_CITY_ID,
   getPeer,
@@ -172,17 +173,28 @@ function PeerDetail() {
           <div>
             <div className="label-xs">Links</div>
             <ul className="mt-1 space-y-1 text-sm">
-              {peer.links.map((l) => (
+              {peer.links.map((l) => {
+                // User-supplied URL. React escapes text but not href, so a
+                // `javascript:` link would execute on click. Anything that
+                // isn't http(s) renders as inert text instead.
+                const href = safeUrl(l.url);
+                return (
                 <li key={l.url}>
+                  {href ? (
                   <a
-                    href={l.url}
+                    href={href}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     className="text-primary hover:underline"
                   >
                     {l.label}
                   </a>
+                  ) : (
+                    <span className="text-muted-foreground">{l.label}</span>
+                  )}
                 </li>
+                );
+              })}
               ))}
             </ul>
           </div>
