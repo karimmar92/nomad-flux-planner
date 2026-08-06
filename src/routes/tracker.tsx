@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Trash2, X } from "lucide-react";
+import { AlertTriangle, Info, Trash2, X } from "lucide-react";
 import {
   SCHENGEN_COUNTRIES,
   SCHENGEN_MAX_DAYS,
@@ -20,6 +20,7 @@ import {
 import { CITIES } from "@/lib/cities";
 import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useProfile, useTrips } from "@/lib/store";
+import { useSession } from "@/lib/use-session";
 import { buildBorderRunPlan } from "@/lib/border-run";
 import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
 import { detectPreDeparture } from "@/lib/pre-departure";
@@ -104,6 +105,8 @@ function Tracker() {
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
   const [justAdded, setJustAdded] = useState<Trip | null>(null);
   const [preDepartureDismissed, setPreDepartureDismissed] = useState(false);
+  const { signedIn, ready: sessionReady } = useSession();
+  const [deviceNoticeDismissed, setDeviceNoticeDismissed] = useState(false);
 
   const engineTrips = useMemo(() => toEngineTrips(trips), [trips]);
   const schengen = useMemo(() => schengenStatus(engineTrips, today), [engineTrips, today]);
@@ -230,10 +233,25 @@ function Tracker() {
             tone={schengen.status === "ok" ? "positive" : "negative"}
             size="lg"
           />
-          <Stat label="Window opened" value={addDaysIso(today, -179)} size="sm" />
+          {/*
+            Dates always render through formatDate — never raw ISO. "2026-02-07"
+            is unreadable at a glance, and any numeric-only format is ambiguous
+            across locales (03/04 is 3 April to a German, 4 March to an
+            American). Every date in this app has legal consequences, so the
+            month is always a word.
+          */}
+          <Stat
+            label="Window opened"
+            value={formatDate(addDaysIso(today, -179), i18n.language)}
+            size="sm"
+          />
           <Stat
             label="Full 90 available from"
-            value={schengen.nextFullNinety ?? "beyond 400 days"}
+            value={
+              schengen.nextFullNinety
+                ? formatDate(schengen.nextFullNinety, i18n.language)
+                : "beyond 400 days"
+            }
             size="sm"
             hint="earliest date for a fresh full stay"
           />
@@ -375,6 +393,34 @@ function Tracker() {
         </div>
       ) : null}
 
+      {/*
+        Device-only warning. Everything works without an account — that is
+        deliberate, because logging a trip is the habit the product depends on
+        and a signup wall kills it. But someone must never accumulate months of
+        history believing it is safe when it lives in one browser's storage.
+        Shown only once they actually have something to lose.
+      */}
+      {trips.length > 0 && sessionReady && !signedIn && !deviceNoticeDismissed ? (
+        <div className="flex items-start gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+          <p className="text-foreground">
+            Saved on this device only. If you clear your browser or switch
+            phones, these trips are gone.{" "}
+            <Link to="/auth" className="font-medium text-primary underline">
+              Create an account
+            </Link>{" "}
+            and everything you have already logged is uploaded automatically.
+          </p>
+          <button
+            onClick={() => setDeviceNoticeDismissed(true)}
+            aria-label="Dismiss"
+            className="ms-auto shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : null}
+
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Your trips</h2>
         {hydrated && trips.length === 0 ? (
@@ -491,6 +537,26 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
   const [exit, setExit] = useState("");
   const [stillHere, setStillHere] = useState(false);
   const [purpose, setPurpose] = useState<TripPurpose>("tourist");
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Returns a message when the form cannot be submitted, null when it can.
+   *
+   * This used to be `if (!entry || (!stillHere && !exit)) return;` — a silent
+   * no-op. Clicking "Add trip" with no exit date did nothing at all, with no
+   * explanation, which reads as a broken button. Logging a trip is the one
+   * action the whole product depends on; it must never fail quietly.
+   */
+  function validate(): string | null {
+    if (!entry) return "Add an entry date.";
+    if (!stillHere && !exit) {
+      return "Add an exit date, or tick “Still here” if you haven’t left yet.";
+    }
+    if (!stillHere && exit && exit < entry) {
+      return "The exit date is before the entry date.";
+    }
+    return null;
+  }
 
   return (
     <section className="panel p-4">
@@ -515,7 +581,10 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
           <input
             type="date"
             value={entry}
-            onChange={(e) => setEntry(e.target.value)}
+            onChange={(e) => {
+              setEntry(e.target.value);
+              setError(null);
+            }}
             className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
           />
         </label>
@@ -525,14 +594,20 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
             type="date"
             value={exit}
             disabled={stillHere}
-            onChange={(e) => setExit(e.target.value)}
+            onChange={(e) => {
+              setExit(e.target.value);
+              setError(null);
+            }}
             className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm disabled:opacity-40"
           />
           <label className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
               checked={stillHere}
-              onChange={(e) => setStillHere(e.target.checked)}
+              onChange={(e) => {
+                setStillHere(e.target.checked);
+                setError(null);
+              }}
             />
             Still here
           </label>
@@ -550,9 +625,23 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
           </select>
         </label>
       </div>
+      {error ? (
+        <p
+          role="alert"
+          className="mt-3 rounded-md border border-negative/50 bg-negative-muted px-3 py-2 text-xs text-negative"
+        >
+          {error}
+        </p>
+      ) : null}
+
       <button
         onClick={() => {
-          if (!entry || (!stillHere && !exit)) return;
+          const problem = validate();
+          if (problem) {
+            setError(problem);
+            return;
+          }
+          setError(null);
           onAdd({
             id: crypto.randomUUID(),
             country_code: country,

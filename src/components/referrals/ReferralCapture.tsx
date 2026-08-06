@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { captureReferral } from "@/lib/referrals/attribution";
+import { captureReferral, purgeLegacyAttribution } from "@/lib/referrals/attribution";
 import { logReferralClick } from "@/lib/referrals/clicks.functions";
 import { REFERRAL_PARAM } from "@/lib/referrals/config";
 
 /**
- * Stores ?r=CODE first-party (30-day last-touch) and logs the click once.
+ * Holds ?r=CODE for this browsing session and logs the click once.
+ *
+ * Session-scoped, not a 30-day cookie — see the reasoning in attribution.ts.
  * Attribution itself is locked to the profile at signup, not here.
  */
 export function ReferralCapture() {
@@ -15,6 +17,12 @@ export function ReferralCapture() {
   useEffect(() => {
     if (done.current) return;
     done.current = true;
+
+    // Visitors from before the session-scoped change still carry the old
+    // 30-day cookie and localStorage record. We no longer have a lawful basis
+    // to hold either, so clear them on the next visit rather than waiting for
+    // them to expire.
+    purgeLegacyAttribution();
 
     const hasParam = new URLSearchParams(window.location.search).has(REFERRAL_PARAM);
     const stored = captureReferral();

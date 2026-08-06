@@ -1,0 +1,32 @@
+# Normalise line endings to LF inside the repository.
+#
+# Why this file exists: Git for Windows converts checkouts to CRLF by default.
+# Lovable writes LF, so without this every file in a Windows working tree shows
+# as modified — 219 files and ~32,000 changed lines that are purely line
+# endings. That buries real changes, makes review impossible, and produces
+# meaningless commits.
+#
+# `text=auto eol=lf` means: store LF in the repo, check out LF everywhere,
+# regardless of platform. Modern Windows editors (VS Code, Cursor, Notepad)
+# all handle LF fine.
+* text=auto eol=lf
+
+# Binary files must never be line-ending converted.
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.pdf    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.otf    binary
+
+# Lockfiles are generated — keep diffs out of review.
+bun.lock         linguist-generated=true
+package-lock.json linguist-generated=true
+
+# Generated route tree — machine written, not reviewed by hand.
+src/routeTree.gen.ts linguist-generated=true

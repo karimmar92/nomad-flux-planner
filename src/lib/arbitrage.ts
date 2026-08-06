@@ -12,13 +12,41 @@ import {
   type CostLineKey,
 } from "./types";
 
-export type CostTier = "lean" | "mid";
+export type CostTier = "lean" | "mid" | "luxury";
 
 export type CostLine = { key: CostLineKey; label: string; amount: number; inTotal: boolean };
 
-/** Headline monthly cost, straight from the dataset totals. Visible, not magic. */
+/** Headline monthly cost. Lean and mid come straight from the dataset totals;
+ *  luxury is a derived estimate (see luxuryMonthlyCost). */
 export function monthlyCost(city: City, tier: CostTier = "mid"): number {
-  return tier === "lean" ? city.costs.totalMonthlyLean : city.costs.totalMonthlyMidRange;
+  if (tier === "lean") return city.costs.totalMonthlyLean;
+  if (tier === "luxury") return luxuryMonthlyCost(city);
+  return city.costs.totalMonthlyMidRange;
+}
+
+/**
+ * Luxury tier, derived from the city's own component prices rather than a
+ * flat multiplier — the luxury gap is widest where base costs are lowest.
+ * Basket: serviced/luxury apartment (~2.5× central 1BR), everything eaten
+ * out incl. fine dining (~3× groceries), part/full-time housekeeper scaled
+ * to local wages (~0.5× central rent), ride-hailing everywhere (~4×
+ * transport), premium gym/spa (~3×), higher utilities (~1.5×), plus a
+ * regional-trips budget (~0.3× central rent). Coworking and mobile as-is.
+ * An estimate for planning, labelled as such in the UI.
+ */
+export function luxuryMonthlyCost(city: City): number {
+  const c = city.costs;
+  return Math.round(
+    c.rent1brCentral * 2.5 +
+      c.groceriesMonthly * 3 +
+      c.rent1brCentral * 0.5 + // housekeeper, proxied by local rent level
+      c.transportMonthly * 4 +
+      c.gymMonthly * 3 +
+      c.utilities * 1.5 +
+      c.rent1brCentral * 0.3 + // weekend trips / short flights
+      c.coworkingHotDesk +
+      c.mobileData,
+  );
 }
 
 /** Itemised lines behind the headline figure. */

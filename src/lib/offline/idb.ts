@@ -64,3 +64,19 @@ export function idbSet(key: string, value: unknown): Promise<unknown> {
 export function idbDel(key: string): Promise<unknown> {
   return run("readwrite", (s) => s.delete(key));
 }
+
+/**
+ * Empty the store completely.
+ *
+ * Used by account deletion. The tracker is offline-first, so a full copy of
+ * someone's travel history and the pending sync queue live here — deleting
+ * the server copy while leaving this behind is not erasure, and the next flush
+ * would re-upload it.
+ *
+ * Clears everything rather than named keys deliberately: a key added later and
+ * forgotten here would be a silent data remnant, which is exactly the failure
+ * GDPR Art. 17 is about.
+ */
+export function idbClear(): Promise<unknown> {
+  return run("readwrite", (s) => s.clear());
+}

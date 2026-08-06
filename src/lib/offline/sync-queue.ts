@@ -44,10 +44,19 @@ export async function pendingCount(): Promise<number> {
 }
 
 /**
- * Drain the queue. The remote target is Lovable Cloud; until the tables are
- * wired the local write IS the source of truth, so a flush only clears ops it
- * has durably applied. Last-write-wins per entity id is fine here: a trip is
- * edited by exactly one device at a time.
+ * Drain the queue.
+ *
+ * Trip ops carry the FULL local trips array as their payload (see `write` in
+ * store.ts), so only the most recent one matters — it already supersedes every
+ * op before it. We push that, upsert-only.
+ *
+ * The queue is cleared ONLY on a successful push. Clearing unconditionally is
+ * what the previous implementation did, and it meant every op was silently
+ * discarded and nothing ever reached the server while the code looked like it
+ * was syncing. A queue that empties without delivering is worse than no queue.
+ *
+ * Signed out is a valid state: there is nowhere to push, so ops stay queued and
+ * are delivered the moment the user signs in.
  */
 export async function flushQueue(): Promise<void> {
   if (flushing || typeof navigator === "undefined" || !navigator.onLine) return;
@@ -55,11 +64,23 @@ export async function flushQueue(): Promise<void> {
   try {
     const queue = await readQueue();
     if (queue.length === 0) return;
-    // Local-first: ops are already applied locally. Clearing marks them
-    // reconciled. Replace this block with the remote upsert when the cloud
-    // tables land — the offline contract above does not change.
+
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase.auth.getSession();
+    const userId = data.session?.user.id;
+    // No account yet — keep everything queued rather than dropping it.
+    if (!userId) return;
+
+    const lastTripOp = [...queue].reverse().find((op) => op.entity === "trip");
+    if (lastTripOp && Array.isArray(lastTripOp.payload)) {
+      const { pushTrips } = await import("./trip-sync");
+      await pushTrips(userId, lastTripOp.payload as Parameters<typeof pushTrips>[1]);
+    }
+
     await idbSet(QUEUE_KEY, []);
     notify();
+  } catch {
+    // Leave the queue intact so the next flush retries. Never clear on failure.
   } finally {
     flushing = false;
   }

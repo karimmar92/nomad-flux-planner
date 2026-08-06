@@ -14,6 +14,30 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
 
+/**
+ * TRANSLATION IS NOT SHIPPABLE YET — the switcher stays hidden until it is.
+ *
+ * Current coverage: the nav, footer and legal disclaimer are translated. Zero
+ * route components call `t()`, and only 6 of 75 components do. Selecting German
+ * therefore produced a German header above an entirely English page, which is
+ * more confusing than English alone — a user cannot tell whether the app is
+ * broken, or whether the untranslated part is the part that matters.
+ *
+ * This is worse than no translation, and visa content is precisely where a
+ * half-finished job does damage: a user who sees German chrome reasonably
+ * assumes the visa rules beneath it were localised for them too.
+ *
+ * The locale files (en/es/de) are complete and stay in the repo. Flip this to
+ * true once route components actually consume them — start with `common`,
+ * `tracker` and `visa`, verify one language end to end, and only then add more.
+ */
+export const TRANSLATION_READY = false;
+
+/** Locales offered in the UI. Empty until the app is genuinely translated. */
+export const ENABLED_LOCALES: readonly Locale[] = TRANSLATION_READY
+  ? LOCALES
+  : [DEFAULT_LOCALE];
+
 /** Phase two — listed so the plumbing is ready, not shipped in the switcher. */
 export const PHASE_TWO_LOCALES = ["zh-Hans", "it", "tr", "id"] as const;
 

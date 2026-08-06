@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/Primitives";
 import { UserReferralCard } from "@/components/referrals/UserReferralCard";
 import { HeardAboutField } from "@/components/referrals/HeardAboutField";
 import { useSession } from "@/lib/use-session";
+import { DeleteAccount } from "@/components/account/DeleteAccount";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -183,6 +184,13 @@ function ProfilePage() {
           See Pro
         </Link>
       </p>
+
+      {/*
+        GDPR Art.17 and App Store 5.1.1(v) both require in-app account
+        deletion. Last on the page, but on the page — not hidden behind a
+        support email, which is the pattern Apple rejects.
+      */}
+      <DeleteAccount />
     </div>
   );
 }

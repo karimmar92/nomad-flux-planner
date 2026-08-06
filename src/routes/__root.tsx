@@ -22,6 +22,7 @@ import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { hreflangLinks } from "@/lib/i18n/hreflang";
 import { useTranslation } from "react-i18next";
 import { flushQueue } from "@/lib/offline/sync-queue";
+import { useTripReconcile } from "@/lib/offline/use-trip-reconcile";
 
 function NotFoundComponent() {
   const { t } = useTranslation("common");
@@ -138,6 +139,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Uploads anything logged anonymously the moment an account exists, and
+  // adopts trips recorded on another device. Never blocks the UI.
+  useTripReconcile();
 
   // Offline-first: register the (guarded) service worker, cache the whole
   // 25-city dataset locally on every open, and drain any queued writes.

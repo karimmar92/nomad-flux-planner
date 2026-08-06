@@ -7,7 +7,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { CITIES } from "@/lib/cities";
-import { computeArbitrage, flagEmoji, formatUsd, monthsToTarget } from "@/lib/arbitrage";
+import {
+  computeArbitrage,
+  flagEmoji,
+  formatUsd,
+  monthsToTarget,
+  type CostTier,
+} from "@/lib/arbitrage";
+import { formatLocal, isVolatileCurrency, FX_AS_OF } from "@/lib/fx";
+import {
+  DEFAULT_FREELANCE_INPUTS,
+  TAX_REGIMES,
+  computeFreelanceIncome,
+  computeScenarios,
+  hoursPerClientPerDay,
+  type FreelanceInputs,
+} from "@/lib/freelance";
 import { useProfile } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
@@ -37,7 +52,7 @@ function CalculatorPage() {
   const { profile, patchProfile } = useProfile();
   const [income, setIncome] = useState<string>(profile.monthly_income_usd?.toString() ?? "");
   const [target, setTarget] = useState("50000");
-  const [tier, setTier] = useState<"lean" | "mid">("mid");
+  const [tier, setTier] = useState<CostTier>("mid");
 
   const inc = income ? Number(income) : null;
   const targetNum = target ? Number(target) : 0;
@@ -88,7 +103,15 @@ function CalculatorPage() {
                       <span className="text-xs text-muted-foreground">{city.country}</span>
                     </Link>
                   </td>
-                  <Td right>{formatUsd(arb.cost)}</Td>
+                  <Td right>
+                    <div>{formatUsd(arb.cost)}</div>
+                    {formatLocal(arb.cost, city.local_currency) && (
+                      <div className="text-[11px] font-normal text-muted-foreground">
+                        {formatLocal(arb.cost, city.local_currency)}
+                        {isVolatileCurrency(city.local_currency) ? " ±" : ""}
+                      </div>
+                    )}
+                  </Td>
                   <Td
                     right
                     className={cn(
@@ -113,9 +136,11 @@ function CalculatorPage() {
           </table>
         </div>
         <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-          Surplus = income − (rent central + coworking + groceries + eating out + utilities +
-          mobile + transport + gym) at the {tier === "mid" ? "mid-range" : "lean"} tier. Each
-          city page shows its last-verified date.
+          {tier === "luxury"
+            ? "Luxury is a derived estimate: serviced/luxury apartment, everything eaten out incl. fine dining, housekeeper, ride-hailing everywhere, premium gym/spa and a regional-trips budget — priced from each city's own component costs."
+            : `Surplus = income − (rent central + coworking + groceries + eating out + utilities + mobile + transport + gym) at the ${tier === "mid" ? "mid-range" : "lean"} tier.`}{" "}
+          Local-currency figures use reference rates as of {FX_AS_OF}; ± marks volatile
+          currencies. Each city page shows its last-verified date.
         </p>
       </section>
   );
@@ -132,6 +157,12 @@ function CalculatorPage() {
           <div>
             <div className="label-xs">Cost/mo</div>
             <div className="num text-lg font-semibold">{formatUsd(focusArb.cost)}</div>
+            {formatLocal(focusArb.cost, focusCity.local_currency) && (
+              <div className="text-[11px] text-muted-foreground">
+                {formatLocal(focusArb.cost, focusCity.local_currency)}
+                {isVolatileCurrency(focusCity.local_currency) ? " · volatile" : ""}
+              </div>
+            )}
           </div>
           <div>
             <div className="label-xs">Surplus/mo</div>
@@ -227,7 +258,7 @@ function CalculatorPage() {
         <div>
           <span className="label-xs">Cost tier</span>
           <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
-            {(["lean", "mid"] as const).map((t) => (
+            {(["lean", "mid", "luxury"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTier(t)}
@@ -236,15 +267,167 @@ function CalculatorPage() {
                   tier === t ? "bg-primary text-primary-foreground" : "text-muted-foreground",
                 )}
               >
-                {t === "mid" ? "Mid-range" : "Lean"}
+                {t === "mid" ? "Mid-range" : t === "lean" ? "Lean" : "Luxury"}
               </button>
             ))}
           </div>
         </div>
       </section>
 
+      <FreelancePanel
+        onUseNet={(net) => {
+          const v = String(Math.round(net));
+          setIncome(v);
+          patchProfile({ monthly_income_usd: Math.round(net) });
+        }}
+      />
+
       {rankingSection}
     </div>
+  );
+}
+
+/**
+ * Freelance scenario builder: models income from concurrent client slots
+ * (hourly base + per-appointment fee), then nets it out under three tax
+ * regimes. "Use" feeds the net into the city ranking above.
+ */
+function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
+  const [open, setOpen] = useState(false);
+  const [inputs, setInputs] = useState<FreelanceInputs>(DEFAULT_FREELANCE_INPUTS);
+  const income = computeFreelanceIncome(inputs);
+  const scenarios = computeScenarios(inputs);
+
+  const patch = (p: Partial<FreelanceInputs>) => setInputs((s) => ({ ...s, ...p }));
+  const numField = (
+    id: string,
+    label: string,
+    value: number,
+    set: (n: number) => void,
+  ) => (
+    <div>
+      <label className="label-xs" htmlFor={id}>
+        {label}
+      </label>
+      <input
+        id={id}
+        inputMode="numeric"
+        value={value === 0 ? "" : String(value)}
+        onChange={(e) => set(Number(e.target.value.replace(/\D/g, "") || 0))}
+        className="num mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-sm font-semibold outline-none focus:border-primary"
+      />
+    </div>
+  );
+
+  return (
+    <section className="panel">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-baseline justify-between px-4 py-3 text-start"
+      >
+        <span className="text-sm font-semibold">
+          Don&apos;t know your net income? Model it from freelance work
+        </span>
+        <span className="label-xs">{open ? "Hide" : "Open"}</span>
+      </button>
+      {open && (
+        <div className="space-y-4 border-t border-border p-4">
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div>
+              <span className="label-xs">Client slots</span>
+              <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
+                {([2, 3] as const).map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => patch({ clients: n })}
+                    className={cn(
+                      "flex-1 rounded px-2 py-1.5",
+                      inputs.clients === n
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {n} × {hoursPerClientPerDay(n)}h/day
+                  </button>
+                ))}
+              </div>
+            </div>
+            {numField("fl-rate", "Hourly rate (USD)", inputs.hourlyRateUsd, (n) =>
+              patch({ hourlyRateUsd: n }),
+            )}
+            {numField("fl-fee", "Fee per appointment (USD)", inputs.appointmentFeeUsd, (n) =>
+              patch({ appointmentFeeUsd: n }),
+            )}
+            {numField(
+              "fl-appts",
+              "Appointments / client / mo",
+              inputs.appointmentsPerClient,
+              (n) => patch({ appointmentsPerClient: n }),
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            {formatUsd(income.hourlyBilledUsd)} hourly + {formatUsd(income.appointmentBilledUsd)}{" "}
+            appointment fees = {formatUsd(income.grossBilledUsd)} billed ·{" "}
+            {formatUsd(income.afterPlatformUsd)} after the{" "}
+            {Math.round(inputs.platformFeePct * 100)}% platform fee ·{" "}
+            {formatUsd(income.profitUsd)} profit before tax.
+          </p>
+
+          <div className="overflow-x-auto hide-scrollbar">
+            <table className="w-full min-w-[560px] text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <Th>Regime</Th>
+                  <Th right>Tax/mo</Th>
+                  <Th right>Insurance/mo</Th>
+                  <Th right>Net/mo</Th>
+                  <Th right>Take-home</Th>
+                  <Th right>{null}</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {scenarios.map((s) => {
+                  const regime = TAX_REGIMES.find((r) => r.id === s.regime)!;
+                  return (
+                    <tr key={s.regime} className="border-b border-border/60 last:border-0">
+                      <td className="px-4 py-2.5">
+                        <div className="font-medium">{regime.label}</div>
+                        <div className="mt-0.5 max-w-[420px] text-[11px] text-muted-foreground">
+                          {regime.caveat}
+                        </div>
+                      </td>
+                      <Td right>{formatUsd(s.taxUsd)}</Td>
+                      <Td right>{formatUsd(s.insuranceUsd)}</Td>
+                      <Td right className="font-semibold text-positive">
+                        {formatUsd(s.netUsd)}
+                      </Td>
+                      <Td right>{(100 - s.effectiveRate).toFixed(0)}%</Td>
+                      <td className="px-4 py-2.5 text-end">
+                        <button
+                          onClick={() => onUseNet(s.netUsd)}
+                          className="rounded-md border border-border px-2.5 py-1 text-xs font-medium hover:border-primary hover:text-primary"
+                        >
+                          Use
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground">
+            Estimates for planning, not tax advice. Capacity assumes ~6 prime calling hours in
+            the 8–18 client-timezone window and 21 workdays. Vietnam rows require actually
+            ending German unlimited tax liability — keeping a Wohnsitz (even a room with a key)
+            keeps the German row in force. Vietnam has no nomad visa; the 90-day e-visa is the
+            practical route, and 183+ days makes you tax resident on worldwide income.
+          </p>
+        </div>
+      )}
+    </section>
   );
 }
 

@@ -99,6 +99,44 @@ describe("rankExitOptions", () => {
   });
 
 
+  // Regression: an open trip (exit_date === null) used to be passed straight to
+  // the engine when simulating a destination, so the user was counted as still
+  // present in the origin country on every simulated future day — present in two
+  // Schengen countries at once. Each simulated day was double-counted and
+  // daysAvailable came out roughly half its true value (measured 21 vs 41).
+  it("does not double-count an open origin trip when sizing a Schengen destination", () => {
+    const args = {
+      origin: lisbon,
+      today: "2026-08-04",
+      departOn: "2026-09-01",
+      avoidSchengen: false,
+      monthlyIncomeUsd: 5000,
+    } as const;
+
+    const withOpenTrip = rankExitOptions({
+      ...args,
+      trips: [
+        trip({ country_code: "ES", city_id: null, entry_date: "2026-01-05", exit_date: "2026-02-10" }),
+        trip({ entry_date: "2026-07-15", exit_date: null }),
+      ],
+    });
+
+    // Same history, but the origin trip already closed on the departure date.
+    const withClosedTrip = rankExitOptions({
+      ...args,
+      trips: [
+        trip({ country_code: "ES", city_id: null, entry_date: "2026-01-05", exit_date: "2026-02-10" }),
+        trip({ entry_date: "2026-07-15", exit_date: "2026-09-01" }),
+      ],
+    });
+
+    const athensOpen = withOpenTrip.find((o) => o.city.id === "athens-gr")!;
+    const athensClosed = withClosedTrip.find((o) => o.city.id === "athens-gr")!;
+
+    expect(athensOpen.daysAvailable).toBe(athensClosed.daysAvailable);
+    expect(athensOpen.daysAvailable).toBeGreaterThan(30);
+  });
+
   it("surfaces Belgrade and Tirana strongly for a Schengen exit", () => {
     const top = options.slice(0, 6).map((o) => o.city.id);
     expect(top).toContain("belgrade-rs");

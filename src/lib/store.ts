@@ -98,10 +98,38 @@ export function useProfile() {
 export function useTrips() {
   const { value, update, hydrated } = useStored<Trip[]>(KEYS.trips, []);
   const addTrip = useCallback((trip: Trip) => update([...value, trip]), [value, update]);
+
+  /**
+   * Removes locally first, then deletes the remote row.
+   *
+   * The remote delete is explicit and singular by design. Sync never bulk
+   * deletes — see the rules in offline/trip-sync.ts — so a deletion the user
+   * asked for has to be carried out directly, or the row would be re-adopted
+   * on the next reconcile and the trip would reappear.
+   *
+   * Failure is non-fatal and unawaited: local state is already correct, and a
+   * stale remote row resurfacing is recoverable. Blocking the UI on a network
+   * call to delete a trip is not.
+   */
   const removeTrip = useCallback(
-    (id: string) => update(value.filter((t) => t.id !== id)),
+    (id: string) => {
+      update(value.filter((t) => t.id !== id));
+      void (async () => {
+        try {
+          const { supabase } = await import("@/integrations/supabase/client");
+          const { data } = await supabase.auth.getSession();
+          const userId = data.session?.user.id;
+          if (!userId) return;
+          const { deleteTripRemote } = await import("./offline/trip-sync");
+          await deleteTripRemote(userId, id);
+        } catch {
+          /* local removal stands; reconcile may resurface it, user can retry */
+        }
+      })();
+    },
     [value, update],
   );
+
   return { trips: value, addTrip, removeTrip, setTrips: update, hydrated };
 }
 

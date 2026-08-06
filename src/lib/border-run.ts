@@ -179,7 +179,14 @@ function scale(value: number, best: number, worst: number): number {
 /** Days the user could stay in `city` on their passport, using the engine. */
 function daysAvailableIn(city: City, trips: Trip[], from: string): number {
   if (SCHENGEN_COUNTRIES.has(city.country_code)) {
-    const engine = toEngineTrips(trips);
+    // Any trip still open ends the day the user departs. Passing an open trip
+    // through with exitDate === null makes the engine treat them as still
+    // present on every simulated future day — i.e. in two Schengen countries at
+    // once — so each simulated day gets counted twice and the days-available
+    // figure comes out roughly half what it should be. Close them at `from`.
+    const engine = toEngineTrips(trips).map((t) =>
+      t.exitDate === null ? { ...t, exitDate: from } : t,
+    );
     let n = 0;
     for (let k = 0; k < SCHENGEN_MAX_DAYS; k++) {
       const day = addDaysIso(from, k);
