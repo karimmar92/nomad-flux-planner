@@ -103,7 +103,7 @@ function PlansPage() {
           <p className="text-muted-foreground">
             You need an account to post or join a plan — so the people at the
             table know who they are meeting.{" "}
-            <Link to="/auth" className="font-medium text-primary underline">
+            <Link to="/auth" search={{ next: "/plans" }} className="font-medium text-primary underline">
               Sign in
             </Link>
           </p>
@@ -237,15 +237,16 @@ function CreatePlan({ userId, onCreated }: { userId: string; onCreated: () => vo
     setBusy(true);
     setError(null);
     try {
-      await createPlan(userId, {
+      const newPlan: NewPlan = {
         city_id: RADAR_CITY_ID,
         activity,
         venue_name: venue.trim(),
-        venue_hint: hint.trim() || undefined,
         starts_at: new Date(`${date}T${time}`).toISOString(),
         capacity,
-        note: note.trim() || undefined,
-      });
+      };
+      if (hint.trim()) newPlan.venue_hint = hint.trim();
+      if (note.trim()) newPlan.note = note.trim();
+      await createPlan(userId, newPlan);
       onCreated();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not create the plan.");

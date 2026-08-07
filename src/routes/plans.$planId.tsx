@@ -173,7 +173,7 @@ function PlanDetail() {
         ) : null}
 
         {!signedIn ? (
-          <Link to="/auth" className="text-sm font-medium text-primary underline">
+          <Link to="/auth" search={{ next: "/plans" }} className="text-sm font-medium text-primary underline">
             Sign in to join
           </Link>
         ) : plan.isHost ? (

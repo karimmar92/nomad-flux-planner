@@ -90,8 +90,7 @@ export type NewPlan = {
  * honest.
  */
 export async function listPlans(cityId: string, userId: string | null): Promise<PlanWithCounts[]> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .select("*, plan_attendees(user_id)")
     .eq("city_id", cityId)
     .eq("status", "open")
@@ -114,8 +113,7 @@ export async function listPlans(cityId: string, userId: string | null): Promise<
 }
 
 export async function getPlan(planId: string, userId: string | null): Promise<PlanWithCounts | null> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .select("*, plan_attendees(user_id)")
     .eq("id", planId)
     .maybeSingle();
@@ -134,8 +132,7 @@ export async function getPlan(planId: string, userId: string | null): Promise<Pl
 }
 
 export async function createPlan(hostId: string, plan: NewPlan): Promise<string> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .insert({ ...plan, host_id: hostId })
     .select("id")
     .single();
@@ -149,8 +146,7 @@ export async function createPlan(hostId: string, plan: NewPlan): Promise<string>
  * below is a real case rather than a formality.
  */
 export async function joinPlan(planId: string, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plan_attendees")
+  const { error } = await from("plan_attendees")
     .insert({ plan_id: planId, user_id: userId });
   if (error) throw new Error(friendly(error.message));
 }
@@ -158,8 +154,7 @@ export async function joinPlan(planId: string, userId: string): Promise<void> {
 /** Leaving is silent — the host is not notified. Someone who feels
  *  uncomfortable should be able to withdraw without an announcement. */
 export async function leavePlan(planId: string, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plan_attendees")
+  const { error } = await from("plan_attendees")
     .delete()
     .eq("plan_id", planId)
     .eq("user_id", userId);
@@ -167,8 +162,7 @@ export async function leavePlan(planId: string, userId: string): Promise<void> {
 }
 
 export async function cancelPlan(planId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plans")
+  const { error } = await from("plans")
     .update({ status: "cancelled" })
     .eq("id", planId);
   if (error) throw new Error(error.message);
