@@ -61,7 +61,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("errors.genericBody")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+          <button type="button"
             onClick={() => {
               router.invalidate();
               reset();

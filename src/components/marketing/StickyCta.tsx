@@ -56,7 +56,7 @@ export function StickyCta() {
           Start free
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
-        <button
+        <button type="button"
           onClick={() => setDismissed(true)}
           tabIndex={show ? 0 : -1}
           aria-label="Dismiss"

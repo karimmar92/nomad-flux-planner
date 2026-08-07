@@ -93,7 +93,7 @@ export function VisibilityToggle({
           <div className="text-sm font-medium">{current.label}</div>
         </div>
         {value !== "ghost" ? (
-          <button
+          <button type="button"
             onClick={() => onChange("ghost")}
             className="rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
@@ -103,7 +103,7 @@ export function VisibilityToggle({
       </div>
       <div className="mt-3 grid grid-cols-3 gap-1 rounded-md bg-surface-2 p-1">
         {VISIBILITY_OPTIONS.map((o) => (
-          <button
+          <button type="button"
             key={o.value}
             onClick={() => onChange(o.value)}
             aria-pressed={value === o.value}
@@ -213,7 +213,7 @@ export function ConsentScreen({ onAccept }: { onAccept: () => void }) {
           </li>
         ))}
       </ul>
-      <button
+      <button type="button"
         onClick={onAccept}
         className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
       >

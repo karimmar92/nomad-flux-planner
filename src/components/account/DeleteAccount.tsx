@@ -76,7 +76,7 @@ export function DeleteAccount() {
           referral records. Document files themselves stay in your vault and
           download separately.
         </p>
-        <button
+        <button type="button"
           onClick={runExport}
           disabled={exporting}
           className="mt-3 flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-primary/50 hover:bg-surface-2 disabled:opacity-40"
@@ -118,7 +118,7 @@ export function DeleteAccount() {
           </p>
 
           {!open ? (
-            <button
+            <button type="button"
               onClick={() => setOpen(true)}
               className="mt-3 rounded-md border border-negative/50 px-3 py-1.5 text-xs font-medium text-negative transition-colors hover:bg-negative-muted"
             >
@@ -146,14 +146,14 @@ export function DeleteAccount() {
               ) : null}
 
               <div className="flex items-center gap-2">
-                <button
+                <button type="button"
                   onClick={run}
                   disabled={confirm !== CONFIRM_WORD || busy}
                   className="rounded-md bg-negative px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
                 >
                   {busy ? "Deleting…" : "Permanently delete"}
                 </button>
-                <button
+                <button type="button"
                   onClick={() => {
                     setOpen(false);
                     setConfirm("");

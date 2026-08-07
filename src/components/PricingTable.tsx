@@ -40,7 +40,7 @@ export function PricingTable({
       <div className="flex items-center justify-center">
         <div className="flex rounded-md border border-border p-0.5 text-sm">
           {(["monthly", "annual"] as const).map((b) => (
-            <button
+            <button type="button"
               key={b}
               onClick={() => setBilling(b)}
               className={cn(
@@ -161,7 +161,7 @@ function TierCard({
           Start tracking — no account needed
         </Link>
       ) : (
-        <button
+        <button type="button"
           onClick={() => onChoose?.(tier, billing)}
           disabled={busy}
           className={cn(

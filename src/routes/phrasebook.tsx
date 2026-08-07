@@ -83,7 +83,7 @@ function Phrasebook() {
 
       <div className="flex flex-wrap gap-2">
         {PHRASEBOOKS.map((p) => (
-          <button
+          <button type="button"
             key={p.countryCode}
             onClick={() => setCode(p.countryCode)}
             className={cn(
@@ -153,7 +153,7 @@ function Phrasebook() {
                 ) : null}
               </div>
               <div className="flex shrink-0 gap-1">
-                <button
+                <button type="button"
                   onClick={() => speak(p.target, locale.bcp47)}
                   disabled={support !== "ready"}
                   aria-label="Speak this phrase"
@@ -161,7 +161,7 @@ function Phrasebook() {
                 >
                   <Volume2 className="h-4 w-4" aria-hidden />
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setFullscreen(p)}
                   aria-label="Show full screen"
                   className="grid h-9 w-9 place-items-center rounded-md border border-border text-muted-foreground hover:border-primary hover:text-primary"
@@ -214,7 +214,7 @@ function ShowToScreen({ phrase, onClose }: { phrase: Phrase; onClose: () => void
       aria-modal="true"
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background p-6"
     >
-      <button
+      <button type="button"
         onClick={onClose}
         aria-label="Close"
         className="absolute end-4 top-4 grid h-10 w-10 place-items-center rounded-md border border-border text-muted-foreground"
@@ -244,7 +244,7 @@ function Chip({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={cn(
         "rounded-full border px-3 py-1 text-xs",

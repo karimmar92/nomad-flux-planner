@@ -259,7 +259,7 @@ function CalculatorPage() {
           <span className="label-xs">Cost tier</span>
           <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
             {(["lean", "mid", "luxury"] as const).map((t) => (
-              <button
+              <button type="button"
                 key={t}
                 onClick={() => setTier(t)}
                 className={cn(
@@ -321,7 +321,7 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
 
   return (
     <section className="panel">
-      <button
+      <button type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-baseline justify-between px-4 py-3 text-start"
       >
@@ -337,7 +337,7 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
               <span className="label-xs">Client slots</span>
               <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
                 {([2, 3] as const).map((n) => (
-                  <button
+                  <button type="button"
                     key={n}
                     onClick={() => patch({ clients: n })}
                     className={cn(
@@ -404,7 +404,7 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
                       </Td>
                       <Td right>{(100 - s.effectiveRate).toFixed(0)}%</Td>
                       <td className="px-4 py-2.5 text-end">
-                        <button
+                        <button type="button"
                           onClick={() => onUseNet(s.netUsd)}
                           className="rounded-md border border-border px-2.5 py-1 text-xs font-medium hover:border-primary hover:text-primary"
                         >

@@ -72,7 +72,7 @@ function TaxExitPage() {
         <span className="label-xs">Your home country</span>
         <div className="mt-2 flex flex-wrap gap-2">
           {TAX_EXIT_NOTES.map((n) => (
-            <button
+            <button type="button"
               key={n.countryCode}
               onClick={() => {
                 setSelected(n.countryCode);

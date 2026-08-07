@@ -128,7 +128,7 @@ export function HeroCalculator() {
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
               <div
                 className={cn(
-                  "h-full rounded-full transition-[width] duration-700 ease-out",
+                  "h-full rounded-full transition-[width] duration-200 ease-out",
                   result.status === "ok" ? "bg-positive" : "bg-accent-warning",
                   (result.status === "critical" || result.status === "violation") && "bg-negative",
                 )}
@@ -144,7 +144,7 @@ export function HeroCalculator() {
                 : `Counted on the rolling 180-day window, with entry and exit days both counted in full. Your allowance next returns to a full 90 days on ${result.nextFullNinety ?? "a date beyond this horizon"}.`}
             </p>
 
-            <button
+            <button type="button"
               onClick={save}
               className="flex w-full items-center justify-center gap-1.5 rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >

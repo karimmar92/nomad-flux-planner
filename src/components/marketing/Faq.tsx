@@ -8,9 +8,7 @@
  *   * Never promise behaviour the code does not have. Published claims about a
  *     paid service are enforceable.
  */
-import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ANNUAL_MONTHS_CHARGED, tier } from "@/config/pricing";
 
 export type FaqItem = { q: string; a: string };
@@ -52,22 +50,26 @@ export function FaqList({ items }: { items: FaqItem[] }) {
   );
 }
 
+/**
+ * Native <details>, not React state.
+ *
+ * The browser toggles this itself, in the same frame as the click, with no
+ * re-render and no JavaScript at all. It is also keyboard-accessible for free,
+ * announced correctly by screen readers, findable by the browser's own Ctrl+F,
+ * and it still works if the JS bundle fails. A useState version can only ever
+ * be equal to this, never better.
+ */
 function FaqRow({ item }: { item: FaqItem }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-start text-sm font-medium hover:bg-surface"
-      >
+    <details className="group">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium marker:hidden hover:bg-surface">
         {item.q}
         <ChevronDown
-          className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")}
+          className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
           aria-hidden
         />
-      </button>
-      {open ? <p className="px-4 pb-4 text-sm text-muted-foreground">{item.a}</p> : null}
-    </div>
+      </summary>
+      <p className="px-4 pb-4 text-sm text-muted-foreground">{item.a}</p>
+    </details>
   );
 }

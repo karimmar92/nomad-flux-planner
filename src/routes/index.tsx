@@ -230,7 +230,7 @@ export function Explore() {
             className="w-full rounded-full border border-border bg-card py-3 ps-11 pe-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors focus:border-primary"
           />
         </div>
-        <button
+        <button type="button"
           onClick={() => setFiltersOpen((v) => !v)}
           aria-label="Filters"
           className={cn(
@@ -465,7 +465,7 @@ function Toggle({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={cn(
         "rounded-full border border-border px-3 py-1.5 text-xs",
@@ -487,7 +487,7 @@ function QuickChip({
   children: React.ReactNode;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={cn(
         "shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",

@@ -106,7 +106,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
               {STEP_TITLES[step]}
             </h2>
           </div>
-          <button
+          <button type="button"
             onClick={() => finish(true)}
             aria-label={t("onboarding.skipAria")}
             className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:border-primary/50 hover:bg-surface-2"
@@ -145,7 +145,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                 ],
               ] as [UserStage, string, string][]
             ).map(([value, label, blurb]) => (
-              <button
+              <button type="button"
                 key={value}
                 onClick={() => {
                   setStage(value);
@@ -166,7 +166,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
         {step === 1 ? (
           <div className="grid max-h-72 grid-cols-2 gap-2 overflow-y-auto">
             {NATIONALITIES.map(([code, name]) => (
-              <button
+              <button type="button"
                 key={code}
                 onClick={() => {
                   setNationality(code);
@@ -200,7 +200,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
             <p className="mt-2 text-xs text-muted-foreground">
               {t("onboarding.income.helper", { app: APP_NAME })}
             </p>
-            <button
+            <button type="button"
               onClick={() => setStep(3)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
@@ -214,7 +214,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
             {INCOME_TYPES.map((value) => {
               const [label, hint] = INCOME_TYPE_LABELS[value];
               return (
-                <button
+                <button type="button"
                   key={value}
                   onClick={() => {
                     setIncomeType(value);
@@ -279,7 +279,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
               </div>
             ) : null}
 
-            <button
+            <button type="button"
               onClick={() => setStep(4)}
               className="mt-2 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >
@@ -293,7 +293,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
           <div>
             <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto">
               {CITIES.map((city) => (
-                <button
+                <button type="button"
                   key={city.id}
                   onClick={() => setHomeCity(city.id)}
                   className={cn(
@@ -306,7 +306,7 @@ export function Onboarding({ onDone }: { onDone: (stage: UserStage) => void }) {
                 </button>
               ))}
             </div>
-            <button
+            <button type="button"
               onClick={() => finish(false)}
               className="mt-4 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
             >

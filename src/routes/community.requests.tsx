@@ -82,7 +82,7 @@ function Requests() {
                 </div>
                 <p className="rounded-md bg-surface-2 p-3 text-sm">{c.intro_note}</p>
                 <div className="flex gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setStatus(c.id, "accepted");
                       toast.success("Accepted");
@@ -91,7 +91,7 @@ function Requests() {
                   >
                     Accept
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setStatus(c.id, "declined")}
                     className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
                   >

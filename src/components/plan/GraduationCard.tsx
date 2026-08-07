@@ -114,7 +114,7 @@ export function GraduationCard() {
             against your first trip rather than deleted, and the day counters take over from here.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
+            <button type="button"
               onClick={graduate}
               className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
             >

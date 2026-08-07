@@ -107,7 +107,7 @@ export function ArrivalCard({
               : "That zone covers more than one country — which one are you in?"}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => {
             dismissArrival(prompt.timeZone, today);
             onResolved();
@@ -133,7 +133,7 @@ export function ArrivalCard({
               </option>
             ))}
           </select>
-          <button
+          <button type="button"
             onClick={() => confirm(choice)}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
@@ -142,13 +142,13 @@ export function ArrivalCard({
         </div>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">
-          <button
+          <button type="button"
             onClick={() => confirm(prompt.suggestedCountry!)}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Yes, I&apos;m here
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               dismissArrival(prompt.timeZone, today);
               onResolved();
@@ -157,7 +157,7 @@ export function ArrivalCard({
           >
             No
           </button>
-          <button
+          <button type="button"
             onClick={() => setPicking(true)}
             className="rounded-md border border-input px-4 py-2 text-sm"
           >
@@ -214,7 +214,7 @@ function ArrivalFacts({
           <CheckCircle2 className="h-4 w-4 text-accent-positive" aria-hidden />
           Entry logged — {flagEmoji(countryCode)} {countryName(countryCode)}, {today}
         </h2>
-        <button
+        <button type="button"
           onClick={onClose}
           aria-label="Dismiss"
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"
@@ -269,7 +269,7 @@ function ArrivalFacts({
             <p className="text-xs text-muted-foreground">
               No local data yet? Options are on the Nomad kit page.
             </p>
-            <button
+            <button type="button"
               onClick={onDismissNudge}
               aria-label="Dismiss suggestion"
               className="shrink-0 text-muted-foreground hover:text-foreground"

@@ -130,7 +130,7 @@ function ChecklistPage() {
                 const checked = !!plan.checked[task.key];
                 return (
                   <li key={task.key} className="flex gap-3 px-4 py-3">
-                    <button
+                    <button type="button"
                       onClick={() => toggleTask(task.key)}
                       aria-pressed={checked}
                       aria-label={`Mark "${task.label}" as ${checked ? "not done" : "done"}`}

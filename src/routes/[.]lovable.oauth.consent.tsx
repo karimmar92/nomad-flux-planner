@@ -99,14 +99,14 @@ function Consent() {
       ) : null}
 
       <div className="flex gap-2">
-        <button
+        <button type="button"
           disabled={busy}
           onClick={() => decide(true)}
           className="flex-1 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-60"
         >
           Approve
         </button>
-        <button
+        <button type="button"
           disabled={busy}
           onClick={() => decide(false)}
           className="flex-1 rounded-lg border border-border px-3 py-2.5 text-sm disabled:opacity-60"

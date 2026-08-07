@@ -89,7 +89,7 @@ function PlansPage() {
           </p>
         </div>
         {signedIn ? (
-          <button
+          <button type="button"
             onClick={() => setCreating((v) => !v)}
             className="flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
           >
@@ -205,7 +205,7 @@ function FilterChip({
   label: string;
 }) {
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       className={
         active
@@ -352,7 +352,7 @@ function CreatePlan({ userId, onCreated }: { userId: string; onCreated: () => vo
         </p>
       ) : null}
 
-      <button
+      <button type="button"
         onClick={submit}
         disabled={busy}
         className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40"

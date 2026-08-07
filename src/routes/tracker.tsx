@@ -440,7 +440,7 @@ function Tracker() {
             </Link>{" "}
             and everything you have already logged is uploaded automatically.
           </p>
-          <button
+          <button type="button"
             onClick={() => setDeviceNoticeDismissed(true)}
             aria-label="Dismiss"
             className="ms-auto shrink-0 text-muted-foreground hover:text-foreground"
@@ -482,7 +482,7 @@ function Tracker() {
                       {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days · {trip.purpose.replace("_", " ")}
                     </div>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => removeTrip(trip.id)}
                     aria-label="Delete trip"
                     className="text-muted-foreground hover:text-negative"
@@ -663,7 +663,7 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
         </p>
       ) : null}
 
-      <button
+      <button type="button"
         onClick={() => {
           const problem = validate();
           if (problem) {
@@ -735,7 +735,7 @@ function TripConfirmKit({
             Our notes, not the partners&apos;. Dismiss if you&apos;re already set.
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"

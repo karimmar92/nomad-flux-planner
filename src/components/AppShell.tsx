@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ms-auto flex items-center gap-1">
             <AuthButton />
             <LanguageSwitcher />
-            <button
+            <button type="button"
               onClick={toggleTheme}
               aria-label={t("nav.toggleTheme")}
               className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"

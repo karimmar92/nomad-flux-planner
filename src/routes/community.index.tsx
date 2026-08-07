@@ -195,7 +195,7 @@ function CommunityRadar() {
                 </span>
               )}
             </div>
-            <button
+            <button type="button"
               onClick={shareArea}
               className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
             >
@@ -273,7 +273,7 @@ function CommunityRadar() {
           last active. No history, no exact coordinates, nothing to reconstruct a route
           from.
         </p>
-        <button
+        <button type="button"
           onClick={() => {
             deleteEverything();
             toast.success("Radar data deleted");
@@ -360,7 +360,7 @@ function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
             placeholder="you@example.com"
             className="flex-1 rounded-md border border-input bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
-          <button
+          <button type="button"
             disabled={busy}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
           >

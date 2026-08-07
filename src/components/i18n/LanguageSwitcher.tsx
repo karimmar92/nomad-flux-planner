@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
 
   return (
     <div className="relative">
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={t("language.change")}
         aria-expanded={open}
@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
               const status = statusFor(l, "common");
               return (
                 <li key={l}>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       void setLocale(l);
                       setOpen(false);

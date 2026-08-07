@@ -38,7 +38,7 @@ export function AuthButton() {
   }
 
   return (
-    <button
+    <button type="button"
       onClick={async () => {
         await supabase.auth.signOut();
       }}

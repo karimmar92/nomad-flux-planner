@@ -60,7 +60,7 @@ function Pricing() {
         </div>
         <div className="flex gap-1.5">
           {(["free", "starter", "pro", "teams"] as const).map((p: Plan) => (
-            <button
+            <button type="button"
               key={p}
               onClick={() => patchProfile({ plan: p })}
               className={

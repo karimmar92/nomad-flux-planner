@@ -85,11 +85,11 @@ function ReportPage() {
         <div className="flex flex-wrap gap-2 pt-1">
           {pro ? (
             <>
-              <button onClick={exportPdf} disabled={busy !== null} className="btn-primary">
+              <button type="button" onClick={exportPdf} disabled={busy !== null} className="btn-primary">
                 <Download className="me-1.5 h-3.5 w-3.5" aria-hidden />
                 {busy === "pdf" ? "Building PDF…" : "Export PDF"}
               </button>
-              <button onClick={exportCsv} disabled={busy !== null} className="btn">
+              <button type="button" onClick={exportCsv} disabled={busy !== null} className="btn">
                 <FileSpreadsheet className="me-1.5 h-3.5 w-3.5" aria-hidden />
                 Export CSV
               </button>

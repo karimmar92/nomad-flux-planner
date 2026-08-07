@@ -41,7 +41,7 @@ export function ReferralLinkCard({
     <section className="panel space-y-3 p-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="label-xs">{title}</h2>
-        <button
+        <button type="button"
           onClick={() => setShowQr((v) => !v)}
           className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
         >
@@ -54,7 +54,7 @@ export function ReferralLinkCard({
         <code className="num min-w-0 flex-1 truncate rounded-md bg-surface-2 px-3 py-2 text-sm">
           {url}
         </code>
-        <button
+        <button type="button"
           onClick={copy}
           className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground"
         >

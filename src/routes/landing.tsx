@@ -113,7 +113,7 @@ export function Landing() {
           </p>
         </Reveal>
 
-        <Reveal delay={120}>
+        <Reveal delay={80}>
           <RuleCalculator />
         </Reveal>
       </section>
@@ -123,7 +123,7 @@ export function Landing() {
           the repo: the dataset size, its verification date, the rule the
           engine implements. Invented social proof is the first thing a
           sceptical reader checks. */}
-      <Reveal as="section" className="grid gap-3 sm:grid-cols-4">
+      <Reveal as="section" className="content-auto grid gap-3 sm:grid-cols-4">
         {[
           { k: <><CountUp to={cityCount} /></>, v: "cities with costs, visa and tax rules" },
           { k: <><CountUp to={4} /></>, v: "rules counted from one trip history" },
@@ -138,7 +138,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── The problem ─────────────────────────────────────────────── */}
-      <Reveal as="section" className="panel space-y-3 p-6">
+      <Reveal as="section" className="content-auto panel space-y-3 p-6">
         <h2 className="text-lg font-semibold tracking-tight">
           One trip. Four different correct answers.
         </h2>
@@ -189,7 +189,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── What it does ────────────────────────────────────────────── */}
-      <Reveal as="section" className="space-y-6">
+      <Reveal as="section" className="content-auto space-y-6">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           What it does
         </h2>
@@ -228,7 +228,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── Why trust the maths ─────────────────────────────────────── */}
-      <Reveal as="section" className="panel space-y-3 p-6">
+      <Reveal as="section" className="content-auto panel space-y-3 p-6">
         <h2 className="text-lg font-semibold tracking-tight">Why trust the counting</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Getting this wrong is not a small bug — an overstay can mean a multi-year
@@ -261,7 +261,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── Getting started ─────────────────────────────────────────── */}
-      <Reveal as="section" className="space-y-5">
+      <Reveal as="section" className="content-auto space-y-5">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Getting started
         </h2>
@@ -297,7 +297,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── Pricing ─────────────────────────────────────────────────── */}
-      <Reveal as="section" className="space-y-4" >
+      <Reveal as="section" className="content-auto space-y-4" >
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Free to log. Paid to plan.
         </h2>
@@ -324,7 +324,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── Privacy ─────────────────────────────────────────────────── */}
-      <Reveal as="section" className="panel space-y-4 p-6">
+      <Reveal as="section" className="content-auto panel space-y-4 p-6">
         <h2 className="text-lg font-semibold tracking-tight">
           Sensitive data, specific rules
         </h2>
@@ -349,7 +349,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── FAQ ─────────────────────────────────────────────────────── */}
-      <Reveal as="section" className="space-y-3">
+      <Reveal as="section" className="content-auto space-y-3">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Common questions
         </h2>
@@ -387,7 +387,7 @@ export function Landing() {
       </Reveal>
 
       {/* ── Closing CTA ─────────────────────────────────────────────── */}
-      <Reveal as="section" className="panel space-y-4 p-8 text-center">
+      <Reveal as="section" className="content-auto panel space-y-4 p-8 text-center">
         <h2 className="text-xl font-semibold tracking-tight">
           How many Schengen days do you have left right now?
         </h2>

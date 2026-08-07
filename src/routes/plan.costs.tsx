@@ -82,7 +82,7 @@ function CostsPage() {
           <span className="label-xs">Cost tier</span>
           <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
             {(["lean", "mid"] as const).map((t) => (
-              <button
+              <button type="button"
                 key={t}
                 onClick={() => setTier(t)}
                 className={cn(

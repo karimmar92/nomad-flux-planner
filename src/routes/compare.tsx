@@ -226,7 +226,7 @@ function ComparePage() {
         {CITIES.map((city) => {
           const active = ids.includes(city.id);
           return (
-            <button
+            <button type="button"
               key={city.id}
               onClick={() =>
                 setIds(active ? ids.filter((i: string) => i !== city.id) : [...ids, city.id])

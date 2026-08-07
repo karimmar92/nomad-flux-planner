@@ -177,7 +177,7 @@ function PlanDetail() {
             Sign in to join
           </Link>
         ) : plan.isHost ? (
-          <button
+          <button type="button"
             onClick={handleCancel}
             disabled={busy}
             className="rounded-md border border-negative/50 px-3 py-2 text-sm font-medium text-negative disabled:opacity-40"
@@ -185,7 +185,7 @@ function PlanDetail() {
             Cancel this plan
           </button>
         ) : plan.isAttending ? (
-          <button
+          <button type="button"
             onClick={handleLeave}
             disabled={busy}
             className="rounded-md border border-border px-4 py-2 text-sm font-medium disabled:opacity-40"
@@ -195,7 +195,7 @@ function PlanDetail() {
         ) : full ? (
           <p className="text-sm text-muted-foreground">This plan is full.</p>
         ) : (
-          <button
+          <button type="button"
             onClick={handleJoin}
             disabled={busy}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40"
@@ -214,14 +214,14 @@ function PlanDetail() {
             <li>If it feels off, leave. You don&apos;t owe anyone an explanation.</li>
           </ul>
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={doJoin}
               disabled={busy}
               className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-40"
             >
               Got it — join
             </button>
-            <button
+            <button type="button"
               onClick={() => setShowSafety(false)}
               className="text-sm text-muted-foreground hover:text-foreground"
             >

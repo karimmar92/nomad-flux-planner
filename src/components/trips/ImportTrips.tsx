@@ -75,7 +75,7 @@ export function ImportTrips({ onDone }: { onDone?: (added: number) => void }) {
           <p className="text-sm font-medium">
             {done} {done === 1 ? "trip" : "trips"} imported.
           </p>
-          <button
+          <button type="button"
             onClick={() => setDone(null)}
             className="mt-1 text-xs text-primary underline-offset-2 hover:underline"
           >
@@ -170,7 +170,7 @@ export function ImportTrips({ onDone }: { onDone?: (added: number) => void }) {
             </div>
           ) : null}
 
-          <button
+          <button type="button"
             onClick={commit}
             disabled={toImport.length === 0}
             className="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground disabled:opacity-50"

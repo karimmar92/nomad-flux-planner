@@ -116,7 +116,7 @@ export function StepUpGate({
           placeholder="000000"
           className="num w-32 rounded-md border border-input bg-surface px-3 py-2 text-center text-lg font-semibold tracking-widest outline-none focus:border-primary"
         />
-        <button
+        <button type="button"
           onClick={() => void submit()}
           disabled={code.length < 6 || busy}
           className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"

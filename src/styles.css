@@ -243,7 +243,7 @@
   opacity: 0;
 }
 @utility reveal-in {
-  animation: driftly-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: driftly-rise 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Number that counts up feels earned; a static one feels claimed. */
@@ -265,4 +265,67 @@
   .reveal { opacity: 1; }
   .reveal-in { animation: none; }
   .sheen { animation: none; }
+}
+
+/* ── Input responsiveness ────────────────────────────────────────────
+ * The single biggest source of "why is this app slow" on mobile is not
+ * JavaScript: it is the browser's ~300 ms wait after a tap to see whether a
+ * second tap follows (double-tap-to-zoom). `touch-action: manipulation` tells
+ * the browser there is no double-tap gesture here, so the click fires
+ * immediately. No library, no synthetic event system — just telling the
+ * platform what we mean.
+ *
+ * The :active states matter for the same reason. A tap that produces no visual
+ * change until React re-renders feels broken even when the render is
+ * instantaneous, because the user gets no acknowledgement that the press
+ * landed. A 1-frame transform is acknowledgement.
+ */
+button,
+[role="button"],
+a,
+label,
+summary,
+input[type="checkbox"],
+input[type="radio"] {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.985);
+}
+
+/* Transitions long enough to notice are transitions long enough to feel like
+ * waiting. Anything the user triggered directly settles within ~150 ms. */
+button,
+[role="button"],
+a {
+  transition-duration: 120ms;
+}
+
+/* Keyboard users need to see focus; mouse users do not need a ring on click. */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Long marketing pages: let the browser skip layout and paint for sections
+ * that are still off-screen. Native, one line, no virtualisation library. */
+@media (min-width: 0px) {
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: none;
+  }
 }

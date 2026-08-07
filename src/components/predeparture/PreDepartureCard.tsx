@@ -49,7 +49,7 @@ export function PreDepartureCard({
             No roaming, and airport WiFi wants an SMS code you can&apos;t receive.
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"

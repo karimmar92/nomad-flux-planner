@@ -171,7 +171,7 @@ function VaultPage() {
       </section>
 
       {documents.length > 0 && signedIn ? (
-        <button
+        <button type="button"
           className="btn text-accent-warning"
           disabled={busy}
           onClick={async () => {
@@ -349,10 +349,10 @@ function DocumentRow({ doc, onDeleted }: { doc: VaultDocument; onDeleted: () => 
         </div>
         {doc.notes ? <p className="text-[11px] text-muted-foreground">{doc.notes}</p> : null}
       </div>
-      <button onClick={open} className="btn">
+      <button type="button" onClick={open} className="btn">
         Open
       </button>
-      <button
+      <button type="button"
         className="btn text-accent-warning"
         disabled={busy}
         onClick={async () => {

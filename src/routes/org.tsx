@@ -152,7 +152,7 @@ function OrgDashboard() {
 
       <div className="flex flex-wrap gap-1">
         {TABS.map((t) => (
-          <button
+          <button type="button"
             key={t}
             onClick={() => setTab(t)}
             className={cn(
@@ -312,13 +312,13 @@ function RiskTab({
               ))}
             </select>
           </label>
-          <button
+          <button type="button"
             onClick={() => void exportCsv()}
             className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
           >
             <Download className="h-4 w-4" aria-hidden /> CSV
           </button>
-          <button
+          <button type="button"
             onClick={() => void exportPdf()}
             className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
           >
@@ -345,7 +345,7 @@ function CountriesTab({ overview }: { overview: Overview }) {
     <div className="space-y-3">
       <div className="flex flex-wrap gap-1">
         {overview.countries.map((c) => (
-          <button
+          <button type="button"
             key={c.country_code}
             onClick={() => setCode(c.country_code)}
             className={cn(
@@ -501,13 +501,13 @@ function RequestsTab({
               <p className="text-sm">{impact.sentence}</p>
               {r.note ? <p className="text-xs text-muted-foreground">“{r.note}”</p> : null}
               <div className="flex gap-2">
-                <button
+                <button type="button"
                   onClick={() => void act(r.id, "approved")}
                   className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
                 >
                   Approve
                 </button>
-                <button
+                <button type="button"
                   onClick={() => void act(r.id, "declined")}
                   className="rounded-md border border-border px-3 py-1.5 text-sm transition-colors hover:bg-surface-2"
                 >
@@ -617,7 +617,7 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
               className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
             />
           </label>
-          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+          <button type="button" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
             Invite
           </button>
         </form>
@@ -631,7 +631,7 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
                 </span>
               </span>
               {m.status !== "left" ? (
-                <button
+                <button type="button"
                   onClick={() => void onRemove(m.member_id)}
                   className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs transition-colors hover:bg-surface-2"
                 >
@@ -687,7 +687,7 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
               className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
             />
           </label>
-          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+          <button type="button" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
             Add
           </button>
         </form>
@@ -705,7 +705,7 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
                 {p.requires_approval ? " · approval required" : ""}
                 {p.note ? ` · ${p.note}` : ""}
               </span>
-              <button
+              <button type="button"
                 onClick={async () => {
                   await dropPolicy({ data: { id: p.id } });
                   onChange();

@@ -118,7 +118,7 @@ function PensionPage() {
               { v: true, l: "German / EU / EEA" },
               { v: false, l: "Other" },
             ].map((o) => (
-              <button
+              <button type="button"
                 key={o.l}
                 onClick={() => setEuNational(o.v)}
                 className={cn(

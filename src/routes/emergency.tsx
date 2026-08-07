@@ -107,7 +107,7 @@ function EmergencyPage() {
       <section className="panel p-4">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-sm font-semibold">Your details</h2>
-          <button
+          <button type="button"
             onClick={() => setEditing((v) => !v)}
             className="rounded-md border border-border px-2.5 py-1 text-xs font-medium hover:bg-surface-2"
           >

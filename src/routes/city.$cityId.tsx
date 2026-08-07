@@ -111,7 +111,7 @@ function CityDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <button
+          <button type="button"
             onClick={() => toggle(city.id)}
             className={cn(
               "flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm",
@@ -209,7 +209,7 @@ function CityDetail() {
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={() => setShowMath((v) => !v)}
               className="mt-3 text-xs text-primary underline-offset-2 hover:underline"
             >
@@ -608,7 +608,7 @@ function TierToggle({
   return (
     <div className="flex rounded-md border border-border p-0.5 text-xs">
       {(["lean", "mid", "luxury"] as const).map((t) => (
-        <button
+        <button type="button"
           key={t}
           onClick={() => onChange(t)}
           className={cn(

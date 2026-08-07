@@ -79,7 +79,7 @@ export function CityCard({
       </Link>
 
       {onToggleSave ? (
-        <button
+        <button type="button"
           onClick={onToggleSave}
           aria-label={saved ? "Remove saved city" : "Save city"}
           className="absolute end-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-card/90 text-muted-foreground shadow-sm backdrop-blur transition-colors hover:text-primary"

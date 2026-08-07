@@ -105,7 +105,7 @@ function PlanHub() {
       </header>
 
       {profile.stage !== "planning" ? (
-        <button
+        <button type="button"
           onClick={() => patchProfile({ stage: "planning" })}
           className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
         >
@@ -147,7 +147,7 @@ function PlanHub() {
             <span className="label-xs">Cost tier</span>
             <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
               {(["lean", "mid"] as const).map((t) => (
-                <button
+                <button type="button"
                   key={t}
                   onClick={() => setTier(t)}
                   className={cn(
@@ -305,7 +305,7 @@ function PlanHub() {
                   {formatUsd(pick.city.costs.totalMonthlyLean)}/mo lean
                 </span>
                 <div className="flex gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setCityId(pick.city.id);
                       patch({ targetCityId: pick.city.id });

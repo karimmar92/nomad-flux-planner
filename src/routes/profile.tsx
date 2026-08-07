@@ -151,7 +151,7 @@ function ProfilePage() {
                   <Link to="/city/$cityId" params={{ cityId: id }} className="text-sm">
                     {flagEmoji(city.country_code)} {city.city}, {city.country}
                   </Link>
-                  <button
+                  <button type="button"
                     onClick={() => toggle(id)}
                     className="text-xs text-muted-foreground hover:text-negative"
                   >

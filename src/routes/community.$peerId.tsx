@@ -228,7 +228,7 @@ function PeerDetail() {
               <span className="num text-xs text-muted-foreground">
                 {note.length}/{INTRO_NOTE_MAX}
               </span>
-              <button
+              <button type="button"
                 onClick={sendIntro}
                 className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
               >
@@ -241,7 +241,7 @@ function PeerDetail() {
       </section>
 
       <section className="flex flex-wrap gap-2">
-        <button
+        <button type="button"
           onClick={() => {
             block(peerId);
             toast.success("Blocked");
@@ -252,7 +252,7 @@ function PeerDetail() {
           <Ban className="me-1.5 inline h-3.5 w-3.5" />
           Block
         </button>
-        <button
+        <button type="button"
           onClick={() => setReporting((v) => !v)}
           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
@@ -284,7 +284,7 @@ function PeerDetail() {
             placeholder="What happened? Reviewed by a human."
             className="w-full rounded-md border border-input bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
-          <button
+          <button type="button"
             onClick={() => {
               report(peerId, reason, detail.trim());
               setReporting(false);
