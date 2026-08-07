@@ -11,6 +11,18 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * The `plans` and `plan_attendees` tables are created by a migration that has
+ * not been applied to this project yet, so the generated Supabase types do not
+ * include them. Cast through a loose query builder so the code compiles and
+ * runs; once the migration lands and types are regenerated, drop this and use
+ * the typed `supabase.from(...)` directly.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function from(table: string): any {
+  return (supabase as unknown as { from: (t: string) => any }).from(table);
+}
+
 export const PLAN_ACTIVITIES = [
   "coffee",
   "lunch",
