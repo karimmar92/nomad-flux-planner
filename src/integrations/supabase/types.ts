@@ -574,6 +574,7 @@ export type Database = {
           referred_at: string | null
           referred_by: string | null
           skills: string[]
+          stripe_customer_id: string | null
           timezone: string | null
           updated_at: string
           visibility: Database["public"]["Enums"]["radar_visibility"]
@@ -600,6 +601,7 @@ export type Database = {
           referred_at?: string | null
           referred_by?: string | null
           skills?: string[]
+          stripe_customer_id?: string | null
           timezone?: string | null
           updated_at?: string
           visibility?: Database["public"]["Enums"]["radar_visibility"]
@@ -626,6 +628,7 @@ export type Database = {
           referred_at?: string | null
           referred_by?: string | null
           skills?: string[]
+          stripe_customer_id?: string | null
           timezone?: string | null
           updated_at?: string
           visibility?: Database["public"]["Enums"]["radar_visibility"]
