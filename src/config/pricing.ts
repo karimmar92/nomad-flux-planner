@@ -101,6 +101,7 @@ export const TIERS: Tier[] = [
       "Document vault, protected by a second factor and cached for offline access",
       "Full arbitrage ranking across every city, plus the savings-target calculator",
       "Multi-year history and retrospective reports",
+      "Pension exit calculator — refund rules for every country you have worked in",
       "Priority support",
     ],
   },
