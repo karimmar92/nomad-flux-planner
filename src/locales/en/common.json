@@ -137,5 +137,11 @@
       "checkoutSoonTitle": "Checkout is coming soon",
       "checkoutSoonDescription": "Payments aren't wired up yet."
     }
+  },
+  "footerGroups": {
+    "product": "Product",
+    "yourRecord": "Your record",
+    "forBusiness": "For business",
+    "company": "Company"
   }
 }

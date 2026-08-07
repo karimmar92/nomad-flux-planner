@@ -137,5 +137,11 @@
       "checkoutSoonTitle": "El pago llegará pronto",
       "checkoutSoonDescription": "Los pagos aún no están habilitados."
     }
+  },
+  "footerGroups": {
+    "product": "Producto",
+    "yourRecord": "Tu registro",
+    "forBusiness": "Para empresas",
+    "company": "Empresa"
   }
 }

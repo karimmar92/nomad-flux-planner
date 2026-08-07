@@ -18,6 +18,9 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PricingTable } from "@/components/PricingTable";
+import { HeroCalculator } from "@/components/marketing/HeroCalculator";
+import { Reveal, CountUp } from "@/components/marketing/Reveal";
+import { StickyCta } from "@/components/marketing/StickyCta";
 import {
   ArrowRight,
   CalendarClock,
@@ -62,46 +65,77 @@ export function Landing() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-16 pb-16">
+      <StickyCta />
       {/* ── Trust bar ───────────────────────────────────────────────── */}
       <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-2 text-center text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden />
         Hosted in the EU (Frankfurt) · Works offline · No tracking or analytics
       </p>
 
-      {/* ── Hero ────────────────────────────────────────────────────── */}
-      <section className="space-y-5 text-center">
-        <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-          Know exactly how many days{" "}
-          <span className="text-primary">you have left</span>
-        </h1>
-        <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground">
-          The Schengen 90/180 rule is a rolling window, not an annual reset — which is
-          why people miscount it and get banned for three years. {APP_NAME} counts it
-          properly, tracks every tax-residency threshold alongside it, and keeps the
-          record you will need when someone asks where you have been.
-        </p>
-        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            to="/tracker"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Start tracking — free
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-          <Link
-            to="/explore"
-            className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-surface-2"
-          >
-            Browse {cityCount} cities
-          </Link>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          No account needed to start. Unlimited trip logging, free forever.
-        </p>
+      {/* ── Hero ────────────────────────────────────────────────────
+          Two columns on desktop: the claim on the left, a WORKING calculator
+          on the right. Letting someone get their own real number before any
+          signup ask is worth more than any amount of copy — and the effort
+          they spend typing their dates is what makes saving it feel like
+          continuing rather than converting. */}
+      <section className="grid items-center gap-8 md:grid-cols-2">
+        <Reveal className="space-y-5">
+          <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            Know exactly how many days{" "}
+            <span className="sheen">you have left</span>
+          </h1>
+          <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+            The Schengen 90/180 rule is a rolling window, not an annual reset — which is
+            why people miscount it and get banned for three years. {APP_NAME} counts it
+            properly, tracks every tax-residency threshold alongside it, and keeps the
+            record you will need when someone asks where you have been.
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/tracker"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:bg-primary/90 hover:-translate-y-0.5"
+            >
+              Start tracking — free
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link
+              to="/explore"
+              className="rounded-lg border border-border px-5 py-2.5 text-center text-sm font-medium transition-colors hover:bg-surface-2"
+            >
+              Browse {cityCount} cities
+            </Link>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            No account needed to start. Unlimited trip logging, free forever.
+          </p>
+        </Reveal>
+
+        <Reveal delay={120}>
+          <HeroCalculator />
+        </Reveal>
       </section>
 
+      {/* ── Proof strip ──────────────────────────────────────────────
+          Numbers instead of testimonials. Every figure here is traceable to
+          the repo: the dataset size, its verification date, the rule the
+          engine implements. Invented social proof is the first thing a
+          sceptical reader checks. */}
+      <Reveal as="section" className="grid gap-3 sm:grid-cols-4">
+        {[
+          { k: <><CountUp to={cityCount} /></>, v: "cities with costs, visa and tax rules" },
+          { k: <><CountUp to={90} />/<CountUp to={180} /></>, v: "rolling window, counted properly" },
+          { k: <><CountUp to={0} /></>, v: "tracking scripts, on any page" },
+          { k: SEED_LAST_VERIFIED, v: "data last verified" },
+        ].map((s2, i) => (
+          <div key={i} className="panel px-4 py-3 text-center">
+            <div className="num text-xl font-semibold text-primary">{s2.k}</div>
+            <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{s2.v}</div>
+          </div>
+        ))}
+      </Reveal>
+
       {/* ── The problem ─────────────────────────────────────────────── */}
-      <section className="panel space-y-3 p-6">
+      <Reveal as="section" className="panel space-y-3 p-6">
         <h2 className="text-lg font-semibold tracking-tight">
           Most people count Schengen days wrong
         </h2>
@@ -132,10 +166,10 @@ export function Landing() {
             </li>
           ))}
         </ul>
-      </section>
+      </Reveal>
 
       {/* ── What it does ────────────────────────────────────────────── */}
-      <section className="space-y-6">
+      <Reveal as="section" className="space-y-6">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           What it does
         </h2>
@@ -171,10 +205,10 @@ export function Landing() {
             body={`Rent, coworking, groceries and transport for ${cityCount} cities, each carrying the date it was last verified. Stale numbers are labelled as stale.`}
           />
         </div>
-      </section>
+      </Reveal>
 
       {/* ── Why trust the maths ─────────────────────────────────────── */}
-      <section className="panel space-y-3 p-6">
+      <Reveal as="section" className="panel space-y-3 p-6">
         <h2 className="text-lg font-semibold tracking-tight">Why trust the counting</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Getting this wrong is not a small bug — an overstay can mean a multi-year
@@ -204,10 +238,10 @@ export function Landing() {
           City data last verified {SEED_LAST_VERIFIED}. Visa and tax information is
           provided for guidance and is not legal or tax advice.
         </p>
-      </section>
+      </Reveal>
 
       {/* ── Getting started ─────────────────────────────────────────── */}
-      <section className="space-y-5">
+      <Reveal as="section" className="space-y-5">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Getting started
         </h2>
@@ -240,10 +274,10 @@ export function Landing() {
             </li>
           ))}
         </ol>
-      </section>
+      </Reveal>
 
       {/* ── Pricing ─────────────────────────────────────────────────── */}
-      <section className="space-y-4">
+      <Reveal as="section" className="space-y-4" >
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Free to log. Paid to plan.
         </h2>
@@ -267,10 +301,10 @@ export function Landing() {
           exit list is shown regardless of plan. Someone about to overstay is not
           someone to charge.
         </p>
-      </section>
+      </Reveal>
 
       {/* ── Privacy ─────────────────────────────────────────────────── */}
-      <section className="panel space-y-4 p-6">
+      <Reveal as="section" className="panel space-y-4 p-6">
         <h2 className="text-lg font-semibold tracking-tight">
           Sensitive data, specific rules
         </h2>
@@ -292,10 +326,10 @@ export function Landing() {
             body="Download everything as JSON, or delete your account and every file with it. Both are in your profile, not behind a support email."
           />
         </div>
-      </section>
+      </Reveal>
 
       {/* ── FAQ ─────────────────────────────────────────────────────── */}
-      <section className="space-y-3">
+      <Reveal as="section" className="space-y-3">
         <h2 className="text-center text-lg font-semibold tracking-tight">
           Common questions
         </h2>
@@ -330,10 +364,10 @@ export function Landing() {
             </details>
           ))}
         </div>
-      </section>
+      </Reveal>
 
       {/* ── Closing CTA ─────────────────────────────────────────────── */}
-      <section className="panel space-y-4 p-8 text-center">
+      <Reveal as="section" className="panel space-y-4 p-8 text-center">
         <h2 className="text-xl font-semibold tracking-tight">
           How many Schengen days do you have left right now?
         </h2>
@@ -348,7 +382,7 @@ export function Landing() {
           Check my days
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
-      </section>
+      </Reveal>
     </div>
   );
 }

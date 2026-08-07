@@ -137,5 +137,11 @@
       "checkoutSoonTitle": "Checkout kommt bald",
       "checkoutSoonDescription": "Zahlungen sind noch nicht eingerichtet."
     }
+  },
+  "footerGroups": {
+    "product": "Produkt",
+    "yourRecord": "Deine Unterlagen",
+    "forBusiness": "Für Unternehmen",
+    "company": "Unternehmen"
   }
 }

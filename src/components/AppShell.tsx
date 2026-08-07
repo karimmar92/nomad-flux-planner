@@ -22,35 +22,69 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
-type NavItem = { to: string; labelKey: string; icon: typeof Compass };
+type NavItem = { to: string; labelKey: string; icon: typeof Compass; label?: string };
+type NavGroup = { label: string; items: NavItem[] };
 
 /**
- * People who have not left yet have no trips, so the tracker and the record
- * layer are empty noise to them. The planning track leads instead, and the
- * tracker reappears at graduation.
+ * NAVIGATION — grouped by JOB, not by feature.
+ *
+ * The flat list mixed three unrelated jobs (comply, decide, buy) and made the
+ * user scan six equal-weight links to find one. Grouping them means a person
+ * looks in one place: "am I legal?" → Compliance, "where next?" → Decide.
+ *
+ * Two rules:
+ *   * The primary job for the user's stage sits leftmost and stays visible on
+ *     mobile. Someone abroad opens this app to check days, not to browse cities.
+ *   * Pricing is NOT in the primary nav for signed-in users. Selling to
+ *     somebody mid-task is the fastest way to make a tool feel like a funnel;
+ *     it lives in the footer and on the upgrade prompts that appear at the
+ *     point of need.
  */
-const NAV_PLANNING: NavItem[] = [
-  { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
-  { to: "/explore", labelKey: "nav.explore", icon: Compass },
-  { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
-  { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
-  { to: "/pricing", labelKey: "nav.pricing", icon: Tag },
+const NAV_PLANNING: NavGroup[] = [
+  {
+    label: "Plan",
+    items: [
+      { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
+      { to: "/explore", labelKey: "nav.explore", icon: Compass },
+    ],
+  },
+  {
+    label: "Decide",
+    items: [
+      { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
+      { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
+    ],
+  },
 ];
 
-const NAV_ABROAD: NavItem[] = [
-  { to: "/explore", labelKey: "nav.explore", icon: Compass },
-  { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
-  { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
-  { to: "/tracker", labelKey: "nav.tracker", icon: CalendarClock },
-  { to: "/record", labelKey: "nav.record", icon: FolderLock },
-  { to: "/pricing", labelKey: "nav.pricing", icon: Tag },
+const NAV_ABROAD: NavGroup[] = [
+  {
+    label: "Compliance",
+    items: [
+      { to: "/tracker", labelKey: "nav.tracker", icon: CalendarClock },
+      { to: "/record", labelKey: "nav.record", icon: FolderLock },
+    ],
+  },
+  {
+    label: "Decide",
+    items: [
+      { to: "/explore", labelKey: "nav.explore", icon: Compass },
+      { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
+      { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
+    ],
+  },
 ];
+
+function flatten(groups: NavGroup[]): NavItem[] {
+  return groups.flatMap((g) => g.items);
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation("common");
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
-  const NAV = profile.stage === "planning" ? NAV_PLANNING : NAV_ABROAD;
+  const NAV_GROUPS = profile.stage === "planning" ? NAV_PLANNING : NAV_ABROAD;
+  const NAV = flatten(NAV_GROUPS);
   // Country + dates only, and only for people who are in an organisation.
   useOrgTripSync();
 
@@ -66,16 +100,21 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 
           <nav className="ms-4 hidden items-center gap-1 md:flex">
-            {NAV.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
-                activeProps={{ className: "bg-surface-2 text-foreground" }}
-                activeOptions={{ exact: item.to === "/" }}
-              >
-                {t(item.labelKey)}
-              </Link>
+            {NAV_GROUPS.map((group, gi) => (
+              <div key={group.label} className="flex items-center gap-1">
+                {gi > 0 ? <span className="mx-1 h-4 w-px bg-border" aria-hidden /> : null}
+                {group.items.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                    activeProps={{ className: "bg-surface-2 text-foreground" }}
+                    activeOptions={{ exact: item.to === "/" }}
+                  >
+                    {t(item.labelKey)}
+                  </Link>
+                ))}
+              </div>
             ))}
           </nav>
 
@@ -105,57 +144,56 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <div className="mx-auto mb-20 flex w-full max-w-6xl flex-wrap gap-4 px-4 text-xs text-muted-foreground md:mb-6">
-        <Link to="/plan" className="hover:text-foreground">
-          {t("footerLinks.beforeYouGo")}
-        </Link>
-        <Link to="/community" className="hover:text-foreground">
-          {t("footerLinks.community")}
-        </Link>
-        <Link to="/stays" className="hover:text-foreground">
-          {t("footerLinks.stays")}
-        </Link>
-        <Link to="/profile" className="hover:text-foreground">
-          {t("footerLinks.profile")}
-        </Link>
-        <Link to="/setup/company" className="hover:text-foreground">
-          {t("footerLinks.company")}
-        </Link>
-        <Link to="/kit" className="hover:text-foreground">
-          {t("footerLinks.kit")}
-        </Link>
-        <Link to="/business" className="hover:text-foreground">
-          {t("footerLinks.business")}
-        </Link>
-        <Link to="/org" className="hover:text-foreground">
-          {t("footerLinks.org")}
-        </Link>
-        <Link to="/settings/employer-sharing" className="hover:text-foreground">
-          {t("footerLinks.employerSharing")}
-        </Link>
-        {/*
-          NO LINK TO /landing HERE — deliberately.
+      {/* FOOTER — grouped, not a wall.
+          Thirteen equal-weight links in one row is a list nobody reads. These
+          are the same destinations sorted by who wants them: a nomad, an
+          employer, a creator, or someone checking whether to trust us.
+          Pricing lives here rather than in the primary nav, because selling to
+          someone mid-task makes a tool feel like a funnel.
 
-          A previous version added one, and it broke the entire app: AppShell
-          renders on every page, TanStack Router validates `to` against the
-          generated route tree, and `/landing` was not in it. One invalid link
-          in a shared shell takes down every route at once.
+          NO LINK TO /landing — deliberately. AppShell renders on every page and
+          TanStack Router validates `to` against the generated route tree; a
+          previous version added one before the route existed and took down
+          every route at once. Use a plain <a href> if that is ever needed. */}
+      <footer className="mx-auto mb-20 w-full max-w-6xl px-4 pt-8 text-xs text-muted-foreground md:mb-6">
+        <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-4">
+          <FooterColumn title={t("footerGroups.product")}>
+            <FooterLink to="/tracker">{t("nav.tracker")}</FooterLink>
+            <FooterLink to="/explore">{t("nav.explore")}</FooterLink>
+            <FooterLink to="/calculator">{t("nav.arbitrage")}</FooterLink>
+            <FooterLink to="/plan">{t("footerLinks.beforeYouGo")}</FooterLink>
+            <FooterLink to="/pricing">{t("nav.pricing")}</FooterLink>
+          </FooterColumn>
 
-          Use a plain <a href> if a temporary link is needed before the route
-          tree is regenerated — it bypasses route validation. Better still,
-          settle the routing first: the landing page belongs at "/" for
-          logged-out visitors, not in a footer.
-        */}
-        <Link to="/how-we-make-money" className="hover:text-foreground">
-          {t("footerLinks.howWeMakeMoney")}
-        </Link>
-        <Link to="/creators" className="hover:text-foreground">
-          {t("footerLinks.creatorProgramme")}
-        </Link>
-        <Link to="/creator" className="hover:text-foreground">
-          {t("footerLinks.creatorDashboard")}
-        </Link>
-      </div>
+          <FooterColumn title={t("footerGroups.yourRecord")}>
+            <FooterLink to="/record">{t("nav.record")}</FooterLink>
+            <FooterLink to="/kit">{t("footerLinks.kit")}</FooterLink>
+            <FooterLink to="/community">{t("footerLinks.community")}</FooterLink>
+            <FooterLink to="/stays">{t("footerLinks.stays")}</FooterLink>
+            <FooterLink to="/profile">{t("footerLinks.profile")}</FooterLink>
+          </FooterColumn>
+
+          <FooterColumn title={t("footerGroups.forBusiness")}>
+            <FooterLink to="/business">{t("footerLinks.business")}</FooterLink>
+            <FooterLink to="/org">{t("footerLinks.org")}</FooterLink>
+            <FooterLink to="/setup/company">{t("footerLinks.company")}</FooterLink>
+            <FooterLink to="/settings/employer-sharing">
+              {t("footerLinks.employerSharing")}
+            </FooterLink>
+          </FooterColumn>
+
+          <FooterColumn title={t("footerGroups.company")}>
+            <FooterLink to="/creators">{t("footerLinks.creatorProgramme")}</FooterLink>
+            <FooterLink to="/creator">{t("footerLinks.creatorDashboard")}</FooterLink>
+            <FooterLink to="/how-we-make-money">{t("footerLinks.howWeMakeMoney")}</FooterLink>
+          </FooterColumn>
+        </div>
+
+        <p className="mt-6 border-t border-border pt-4 text-[11px]">
+          {APP_NAME} produces a record of your travel. It does not determine your visa or tax
+          status — confirm both with official sources or a qualified adviser.
+        </p>
+      </footer>
 
       <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-2xl border border-border bg-card/95 px-1 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur md:hidden">
         {NAV.map((item) => (
@@ -177,5 +215,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         ))}
       </nav>
     </div>
+  );
+}
+
+function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div>
+      <div className="label-xs mb-2">{title}</div>
+      <ul className="space-y-1.5">{children}</ul>
+    </div>
+  );
+}
+
+function FooterLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <li>
+      <Link to={to} className="transition-colors hover:text-foreground">
+        {children}
+      </Link>
+    </li>
   );
 }
