@@ -49,6 +49,7 @@ import { Route as PlanTaxExitRouteImport } from './routes/plan.tax-exit'
 import { Route as PlansPlanIdRouteImport } from './routes/plans.$planId'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
+import { Route as RulesSlugRouteImport } from './routes/rules.$slug'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
 import { Route as SetupCompanyRouteImport } from './routes/setup.company'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -258,6 +259,11 @@ const RecordVaultRoute = RecordVaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => RecordRoute,
 } as any)
+const RulesSlugRoute = RulesSlugRouteImport.update({
+  id: '/rules/$slug',
+  path: '/rules/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsEmployerSharingRoute = SettingsEmployerSharingRouteImport.update({
   id: '/settings/employer-sharing',
   path: '/settings/employer-sharing',
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/plan/tax-exit': typeof PlanTaxExitRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
+  '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByTo {
   '/plan/tax-exit': typeof PlanTaxExitRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
+  '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business': typeof BusinessIndexRoute
@@ -422,6 +430,7 @@ export interface FileRoutesById {
   '/plan/tax-exit': typeof PlanTaxExitRoute
   '/plans/$planId': typeof PlansPlanIdRoute
   '/record/vault': typeof RecordVaultRoute
+  '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
   '/business/': typeof BusinessIndexRoute
@@ -472,6 +481,7 @@ export interface FileRouteTypes {
     | '/plan/tax-exit'
     | '/plans/$planId'
     | '/record/vault'
+    | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business/'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/plan/tax-exit'
     | '/plans/$planId'
     | '/record/vault'
+    | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/plan/tax-exit'
     | '/plans/$planId'
     | '/record/vault'
+    | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
     | '/business/'
@@ -610,6 +622,7 @@ export interface RootRouteChildren {
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
+  RulesSlugRoute: typeof RulesSlugRoute
   SettingsEmployerSharingRoute: typeof SettingsEmployerSharingRoute
   SetupCompanyRoute: typeof SetupCompanyRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
@@ -901,6 +914,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordVaultRouteImport
       parentRoute: typeof RecordRoute
     }
+    '/rules/$slug': {
+      id: '/rules/$slug'
+      path: '/rules/$slug'
+      fullPath: '/rules/$slug'
+      preLoaderRoute: typeof RulesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/employer-sharing': {
       id: '/settings/employer-sharing'
       path: '/settings/employer-sharing'
@@ -1020,6 +1040,7 @@ const rootRouteChildren: RootRouteChildren = {
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
+  RulesSlugRoute: RulesSlugRoute,
   SettingsEmployerSharingRoute: SettingsEmployerSharingRoute,
   SetupCompanyRoute: SetupCompanyRoute,
   BusinessIndexRoute: BusinessIndexRoute,
