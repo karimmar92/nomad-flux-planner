@@ -100,7 +100,7 @@ export async function listPlans(cityId: string, userId: string | null): Promise<
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((row) => {
+  return (data ?? []).map((row: Plan & { plan_attendees: { user_id: string }[] }) => {
     const r = row as unknown as Plan & { plan_attendees: { user_id: string }[] };
     const attendees = r.plan_attendees ?? [];
     return {

@@ -28,6 +28,7 @@ import {
   createPlan,
   formatPlanTime,
   listPlans,
+  type NewPlan,
   type PlanActivity,
   type PlanWithCounts,
 } from "@/lib/plans/plans";
