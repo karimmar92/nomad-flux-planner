@@ -23,6 +23,7 @@ import { Route as KitRouteImport } from './routes/kit'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as OrgRouteImport } from './routes/org'
+import { Route as PensionRouteImport } from './routes/pension'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -122,6 +123,11 @@ const McpRoute = McpRouteImport.update({
 const OrgRoute = OrgRouteImport.update({
   id: '/org',
   path: '/org',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PensionRoute = PensionRouteImport.update({
+  id: '/pension',
+  path: '/pension',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanRoute = PlanRouteImport.update({
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/pension': typeof PensionRoute
   '/plan': typeof PlanRouteWithChildren
   '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
@@ -339,6 +346,7 @@ export interface FileRoutesByTo {
   '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/pension': typeof PensionRoute
   '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/landing': typeof LandingRoute
   '/mcp': typeof McpRoute
   '/org': typeof OrgRoute
+  '/pension': typeof PensionRoute
   '/plan': typeof PlanRouteWithChildren
   '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
@@ -432,6 +441,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/mcp'
     | '/org'
+    | '/pension'
     | '/plan'
     | '/plans'
     | '/pricing'
@@ -478,6 +488,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/mcp'
     | '/org'
+    | '/pension'
     | '/plans'
     | '/pricing'
     | '/profile'
@@ -522,6 +533,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/mcp'
     | '/org'
+    | '/pension'
     | '/plan'
     | '/plans'
     | '/pricing'
@@ -569,6 +581,7 @@ export interface RootRouteChildren {
   LandingRoute: typeof LandingRoute
   McpRoute: typeof McpRoute
   OrgRoute: typeof OrgRoute
+  PensionRoute: typeof PensionRoute
   PlanRoute: typeof PlanRouteWithChildren
   PlansRoute: typeof PlansRouteWithChildren
   PricingRoute: typeof PricingRoute
@@ -691,6 +704,13 @@ declare module '@tanstack/react-router' {
       path: '/org'
       fullPath: '/org'
       preLoaderRoute: typeof OrgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pension': {
+      id: '/pension'
+      path: '/pension'
+      fullPath: '/pension'
+      preLoaderRoute: typeof PensionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan': {
@@ -962,6 +982,7 @@ const rootRouteChildren: RootRouteChildren = {
   LandingRoute: LandingRoute,
   McpRoute: McpRoute,
   OrgRoute: OrgRoute,
+  PensionRoute: PensionRoute,
   PlanRoute: PlanRouteWithChildren,
   PlansRoute: PlansRouteWithChildren,
   PricingRoute: PricingRoute,
