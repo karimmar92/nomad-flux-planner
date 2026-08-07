@@ -11,6 +11,18 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * The `plans` and `plan_attendees` tables are created by a migration that has
+ * not been applied to this project yet, so the generated Supabase types do not
+ * include them. Cast through a loose query builder so the code compiles and
+ * runs; once the migration lands and types are regenerated, drop this and use
+ * the typed `supabase.from(...)` directly.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function from(table: string): any {
+  return (supabase as unknown as { from: (t: string) => any }).from(table);
+}
+
 export const PLAN_ACTIVITIES = [
   "coffee",
   "lunch",
@@ -78,8 +90,7 @@ export type NewPlan = {
  * honest.
  */
 export async function listPlans(cityId: string, userId: string | null): Promise<PlanWithCounts[]> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .select("*, plan_attendees(user_id)")
     .eq("city_id", cityId)
     .eq("status", "open")
@@ -89,7 +100,7 @@ export async function listPlans(cityId: string, userId: string | null): Promise<
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((row) => {
+  return (data ?? []).map((row: Plan & { plan_attendees: { user_id: string }[] }) => {
     const r = row as unknown as Plan & { plan_attendees: { user_id: string }[] };
     const attendees = r.plan_attendees ?? [];
     return {
@@ -102,8 +113,7 @@ export async function listPlans(cityId: string, userId: string | null): Promise<
 }
 
 export async function getPlan(planId: string, userId: string | null): Promise<PlanWithCounts | null> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .select("*, plan_attendees(user_id)")
     .eq("id", planId)
     .maybeSingle();
@@ -122,8 +132,7 @@ export async function getPlan(planId: string, userId: string | null): Promise<Pl
 }
 
 export async function createPlan(hostId: string, plan: NewPlan): Promise<string> {
-  const { data, error } = await supabase
-    .from("plans")
+  const { data, error } = await from("plans")
     .insert({ ...plan, host_id: hostId })
     .select("id")
     .single();
@@ -137,8 +146,7 @@ export async function createPlan(hostId: string, plan: NewPlan): Promise<string>
  * below is a real case rather than a formality.
  */
 export async function joinPlan(planId: string, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plan_attendees")
+  const { error } = await from("plan_attendees")
     .insert({ plan_id: planId, user_id: userId });
   if (error) throw new Error(friendly(error.message));
 }
@@ -146,8 +154,7 @@ export async function joinPlan(planId: string, userId: string): Promise<void> {
 /** Leaving is silent — the host is not notified. Someone who feels
  *  uncomfortable should be able to withdraw without an announcement. */
 export async function leavePlan(planId: string, userId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plan_attendees")
+  const { error } = await from("plan_attendees")
     .delete()
     .eq("plan_id", planId)
     .eq("user_id", userId);
@@ -155,8 +162,7 @@ export async function leavePlan(planId: string, userId: string): Promise<void> {
 }
 
 export async function cancelPlan(planId: string): Promise<void> {
-  const { error } = await supabase
-    .from("plans")
+  const { error } = await from("plans")
     .update({ status: "cancelled" })
     .eq("id", planId);
   if (error) throw new Error(error.message);

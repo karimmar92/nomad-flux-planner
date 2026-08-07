@@ -18,7 +18,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CalendarClock } from "lucide-react";
 import { SCHENGEN_MAX_DAYS, schengenStatus } from "@/lib/schengen";
-import { addDaysIso, todayIso } from "@/lib/trip-dates";
+import { addDaysIso, toEngineTrips, todayIso } from "@/lib/trip-dates";
 import { useTrips } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import type { Trip } from "@/lib/types";
@@ -44,7 +44,7 @@ export function HeroCalculator() {
         notes: "",
       },
     ];
-    const status = schengenStatus(probe, today);
+    const status = schengenStatus(toEngineTrips(probe), today);
     // The date they must be out by, if they stayed continuously from entry.
     const mustLeave = addDaysIso(entry, SCHENGEN_MAX_DAYS - 1);
     return { ...status, mustLeave };

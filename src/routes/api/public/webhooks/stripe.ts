@@ -112,8 +112,8 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             return Response.json({ received: true, skipped: "unmapped_price", priceId });
           }
 
-          const patch: Record<string, unknown> = { plan };
-          if (customerId) patch["stripe_customer_id"] = customerId;
+          const patch: { plan: string; stripe_customer_id?: string } = { plan };
+          if (customerId) patch.stripe_customer_id = customerId;
 
           const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
           if (error) return new Response(error.message, { status: 500 });
