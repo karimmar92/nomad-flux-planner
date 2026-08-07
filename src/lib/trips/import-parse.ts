@@ -168,7 +168,15 @@ export function parseTripText(text: string): ParseResult {
     const trimmed = raw.trim();
     if (!trimmed || /^(country|destination)\b/i.test(trimmed)) return; // blank or header
 
-    const parts = trimmed
+    // "March 14, 2026" carries a comma INSIDE the date, and comma is also the
+    // field separator. Neutralise that comma before splitting, or the field
+    // becomes "March 14" and the year lands in its own column.
+    const normalised = trimmed.replace(
+      /\b([A-Za-z]{3,})\s+(\d{1,2}),\s*(\d{2,4})\b/g,
+      "$1 $2 $3",
+    );
+
+    const parts = normalised
       .split(/\s*[,;\t]\s*|\s+[–—-]\s+/)
       .map((p) => p.trim())
       .filter(Boolean);

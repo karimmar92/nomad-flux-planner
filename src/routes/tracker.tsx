@@ -38,6 +38,7 @@ import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { isPro as planIsPro, canUse } from "@/lib/entitlements";
 import { LockedPreview } from "@/components/ProGate";
+import { ImportTrips } from "@/components/trips/ImportTrips";
 import type { Trip, TripPurpose } from "@/lib/types";
 import { formatDate, formatDateLong } from "@/lib/i18n/format";
 
@@ -219,6 +220,19 @@ function Tracker() {
         inside parentheses the braces parse as an object literal instead.
         That exact mistake blanked the entire app. Keep comments out here.
       */}
+      {trips.length < 5 ? (
+        <ImportTrips />
+      ) : (
+        <details className="panel p-4">
+          <summary className="cursor-pointer text-sm font-medium">
+            Import more trips from a list
+          </summary>
+          <div className="mt-3">
+            <ImportTrips />
+          </div>
+        </details>
+      )}
+
       {borderRun ? (
         <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
       ) : null}
