@@ -71,6 +71,7 @@ export const TIERS: Tier[] = [
       "The LLC eligibility tool",
       "Arbitrage against one city you choose",
       "The full border-run list whenever you are within seven days of a limit",
+      "Situation phrasebook — offline, spoken, for immigration and emergencies",
     ],
   },
   {

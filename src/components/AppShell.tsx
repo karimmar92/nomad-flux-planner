@@ -167,6 +167,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <FooterColumn title={t("footerGroups.yourRecord")}>
             <FooterLink to="/record">{t("nav.record")}</FooterLink>
+            <FooterLink to="/phrasebook">{t("footerLinks.phrasebook")}</FooterLink>
             <FooterLink to="/pension">{t("footerLinks.pension")}</FooterLink>
             <FooterLink to="/kit">{t("footerLinks.kit")}</FooterLink>
             <FooterLink to="/community">{t("footerLinks.community")}</FooterLink>
