@@ -10,7 +10,7 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { CityCard } from "@/components/CityCard";
 import { Onboarding } from "@/components/Onboarding";
 import { EmptyState } from "@/components/Primitives";
-import { Landing } from "./landing";
+import { Landing } from "@/components/marketing/Landing";
 import { useSession } from "@/lib/use-session";
 import { CITIES, REGIONS } from "@/lib/cities";
 import {
@@ -71,9 +71,9 @@ function Home() {
 
   if (signedIn) return <Explore />;
 
-  // One landing page, defined in ./landing.tsx and rendered here. Two
-  // implementations of the same page is how a price gets updated in one place
-  // and not the other.
+  // One landing page, in components/marketing/Landing.tsx, rendered by both
+  // "/" and "/landing". Two implementations of the same page is how a price
+  // gets updated in one place and not the other.
   return <Landing />;
 }
 
