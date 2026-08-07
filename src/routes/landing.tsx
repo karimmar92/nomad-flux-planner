@@ -18,7 +18,7 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PricingTable } from "@/components/PricingTable";
-import { HeroCalculator } from "@/components/marketing/HeroCalculator";
+import { RuleCalculator } from "@/components/marketing/RuleCalculator";
 import { Reveal, CountUp } from "@/components/marketing/Reveal";
 import { StickyCta } from "@/components/marketing/StickyCta";
 import {
@@ -38,13 +38,13 @@ import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
 export const Route = createFileRoute("/landing")({
   head: () => ({
     meta: [
-      { title: `${APP_NAME} — Know how many days you have left` },
+      { title: `${APP_NAME} — Every rule abroad is a day count` },
       {
         name: "description",
         content:
-          "Rolling Schengen 90/180 counting, per-country tax day counters and a permanent record of where you have been. Free to log trips, forever.",
+          "Schengen 90/180, 183-day tax residency, the US FEIE 330-day test and the UK SRT — all counted from one trip history, with the conventions that differ between them. Free to log trips, forever.",
       },
-      { property: "og:title", content: `${APP_NAME} — Know how many days you have left` },
+      { property: "og:title", content: `${APP_NAME} — Every rule abroad is a day count` },
       // "/" renders this same component, so this URL is a duplicate. Keep it
       // out of the index and point the canonical at the homepage rather than
       // letting two URLs compete for the same terms.
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/landing")({
       {
         property: "og:description",
         content:
-          "A visa day tracker and cost-of-living record for people who work from more than one country.",
+          "Visa limits, tax residency and the US 330-day exclusion, counted from one trip history.",
       },
     ],
     links: [{ rel: "canonical", href: "/" }],
@@ -81,14 +81,16 @@ export function Landing() {
       <section className="grid items-center gap-8 md:grid-cols-2">
         <Reveal className="space-y-5">
           <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-            Know exactly how many days{" "}
-            <span className="sheen">you have left</span>
+            Every rule that decides your life abroad is{" "}
+            <span className="sheen">a day count</span>
           </h1>
           <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
-            The Schengen 90/180 rule is a rolling window, not an annual reset — which is
-            why people miscount it and get banned for three years. {APP_NAME} counts it
-            properly, tracks every tax-residency threshold alongside it, and keeps the
-            record you will need when someone asks where you have been.
+            Visa limits, tax residency, the US 330-day exclusion, the UK residence test —
+            all the same arithmetic against different thresholds, with conventions that
+            contradict each other. Schengen counts your arrival day. The FEIE does not.
+            {" "}{APP_NAME} runs every rule against one trip history, warns you before you
+            cross a line, and keeps the record you will need when someone asks where you
+            have been.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
@@ -111,7 +113,7 @@ export function Landing() {
         </Reveal>
 
         <Reveal delay={120}>
-          <HeroCalculator />
+          <RuleCalculator />
         </Reveal>
       </section>
 
@@ -123,7 +125,7 @@ export function Landing() {
       <Reveal as="section" className="grid gap-3 sm:grid-cols-4">
         {[
           { k: <><CountUp to={cityCount} /></>, v: "cities with costs, visa and tax rules" },
-          { k: <><CountUp to={90} />/<CountUp to={180} /></>, v: "rolling window, counted properly" },
+          { k: <><CountUp to={4} /></>, v: "rules counted from one trip history" },
           { k: <><CountUp to={0} /></>, v: "tracking scripts, on any page" },
           { k: SEED_LAST_VERIFIED, v: "data last verified" },
         ].map((s2, i) => (
@@ -137,24 +139,29 @@ export function Landing() {
       {/* ── The problem ─────────────────────────────────────────────── */}
       <Reveal as="section" className="panel space-y-3 p-6">
         <h2 className="text-lg font-semibold tracking-tight">
-          Most people count Schengen days wrong
+          One trip. Four different correct answers.
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          The three mistakes that cause overstays, in order of how often they happen:
+          The rules do not agree with each other, and each disagreement costs somebody
+          money every year:
         </p>
         <ul className="space-y-2.5 text-sm">
           {[
             [
-              "Leaving does not reset the clock.",
-              "Days fall out of the window only by ageing past 180 days. Flying to Serbia and back does nothing.",
+              "Schengen counts your arrival day. The FEIE does not.",
+              "Land at 23:50 and you have burned a full Schengen day — but that day will never count toward the 330 you need for the US exclusion.",
             ],
             [
-              "Both the entry and exit day count in full.",
-              "Landing at 23:50 burns a whole day.",
+              "Leaving does not reset the Schengen clock.",
+              "Days fall out of the window only by ageing past 180 days. Flying to Serbia and back does nothing at all.",
             ],
             [
-              "The rule is tested every day, not just at the border.",
-              "A stay that is legal on arrival can become illegal halfway through.",
+              "The tax year is not January to December.",
+              "South Africa runs March to February, Mauritius July to June, the UK 6 April to 5 April. Counting on the wrong calendar produces a confident wrong answer.",
+            ],
+            [
+              "Some rules count up, not down.",
+              "The 330-day US test is a target to reach, not a limit to avoid. Missing it by one day can cost more than $120,000 of excluded income.",
             ],
           ].map(([bold, rest]) => (
             <li key={bold} className="flex gap-2.5">

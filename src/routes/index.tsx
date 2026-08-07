@@ -30,13 +30,13 @@ export const Route = createFileRoute("/")({
     meta: [
       // "/" is the landing page for signed-out visitors, so the metadata
       // describes the product rather than the city grid (that is /explore).
-      { title: `${APP_NAME} — know how many days you have left, everywhere` },
+      { title: `${APP_NAME} — every rule abroad is a day count` },
       {
         name: "description",
         content:
-          "Track your Schengen 90/180 allowance and tax-residency days as you travel. Alerts before you cross a line, and a year-end presence record for your accountant. Free to track, no account needed.",
+          "Schengen 90/180, 183-day tax residency, the US FEIE 330-day test and the UK SRT — counted from one trip history, with alerts before you cross a line and a year-end record for your accountant. Free, no account needed.",
       },
-      { property: "og:title", content: `${APP_NAME} — visa and tax day tracking for nomads` },
+      { property: "og:title", content: `${APP_NAME} — visa, tax and residency day counting` },
       {
         property: "og:description",
         content:
