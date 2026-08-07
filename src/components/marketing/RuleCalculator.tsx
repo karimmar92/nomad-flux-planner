@@ -13,7 +13,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Info } from "lucide-react";
-import { evaluateAll, type RuleResult } from "@/lib/rules";
+import { evaluateAll, type RuleId, type RuleResult } from "@/lib/rules";
 import { addDaysIso, todayIso } from "@/lib/trip-dates";
 import { useTrips } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -27,16 +27,23 @@ const PLACES = [
   { code: "VN", label: "Vietnam", hint: "183-day" },
 ];
 
-export function RuleCalculator() {
+export function RuleCalculator({
+  only,
+  initialCountry,
+}: {
+  /** Show a single rule (used by the per-rule SEO pages). */
+  only?: RuleId;
+  initialCountry?: string;
+} = {}) {
   const navigate = useNavigate();
   const { trips, setTrips } = useTrips();
   const today = useMemo(() => todayIso(), []);
 
-  const [country, setCountry] = useState("PT");
+  const [country, setCountry] = useState(initialCountry ?? "PT");
   const [entry, setEntry] = useState(() => addDaysIso(todayIso(), -120));
   const [stillHere, setStillHere] = useState(true);
   const [exit, setExit] = useState(() => todayIso());
-  const [open, setOpen] = useState<string | null>("schengen");
+  const [open, setOpen] = useState<string | null>(only ?? "schengen");
 
   const probe: Trip[] = useMemo(
     () => [
@@ -53,13 +60,17 @@ export function RuleCalculator() {
     [country, entry, exit, stillHere],
   );
 
-  const results = useMemo(
-    () =>
-      entry && entry <= today
-        ? evaluateAll({ trips: probe, today, homeCountry: "US", ukTies: 2, ukResidentRecently: true })
-        : [],
-    [probe, today, entry],
-  );
+  const results = useMemo(() => {
+    if (!entry || entry > today) return [];
+    const all = evaluateAll({
+      trips: probe,
+      today,
+      homeCountry: "US",
+      ukTies: 2,
+      ukResidentRecently: true,
+    });
+    return only ? all.filter((r) => r.id === only) : all;
+  }, [probe, today, entry, only]);
 
   const save = () => {
     setTrips([...trips, { ...probe[0]!, id: crypto.randomUUID() }]);
@@ -69,7 +80,9 @@ export function RuleCalculator() {
   return (
     <div className="panel overflow-hidden">
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-        <span className="label-xs">One trip · four rules · no account</span>
+        <span className="label-xs">
+          {only ? "Try it with your dates · no account" : "One trip · four rules · no account"}
+        </span>
       </div>
 
       <div className="space-y-4 p-4">
@@ -142,7 +155,7 @@ export function RuleCalculator() {
           onClick={save}
           className="flex w-full items-center justify-center gap-1.5 rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
         >
-          Save this trip and track all four
+          {only ? "Save this trip and track it" : "Save this trip and track all four"}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
         <p className="text-center text-[11px] text-muted-foreground">

@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { APP_NAME } from "@/lib/app";
 import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
+import { RULE_PAGES } from "@/config/rule-pages";
 
 export const Route = createFileRoute("/landing")({
   head: () => ({
@@ -173,6 +174,18 @@ export function Landing() {
             </li>
           ))}
         </ul>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {RULE_PAGES.map((r) => (
+            <Link
+              key={r.slug}
+              to="/rules/$slug"
+              params={{ slug: r.slug }}
+              className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+            >
+              {r.title.split("—")[0]!.trim()} →
+            </Link>
+          ))}
+        </div>
       </Reveal>
 
       {/* ── What it does ────────────────────────────────────────────── */}

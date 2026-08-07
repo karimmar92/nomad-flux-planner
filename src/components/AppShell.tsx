@@ -15,6 +15,7 @@ import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
+import { RULE_PAGES } from "@/config/rule-pages";
 import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { cn } from "@/lib/utils";
@@ -156,7 +157,21 @@ export function AppShell({ children }: { children: ReactNode }) {
           previous version added one before the route existed and took down
           every route at once. Use a plain <a href> if that is ever needed. */}
       <footer className="mx-auto mb-20 w-full max-w-6xl px-4 pt-8 text-xs text-muted-foreground md:mb-6">
-        <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-5">
+          <FooterColumn title={t("footerGroups.rules")}>
+            {RULE_PAGES.map((r) => (
+              <li key={r.slug}>
+                <Link
+                  to="/rules/$slug"
+                  params={{ slug: r.slug }}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {r.title.split("—")[0]!.trim()}
+                </Link>
+              </li>
+            ))}
+          </FooterColumn>
+
           <FooterColumn title={t("footerGroups.product")}>
             <FooterLink to="/tracker">{t("nav.tracker")}</FooterLink>
             <FooterLink to="/explore">{t("nav.explore")}</FooterLink>
