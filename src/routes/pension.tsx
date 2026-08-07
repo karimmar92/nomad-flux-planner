@@ -53,7 +53,7 @@ function PensionPage() {
           monthlyPensionEur: value,
           letterYear,
           entitledToVoluntaryInsurance: euNational,
-          monthsSinceLastContribution: monthsSince ? Number(monthsSince) : undefined,
+          ...(monthsSince ? { monthsSinceLastContribution: Number(monthsSince) } : {}),
         })
       : null;
 
