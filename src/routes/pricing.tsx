@@ -23,7 +23,8 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: `Pricing | ${APP_NAME}` },
       {
         property: "og:description",
-        content: "Free to put your data in. Paid to get the answers out. Prices on the page, no demo call.",
+        content:
+          "Free to put your data in. Paid to get the answers out. Prices on the page, no demo call.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -49,31 +50,52 @@ function Pricing() {
         </p>
       </div>
 
-      {/* TEMP until billing exists: local-only plan switch so gated features can
-          be tested end to end. Remove when a real checkout sets profile.plan. */}
-      <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-        <div>
-          <div className="text-sm font-semibold">Plan preview (testing)</div>
-          <p className="text-xs text-muted-foreground">
-            Billing isn&apos;t wired up yet. This switches plans on this device only.
-          </p>
+      {/*
+        DEV ONLY — and it was not.
+
+        This block shipped publicly with the label "Plan preview (testing)" and
+        four buttons that set profile.plan to any tier. Entitlements are read
+        from profile.plan, so every paid feature was two clicks away from free,
+        on the pricing page, for anyone. Its own comment said "remove when a
+        real checkout sets profile.plan" — that checkout now exists.
+
+        `import.meta.env.DEV` is statically replaced at build time, so this
+        whole subtree is eliminated from the production bundle rather than
+        merely hidden.
+
+        Note the wider point this exposes: profile.plan lives in localStorage,
+        so client-side gating can always be edited by a determined user. That
+        is acceptable for UI gating, but anything that must be paid for on the
+        server — exports, the vault, reports — has to check entitlement
+        server-side too. See the launch checklist.
+      */}
+      {import.meta.env.DEV ? (
+        <div className="panel flex flex-wrap items-center justify-between gap-3 border-dashed p-4">
+          <div>
+            <div className="text-sm font-semibold">Plan switch (dev build only)</div>
+            <p className="text-xs text-muted-foreground">
+              Switches plans on this device so gated features can be tested. Not present in
+              production builds.
+            </p>
+          </div>
+          <div className="flex gap-1.5">
+            {(["free", "starter", "pro", "teams"] as const).map((p: Plan) => (
+              <button
+                type="button"
+                key={p}
+                onClick={() => patchProfile({ plan: p })}
+                className={
+                  profile.plan === p
+                    ? "rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                    : "rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary"
+                }
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-1.5">
-          {(["free", "starter", "pro", "teams"] as const).map((p: Plan) => (
-            <button type="button"
-              key={p}
-              onClick={() => patchProfile({ plan: p })}
-              className={
-                profile.plan === p
-                  ? "rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-                  : "rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary"
-              }
-            >
-              {p}
-            </button>
-          ))}
-        </div>
-      </div>
+      ) : null}
 
       <PricingTable
         busyPlan={busy}
@@ -87,7 +109,17 @@ function Pricing() {
             data: {
               plan: chosen.id,
               interval: billing === "annual" ? "yearly" : "monthly",
-              seats: chosen.perSeat ? 5 : 1,
+              /**
+               * Always start at 1. This previously sent `5` for per-seat
+               * plans, so a customer who clicked Teams was taken to a checkout
+               * for five seats they had never asked for — five times the price
+               * shown on the card they just clicked.
+               *
+               * Seats are now adjusted on the Stripe page itself, which shows
+               * the running total as it changes (see adjustable_quantity in
+               * billing.functions.ts).
+               */
+              seats: 1,
             },
           })
             .then((r) => {

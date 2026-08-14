@@ -30,6 +30,7 @@ import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as LangSplatRouteImport } from './routes/$lang.$'
@@ -42,6 +43,11 @@ import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
 import { Route as CommunityIndexRouteImport } from './routes/community.index'
 import { Route as CommunityPeerIdRouteImport } from './routes/community.$peerId'
 import { Route as CommunityRequestsRouteImport } from './routes/community.requests'
+import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
+import { Route as LegalImprintRouteImport } from './routes/legal.imprint'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as PlanIndexRouteImport } from './routes/plan.index'
 import { Route as PlanChecklistRouteImport } from './routes/plan.checklist'
 import { Route as PlanCostsRouteImport } from './routes/plan.costs'
@@ -162,6 +168,11 @@ const RecordRoute = RecordRouteImport.update({
   path: '/record',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaysRoute = StaysRouteImport.update({
   id: '/stays',
   path: '/stays',
@@ -222,6 +233,31 @@ const CommunityPeerIdRoute = CommunityPeerIdRouteImport.update({
 const CommunityRequestsRoute = CommunityRequestsRouteImport.update({
   id: '/community/requests',
   path: '/community/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalCookiesRoute = LegalCookiesRouteImport.update({
+  id: '/legal/cookies',
+  path: '/legal/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalImprintRoute = LegalImprintRouteImport.update({
+  id: '/legal/imprint',
+  path: '/legal/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRefundsRoute = LegalRefundsRouteImport.update({
+  id: '/legal/refunds',
+  path: '/legal/refunds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanIndexRoute = PlanIndexRouteImport.update({
@@ -318,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/$lang/$': typeof LangSplatRoute
@@ -328,6 +365,11 @@ export interface FileRoutesByFullPath {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/imprint': typeof LegalImprintRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
@@ -365,6 +407,7 @@ export interface FileRoutesByTo {
   '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/$lang/$': typeof LangSplatRoute
@@ -375,6 +418,11 @@ export interface FileRoutesByTo {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/imprint': typeof LegalImprintRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
@@ -415,6 +463,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
   '/$lang/$': typeof LangSplatRoute
@@ -425,6 +474,11 @@ export interface FileRoutesById {
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
   '/community/requests': typeof CommunityRequestsRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/imprint': typeof LegalImprintRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/plan/checklist': typeof PlanChecklistRoute
   '/plan/costs': typeof PlanCostsRoute
   '/plan/tax-exit': typeof PlanTaxExitRoute
@@ -466,6 +520,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/record'
+    | '/sitemap.xml'
     | '/stays'
     | '/tracker'
     | '/$lang/$'
@@ -476,6 +531,11 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/legal/cookies'
+    | '/legal/imprint'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
@@ -513,6 +573,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/pricing'
     | '/profile'
+    | '/sitemap.xml'
     | '/stays'
     | '/tracker'
     | '/$lang/$'
@@ -523,6 +584,11 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/legal/cookies'
+    | '/legal/imprint'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
@@ -562,6 +628,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/record'
+    | '/sitemap.xml'
     | '/stays'
     | '/tracker'
     | '/$lang/$'
@@ -572,6 +639,11 @@ export interface FileRouteTypes {
     | '/city/$cityId'
     | '/community/$peerId'
     | '/community/requests'
+    | '/legal/cookies'
+    | '/legal/imprint'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/terms'
     | '/plan/checklist'
     | '/plan/costs'
     | '/plan/tax-exit'
@@ -612,6 +684,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
   LangSplatRoute: typeof LangSplatRoute
@@ -622,6 +695,11 @@ export interface RootRouteChildren {
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
   CommunityRequestsRoute: typeof CommunityRequestsRoute
+  LegalCookiesRoute: typeof LegalCookiesRoute
+  LegalImprintRoute: typeof LegalImprintRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalRefundsRoute: typeof LegalRefundsRoute
+  LegalTermsRoute: typeof LegalTermsRoute
   RulesSlugRoute: typeof RulesSlugRoute
   SettingsEmployerSharingRoute: typeof SettingsEmployerSharingRoute
   SetupCompanyRoute: typeof SetupCompanyRoute
@@ -781,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stays': {
       id: '/stays'
       path: '/stays'
@@ -863,6 +948,41 @@ declare module '@tanstack/react-router' {
       path: '/community/requests'
       fullPath: '/community/requests'
       preLoaderRoute: typeof CommunityRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/cookies': {
+      id: '/legal/cookies'
+      path: '/legal/cookies'
+      fullPath: '/legal/cookies'
+      preLoaderRoute: typeof LegalCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/imprint': {
+      id: '/legal/imprint'
+      path: '/legal/imprint'
+      fullPath: '/legal/imprint'
+      preLoaderRoute: typeof LegalImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/refunds': {
+      id: '/legal/refunds'
+      path: '/legal/refunds'
+      fullPath: '/legal/refunds'
+      preLoaderRoute: typeof LegalRefundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plan/': {
@@ -1029,6 +1149,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
   LangSplatRoute: LangSplatRoute,
@@ -1040,6 +1161,11 @@ const rootRouteChildren: RootRouteChildren = {
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
   CommunityRequestsRoute: CommunityRequestsRoute,
+  LegalCookiesRoute: LegalCookiesRoute,
+  LegalImprintRoute: LegalImprintRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalRefundsRoute: LegalRefundsRoute,
+  LegalTermsRoute: LegalTermsRoute,
   RulesSlugRoute: RulesSlugRoute,
   SettingsEmployerSharingRoute: SettingsEmployerSharingRoute,
   SetupCompanyRoute: SetupCompanyRoute,
@@ -1052,13 +1178,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

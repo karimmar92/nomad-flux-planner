@@ -27,7 +27,12 @@
     "creatorProgramme": "Creator programme",
     "creatorDashboard": "Creator dashboard",
     "pension": "Pension exit calculator",
-    "phrasebook": "Situation phrasebook"
+    "phrasebook": "Situation phrasebook",
+    "imprint": "Imprint",
+    "terms": "Terms of Service",
+    "privacy": "Privacy",
+    "refunds": "Refunds & withdrawal",
+    "cookies": "Cookies"
   },
   "actions": {
     "save": "Save",
@@ -145,6 +150,7 @@
     "yourRecord": "Your record",
     "forBusiness": "For business",
     "company": "Company",
-    "rules": "Rules explained"
+    "rules": "Rules explained",
+    "legal": "Legal"
   }
 }

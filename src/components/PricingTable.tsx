@@ -17,6 +17,7 @@ import {
   annualUsd,
   type Tier,
 } from "@/config/pricing";
+import { VAT } from "@/config/legal";
 import { cn } from "@/lib/utils";
 
 export type Billing = "monthly" | "annual";
@@ -40,7 +41,8 @@ export function PricingTable({
       <div className="flex items-center justify-center">
         <div className="flex rounded-md border border-border p-0.5 text-sm">
           {(["monthly", "annual"] as const).map((b) => (
-            <button type="button"
+            <button
+              type="button"
               key={b}
               onClick={() => setBilling(b)}
               className={cn(
@@ -67,10 +69,13 @@ export function PricingTable({
         ))}
       </div>
 
+      {/* PAngV: the total payable, stated once and in full, not "+ VAT" in six
+          places. VAT.notice is generated from the provider's actual tax status
+          in src/config/legal.ts, so it cannot drift from what Stripe charges. */}
       <p className="text-center text-xs text-muted-foreground">
-        Prices in USD {PRICE_VAT_NOTE}. Annual plans are billed as{" "}
-        {ANNUAL_MONTHS_CHARGED} months — the other {12 - ANNUAL_MONTHS_CHARGED} are free. Cancel
-        any time; cancelling stops the next renewal and your record stays yours to export.
+        {VAT.notice} Annual plans are billed as {ANNUAL_MONTHS_CHARGED} months — the other{" "}
+        {12 - ANNUAL_MONTHS_CHARGED} are free. Cancel any time; cancelling stops the next renewal
+        and your record stays yours to export.
       </p>
     </div>
   );
@@ -127,11 +132,13 @@ function TierCard({
           "No card, no trial clock."
         ) : billing === "annual" ? (
           <>
-            ${annualUsd(tier)}/yr {PRICE_VAT_NOTE} — {12 - ANNUAL_MONTHS_CHARGED} months free
+            ${annualUsd(tier)}/yr{PRICE_VAT_NOTE ? ` ${PRICE_VAT_NOTE}` : ""} —{" "}
+            {12 - ANNUAL_MONTHS_CHARGED} months free
           </>
         ) : (
           <>
-            {PRICE_VAT_NOTE} · ${annualMonthlyEquivalentUsd(tier)}/mo billed annually
+            {PRICE_VAT_NOTE ? `${PRICE_VAT_NOTE} · ` : ""}${annualMonthlyEquivalentUsd(tier)}/mo
+            billed annually
           </>
         )}
       </div>
@@ -161,15 +168,14 @@ function TierCard({
           Start tracking — no account needed
         </Link>
       ) : (
-        <button type="button"
+        <button
+          type="button"
           onClick={() => onChoose?.(tier, billing)}
           disabled={busy}
           className={cn(
             busy && "opacity-60",
             "mt-5 rounded-md py-2.5 text-sm font-medium",
-            tier.recommended
-              ? "bg-primary text-primary-foreground"
-              : "border border-border",
+            tier.recommended ? "bg-primary text-primary-foreground" : "border border-border",
           )}
         >
           {busy ? "Opening checkout…" : `Choose ${tier.name}`}

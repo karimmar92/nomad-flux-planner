@@ -90,6 +90,18 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         {
           price: priceIdFor(data.plan, data.interval),
           quantity: data.plan === "teams" ? data.seats : 1,
+          /**
+           * Per-seat plans: let the buyer set the seat count on Stripe's page,
+           * where the total updates as they change it. Sending a fixed
+           * quantity from the app meant the amount charged could differ from
+           * the price on the card that was clicked — the exact thing PAngV and
+           * §312j are about.
+           *
+           * Bounded to match the server-side clamp on `seats`.
+           */
+          ...(data.plan === "teams"
+            ? { adjustable_quantity: { enabled: true, minimum: 1, maximum: 500 } }
+            : {}),
         },
       ],
       /**
@@ -147,7 +159,16 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         },
       },
       consent_collection: { terms_of_service: "required" },
-      success_url: `${siteUrl()}/account?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      /**
+       * /profile, not /account — there IS no /account route. This pointed at
+       * one, which meant a customer who had just been charged landed on a 404:
+       * the single worst moment in the product to show a broken page, and
+       * invisible in testing because it only happens after a real payment.
+       *
+       * If an /account route is ever added, change both URLs here AND the
+       * portal return_url below in the same commit.
+       */
+      success_url: `${siteUrl()}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl()}/pricing?checkout=cancelled`,
     });
 
@@ -175,7 +196,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
 
     const session = await stripe<{ url: string }>("/billing_portal/sessions", {
       customer,
-      return_url: `${siteUrl()}/account`,
+      return_url: `${siteUrl()}/profile`,
     });
     return { url: session.url };
   });

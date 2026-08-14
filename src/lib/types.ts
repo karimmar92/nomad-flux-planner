@@ -16,10 +16,7 @@ export type Costs = {
   totalMonthlyLean: number;
 };
 
-export type CostLineKey = Exclude<
-  keyof Costs,
-  "totalMonthlyMidRange" | "totalMonthlyLean"
->;
+export type CostLineKey = Exclude<keyof Costs, "totalMonthlyMidRange" | "totalMonthlyLean">;
 
 export const COST_LABELS: Record<CostLineKey, string> = {
   rent1brCentral: "Rent — central 1BR",
@@ -74,10 +71,7 @@ export const SCORE_LABELS: Record<keyof Scores, string> = {
 };
 
 export type VisaRuleType =
-  | "SCHENGEN_90_180"
-  | "FIXED_PER_ENTRY"
-  | "ROLLING_PER_YEAR"
-  | "NOMAD_VISA";
+  "SCHENGEN_90_180" | "FIXED_PER_ENTRY" | "ROLLING_PER_YEAR" | "NOMAD_VISA";
 
 export const VISA_RULE_LABELS: Record<VisaRuleType, string> = {
   SCHENGEN_90_180: "Schengen 90/180",
@@ -91,10 +85,8 @@ export const VISA_RULE_DESCRIPTIONS: Record<VisaRuleType, string> = {
     "Rolling window. Max 90 days in any trailing 180-day period across the whole Schengen Area combined. Entry day and exit day both count. Leaving to a non-Schengen country does not reset it.",
   FIXED_PER_ENTRY:
     "A fresh allowance each time you enter. Border runs may reset it, but repeated same-day runs draw scrutiny.",
-  ROLLING_PER_YEAR:
-    "Max N days per rolling 12 months or per calendar year, tracked cumulatively.",
-  NOMAD_VISA:
-    "A dedicated remote-work residence permit. Separate from the tourist allowance.",
+  ROLLING_PER_YEAR: "Max N days per rolling 12 months or per calendar year, tracked cumulatively.",
+  NOMAD_VISA: "A dedicated remote-work residence permit. Separate from the tourist allowance.",
 };
 
 export type NomadVisa = {
@@ -157,6 +149,23 @@ export type City = {
   region: string;
   lat: number;
   lng: number;
+  /**
+   * IANA time zone id, e.g. "Europe/Lisbon".
+   *
+   * Stored explicitly rather than derived from lat/lng, because the mapping is
+   * political, not geographic, and the exceptions are exactly the places
+   * nomads go:
+   *
+   *   - Las Palmas is Spain but Atlantic/Canary — an hour behind Madrid.
+   *   - Playa del Carmen is America/Cancun (UTC-5), an hour AHEAD of
+   *     Mexico City (UTC-6), despite being the same country.
+   *   - All five Chinese cities are Asia/Shanghai, including Kunming and Dali
+   *     in the far west, where solar noon is nearly two hours off the clock.
+   *
+   * A coordinate lookup gets each of those wrong, and an hour of error is
+   * exactly enough to make a "you can make the 09:00 standup" claim false.
+   */
+  timezone: string;
   local_currency: string;
   costs: Costs;
   scores: Scores;
@@ -198,6 +207,24 @@ export type Profile = {
   plan: Plan;
   stage: UserStage;
   onboarded: boolean;
+  /**
+   * The working hours the person cannot move, and the zone they belong to.
+   *
+   * Optional because it only applies to people with fixed hours — an employee
+   * on a European team, a freelancer with a standing client call. Someone
+   * genuinely async has no constraint here and should not be asked to invent
+   * one. Absent means "don't show schedule fit", not "assume 9 to 5".
+   *
+   * Stored on the profile rather than per-city because it is a fact about the
+   * person's job, not about anywhere they might go.
+   */
+  work_hours?: {
+    /** Minutes since midnight in `timezone`. */
+    start_minute: number;
+    end_minute: number;
+    /** IANA zone the hours are fixed to, e.g. "Europe/Berlin". */
+    timezone: string;
+  } | null;
 };
 
 export type TripPurpose = "tourist" | "nomad_visa" | "residence";

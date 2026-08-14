@@ -17,9 +17,20 @@
  * pricing.ts is what the site displays, Stripe is what actually charges, and
  * the two disagreeing is a misleading price claim rather than a cosmetic bug.
  *
- * Set prices as TAX INCLUSIVE in Stripe and enable Stripe Tax. That makes the
- * displayed figure the total payable, which is what German PAngV requires for
- * consumers, and lets Stripe apply the right VAT rate per country under OSS.
+ * TAX SETTINGS — do NOT enable Stripe Tax.
+ *
+ * An earlier version of this note said to switch it on. That was written
+ * before the provider's VAT position was pinned down and it is wrong: the
+ * operator is a §19 UStG Kleinunternehmer (see src/config/legal.ts), so there
+ * is no entitlement to collect VAT and no registration to remit it against.
+ * Stripe Tax would add tax to every invoice that could not lawfully be kept.
+ * `automatic_tax` is therefore disabled in billing.functions.ts, and that file
+ * carries the full note on when this must be revisited (the €10,000
+ * cross-border B2C threshold arrives first).
+ *
+ * Set prices as TAX INCLUSIVE anyway: with no VAT applied the displayed figure
+ * is the total payable, which is what PAngV requires — and if the exemption
+ * ever ends, the price the customer was shown stays the price they pay.
  */
 import type { PlanId } from "./pricing";
 

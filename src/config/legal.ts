@@ -16,12 +16,7 @@
 export const PROVIDER = {
   tradingName: "Aduro — The Magic Pen",
   legalName: "Karim Marzouki",
-  addressLines: [
-    "c/o POSTFLEX PFX-436-295",
-    "Emsdettener Straße 10",
-    "48268 Greven",
-    "Germany",
-  ],
+  addressLines: ["c/o POSTFLEX PFX-436-295", "Emsdettener Straße 10", "48268 Greven", "Germany"],
   email: "contact@adurothemagicpen.com",
   phone: "+49 1573 0843168",
   representative: "Karim Marzouki",
@@ -42,11 +37,31 @@ export const PROVIDER = {
 export const VAT = {
   exempt: true,
   basis: "§ 19 UStG (Kleinunternehmerregelung)",
+  /**
+   * Currency is USD because that is what src/config/pricing.ts charges. If
+   * pricing ever moves to EUR, change it here in the same commit — a price
+   * page and a legal note disagreeing about currency is the kind of detail
+   * that turns a refund request into a complaint.
+   */
   notice:
-    "Prices are in EUR and final. No VAT is charged — sole proprietor under § 19 UStG (Kleinunternehmerregelung, Germany). An invoice is emailed automatically after payment.",
+    "Prices are in USD and final — the amount shown is the amount charged. No VAT is added: the provider is a sole proprietor under § 19 UStG (Kleinunternehmerregelung, Germany). An invoice is emailed automatically after payment.",
 } as const;
 
-export const ODR_URL = "https://ec.europa.eu/consumers/odr";
+/**
+ * NO ODR LINK — deliberately.
+ *
+ * The EU Online Dispute Resolution platform was switched off on 20 July 2025
+ * and the underlying ODR Regulation repealed, so the duty to link to it is
+ * gone. Templates all over the web still carry the old
+ * `ec.europa.eu/consumers/odr` link; publishing a dead link to a platform
+ * that no longer exists is misleading and is exactly the kind of stale
+ * boilerplate a Abmahnung letter picks up.
+ *
+ * What survives is the ADR duty (§ 36 VSBG): say whether you are willing or
+ * obliged to take part in consumer arbitration. The imprint states this.
+ */
+export const CONSUMER_ARBITRATION_STATEMENT =
+  "We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board (Verbraucherschlichtungsstelle).";
 
 /** Everything the app relies on that processes personal data. Named in the
  *  privacy policy because Art. 13 requires recipients to be disclosed. */

@@ -7,8 +7,8 @@
  */
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, Check } from "lucide-react";
-import { APP_NAME } from "@/lib/app";
-import { RULE_PAGES, rulePageBySlug } from "@/config/rule-pages";
+import { APP_NAME, absoluteUrl } from "@/lib/app";
+import { RULE_PAGES, rulePageBySlug, type RulePage } from "@/config/rule-pages";
 import { RuleCalculator } from "@/components/marketing/RuleCalculator";
 import { FaqList } from "@/components/marketing/Faq";
 import { Reveal } from "@/components/marketing/Reveal";
@@ -33,7 +33,9 @@ export const Route = createFileRoute("/rules/$slug")({
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      links: [{ rel: "canonical", href: `/rules/${page.slug}` }],
+      // Absolute, not `/rules/...`: Google ignores a relative canonical, which
+      // silently un-does the whole point of having one page per rule.
+      links: [{ rel: "canonical", href: absoluteUrl(`/rules/${page.slug}`) }],
     };
   },
   notFoundComponent: () => (
@@ -64,12 +66,9 @@ function RulePageView() {
           What goes wrong, in order of how often
         </h2>
         <ul className="space-y-3">
-          {page.mistakes.map((m) => (
+          {page.mistakes.map((m: RulePage["mistakes"][number]) => (
             <li key={m.title} className="panel flex items-start gap-2.5 p-4">
-              <AlertTriangle
-                className="mt-0.5 h-4 w-4 shrink-0 text-accent-warning"
-                aria-hidden
-              />
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-accent-warning" aria-hidden />
               <div>
                 <h3 className="text-sm font-medium">{m.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{m.body}</p>
@@ -90,8 +89,8 @@ function RulePageView() {
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           The same trips are measured by every other rule you are subject to, and the counting
-          conventions contradict each other — Schengen counts your arrival day, the US 330-day
-          test does not. {APP_NAME} runs them all against one trip history.
+          conventions contradict each other — Schengen counts your arrival day, the US 330-day test
+          does not. {APP_NAME} runs them all against one trip history.
         </p>
         <ul className="grid gap-2 sm:grid-cols-2">
           {others.map((o) => (

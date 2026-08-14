@@ -28,6 +28,7 @@ import { formatLocal } from "@/lib/fx";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
+import { WorkWindowCard } from "@/components/city/WorkWindowCard";
 import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { useCityContent } from "@/lib/i18n/city-content";
@@ -120,7 +121,8 @@ function CityDetail() {
           </div>
         </div>
         <div className="flex gap-2">
-          <button type="button"
+          <button
+            type="button"
             onClick={() => toggle(city.id)}
             className={cn(
               "flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm",
@@ -198,7 +200,9 @@ function CityDetail() {
                   value={profile.savings_usd ?? ""}
                   onChange={(e) =>
                     patchProfile({
-                      savings_usd: e.target.value ? Number(e.target.value.replace(/\D/g, "")) : null,
+                      savings_usd: e.target.value
+                        ? Number(e.target.value.replace(/\D/g, ""))
+                        : null,
                     })
                   }
                   placeholder="e.g. 18000"
@@ -218,7 +222,8 @@ function CityDetail() {
               </div>
             </div>
 
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowMath((v) => !v)}
               className="mt-3 text-xs text-primary underline-offset-2 hover:underline"
             >
@@ -248,6 +253,12 @@ function CityDetail() {
           </>
         )}
       </section>
+
+      {/* Sits directly under "Your numbers" because it is the same kind of
+          question — a fact about whether this city works for THIS person, not
+          a description of the city. Cost tells you if you can afford it;
+          this tells you whether you can keep your job while you are there. */}
+      <WorkWindowCard city={city} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Costs */}
@@ -324,9 +335,7 @@ function CityDetail() {
               <span>
                 {(() => {
                   const c = cityContent(city.id, "connectivityWarning", city.connectivity_warning);
-                  return c ? (
-                    <TranslatedField translated={c.display} english={c.english} />
-                  ) : null;
+                  return c ? <TranslatedField translated={c.display} english={c.english} /> : null;
                 })()}
               </span>
             </p>
@@ -343,7 +352,6 @@ function CityDetail() {
             </p>
           ) : null}
           <div className="grid grid-cols-2 gap-4">
-
             <Stat
               label="Visa-free tourist days"
               value={touristDays === 0 ? "Visa required" : `${touristDays} days`}
@@ -356,9 +364,7 @@ function CityDetail() {
             />
             <Stat label="Rule" value={VISA_RULE_LABELS[ruleType]} size="sm" />
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {VISA_RULE_DESCRIPTIONS[ruleType]}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{VISA_RULE_DESCRIPTIONS[ruleType]}</p>
           {city.visa.maxDaysPerCalendarYear ? (
             <p className="mt-2 text-sm text-muted-foreground">
               Hard cap of {city.visa.maxDaysPerCalendarYear} days per calendar year.
@@ -388,8 +394,8 @@ function CityDetail() {
               <TriangleAlert className="mt-px h-4 w-4 shrink-0" aria-hidden />
               <span>
                 These visa-free policies are trials, currently set to expire{" "}
-                {city.visa.policyTrialExpiry}. Verified {city.last_verified}. If your stay runs
-                past that date, confirm the rules before booking anything.
+                {city.visa.policyTrialExpiry}. Verified {city.last_verified}. If your stay runs past
+                that date, confirm the rules before booking anything.
               </span>
             </p>
           ) : null}
@@ -439,10 +445,7 @@ function CityDetail() {
                     <Row label="Stay per entry" value={`${nomad.staysPerEntryDays} days`} />
                   ) : null}
                   <Row label="Renewable" value={nomad.renewable ? "Yes" : "No"} />
-                  <Row
-                    label="Path to residency"
-                    value={nomad.pathToResidency ? "Yes" : "No"}
-                  />
+                  <Row label="Path to residency" value={nomad.pathToResidency ? "Yes" : "No"} />
                   {(() => {
                     const c = cityContent(city.id, "nomadVisaNotes", nomad.notes);
                     return c ? (
@@ -574,7 +577,6 @@ function CityDetail() {
           paid to not be sold to while browsing, so they never see this. Skipped
           entirely when the visa card already carried this screen's one card. */}
       {isPaid(profile.plan) || nomad ? null : (
-
         <section className="panel p-4">
           <h2 className="text-sm font-semibold">Before you arrive</h2>
           <p className="mb-3 mt-1 text-xs text-muted-foreground">
@@ -607,17 +609,12 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function TierToggle({
-  tier,
-  onChange,
-}: {
-  tier: CostTier;
-  onChange: (t: CostTier) => void;
-}) {
+function TierToggle({ tier, onChange }: { tier: CostTier; onChange: (t: CostTier) => void }) {
   return (
     <div className="flex rounded-md border border-border p-0.5 text-xs">
       {(["lean", "mid", "luxury"] as const).map((t) => (
-        <button type="button"
+        <button
+          type="button"
           key={t}
           onClick={() => onChange(t)}
           className={cn(

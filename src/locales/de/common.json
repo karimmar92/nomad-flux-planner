@@ -27,7 +27,12 @@
     "creatorProgramme": "Creator-Programm",
     "creatorDashboard": "Creator-Dashboard",
     "pension": "Renten-Rechner beim Wegzug",
-    "phrasebook": "Situations-Sprachführer"
+    "phrasebook": "Situations-Sprachführer",
+    "imprint": "Impressum",
+    "terms": "AGB",
+    "privacy": "Datenschutz",
+    "refunds": "Widerruf & Erstattung",
+    "cookies": "Cookies"
   },
   "actions": {
     "save": "Speichern",
@@ -145,6 +150,7 @@
     "yourRecord": "Deine Unterlagen",
     "forBusiness": "Für Unternehmen",
     "company": "Unternehmen",
-    "rules": "Regeln erklärt"
+    "rules": "Regeln erklärt",
+    "legal": "Rechtliches"
   }
 }

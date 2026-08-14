@@ -15,6 +15,7 @@ type SeedCity = {
   region: string;
   lat: number;
   lng: number;
+  timezone: string;
   localCurrency: string;
   costs: Costs;
   scores: Scores;
@@ -41,6 +42,7 @@ function toCity(row: SeedCity): City {
     region: row.region,
     lat: row.lat,
     lng: row.lng,
+    timezone: row.timezone,
     local_currency: row.localCurrency,
     costs: row.costs,
     scores: row.scores,

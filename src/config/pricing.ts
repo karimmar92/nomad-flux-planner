@@ -11,11 +11,20 @@
  *    a hand-typed number, so "two months free" stays literally true. Claiming a
  *    saving that the arithmetic doesn't support is a misleading price claim.
  *
- * 2. VAT. These are net prices. German PAngV requires CONSUMER-facing prices to
- *    show the total payable including VAT, and VAT on digital services is due
- *    at the customer's rate (OSS). "+ VAT" is fine while checkout is closed;
- *    before the first charge this must become a gross price. See PRICE_VAT_NOTE.
+ * 2. VAT. These are FINAL prices — the figure shown is the figure charged.
+ *    German PAngV requires consumer-facing prices to state the total payable,
+ *    and the provider is a §19 UStG Kleinunternehmer, so no VAT is added
+ *    (see src/config/legal.ts and the note in billing.functions.ts).
+ *
+ *    This previously displayed "+ VAT", which was written when checkout was
+ *    closed and became wrong the moment it opened: advertising an addition
+ *    that is never charged is a misleading price statement, and PAngV wants
+ *    the total anyway. If the §19 exemption ever ends, VAT.exempt in
+ *    src/config/legal.ts flips and this note changes with it — one switch,
+ *    not five files.
  */
+
+import { VAT } from "@/config/legal";
 
 export type PlanId = "free" | "starter" | "pro" | "teams";
 
@@ -38,7 +47,12 @@ export type Tier = {
 /** Months charged on the annual plan. 10 of 12 = two months free. */
 export const ANNUAL_MONTHS_CHARGED = 10;
 
-export const PRICE_VAT_NOTE = "+ VAT";
+/**
+ * The short tax note shown next to a price. Empty while the §19 exemption
+ * applies, because there is nothing to add and "incl. VAT" would be equally
+ * untrue. The full explanation lives in VAT.notice, shown once per page.
+ */
+export const PRICE_VAT_NOTE = VAT.exempt ? "" : "incl. VAT";
 
 /** Annual price, derived. Never hard-code an annual figure. */
 export function annualUsd(tier: Tier): number {

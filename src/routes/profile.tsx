@@ -9,6 +9,7 @@ import { UserReferralCard } from "@/components/referrals/UserReferralCard";
 import { HeardAboutField } from "@/components/referrals/HeardAboutField";
 import { useSession } from "@/lib/use-session";
 import { DeleteAccount } from "@/components/account/DeleteAccount";
+import { BillingCard } from "@/components/billing/BillingCard";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -151,7 +152,8 @@ function ProfilePage() {
                   <Link to="/city/$cityId" params={{ cityId: id }} className="text-sm">
                     {flagEmoji(city.country_code)} {city.city}, {city.country}
                   </Link>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => toggle(id)}
                     className="text-xs text-muted-foreground hover:text-negative"
                   >
@@ -178,12 +180,12 @@ function ProfilePage() {
         </Link>
       </p>
 
-      <p className="text-xs text-muted-foreground">
-        Plan: <span className="font-medium capitalize text-foreground">{profile.plan}</span> ·{" "}
-        <Link to="/pricing" className="text-primary underline-offset-2 hover:underline">
-          See Pro
-        </Link>
-      </p>
+      {/*
+        Billing, including the § 312k cancellation button. Replaces a one-line
+        "Plan: free · See Pro" that showed the plan but gave a paying customer
+        no way to change or end it.
+      */}
+      <BillingCard />
 
       {/*
         GDPR Art.17 and App Store 5.1.1(v) both require in-app account

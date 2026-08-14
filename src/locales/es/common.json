@@ -27,7 +27,12 @@
     "creatorProgramme": "Programa de creadores",
     "creatorDashboard": "Panel de creador",
     "pension": "Calculadora de pensión al salir",
-    "phrasebook": "Frases por situación"
+    "phrasebook": "Frases por situación",
+    "imprint": "Aviso legal",
+    "terms": "Términos del servicio",
+    "privacy": "Privacidad",
+    "refunds": "Reembolsos y desistimiento",
+    "cookies": "Cookies"
   },
   "actions": {
     "save": "Guardar",
@@ -145,6 +150,7 @@
     "yourRecord": "Tu registro",
     "forBusiness": "Para empresas",
     "company": "Empresa",
-    "rules": "Reglas explicadas"
+    "rules": "Reglas explicadas",
+    "legal": "Legal"
   }
 }

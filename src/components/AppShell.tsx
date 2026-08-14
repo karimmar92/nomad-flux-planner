@@ -18,6 +18,7 @@ import { APP_NAME } from "@/lib/app";
 import { RULE_PAGES } from "@/config/rule-pages";
 import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
+import { usePlanSync } from "@/lib/billing/use-plan-sync";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -88,6 +89,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const NAV = flatten(NAV_GROUPS);
   // Country + dates only, and only for people who are in an organisation.
   useOrgTripSync();
+  // Stripe writes the paid plan to the database; this is what brings it back
+  // to the device. Without it a paying customer keeps seeing the free tier.
+  usePlanSync();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -98,7 +102,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/" className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight text-primary">{APP_NAME}</span>
           </Link>
-
 
           <nav className="ms-4 hidden items-center gap-1 md:flex">
             {NAV_GROUPS.map((group, gi) => (
@@ -122,7 +125,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ms-auto flex items-center gap-1">
             <AuthButton />
             <LanguageSwitcher />
-            <button type="button"
+            <button
+              type="button"
               onClick={toggleTheme}
               aria-label={t("nav.toggleTheme")}
               className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
@@ -206,9 +210,34 @@ export function AppShell({ children }: { children: ReactNode }) {
           </FooterColumn>
         </div>
 
-        <p className="mt-6 border-t border-border pt-4 text-[11px]">
-          {APP_NAME} produces a record of your travel. It does not determine your visa or tax
-          status — confirm both with official sources or a qualified adviser.
+        {/* LEGAL ROW — its own line, not buried in a column.
+            DDG §5 requires the Impressum to be "leicht erkennbar, unmittelbar
+            erreichbar und ständig verfügbar": recognisable, one click away, on
+            every page. A missing or hard-to-find imprint is the single most
+            reliably Abmahnung-attracting defect on a German commercial site,
+            so these sit on their own row rather than as the fourth item in a
+            column somebody has to scan. */}
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-4">
+          <Link to="/legal/imprint" className="transition-colors hover:text-foreground">
+            {t("footerLinks.imprint")}
+          </Link>
+          <Link to="/legal/terms" className="transition-colors hover:text-foreground">
+            {t("footerLinks.terms")}
+          </Link>
+          <Link to="/legal/privacy" className="transition-colors hover:text-foreground">
+            {t("footerLinks.privacy")}
+          </Link>
+          <Link to="/legal/refunds" className="transition-colors hover:text-foreground">
+            {t("footerLinks.refunds")}
+          </Link>
+          <Link to="/legal/cookies" className="transition-colors hover:text-foreground">
+            {t("footerLinks.cookies")}
+          </Link>
+        </div>
+
+        <p className="mt-4 text-[11px]">
+          {APP_NAME} produces a record of your travel. It does not determine your visa or tax status
+          — confirm both with official sources or a qualified adviser.
         </p>
       </footer>
 
@@ -228,7 +257,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             {t(item.labelKey)}
           </Link>
-
         ))}
       </nav>
     </div>

@@ -210,6 +210,45 @@
   border-radius: var(--radius-lg);
 }
 
+/**
+ * `.input` was being used in profile.tsx, creators.tsx and admin.creators.tsx
+ * before it existed anywhere — Tailwind silently drops an unknown class, so
+ * every one of those fields was rendering as an unstyled browser default.
+ * Easy to miss, because an unstyled input still works; it just looks like a
+ * different website.
+ *
+ * Defined here rather than as a component so the existing call sites are
+ * fixed by adding it, with no edits to them.
+ */
+@utility input {
+  width: 100%;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-input);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+
+  &::placeholder {
+    color: var(--color-muted-foreground);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 20%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 @utility hide-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {

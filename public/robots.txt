@@ -32,4 +32,9 @@ Disallow: /mcp
 #
 # The sitemap itself is generated from the city dataset, so adding a city to
 # seed-cities.json publishes it automatically.
-Sitemap: https://REPLACE-WITH-YOUR-DOMAIN/sitemap.xml
+# Deliberately absent until the domain is known. A Sitemap line pointing at
+# REPLACE-WITH-YOUR-DOMAIN is not a harmless placeholder — crawlers try to
+# fetch it and log a failure against the site. No line is better than a bad
+# one. Uncomment and fill in on the day the domain goes live:
+#
+# Sitemap: https://yourdomain.com/sitemap.xml

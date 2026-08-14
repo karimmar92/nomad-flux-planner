@@ -43,8 +43,17 @@ export type RuleResult = {
   headline: string;
   /** The counting convention, stated so the figure can be checked. */
   convention: string;
-  /** Extra facts worth surfacing (dates, sub-counts). */
-  detail?: string;
+  /**
+   * Extra facts worth surfacing (dates, sub-counts).
+   *
+   * `| undefined` is deliberate, not redundant. The project runs
+   * `exactOptionalPropertyTypes`, under which `detail?: string` means "may be
+   * absent" but NOT "may be present and undefined" — so every evaluator that
+   * builds this object literally with a possibly-undefined detail fails to
+   * compile. Writing it this way keeps the field optional at call sites and
+   * assignable from `string | undefined` expressions.
+   */
+  detail?: string | undefined;
   /** True when this rule counts UP toward a good outcome rather than a limit. */
   higherIsBetter?: boolean;
 };
