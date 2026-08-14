@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { Bookmark, Check, GitCompareArrows, Plus, TriangleAlert, X } from "lucide-react";
-import { getCity } from "@/lib/cities";
+import { getCity, SEED_LAST_VERIFIED } from "@/lib/cities";
 import {
   type CostTier,
   computeArbitrage,
@@ -28,7 +28,7 @@ import { formatLocal } from "@/lib/fx";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
-import { APP_NAME } from "@/lib/app";
+import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { useCityContent } from "@/lib/i18n/city-content";
 import { TranslatedField } from "@/components/i18n/TranslatedField";
@@ -46,8 +46,14 @@ export const Route = createFileRoute("/city/$cityId")({
       return { meta: [{ title: "City unavailable" }, { name: "robots", content: "noindex" }] };
     }
     const { city } = loaderData;
-    const title = `${city.city}, ${city.country} — cost, visa and tax | ${APP_NAME}`;
-    const description = `What ${city.city} costs you: personalised monthly surplus, visa days for your passport, tax residency triggers and the honest downsides.`;
+    // Lead with the search intent, not the brand. People google "digital nomad
+    // visa Portugal", not the product name — so the query words come first and
+    // the brand goes last where it costs nothing.
+    const title = `${city.city}, ${city.country} — cost of living, nomad visa & tax days | ${APP_NAME}`;
+    const description = `What ${city.city} really costs: monthly budget, ${
+      city.visa.nomadVisa.exists ? `the ${city.visa.nomadVisa.name}` : "visa rules"
+    }, tourist days on your passport and the tax-residency threshold. Verified ${SEED_LAST_VERIFIED}.`;
+    const path = `/city/${city.id}`;
     return {
       meta: [
         { title },
@@ -55,12 +61,15 @@ export const Route = createFileRoute("/city/$cityId")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
+        { property: "og:url", content: absoluteUrl(path) },
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      // One indexable URL per language for the same city.
       links: [
-        { rel: "canonical", href: `/city/${city.id}` },
-        ...hreflangLinks(`/city/${city.id}`),
+        // MUST be absolute. A relative canonical is ignored, and Google then
+        // picks its own preferred URL — which, with identical content served
+        // on Vercel preview domains, can be the wrong host entirely.
+        { rel: "canonical", href: absoluteUrl(path) },
+        ...hreflangLinks(path),
       ],
     };
   },

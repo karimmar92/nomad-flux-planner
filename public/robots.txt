@@ -1,14 +1,35 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Public pages are the city guides, the planner and the marketing pages.
+# Everything personal is disallowed below: indexing it wastes crawl budget and
+# produces useless search results — an empty tracker or someone's plan page is
+# not a useful thing to land on from Google.
 
 User-agent: *
 Allow: /
+
+Disallow: /tracker
+Disallow: /record
+Disallow: /profile
+Disallow: /auth
+Disallow: /plans
+Disallow: /community
+Disallow: /org
+Disallow: /creator
+Disallow: /admin
+Disallow: /settings
+Disallow: /kit
+Disallow: /api/
+Disallow: /.well-known/
+Disallow: /mcp
+
+# The Sitemap directive must be an ABSOLUTE url — a relative path is invalid
+# and silently ignored. This file is static, so it cannot interpolate the
+# domain.
+#
+# TODO once the custom domain is live: replace the line below with the real
+# origin, e.g.  Sitemap: https://yourdomain.com/sitemap.xml
+# Until then, submit /sitemap.xml directly in Google Search Console — that
+# works without this line at all.
+#
+# The sitemap itself is generated from the city dataset, so adding a city to
+# seed-cities.json publishes it automatically.
+Sitemap: https://REPLACE-WITH-YOUR-DOMAIN/sitemap.xml

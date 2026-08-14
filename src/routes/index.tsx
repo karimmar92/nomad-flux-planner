@@ -26,26 +26,100 @@ import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      // "/" is the landing page for signed-out visitors, so the metadata
-      // describes the product rather than the city grid (that is /explore).
-      { title: `${APP_NAME} — every rule abroad is a day count` },
-      {
-        name: "description",
-        content:
-          "Schengen 90/180, 183-day tax residency, the US FEIE 330-day test and the UK SRT — counted from one trip history, with alerts before you cross a line and a year-end record for your accountant. Free, no account needed.",
-      },
-      { property: "og:title", content: `${APP_NAME} — visa, tax and residency day counting` },
-      {
-        property: "og:description",
-        content:
-          "Rolling 90/180 counter, per-country tax day counts, border-run planning and an exportable presence record.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => {
+    // Title leads with the phrase people actually search — "Schengen calculator"
+    // — not the brand. Nobody googles a product they have never heard of.
+    const title = `Schengen 90/180 Calculator & Visa Day Tracker | ${APP_NAME}`;
+    const description =
+      "Free Schengen calculator and visa day tracker. Count your rolling 90/180 days correctly, track 183-day tax residency thresholds in 30 countries, and keep an exportable record for your accountant. No account needed, works offline.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: absoluteUrl("/") },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: absoluteUrl("/") }],
+      // Structured data. SoftwareApplication drives the rich result; FAQPage
+      // can win an expanded snippet, which is worth more than the ranking
+      // position on its own for a query someone is anxious about.
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "SoftwareApplication",
+                name: APP_NAME,
+                applicationCategory: "TravelApplication",
+                operatingSystem: "Web, iOS, Android",
+                description,
+                url: absoluteUrl("/"),
+                offers: [
+                  {
+                    "@type": "Offer",
+                    name: "Free",
+                    price: "0",
+                    priceCurrency: "EUR",
+                    description: "Unlimited trip logging, Schengen status, all city data.",
+                  },
+                  {
+                    "@type": "Offer",
+                    name: "Pro",
+                    price: "9",
+                    priceCurrency: "EUR",
+                    description:
+                      "Forward planning, threshold alerts, tax presence report, exports and document vault.",
+                  },
+                ],
+              },
+              {
+                "@type": "FAQPage",
+                mainEntity: [
+                  {
+                    "@type": "Question",
+                    name: "How does the Schengen 90/180 rule actually work?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "You may spend at most 90 days in the Schengen Area within any rolling 180-day period. The window is rolling, not annual: days leave it only by ageing past 180 days, so leaving the area and returning does not reset anything. Both your entry day and exit day count as full days, and the limit is tested on every day of your stay, not only at the border.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Is this Schengen calculator free?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Yes. Logging trips and seeing your current Schengen status is free forever and needs no account. Paid features cover forward planning, threshold alerts, the year-end presence report and exports.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Does it track tax residency as well as visa days?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Yes. It counts days per country against each country's own residency threshold, including countries whose tax year is not January to December — South Africa runs March to February and Mauritius July to June. It reports your recorded days against the published threshold; it never tells you that you are tax resident somewhere, because that depends on factors beyond day counting.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    name: "Does it work without internet?",
+                    acceptedAnswer: {
+                      "@type": "Answer",
+                      text: "Yes. City data, your trips and your visa requirements are cached on the device, and the day-counting engine runs locally. It is designed to work in an immigration queue with no roaming.",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        },
+      ],
+    };
+  },
   component: Home,
 });
 
