@@ -20,6 +20,7 @@ import { Reveal, CountUp } from "@/components/marketing/Reveal";
 import { StickyCta } from "@/components/marketing/StickyCta";
 import {
   ArrowRight,
+  Building2,
   CalendarClock,
   Check,
   FileText,
@@ -107,6 +108,60 @@ export function Landing() {
             <div className="mt-0.5 text-[11px] leading-snug text-muted-foreground">{s2.v}</div>
           </div>
         ))}
+      </Reveal>
+
+      {/* ── Audience split ───────────────────────────────────────────
+          Placed AFTER the hero, the calculator and the proof strip — never
+          before. A choice offered before someone knows what the product is
+          raises bounce; the same choice after they have seen it work is a
+          qualification. */}
+      <Reveal as="section" className="content-auto space-y-3">
+        <h2 className="text-center text-lg font-semibold tracking-tight">Which one are you?</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            to="/tracker"
+            className="panel group space-y-2 p-5 transition-shadow hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Plane className="h-4 w-4" aria-hidden />
+            </span>
+            <h3 className="text-sm font-semibold">I work from more than one country</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Day counting across every rule, tax thresholds per country, where to
+              go when a limit forces you out, and a record you can hand to an
+              accountant.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+              Open the tracker
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </span>
+          </Link>
+
+          <Link
+            to="/business"
+            className="panel group space-y-2 p-5 transition-shadow hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-muted text-info">
+              <Building2 className="h-4 w-4" aria-hidden />
+            </span>
+            <h3 className="text-sm font-semibold">I manage people who do</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Permanent-establishment exposure across your team, per country, with
+              an audit trail — and every employee keeps a personal account you
+              cannot see into.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-info">
+              For teams
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
+            </span>
+          </Link>
+        </div>
       </Reveal>
 
       {/* ── The problem ─────────────────────────────────────────────── */}
@@ -317,6 +372,61 @@ export function Landing() {
             title="Export or delete, one tap"
             body="Download everything as JSON, or delete your account and every file with it. Both are in your profile, not behind a support email."
           />
+        </div>
+      </Reveal>
+
+      {/* ── Honest limits ────────────────────────────────────────────
+          What a mature SaaS page fills with a logo cloud and a G2 badge.
+          Written as disclosure, not apology: this product's entire positioning
+          is telling people uncomfortable truths about their own situation, so
+          concealing its own would undercut everything above it. It also
+          pre-empts the objection rather than letting a sceptic form it alone. */}
+      <Reveal as="section" className="content-auto panel space-y-4 border-primary/30 p-6">
+        <div>
+          <div className="label-xs text-primary">Straight answer</div>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight">
+            Built by one person. Here is exactly where that shows.
+          </h2>
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          There are no customer logos on this page because there are no customers
+          yet. You would work that out within a week, and a product about getting
+          the awkward details right should not open with a decorative one.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">What is solid</h3>
+            <ul className="space-y-1.5 text-sm text-muted-foreground">
+              {[
+                "The day-counting engines have their own test suites, run under opposing timezones so a date never shifts by one depending on where you are.",
+                `${cityCount} cities with visa rules, tax thresholds and costs — each carrying the date it was last verified.`,
+                "Everything works offline. It is built for an immigration queue with no roaming.",
+              ].map((t) => (
+                <li key={t} className="flex gap-2">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-positive" aria-hidden />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">What is not done</h3>
+            <ul className="space-y-1.5 text-sm text-muted-foreground">
+              {[
+                "Cost figures are researched estimates, not a live feed. Volatile currencies are marked low-confidence rather than presented as fact.",
+                "The community runs in one city while it finds its feet, not thirty.",
+                "Nothing here is legal or tax advice, and the app never tells you that you are tax resident somewhere — only what your recorded days are against the published threshold.",
+              ].map((t) => (
+                <li key={t} className="flex gap-2">
+                  <span
+                    className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground"
+                    aria-hidden
+                  />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </Reveal>
 
