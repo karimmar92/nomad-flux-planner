@@ -37,8 +37,18 @@ import { RULE_PAGES } from "@/config/rule-pages";
 export function Landing() {
   const cityCount = CITIES.length;
 
+  // Marketing scale, not app scale.
+  //
+  // This was max-w-4xl (896px) with space-y-16 (64px). Inside an app shell
+  // that read as a settings screen rather than a landing page — the copy was
+  // fine, the proportions were wrong. Reference marketing sites run ~1200px
+  // wide with 96-128px between sections, and that whitespace is most of what
+  // signals "this is a product worth paying for".
+  //
+  // NOTE: a `{/* … */}` comment cannot go directly inside `return (` — the
+  // braces parse as an object literal and the build fails. Hence `//` here.
   return (
-    <div className="mx-auto max-w-4xl space-y-16 pb-16">
+    <div className="mx-auto max-w-6xl space-y-24 pb-24 sm:space-y-28">
       <StickyCta />
       {/* ── Trust bar ───────────────────────────────────────────────── */}
       <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-2 text-center text-xs text-muted-foreground">
@@ -54,7 +64,7 @@ export function Landing() {
           continuing rather than converting. */}
       <section className="grid items-center gap-8 md:grid-cols-2">
         <Reveal className="space-y-5">
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
             Every rule that decides your life abroad is{" "}
             <span className="sheen">a day count</span>
           </h1>
@@ -116,7 +126,7 @@ export function Landing() {
           raises bounce; the same choice after they have seen it work is a
           qualification. */}
       <Reveal as="section" className="content-auto space-y-3">
-        <h2 className="text-center text-lg font-semibold tracking-tight">Which one are you?</h2>
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">Which one are you?</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             to="/tracker"
@@ -125,7 +135,7 @@ export function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Plane className="h-4 w-4" aria-hidden />
             </span>
-            <h3 className="text-sm font-semibold">I work from more than one country</h3>
+            <h3 className="text-base font-semibold">I work from more than one country</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Day counting across every rule, tax thresholds per country, where to
               go when a limit forces you out, and a record you can hand to an
@@ -147,7 +157,7 @@ export function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-muted text-info">
               <Building2 className="h-4 w-4" aria-hidden />
             </span>
-            <h3 className="text-sm font-semibold">I manage people who do</h3>
+            <h3 className="text-base font-semibold">I manage people who do</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Permanent-establishment exposure across your team, per country, with
               an audit trail — and every employee keeps a personal account you
@@ -166,7 +176,7 @@ export function Landing() {
 
       {/* ── The problem ─────────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto panel space-y-3 p-6">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           One trip. Four different correct answers.
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -217,7 +227,7 @@ export function Landing() {
 
       {/* ── What it does ────────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto space-y-6">
-        <h2 className="text-center text-lg font-semibold tracking-tight">
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
           What it does
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -256,7 +266,7 @@ export function Landing() {
 
       {/* ── Why trust the maths ─────────────────────────────────────── */}
       <Reveal as="section" className="content-auto panel space-y-3 p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Why trust the counting</h2>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Why trust the counting</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Getting this wrong is not a small bug — an overstay can mean a multi-year
           entry ban. So the day-counting engine is a single pure function with a test
@@ -289,7 +299,7 @@ export function Landing() {
 
       {/* ── Getting started ─────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto space-y-5">
-        <h2 className="text-center text-lg font-semibold tracking-tight">
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
           Getting started
         </h2>
         <ol className="space-y-4">
@@ -325,7 +335,7 @@ export function Landing() {
 
       {/* ── Pricing ─────────────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto space-y-4" >
-        <h2 className="text-center text-lg font-semibold tracking-tight">
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
           Free to log. Paid to plan.
         </h2>
         <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-muted-foreground">
@@ -352,7 +362,7 @@ export function Landing() {
 
       {/* ── Privacy ─────────────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto panel space-y-4 p-6">
-        <h2 className="text-lg font-semibold tracking-tight">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           Sensitive data, specific rules
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -395,7 +405,7 @@ export function Landing() {
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold">What is solid</h3>
+            <h3 className="text-base font-semibold">What is solid</h3>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               {[
                 "The day-counting engines have their own test suites, run under opposing timezones so a date never shifts by one depending on where you are.",
@@ -410,7 +420,7 @@ export function Landing() {
             </ul>
           </div>
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold">What is not done</h3>
+            <h3 className="text-base font-semibold">What is not done</h3>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               {[
                 "Cost figures are researched estimates, not a live feed. Volatile currencies are marked low-confidence rather than presented as fact.",
@@ -432,7 +442,7 @@ export function Landing() {
 
       {/* ── FAQ ─────────────────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto space-y-3">
-        <h2 className="text-center text-lg font-semibold tracking-tight">
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
           Common questions
         </h2>
         <div className="space-y-2">
@@ -503,7 +513,7 @@ function Feature({
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
         {icon}
       </span>
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h3 className="text-base font-semibold">{title}</h3>
       <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
     </div>
   );

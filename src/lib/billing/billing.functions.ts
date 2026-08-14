@@ -92,9 +92,39 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
           quantity: data.plan === "teams" ? data.seats : 1,
         },
       ],
-      // Stripe Tax computes VAT at the customer's rate; prices are tax-inclusive
-      // so the displayed total is the gross figure PAngV requires.
-      automatic_tax: { enabled: true },
+      /**
+       * VAT IS DELIBERATELY OFF — the provider is a §19 UStG Kleinunternehmer.
+       *
+       * This previously ran `automatic_tax: { enabled: true }`, which makes
+       * Stripe compute and add VAT at the customer's rate. The Impressum states
+       * the provider is exempt under the small-business regulation and holds no
+       * VAT identification number, so collecting VAT would mean charging tax
+       * there is no entitlement to collect and no registration to remit it
+       * against. That is a worse problem than under-charging.
+       *
+       * Prices are therefore gross AND final: what the pricing page shows is
+       * what is taken, which satisfies PAngV directly rather than via Stripe.
+       *
+       * ── WHEN THIS MUST CHANGE ──────────────────────────────────────────
+       * The exemption is not unconditional. Two thresholds end it:
+       *
+       *   1. Cross-border B2C digital sales into other EU states above
+       *      €10,000/year. Past that, VAT is due at the CUSTOMER's rate and
+       *      OSS registration is required — Kleinunternehmer status does not
+       *      cover it.
+       *   2. Domestic turnover above the §19 limits.
+       *
+       * This product sells digital subscriptions to consumers across the EU,
+       * so threshold 1 is the one that will bite first and it can arrive
+       * quickly. Monitor EU-consumer revenue; when it approaches €10,000,
+       * register for OSS and set `automatic_tax` back to enabled with
+       * tax-exclusive prices.
+       *
+       * Not tax advice. Confirm with a Steuerberater before launch.
+       */
+      automatic_tax: { enabled: false },
+      // Still collect a VAT ID from business customers: it is needed on the
+      // invoice for their own records even where no VAT is charged.
       tax_id_collection: { enabled: true },
       billing_address_collection: "required",
       customer_email: email,
