@@ -22,7 +22,7 @@ import {
   touristDaysFor,
 } from "@/lib/arbitrage";
 import { useProfile, useSavedCities } from "@/lib/store";
-import { APP_NAME } from "@/lib/app";
+import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
