@@ -88,7 +88,8 @@ export function RuleCalculator({
       <div className="space-y-4 p-4">
         <div className="flex flex-wrap gap-1.5">
           {PLACES.map((p) => (
-            <button type="button"
+            <button
+              type="button"
               key={p.code}
               onClick={() => setCountry(p.code)}
               className={cn(
@@ -151,7 +152,8 @@ export function RuleCalculator({
           <p className="text-xs text-muted-foreground">Pick an arrival date to see all four.</p>
         )}
 
-        <button type="button"
+        <button
+          type="button"
           onClick={save}
           className="flex w-full items-center justify-center gap-1.5 rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground"
         >
@@ -190,7 +192,8 @@ function RuleRow({
 
   return (
     <li className="rounded-md border border-border">
-      <button type="button"
+      <button
+        type="button"
         onClick={onToggle}
         aria-expanded={open}
         className="flex w-full items-center gap-3 px-3 py-2.5 text-start"

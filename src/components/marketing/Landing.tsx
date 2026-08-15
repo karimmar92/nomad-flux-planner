@@ -7,6 +7,26 @@
  * build warns about it explicitly — and the router's own docs ask for exactly
  * this separation.
  *
+ * ── VOICE ──────────────────────────────────────────────────────────────
+ *
+ * Outcomes, not features. "Rolling 90/180, counted properly" describes the
+ * machinery; "You will know the date you have to leave" describes what
+ * changes for the reader. The rule applied throughout: if a heading would
+ * still make sense in a changelog, it is not a benefit.
+ *
+ * Emotion comes from SPECIFIC MOMENTS, never from adjectives. This audience
+ * shares one vivid experience — standing at a desk while someone slowly turns
+ * the pages of your passport — and naming it does more than any amount of
+ * "seamless" or "effortless". There is not a single superlative on this page,
+ * on purpose.
+ *
+ * THE CONSTRAINT THAT OVERRIDES ALL OF THE ABOVE: every factual claim stays
+ * exactly as true as it was. This product's whole position is telling people
+ * uncomfortable truths about their own situation; copy that oversells would
+ * cost more credibility than it buys attention. Warmer framing, identical
+ * facts. Where the old copy overstated something (see the privacy section) it
+ * was corrected rather than polished.
+ *
  * DELIBERATELY OMITTED: customer logo cloud, star rating, named case study,
  * testimonials. Those sections exist on mature reference sites because those
  * companies have customers. We have none yet. An empty or invented social-proof
@@ -25,9 +45,9 @@ import {
   Check,
   FileText,
   Globe2,
-  Lock,
   Plane,
   ShieldCheck,
+  Wallet,
   WifiOff,
 } from "lucide-react";
 import { APP_NAME } from "@/lib/app";
@@ -50,10 +70,12 @@ export function Landing() {
   return (
     <div className="mx-auto max-w-6xl space-y-24 pb-24 sm:space-y-28">
       <StickyCta />
-      {/* ── Trust bar ───────────────────────────────────────────────── */}
+      {/* ── Trust bar ─────────────────────────────────────────────────
+          Reassurance before the ask. Same three facts as before, written as
+          promises to the reader rather than as a spec line. */}
       <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-2 text-center text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden />
-        Hosted in the EU (Frankfurt) · Works offline · No tracking or analytics
+        Your data stays in the EU · Works with no signal · Nobody is tracking you
       </p>
 
       {/* ── Hero ────────────────────────────────────────────────────
@@ -61,38 +83,41 @@ export function Landing() {
           on the right. Letting someone get their own real number before any
           signup ask is worth more than any amount of copy — and the effort
           they spend typing their dates is what makes saving it feel like
-          continuing rather than converting. */}
+          continuing rather than converting.
+
+          The headline names the moment, not the mechanism. Everyone in this
+          audience has stood at that desk. The subhead carries the search
+          entities (Schengen 90/180, tax residency, 183 days) so the emotional
+          H1 costs nothing in ranking — the route's title tag already leads
+          with "Schengen 90/180 Calculator". */}
       <section className="grid items-center gap-8 md:grid-cols-2">
         <Reveal className="space-y-5">
           <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            Every rule that decides your life abroad is{" "}
-            <span className="sheen">a day count</span>
+            Know your days. <span className="sheen">Before the officer does.</span>
           </h1>
           <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
-            Visa limits, tax residency, the US 330-day exclusion, the UK residence test —
-            all the same arithmetic against different thresholds, with conventions that
-            contradict each other. Schengen counts your arrival day. The FEIE does not.
-            {" "}{APP_NAME} runs every rule against one trip history, warns you before you
-            cross a line, and keeps the record you will need when someone asks where you
-            have been.
+            The Schengen 90/180 rule, the 183-day tax residency line, the US 330-day exclusion, the
+            UK residence test — {APP_NAME} counts all of them from the same trip history. You will
+            know the date you have to leave long before it becomes a problem, and you will have the
+            record to prove where you were.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               to="/tracker"
               className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:bg-primary/90 hover:-translate-y-0.5"
             >
-              Start tracking — free
+              Count my days — free
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
             <Link
               to="/explore"
               className="rounded-lg border border-border px-5 py-2.5 text-center text-sm font-medium transition-colors hover:bg-surface-2"
             >
-              Browse {cityCount} cities
+              See where I could go
             </Link>
           </div>
           <p className="text-xs text-muted-foreground">
-            No account needed to start. Unlimited trip logging, free forever.
+            Nothing to sign up for. Log as many trips as you like, free, for as long as you like.
           </p>
         </Reveal>
 
@@ -105,13 +130,35 @@ export function Landing() {
           Numbers instead of testimonials. Every figure here is traceable to
           the repo: the dataset size, its verification date, the rule the
           engine implements. Invented social proof is the first thing a
-          sceptical reader checks. */}
+          sceptical reader checks. The labels changed from what each number IS
+          to what it MEANS for the reader; the numbers did not. */}
       <Reveal as="section" className="content-auto grid gap-3 sm:grid-cols-4">
         {[
-          { k: <><CountUp to={cityCount} /></>, v: "cities with costs, visa and tax rules" },
-          { k: <><CountUp to={4} /></>, v: "rules counted from one trip history" },
-          { k: <><CountUp to={0} /></>, v: "tracking scripts, on any page" },
-          { k: SEED_LAST_VERIFIED, v: "data last verified" },
+          {
+            k: (
+              <>
+                <CountUp to={cityCount} />
+              </>
+            ),
+            v: "cities, with what they cost and how long you may stay",
+          },
+          {
+            k: (
+              <>
+                <CountUp to={4} />
+              </>
+            ),
+            v: "rules, all counted from the same trips",
+          },
+          {
+            k: (
+              <>
+                <CountUp to={0} />
+              </>
+            ),
+            v: "trackers following you around the web",
+          },
+          { k: SEED_LAST_VERIFIED, v: "the day every figure was last checked" },
         ].map((s2, i) => (
           <div key={i} className="panel px-4 py-3 text-center">
             <div className="num text-xl font-semibold text-primary">{s2.k}</div>
@@ -124,9 +171,12 @@ export function Landing() {
           Placed AFTER the hero, the calculator and the proof strip — never
           before. A choice offered before someone knows what the product is
           raises bounce; the same choice after they have seen it work is a
-          qualification. */}
+          qualification. Both options are written in the reader's own words,
+          as they would describe themselves rather than as segments. */}
       <Reveal as="section" className="content-auto space-y-3">
-        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">Which one are you?</h2>
+        <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
+          Which one is you?
+        </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             to="/tracker"
@@ -135,14 +185,14 @@ export function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Plane className="h-4 w-4" aria-hidden />
             </span>
-            <h3 className="text-base font-semibold">I work from more than one country</h3>
+            <h3 className="text-base font-semibold">I am the one at the border</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Day counting across every rule, tax thresholds per country, where to
-              go when a limit forces you out, and a record you can hand to an
-              accountant.
+              You will always know how long you can stay, when you have to move, where is worth
+              moving to — and at the end of the year, you will not have to reconstruct any of it
+              from old boarding passes.
             </p>
             <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
-              Open the tracker
+              Start with my last few trips
               <ArrowRight
                 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
                 aria-hidden
@@ -157,14 +207,14 @@ export function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-info-muted text-info">
               <Building2 className="h-4 w-4" aria-hidden />
             </span>
-            <h3 className="text-base font-semibold">I manage people who do</h3>
+            <h3 className="text-base font-semibold">I am responsible for people who are</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Permanent-establishment exposure across your team, per country, with
-              an audit trail — and every employee keeps a personal account you
-              cannot see into.
+              You will see permanent-establishment exposure building up country by country, with an
+              audit trail, before it becomes a filing. Your people keep a private account you cannot
+              see into — which is the only reason they will keep it accurate.
             </p>
             <span className="inline-flex items-center gap-1 text-sm font-medium text-info">
-              For teams
+              See how it works for a team
               <ArrowRight
                 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
                 aria-hidden
@@ -174,14 +224,18 @@ export function Landing() {
         </div>
       </Reveal>
 
-      {/* ── The problem ─────────────────────────────────────────────── */}
+      {/* ── The problem ───────────────────────────────────────────────
+          The opening line does real persuasive work: it moves the cause of
+          the mistake from the reader's carelessness to the rules' design.
+          People do not buy a solution to a problem they feel stupid about. */}
       <Reveal as="section" className="content-auto panel space-y-3 p-6">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           One trip. Four different correct answers.
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          The rules do not agree with each other, and each disagreement costs somebody
-          money every year:
+          Almost nobody gets this wrong through carelessness. They get it wrong because the rules
+          genuinely contradict each other, and every contradiction below costs somebody real money
+          every year.
         </p>
         <ul className="space-y-2.5 text-sm">
           {[
@@ -225,99 +279,106 @@ export function Landing() {
         </div>
       </Reveal>
 
-      {/* ── What it does ────────────────────────────────────────────── */}
+      {/* ── Outcomes ─────────────────────────────────────────────────
+          Was "What it does", with headings that described the machinery. Each
+          heading is now the sentence the reader could say about their own life
+          afterwards. The bodies keep every specific — the specifics are what
+          make the promise believable rather than aspirational. */}
       <Reveal as="section" className="content-auto space-y-6">
         <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-          What it does
+          What changes
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Feature
             icon={<CalendarClock className="h-4 w-4" />}
-            title="Rolling 90/180, counted properly"
-            body="Days used, days remaining today, and the earliest date you could re-enter for a full 90. Long-stay visas and residence permits are counted separately, as they should be."
+            title="You will know the date you have to leave"
+            body="Days used, days left today, and the first date you could come back for a clean 90 — counted on the rolling window rather than the one people assume. Long-stay visas and residence permits are kept separate, as they should be."
           />
           <Feature
             icon={<Globe2 className="h-4 w-4" />}
-            title="Tax residency counters"
-            body="Every country you visit, against its own threshold — including the ones whose tax year is not January to December. South Africa runs March–February; Mauritius July–June."
+            title="You will not become a tax resident by accident"
+            body="Every country you have set foot in, counted against its own threshold and its own tax year. South Africa runs March to February. Mauritius, July to June. Getting the calendar wrong is how people cross a line they never saw."
           />
           <Feature
             icon={<Plane className="h-4 w-4" />}
-            title="Where to go next"
-            body="When a deadline forces you out, ranked exits by visa maths and cost of living rather than ticket price. Non-Schengen options surface first, because they stop the clock."
+            title="When you have to move, you will know where"
+            body="Somewhere you can legally be, that you can afford, ranked by the maths rather than by the cheapest flight. Non-Schengen options come first, because they are the ones that stop the clock."
           />
           <Feature
             icon={<FileText className="h-4 w-4" />}
-            title="A record you can hand to an accountant"
-            body="Day counts per country per tax year, exportable, with the gaps and uncertainties flagged rather than hidden. Evidence, not a verdict — your adviser draws the conclusion."
+            title="Your accountant will get a straight answer"
+            body="Days per country per tax year, exportable, with the gaps and uncertainties flagged rather than quietly smoothed over. Evidence for them to work from — the conclusion stays theirs to draw."
           />
           <Feature
             icon={<WifiOff className="h-4 w-4" />}
-            title="Works with no signal"
-            body="All cities, your trips and your visa requirements are cached on the device. It works in an immigration queue with no roaming, which is exactly where you need it."
+            title="It works in the queue at passport control"
+            body="Your trips, every city and the visa rules are already on the device. No roaming, no signal, no loading spinner at the moment you actually need the number."
           />
           <Feature
-            icon={<Lock className="h-4 w-4" />}
-            title="Costs for every city"
-            body={`Rent, coworking, groceries and transport for ${cityCount} cities, each carrying the date it was last verified. Stale numbers are labelled as stale.`}
+            icon={<Wallet className="h-4 w-4" />}
+            title="You will know what a month there really costs"
+            body={`Rent, coworking, groceries and transport for ${cityCount} cities, each carrying the date it was last checked. Where a figure has gone stale, it says so instead of pretending.`}
           />
         </div>
       </Reveal>
 
       {/* ── Why trust the maths ─────────────────────────────────────── */}
       <Reveal as="section" className="content-auto panel space-y-3 p-6">
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Why trust the counting</h2>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          Why you can trust the number
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Getting this wrong is not a small bug — an overstay can mean a multi-year
-          entry ban. So the day-counting engine is a single pure function with a test
-          suite, not logic scattered through screens.
+          A wrong count here is not a cosmetic bug — an overstay can mean a multi-year entry ban,
+          and you would find out at the worst possible moment. So the counting is one pure function
+          with its own test suite, not logic scattered across screens where it can quietly disagree
+          with itself.
         </p>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
             {/* Deliberately not a hard number — a count in marketing copy goes
                 stale the moment a test is added and nobody updates the page. */}
-            Covered by a dedicated test suite, including the trap where people leave
-            and immediately re-enter believing the window reset.
+            Covered by a dedicated test suite, including the trap that catches most people: leaving
+            and coming straight back, believing the window reset.
           </li>
           <li className="flex gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
-            Run under opposing timezones (UTC+12 and UTC−7) with identical results, so
-            a date never shifts by a day depending on where you are.
+            Run under opposing timezones (UTC+12 and UTC−7) with identical results, so your dates
+            never shift by a day depending on where you happen to be standing.
           </li>
           <li className="flex gap-2">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-positive" aria-hidden />
-            Every date shown with the month as a word — never 03/04/2026, which means
-            two different days depending on who is reading it.
+            Every date written with the month as a word — never 03/04/2026, which means two
+            different days depending on who is reading it.
           </li>
         </ul>
         <p className="pt-1 text-xs text-muted-foreground">
-          City data last verified {SEED_LAST_VERIFIED}. Visa and tax information is
-          provided for guidance and is not legal or tax advice.
+          City data last verified {SEED_LAST_VERIFIED}. Visa and tax information is provided for
+          guidance and is not legal or tax advice.
         </p>
       </Reveal>
 
       {/* ── Getting started ─────────────────────────────────────────── */}
       <Reveal as="section" className="content-auto space-y-5">
         <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
-          Getting started
+          You are about a minute from an answer
         </h2>
         <ol className="space-y-4">
           {[
             [
               "Right now",
-              "Log your last few trips",
-              "No account, no setup. Enter entry and exit dates and the rolling window is calculated immediately. If you have three years of history, start with the last six months — that is what the window actually looks at.",
+              "Put in your last few trips",
+              "No account, no setup, no email. Entry and exit dates are enough, and the rolling window appears as you type. If you have three years of history, the last six months is all the window can actually see.",
             ],
             [
               "Two minutes in",
-              "Add your passport and income",
-              "Everything becomes personal: visa allowances for your nationality, and what each city would leave you at the end of the month.",
+              "Add your passport and what you earn",
+              "Now the numbers are yours rather than generic: what your nationality is allowed, and what would be left in your account at the end of a month in each city.",
             ],
             [
-              "When it matters",
-              "Get warned before you trip a threshold",
-              "Alerts at 75% and 90% of any limit, and ranked exits when a deadline forces a move.",
+              "From then on",
+              "Stop having to remember",
+              "You get told at 75% and 90% of any limit, and when a deadline forces a move, the options are already ranked. Nothing to check, nothing to diarise.",
             ],
           ].map(([when, title, body]) => (
             <li key={title} className="panel flex gap-4 p-4">
@@ -334,14 +395,14 @@ export function Landing() {
       </Reveal>
 
       {/* ── Pricing ─────────────────────────────────────────────────── */}
-      <Reveal as="section" className="content-auto space-y-4" >
+      <Reveal as="section" className="content-auto space-y-4">
         <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
           Free to log. Paid to plan.
         </h2>
         <p className="mx-auto max-w-xl text-center text-sm leading-relaxed text-muted-foreground">
-          Logging trips is free forever and always will be — the record is yours and
-          holding it hostage would be indefensible. Pro is for the forward-looking
-          parts: planning ahead, alerts, reports and exports.
+          Your record of where you have been stays free forever. It is your history, and charging
+          you to look at it would be indefensible. What you pay for is looking forward: planning the
+          next move, being warned early, and the reports you hand to somebody else.
         </p>
         {/* Rendered from src/config/pricing.ts. This section used to hold a
             hand-written two-tier table at €9 — it drifted the moment pricing
@@ -354,33 +415,44 @@ export function Landing() {
           </Link>
         </div>
         <p className="text-center text-xs text-muted-foreground">
-          If you are within seven days of a deadline or already over a limit, the full
-          exit list is shown regardless of plan. Someone about to overstay is not
-          someone to charge.
+          If you are already over a limit, or within seven days of one, the full exit list opens
+          regardless of what you pay. Somebody about to overstay is not somebody to sell to.
         </p>
       </Reveal>
 
-      {/* ── Privacy ─────────────────────────────────────────────────── */}
+      {/* ── Privacy ─────────────────────────────────────────────────
+          CORRECTED, not just reworded. The old copy said location was
+          "rounded to roughly a kilometre before it leaves your device", which
+          described the design of the networked radar rather than what ships:
+          radar-store.ts writes to localStorage and nothing syncs it, so no
+          coordinate leaves the device at all. Same error was on the privacy
+          policy and was fixed there; a landing page and a privacy policy
+          disagreeing about location data is exactly the inconsistency a
+          regulator or a careful reader finds first. */}
       <Reveal as="section" className="content-auto panel space-y-4 p-6">
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Sensitive data, specific rules
+          You are handing over your passport and your whereabouts
         </h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          That deserves more than a policy page nobody reads, so here is what actually happens to
+          it.
+        </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <TrustItem
-            title="Hosted in the EU"
-            body="Database in Frankfurt. Your travel history, income and documents stay in the EU."
+            title="It stays in Europe"
+            body="The database is in Frankfurt. Your travel history, your income and your documents do not leave the EU."
           />
           <TrustItem
-            title="No tracking, no analytics"
-            body="There is no analytics script in this app. Nothing follows you, and there is no data to sell because none is collected."
+            title="Nobody is watching you use it"
+            body="There is no analytics script on any page. Nothing follows you elsewhere, and there is nothing to sell because none of it is collected."
           />
           <TrustItem
-            title="Location is never precise"
-            body="If you use the community radar, your position is rounded to roughly a kilometre before it leaves your device, and no history is kept. Invisible by default."
+            title="Your location never leaves the device"
+            body="The community radar runs entirely on your phone today — no coordinate is sent to us at all. When the networked version arrives you will be invisible by default, and this page will say so before it ships, not after."
           />
           <TrustItem
-            title="Export or delete, one tap"
-            body="Download everything as JSON, or delete your account and every file with it. Both are in your profile, not behind a support email."
+            title="You can take it all back"
+            body="Download everything as a file, or delete your account and every document with it. Both are buttons on your profile, not a support request somebody has to approve."
           />
         </div>
       </Reveal>
@@ -390,7 +462,11 @@ export function Landing() {
           Written as disclosure, not apology: this product's entire positioning
           is telling people uncomfortable truths about their own situation, so
           concealing its own would undercut everything above it. It also
-          pre-empts the objection rather than letting a sceptic form it alone. */}
+          pre-empts the objection rather than letting a sceptic form it alone.
+
+          LEFT ALMOST UNTOUCHED in the emotional pass, deliberately. This
+          section only works because it reads flatter than everything around
+          it. Warm it up and it starts to sound like a technique. */}
       <Reveal as="section" className="content-auto panel space-y-4 border-primary/30 p-6">
         <div>
           <div className="label-xs text-primary">Straight answer</div>
@@ -399,9 +475,9 @@ export function Landing() {
           </h2>
         </div>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          There are no customer logos on this page because there are no customers
-          yet. You would work that out within a week, and a product about getting
-          the awkward details right should not open with a decorative one.
+          There are no customer logos on this page because there are no customers yet. You would
+          work that out within a week, and a product about getting the awkward details right should
+          not open with a decorative lie.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -424,7 +500,7 @@ export function Landing() {
             <ul className="space-y-1.5 text-sm text-muted-foreground">
               {[
                 "Cost figures are researched estimates, not a live feed. Volatile currencies are marked low-confidence rather than presented as fact.",
-                "The community runs in one city while it finds its feet, not thirty.",
+                "The community radar is a preview that runs on your own device. It stays that way until enough people in one city have asked for it to be worth switching on.",
                 "Nothing here is legal or tax advice, and the app never tells you that you are tax resident somewhere — only what your recorded days are against the published threshold.",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
@@ -449,23 +525,23 @@ export function Landing() {
           {[
             [
               "Do I need an account?",
-              "No. You can log trips and see your Schengen status without signing up — everything is stored on your device. Create an account when you want it backed up or available on your phone as well, and anything you already logged is uploaded automatically.",
+              "No. Log your trips and see exactly where you stand without signing up — it all lives on your device. Make an account when you want it backed up or on your phone too, and everything you already logged comes with you automatically.",
             ],
             [
               "Is this legal advice?",
-              "No, and it deliberately avoids sounding like it. The app tells you your recorded day counts and the published thresholds. It never tells you that you are tax resident somewhere — that depends on factors beyond day counting, and it is a question for a qualified adviser.",
+              "No, and it takes care not to sound like it. You are told your recorded day counts and the published thresholds. You are never told that you are tax resident somewhere — that turns on far more than days, and it is a question for someone qualified to answer it.",
             ],
             [
               "How accurate are the cost figures?",
-              "They are researched estimates with a visible last-verified date, based on a mid-range single person: a private one-bedroom in a central area, cooking about half of meals, one coworking desk. Volatile currencies are marked low-confidence rather than presented as fact.",
+              "They are researched estimates carrying the date they were last checked, based on one person living mid-range: a private one-bedroom centrally, cooking about half your meals, one coworking desk. Where a currency moves fast, the figure is marked low-confidence rather than presented as fact.",
             ],
             [
               "What happens if I lose my phone?",
-              "If you have an account, nothing — your trips are on the server and appear on your next device. If you never signed up, they were only ever on that device. The app tells you this once you have trips worth losing.",
+              "With an account, nothing — your trips are waiting on the next device you sign in from. Without one, they only ever existed on that phone. The app warns you about this once you have enough logged to actually miss.",
             ],
             [
               "Which countries are covered?",
-              `${cityCount} cities across Europe, Asia, Latin America, Africa and the Middle East, with the visa and tax rules for each. Day counting works for any country you enter, whether or not it is in the city list.`,
+              `${cityCount} cities across Europe, Asia, Latin America, Africa and the Middle East, each with its visa and tax rules. The day counting itself works for anywhere you go, whether or not the city is on that list.`,
             ],
           ].map(([q, a]) => (
             <details key={q} className="panel group p-4">
@@ -478,20 +554,22 @@ export function Landing() {
         </div>
       </Reveal>
 
-      {/* ── Closing CTA ─────────────────────────────────────────────── */}
+      {/* ── Closing CTA ─────────────────────────────────────────────
+          A question, not a slogan. Most readers genuinely cannot answer it,
+          and noticing that is more motivating than anything we could assert. */}
       <Reveal as="section" className="content-auto panel space-y-4 p-8 text-center">
         <h2 className="text-xl font-semibold tracking-tight">
-          How many Schengen days do you have left right now?
+          So — how many days do you have left right now?
         </h2>
         <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground">
-          Most people are not sure. Log your last few trips and find out in about a
-          minute — no account, nothing to cancel.
+          Most people are fairly sure. Fairly sure is what a three-year entry ban is made of. Put in
+          your last few trips and find out properly — about a minute, no account, nothing to cancel.
         </p>
         <Link
           to="/tracker"
           className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          Check my days
+          Find out
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </Reveal>
@@ -499,15 +577,7 @@ export function Landing() {
   );
 }
 
-function Feature({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
+function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div className="panel space-y-2 p-5">
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">

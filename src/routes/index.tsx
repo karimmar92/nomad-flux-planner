@@ -23,6 +23,7 @@ import {
 } from "@/lib/arbitrage";
 import { useProfile, useSavedCities } from "@/lib/store";
 import { APP_NAME, absoluteUrl } from "@/lib/app";
+import { tier } from "@/config/pricing";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -30,8 +31,15 @@ export const Route = createFileRoute("/")({
     // Title leads with the phrase people actually search — "Schengen calculator"
     // — not the brand. Nobody googles a product they have never heard of.
     const title = `Schengen 90/180 Calculator & Visa Day Tracker | ${APP_NAME}`;
+    // The meta description is an ad, not a summary: it has to earn a click
+    // against nine other blue links. Opening on the reader's own uncertainty
+    // outperforms a feature list, and the entities Google needs still follow
+    // in the same sentence.
+    //
+    // Kept under ~158 characters. The previous one ran to 238 and was cut off
+    // mid-word in the result, which wastes the only sentence a searcher reads.
     const description =
-      "Free Schengen calculator and visa day tracker. Count your rolling 90/180 days correctly, track 183-day tax residency thresholds in 30 countries, and keep an exportable record for your accountant. No account needed, works offline.";
+      "Not sure how many Schengen days you have left? Count the rolling 90/180 properly, watch 183-day tax residency limits, and keep a record you can export. Free.";
     return {
       meta: [
         { title },
@@ -59,19 +67,29 @@ export const Route = createFileRoute("/")({
                 operatingSystem: "Web, iOS, Android",
                 description,
                 url: absoluteUrl("/"),
+                /**
+                 * Derived from src/config/pricing.ts, never typed by hand.
+                 *
+                 * This said `price: "9", priceCurrency: "EUR"` while the
+                 * checkout charged $29 USD — a leftover from an earlier price.
+                 * Structured data is worse than body copy to get wrong: Google
+                 * renders it as a price in the search result, so the first
+                 * number a stranger ever sees was one we would refuse to
+                 * honour. Reading from the config makes that impossible.
+                 */
                 offers: [
                   {
                     "@type": "Offer",
                     name: "Free",
                     price: "0",
-                    priceCurrency: "EUR",
+                    priceCurrency: "USD",
                     description: "Unlimited trip logging, Schengen status, all city data.",
                   },
                   {
                     "@type": "Offer",
-                    name: "Pro",
-                    price: "9",
-                    priceCurrency: "EUR",
+                    name: tier("pro").name,
+                    price: String(tier("pro").monthlyUsd),
+                    priceCurrency: "USD",
                     description:
                       "Forward planning, threshold alerts, tax presence report, exports and document vault.",
                   },
@@ -304,7 +322,8 @@ export function Explore() {
             className="w-full rounded-full border border-border bg-card py-3 ps-11 pe-4 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] outline-none transition-colors focus:border-primary"
           />
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setFiltersOpen((v) => !v)}
           aria-label="Filters"
           className={cn(
@@ -351,7 +370,6 @@ export function Explore() {
           </QuickChip>
         ))}
       </div>
-
 
       {filtersOpen ? (
         <div className="panel grid gap-5 p-4 sm:grid-cols-2">
@@ -539,7 +557,8 @@ function Toggle({
   children: React.ReactNode;
 }) {
   return (
-    <button type="button"
+    <button
+      type="button"
       onClick={onClick}
       className={cn(
         "rounded-full border border-border px-3 py-1.5 text-xs",
@@ -561,7 +580,8 @@ function QuickChip({
   children: React.ReactNode;
 }) {
   return (
-    <button type="button"
+    <button
+      type="button"
       onClick={onClick}
       className={cn(
         "shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",

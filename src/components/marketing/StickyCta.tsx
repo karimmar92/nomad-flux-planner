@@ -45,18 +45,21 @@ export function StickyCta() {
     >
       <div className="mx-auto flex max-w-4xl items-center gap-3 px-4 py-2.5">
         <p className="flex-1 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Free forever to track.</span> Planning and
-          reports from ${tier("starter").monthlyUsd}/mo.
+          <span className="font-medium text-foreground">
+            Still not sure how many days you have?
+          </span>{" "}
+          Finding out is free. Planning ahead is ${tier("starter").monthlyUsd}/mo.
         </p>
         <Link
           to="/tracker"
           tabIndex={show ? 0 : -1}
           className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground"
         >
-          Start free
+          Count my days
           <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setDismissed(true)}
           tabIndex={show ? 0 : -1}
           aria-label="Dismiss"

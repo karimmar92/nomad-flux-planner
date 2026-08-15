@@ -61,8 +61,8 @@ export function HeroCalculator() {
           How many Schengen days do you have left?
         </h2>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          One trip, for a quick answer. No account, nothing sent anywhere — this
-          runs entirely in your browser.
+          One trip, for a quick answer. No account, nothing sent anywhere — this runs entirely in
+          your browser.
         </p>
       </div>
 
@@ -124,8 +124,8 @@ export function HeroCalculator() {
                 : ""}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            This is one trip. Add the rest of your history and the number changes —
-            older days age out of the window while newer ones count against you.
+            This is one trip. Add the rest of your history and the number changes — older days age
+            out of the window while newer ones count against you.
           </p>
           <Link
             to="/tracker"

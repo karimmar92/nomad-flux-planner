@@ -49,15 +49,13 @@ export function LandingHero() {
 
       <section className="space-y-5 text-center">
         <h1 className="text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-          Never lose track of your{" "}
-          <span className="text-primary">Schengen days</span> again
+          Never lose track of your <span className="text-primary">Schengen days</span> again
         </h1>
         <p className="mx-auto max-w-2xl text-base leading-relaxed text-muted-foreground">
-          The 90/180 rule is a rolling window, not an annual reset — which is why
-          people miscount it and get banned for three years. {APP_NAME} counts it
-          correctly, tracks every tax-residency threshold alongside it, and keeps
-          the record you will need when an accountant or a border officer asks
-          where you have been.
+          The 90/180 rule is a rolling window, not an annual reset — which is why people miscount it
+          and get banned for three years. {APP_NAME} counts it correctly, tracks every tax-residency
+          threshold alongside it, and keeps the record you will need when an accountant or a border
+          officer asks where you have been.
         </p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
@@ -85,9 +83,7 @@ export function LandingHero() {
           this is and has seen it work. A choice presented before context is a
           bounce; a choice presented after one is a qualification. */}
       <section className="space-y-3">
-        <h2 className="text-center text-lg font-semibold tracking-tight">
-          Which one are you?
-        </h2>
+        <h2 className="text-center text-lg font-semibold tracking-tight">Which one are you?</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Link
             to="/tracker"
@@ -98,12 +94,15 @@ export function LandingHero() {
             </span>
             <h3 className="text-sm font-semibold">I work from more than one country</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Day counting, tax thresholds, where to go when a limit forces you
-              out, and a record you can hand to an accountant.
+              Day counting, tax thresholds, where to go when a limit forces you out, and a record
+              you can hand to an accountant.
             </p>
             <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
               Open the tracker
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </span>
           </Link>
 
@@ -116,13 +115,15 @@ export function LandingHero() {
             </span>
             <h3 className="text-sm font-semibold">I manage people who do</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Permanent-establishment exposure across your team, per country, with
-              an audit trail — and each employee keeps a personal account you
-              cannot see into.
+              Permanent-establishment exposure across your team, per country, with an audit trail —
+              and each employee keeps a personal account you cannot see into.
             </p>
             <span className="inline-flex items-center gap-1 text-sm font-medium text-info">
               For teams
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </span>
           </Link>
         </div>
@@ -159,10 +160,9 @@ export function LandingHero() {
           </h2>
         </div>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          There are no customer logos on this page because there are no customers
-          yet. You would find that out in a week anyway, and a product about
-          getting the awkward details right should not open with a decorative
-          one.
+          There are no customer logos on this page because there are no customers yet. You would
+          find that out in a week anyway, and a product about getting the awkward details right
+          should not open with a decorative one.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -189,7 +189,10 @@ export function LandingHero() {
                 "Nothing here is legal or tax advice, and the app never tells you that you are tax resident somewhere — only what your recorded days are against the published threshold.",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
-                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
+                  <span
+                    className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground"
+                    aria-hidden
+                  />
                   {t}
                 </li>
               ))}
