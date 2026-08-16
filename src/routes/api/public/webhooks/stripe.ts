@@ -46,12 +46,28 @@ function verifySignature(payload: string, header: string | null, secret: string)
 export const Route = createFileRoute("/api/public/webhooks/stripe")({
   server: {
     handlers: {
+      /**
+       * The outer handler does signature checking and AUDIT LOGGING; the
+       * decision logic lives in `handleEvent` below.
+       *
+       * Everything is logged, including events we ignore. When a customer says
+       * "I paid and nothing happened", the useful answer is almost never in
+       * Stripe's dashboard: Stripe shows a 200 and stops there. What matters is
+       * what our handler decided, and that only exists if we write it down.
+       *
+       * Logging failures never fail the webhook. A 500 makes Stripe retry, and
+       * retrying a payment that was processed correctly just because the audit
+       * insert failed would be a worse bug than a missing log line.
+       */
       POST: async ({ request }) => {
         const secret = process.env["STRIPE_WEBHOOK_SECRET"];
         const body = await request.text();
 
         if (!secret) return new Response("Webhook not configured", { status: 503 });
         if (!verifySignature(body, request.headers.get("stripe-signature"), secret)) {
+          // Deliberately NOT logged to the database. An unsigned request is
+          // not a Stripe event, and writing attacker-controlled JSON into the
+          // audit table is how the audit table stops being trustworthy.
           return new Response("Invalid signature", { status: 401 });
         }
 
@@ -70,6 +86,45 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
         const object = event.data?.object ?? {};
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        const eventId: string | null = (event as { id?: string }).id ?? null;
+        const subjectUserId: string | null =
+          object["metadata"]?.["user_id"] ?? object["client_reference_id"] ?? null;
+
+        // Record arrival before doing anything. If the handler throws, the row
+        // is already there and says `received`, which is exactly the state you
+        // want to find when investigating.
+        const { logWebhookReceived, logWebhookOutcome } = await import("@/lib/billing/webhook-log");
+        if (eventId) {
+          await logWebhookReceived(supabaseAdmin, {
+            eventId,
+            type: event.type,
+            userId: subjectUserId,
+            payload: event,
+          });
+        }
+
+        async function finish(res: Response, outcome: Record<string, unknown>, failed = false) {
+          if (eventId) {
+            await logWebhookOutcome(supabaseAdmin, {
+              eventId,
+              userId: subjectUserId,
+              outcome,
+              failed,
+            });
+          }
+          return res;
+        }
+
+        /**
+         * Every exit from the handler goes through one of these two, so the
+         * audit row always gets an outcome. Rewriting each `return` by hand
+         * would guarantee that the one branch nobody thought about is the one
+         * that stays silent, and that branch is always the interesting one.
+         */
+        const json = (outcome: Record<string, unknown>) => finish(Response.json(outcome), outcome);
+        const fail = (message: string, status = 500) =>
+          finish(new Response(message, { status }), { error: message }, true);
 
         /* ---------------- founding 100 ----------------
          *
@@ -94,13 +149,13 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           const paid = object["payment_status"] === "paid";
 
           if (!userId || !sessionId) {
-            return Response.json({ received: true, skipped: "no_user_reference" });
+            return json({ received: true, skipped: "no_user_reference" });
           }
           if (!paid) {
             // Delayed payment methods land here. Stripe sends another event
             // when the money actually arrives; granting now would give away a
             // permanent spot for a payment that may never complete.
-            return Response.json({ received: true, skipped: "not_paid_yet" });
+            return json({ received: true, skipped: "not_paid_yet" });
           }
 
           const customerId: string | null =
@@ -114,7 +169,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
 
           const { claimFoundingSpot } = await import("@/lib/founding/rpc");
           const { spot, error } = await claimFoundingSpot(supabaseAdmin, userId, sessionId);
-          if (error) return new Response(error, { status: 500 });
+          if (error) return fail(error);
 
           if (spot == null) {
             /**
@@ -123,7 +178,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
              * refund rather than a silent 200. Flagged loudly because it is a
              * money-owed situation, not a logging line.
              */
-            return Response.json({
+            return json({
               received: true,
               founding: "sold_out_after_payment",
               action_required: "REFUND",
@@ -132,7 +187,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             });
           }
 
-          return Response.json({ received: true, founding_number: spot, user_id: userId });
+          return json({ received: true, founding_number: spot, user_id: userId });
         }
 
         /* ---------------- plan provisioning ----------------
@@ -159,7 +214,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             object["metadata"]?.["user_id"] ?? object["client_reference_id"] ?? null;
           const customerId: string | null =
             typeof object["customer"] === "string" ? object["customer"] : null;
-          if (!userId) return Response.json({ received: true, skipped: "no_user_reference" });
+          if (!userId) return json({ received: true, skipped: "no_user_reference" });
 
           // Statuses that entitle. `past_due` deliberately still entitles:
           // a failed card retry should not lock someone out of their passport
@@ -179,16 +234,16 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
                 null;
 
           if (!plan) {
-            return Response.json({ received: true, skipped: "unmapped_price", priceId });
+            return json({ received: true, skipped: "unmapped_price", priceId });
           }
 
           const patch: { plan: string; stripe_customer_id?: string } = { plan };
           if (customerId) patch.stripe_customer_id = customerId;
 
           const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
-          if (error) return new Response(error.message, { status: 500 });
+          if (error) return fail(error.message);
 
-          return Response.json({ received: true, plan, user_id: userId });
+          return json({ received: true, plan, user_id: userId });
         }
 
         /* ---------------- accrual ---------------- */
@@ -201,7 +256,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             null;
 
           if (!invoiceId || !referredUserId || collected <= 0) {
-            return Response.json({ received: true, skipped: "missing_reference" });
+            return json({ received: true, skipped: "missing_reference" });
           }
 
           const { data: referred } = await supabaseAdmin
@@ -212,7 +267,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
 
           // Attribution is locked to the profile at signup. No re-attribution here.
           if (!referred?.referred_by || referred.referral_program !== "creator") {
-            return Response.json({ received: true, skipped: "not_creator_attributed" });
+            return json({ received: true, skipped: "not_creator_attributed" });
           }
 
           const { data: creator } = await supabaseAdmin
@@ -221,7 +276,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             .eq("user_id", referred.referred_by)
             .maybeSingle();
           if (!creator || creator.status !== "active") {
-            return Response.json({ received: true, skipped: "no_active_creator" });
+            return json({ received: true, skipped: "no_active_creator" });
           }
 
           const { data: creatorAuth } = await supabaseAdmin.auth.admin.getUserById(creator.user_id);
@@ -244,7 +299,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
               severity: "urgent",
               detail: { hard_block: block, invoice: invoiceId },
             });
-            return Response.json({ received: true, blocked: block });
+            return json({ received: true, blocked: block });
           }
 
           const { data: existing } = await supabaseAdmin
@@ -254,7 +309,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           const ledger = (existing ?? []) as LedgerRow[];
 
           if (capReached(ledger, referredUserId)) {
-            return Response.json({
+            return json({
               received: true,
               skipped: `cap_${CREATOR_PROGRAM.capMonthsPerReferredUser}_months`,
             });
@@ -274,9 +329,9 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
 
           // Duplicate delivery: the unique constraint did its job.
           if (error && error.code === "23505") {
-            return Response.json({ received: true, duplicate: true });
+            return json({ received: true, duplicate: true });
           }
-          if (error) return new Response(error.message, { status: 500 });
+          if (error) return fail(error.message);
 
           // Soft flags accrue anyway and queue for a human. Shared coworking IPs
           // are normal for this audience and must never auto-reject.
@@ -303,14 +358,14 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             });
           }
 
-          return Response.json({ received: true, accrued: true });
+          return json({ received: true, accrued: true });
         }
 
         /* ---------------- clawback ---------------- */
         if (event.type === "charge.refunded" || event.type === "charge.dispute.created") {
           const invoiceId: string | null =
             object["invoice"] ?? object["charge"]?.["invoice"] ?? null;
-          if (!invoiceId) return Response.json({ received: true, skipped: "no_invoice" });
+          if (!invoiceId) return json({ received: true, skipped: "no_invoice" });
 
           const { data: accrual } = await supabaseAdmin
             .from("commission_ledger")
@@ -318,7 +373,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             .eq("stripe_invoice_id", invoiceId)
             .eq("type", "accrual")
             .maybeSingle();
-          if (!accrual) return Response.json({ received: true, skipped: "no_accrual" });
+          if (!accrual) return json({ received: true, skipped: "no_accrual" });
 
           const { error } = await supabaseAdmin.from("commission_ledger").insert({
             creator_id: accrual.creator_id,
@@ -334,14 +389,14 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
             note: `Clawback: ${event.type}`,
           });
           if (error && error.code === "23505") {
-            return Response.json({ received: true, duplicate: true });
+            return json({ received: true, duplicate: true });
           }
-          if (error) return new Response(error.message, { status: 500 });
+          if (error) return fail(error.message);
 
-          return Response.json({ received: true, clawed_back: true });
+          return json({ received: true, clawed_back: true });
         }
 
-        return Response.json({ received: true, ignored: event.type });
+        return json({ received: true, ignored: event.type });
       },
     },
   },

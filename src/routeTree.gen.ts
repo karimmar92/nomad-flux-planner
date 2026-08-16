@@ -36,6 +36,7 @@ import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as LangSplatRouteImport } from './routes/$lang.$'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as BusinessExplainRouteImport } from './routes/business.explain'
@@ -200,6 +201,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminBillingRoute = AdminBillingRouteImport.update({
+  id: '/admin/billing',
+  path: '/admin/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
   id: '/admin/creators',
   path: '/admin/creators',
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
@@ -469,6 +477,7 @@ export interface FileRoutesById {
   '/$lang/$': typeof LangSplatRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
@@ -526,6 +535,7 @@ export interface FileRouteTypes {
     | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/billing'
     | '/admin/creators'
     | '/business/explain'
     | '/city/$cityId'
@@ -579,6 +589,7 @@ export interface FileRouteTypes {
     | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/billing'
     | '/admin/creators'
     | '/business/explain'
     | '/city/$cityId'
@@ -634,6 +645,7 @@ export interface FileRouteTypes {
     | '/$lang/$'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/billing'
     | '/admin/creators'
     | '/business/explain'
     | '/city/$cityId'
@@ -690,6 +702,7 @@ export interface RootRouteChildren {
   LangSplatRoute: typeof LangSplatRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  AdminBillingRoute: typeof AdminBillingRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
   BusinessExplainRoute: typeof BusinessExplainRoute
   CityCityIdRoute: typeof CityCityIdRoute
@@ -899,6 +912,13 @@ declare module '@tanstack/react-router' {
       path: '/.well-known/oauth-protected-resource'
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/billing': {
+      id: '/admin/billing'
+      path: '/admin/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AdminBillingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/creators': {
@@ -1156,6 +1176,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  AdminBillingRoute: AdminBillingRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
   BusinessExplainRoute: BusinessExplainRoute,
   CityCityIdRoute: CityCityIdRoute,
@@ -1178,13 +1199,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
