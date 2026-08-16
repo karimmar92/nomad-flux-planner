@@ -24,12 +24,15 @@
  * happened and points at the normal plans. It does not reappear next
  * month with a bigger number.
  */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Infinity as InfinityIcon, Minus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchFoundingTaken } from "@/lib/founding/rpc";
+import { useServerFn } from "@tanstack/react-start";
+import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { createFoundingCheckout } from "@/lib/billing/billing.functions";
+import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { useSession } from "@/lib/use-session";
 import { useProfile } from "@/lib/store";
 import {
@@ -47,8 +50,10 @@ export function FoundingOffer() {
   const { signedIn } = useSession();
   const { profile } = useProfile();
   const [taken, setTaken] = useState<number | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const createSession = useServerFn(createFoundingCheckout);
+  const busy = false;
 
   useEffect(() => {
     let active = true;
@@ -65,17 +70,27 @@ export function FoundingOffer() {
   const soldOut = taken != null && !foundingIsOpen(taken);
   const proYear = tier("pro").monthlyUsd * 12;
 
-  async function buy() {
-    setBusy(true);
-    setError(null);
-    try {
-      const { url } = await createFoundingCheckout();
-      window.location.href = url;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not open checkout. Please try again.");
-      setBusy(false);
-    }
-  }
+  /**
+   * Embedded checkout, matching the subscription flow. The server returns a
+   * client secret rather than a redirect URL, so the payment form opens inside
+   * the app and the buyer never leaves the page they decided on.
+   */
+  const fetchClientSecret = useCallback(async (): Promise<string> => {
+    const result = await createSession({
+      data: {
+        environment: getStripeEnvironment(),
+        // Stripe substitutes the session id server-side before returning here.
+        returnUrl: `${window.location.origin}/profile?checkout=founding&session_id={CHECKOUT_SESSION_ID}`,
+      },
+    });
+    // Stripe's own message verbatim. "Something went wrong" mid-payment is the
+    // least useful sentence in software.
+    if ("error" in result) throw new Error(result.error);
+    if (!result.clientSecret) throw new Error("Checkout could not be started.");
+    return result.clientSecret;
+  }, [createSession]);
+
+  const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
 
   return (
     <section className="panel border-primary/40 ring-1 ring-primary/15 p-6">
@@ -149,8 +164,10 @@ export function FoundingOffer() {
         <>
           <button
             type="button"
-            onClick={buy}
-            disabled={busy}
+            onClick={() => {
+              setError(null);
+              setOpen(true);
+            }}
             className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             <InfinityIcon className="h-4 w-4" aria-hidden />
@@ -172,6 +189,23 @@ export function FoundingOffer() {
           Sign in to take a spot
         </Link>
       )}
+
+      {open ? (
+        <div className="mt-4 rounded-md border border-border p-2">
+          <div className="mb-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Close
+            </button>
+          </div>
+          <EmbeddedCheckoutProvider stripe={getStripe()} options={options}>
+            <EmbeddedCheckout />
+          </EmbeddedCheckoutProvider>
+        </div>
+      ) : null}
 
       <p className="mt-3 text-xs text-muted-foreground">
         One payment, no subscription, nothing to cancel. 14-day right of withdrawal applies as

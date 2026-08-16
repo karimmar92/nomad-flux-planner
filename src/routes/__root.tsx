@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "@/components/AppShell";
+import { PaymentTestModeBanner } from "@/components/billing/PaymentTestModeBanner";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { APP_NAME, APP_TAGLINE } from "@/lib/app";
@@ -169,6 +170,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <ReferralCapture />
+        <PaymentTestModeBanner />
         <AppShell>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />

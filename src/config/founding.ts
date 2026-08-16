@@ -61,13 +61,16 @@ export const FOUNDING_PRICE_USD = 99;
 export const FOUNDING_SPOTS = 100;
 
 /**
- * Env var holding the Stripe one-time Price id.
+ * Stripe lookup key for the one-time price.
  *
- * Deliberately separate from the subscription prices in stripe-prices.ts:
- * this one is `mode: "payment"`, not `mode: "subscription"`, and mixing
- * the two up produces a customer who is charged $99 every month.
+ * A lookup key rather than an env var, matching how the subscription prices
+ * work since the move to Lovable payments: the same key resolves in sandbox
+ * and live, so there is no test price id that can leak into production.
+ *
+ * The price behind it must be ONE-TIME, not recurring. Mixing those up
+ * produces a customer charged $99 every month.
  */
-export const FOUNDING_PRICE_ENV = "STRIPE_PRICE_FOUNDING_LIFETIME";
+export const FOUNDING_PRICE_LOOKUP_KEY = "founding_lifetime";
 
 /** What a founding member gets, stated plainly enough to be held to. */
 export const FOUNDING_INCLUDES = [
