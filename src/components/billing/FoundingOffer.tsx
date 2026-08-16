@@ -24,7 +24,7 @@
  * happened and points at the normal plans. It does not reappear next
  * month with a bigger number.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Infinity as InfinityIcon, Minus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +53,10 @@ export function FoundingOffer() {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const createSession = useServerFn(createFoundingCheckout);
-  const busy = false;
+  const createSessionRef = useRef(createSession);
+  createSessionRef.current = createSession;
+  const sessionPromiseRef = useRef<Promise<string> | null>(null);
+  const busy = open;
 
   useEffect(() => {
     let active = true;
@@ -76,19 +79,21 @@ export function FoundingOffer() {
    * the app and the buyer never leaves the page they decided on.
    */
   const fetchClientSecret = useCallback(async (): Promise<string> => {
-    const result = await createSession({
-      data: {
-        environment: getStripeEnvironment(),
-        // Stripe substitutes the session id server-side before returning here.
-        returnUrl: `${window.location.origin}/profile?checkout=founding&session_id={CHECKOUT_SESSION_ID}`,
-      },
-    });
-    // Stripe's own message verbatim. "Something went wrong" mid-payment is the
-    // least useful sentence in software.
-    if ("error" in result) throw new Error(result.error);
-    if (!result.clientSecret) throw new Error("Checkout could not be started.");
-    return result.clientSecret;
-  }, [createSession]);
+    if (!sessionPromiseRef.current) {
+      sessionPromiseRef.current = createSessionRef.current({
+        data: {
+          environment: getStripeEnvironment(),
+          // Stripe substitutes the session id server-side before returning here.
+          returnUrl: `${window.location.origin}/profile?checkout=founding&session_id={CHECKOUT_SESSION_ID}`,
+        },
+      }).then((result) => {
+        if ("error" in result) throw new Error(result.error);
+        if (!result.clientSecret) throw new Error("Checkout could not be started.");
+        return result.clientSecret;
+      });
+    }
+    return sessionPromiseRef.current;
+  }, []);
 
   const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
 
@@ -173,6 +178,7 @@ export function FoundingOffer() {
         <>
           <button
             type="button"
+            disabled={busy}
             onClick={() => {
               setError(null);
               setOpen(true);
