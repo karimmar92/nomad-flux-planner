@@ -152,6 +152,17 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          * commit.
          */
         ui_mode: "embedded",
+        /**
+         * Managed Payments is on by default on the account, and it REFUSES
+         * custom_text, tax_id_collection and consent_collection — the session
+         * create call fails with an invalid_request_error and the embedded
+         * form shows "Something went wrong". Those three fields are not
+         * decoration here: they are the §312j button wording, the withdrawal
+         * consent and the VAT-ID field. So Managed Payments is switched off
+         * per request rather than dropping the legal fields.
+         */
+        ...({ managed_payments: { enabled: false } } as Record<string, unknown>),
+
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
