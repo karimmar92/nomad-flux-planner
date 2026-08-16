@@ -9,7 +9,7 @@
  * render remounts the provider and Stripe throws "you cannot change the client
  * secret after creation", which breaks the form after the first keystroke.
  */
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { useServerFn } from "@tanstack/react-start";
 import { X } from "lucide-react";
@@ -27,23 +27,32 @@ export function CheckoutDialog({
   onClose: () => void;
 }) {
   const createSession = useServerFn(createCheckoutSession);
+  const createSessionRef = useRef(createSession);
+  createSessionRef.current = createSession;
+  const requestRef = useRef(request);
+  const sessionPromiseRef = useRef<Promise<string> | null>(null);
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
-    const result = await createSession({
-      data: {
-        plan: request.plan,
-        interval: request.interval,
-        environment: getStripeEnvironment(),
-        // Stripe substitutes the session id server-side before returning here.
-        returnUrl: `${window.location.origin}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      },
-    });
-    // Stripe's own message is surfaced verbatim. "Something went wrong" during
-    // a payment attempt is the least useful sentence in software.
-    if ("error" in result) throw new Error(result.error);
-    if (!result.clientSecret) throw new Error("Checkout could not be started.");
-    return result.clientSecret;
-  }, [createSession, request.plan, request.interval]);
+    // Stripe may ask for the secret more than once while its iframe initializes.
+    // Reuse one in-flight request so retries cannot create duplicate sessions.
+    if (!sessionPromiseRef.current) {
+      const selected = requestRef.current;
+      sessionPromiseRef.current = createSessionRef.current({
+        data: {
+          plan: selected.plan,
+          interval: selected.interval,
+          environment: getStripeEnvironment(),
+          // Stripe substitutes the session id server-side before returning here.
+          returnUrl: `${window.location.origin}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+        },
+      }).then((result) => {
+        if ("error" in result) throw new Error(result.error);
+        if (!result.clientSecret) throw new Error("Checkout could not be started.");
+        return result.clientSecret;
+      });
+    }
+    return sessionPromiseRef.current;
+  }, []);
 
   const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
 

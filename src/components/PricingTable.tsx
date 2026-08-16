@@ -64,6 +64,7 @@ export function PricingTable({
             billing={billing}
             compact={compact}
             busy={busyPlan === t.id}
+            disabled={busyPlan != null}
             {...(onChoose ? { onChoose } : {})}
           />
         ))}
@@ -87,12 +88,14 @@ function TierCard({
   compact,
   onChoose,
   busy = false,
+  disabled = false,
 }: {
   tier: Tier;
   billing: Billing;
   compact: boolean;
   onChoose?: (tier: Tier, billing: Billing) => void;
   busy?: boolean;
+  disabled?: boolean;
 }) {
   const free = tier.monthlyUsd === 0;
   const shown = billing === "annual" ? annualMonthlyEquivalentUsd(tier) : tier.monthlyUsd;
@@ -171,9 +174,10 @@ function TierCard({
         <button
           type="button"
           onClick={() => onChoose(tier, billing)}
-          disabled={busy}
+          onPointerEnter={() => void import("@/lib/stripe").then(({ getStripe }) => getStripe())}
+          disabled={disabled}
           className={cn(
-            busy && "opacity-60",
+            disabled && "cursor-not-allowed opacity-60",
             "mt-5 rounded-md py-2.5 text-sm font-medium",
             tier.recommended ? "bg-primary text-primary-foreground" : "border border-border",
           )}
