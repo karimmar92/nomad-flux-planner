@@ -41,6 +41,7 @@ function Pricing() {
   const { signedIn } = useSession();
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
+  const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
 
   return (
     <div className="space-y-6">
