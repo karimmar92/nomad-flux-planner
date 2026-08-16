@@ -13,10 +13,25 @@ import { PE_BENCHMARK_DAYS, PE_BENCHMARK_LABEL } from "./presence";
 export const AUDIT_DISCLAIMER =
   "Self-reported travel data. This record evidences recorded presence only; it is not a determination of tax residency or permanent establishment. Verify against payroll, travel bookings and immigration stamps before relying on it.";
 
-function esc(v: string | number | null): string {
-  const s = String(v ?? "");
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+/**
+ * Characters that make a spreadsheet treat a cell as a FORMULA rather than
+ * text. Employee display names are free text, so an unescaped one could run
+ * code on the admin's machine when the audit is opened. Same protection as
+ * the personal tax-report exporter.
+ */
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
+/** Neutralise a user-supplied string for both CSV cells and PDF labels. */
+export function neutraliseFormula(value: string): string {
+  return FORMULA_TRIGGERS.test(value) ? `'${value}` : value;
 }
+
+function esc(v: string | number | null): string {
+  const raw = String(v ?? "");
+  const s = typeof v === "string" ? neutraliseFormula(raw) : raw;
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
 
 export function auditFileName(orgName: string, ext: string): string {
   const slug = orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
