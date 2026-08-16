@@ -29,6 +29,24 @@ dist-ssr
 .env.*.local
 .env.production
 
+# `.env` itself is TRACKED in this repo and must stay that way: Lovable writes
+# the Supabase URL and publishable key there, and those are public by design
+# (the anon key is shipped to every browser and is protected by RLS).
+#
+# THE TRAP: because it is tracked, anything you add to that file gets committed
+# and pushed to GitHub. Never put a secret in it. Specifically:
+#
+#   STRIPE_SECRET_KEY        <- goes in Lovable project settings, never a file
+#   STRIPE_WEBHOOK_SECRET    <- same
+#   SUPABASE_SERVICE_ROLE_KEY <- same, this one bypasses every RLS policy
+#
+# A leaked Stripe secret key lets anyone charge your customers and read your
+# payment history, and it is live from the moment it lands in a public repo.
+# If one is ever committed, rotate it in Stripe first and clean the history
+# second: the rotation is what actually stops the bleeding.
+.env.secret
+.env.server
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
