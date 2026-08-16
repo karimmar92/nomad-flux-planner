@@ -8,7 +8,9 @@ import { useProfile } from "@/lib/store";
 import { PricingTable } from "@/components/PricingTable";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
-import { createCheckoutSession } from "@/lib/billing/billing.functions";
+import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
+import { getStripeEnvironment } from "@/lib/stripe";
+import type { PaidPlanId } from "@/config/stripe-prices";
 import { useSession } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
@@ -39,6 +41,7 @@ function Pricing() {
   const { signedIn } = useSession();
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
+  const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
 
   return (
     <div className="space-y-6">
@@ -104,34 +107,42 @@ function Pricing() {
             void navigate({ to: "/auth", search: { next: "/pricing" } });
             return;
           }
-          setBusy(chosen.id);
-          createCheckoutSession({
-            data: {
-              plan: chosen.id,
-              interval: billing === "annual" ? "yearly" : "monthly",
-              /**
-               * Always start at 1. This previously sent `5` for per-seat
-               * plans, so a customer who clicked Teams was taken to a checkout
-               * for five seats they had never asked for — five times the price
-               * shown on the card they just clicked.
-               *
-               * Seats are now adjusted on the Stripe page itself, which shows
-               * the running total as it changes (see adjustable_quantity in
-               * billing.functions.ts).
-               */
-              seats: 1,
-            },
-          })
-            .then((r) => {
-              window.location.href = r.url;
-            })
-            .catch((e: Error) => {
-              setBusy(null);
-              // Billing not configured yet reads as a bug unless it is named.
-              toast("Checkout is not available", { description: e.message });
+          if (chosen.id === "free") return;
+          try {
+            // Throws when the build shipped without a payments token. Better a
+            // named error here than a dead button or a broken form.
+            getStripeEnvironment();
+          } catch (e) {
+            toast("Checkout is not available", {
+              description: e instanceof Error ? e.message : undefined,
             });
+            return;
+          }
+          setBusy(chosen.id);
+          /**
+           * Seats are not sent from here. This previously sent a fixed count
+           * for per-seat plans, so someone clicking Teams landed on a checkout
+           * for seats they never asked for — a different price from the card
+           * they clicked. The seat picker lives on the checkout form itself,
+           * where the total updates as it changes.
+           */
+          setCheckout({
+            plan: chosen.id as PaidPlanId,
+            interval: billing === "annual" ? "yearly" : "monthly",
+          });
         }}
       />
+
+      {checkout ? (
+        <CheckoutDialog
+          request={checkout}
+          onClose={() => {
+            setCheckout(null);
+            setBusy(null);
+          }}
+        />
+      ) : null}
+
 
       <section className="panel flex items-start gap-2.5 p-4">
         <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

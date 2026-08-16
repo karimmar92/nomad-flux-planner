@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import { CreditCard, Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { createPortalSession } from "@/lib/billing/billing.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import { tier } from "@/config/pricing";
@@ -63,8 +64,16 @@ export function BillingCard() {
     setBusy(true);
     setError(null);
     try {
-      const { url } = await createPortalSession();
-      window.location.href = url;
+      const result = await createPortalSession({
+        data: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/profile`,
+        },
+      });
+      if ("error" in result) throw new Error(result.error);
+      // Same tab: the portal is the cancellation route (§312k BGB) and must not
+      // depend on a popup surviving a blocker.
+      window.location.href = result.url;
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Could not open the billing portal. Please try again.",

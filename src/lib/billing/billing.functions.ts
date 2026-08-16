@@ -1,202 +1,225 @@
 /**
  * Checkout and billing management.
  *
- * Uses the Stripe REST API through fetch rather than the SDK — one less
- * dependency, and everything here is two endpoints.
+ * Runs through Lovable's built-in payments: every Stripe call goes via
+ * createStripeClient(), which routes to the connector gateway. There is no
+ * STRIPE_SECRET_KEY in this project and hand-rolled api.stripe.com calls fail
+ * authentication — see src/lib/stripe.server.ts.
+ *
+ * Checkout is EMBEDDED: the form renders inside the app and the server returns
+ * a client secret, never a redirect URL.
  *
  * GERMAN CONSUMER LAW, built in rather than bolted on later:
  *
- *   * PAngV — the price a consumer sees must be the total payable including
- *     VAT. Handled by marking Stripe prices tax-inclusive and enabling
- *     automatic_tax, so the checkout total is gross at the customer's own rate
- *     (OSS). Do NOT switch prices to tax-exclusive without changing the site.
- *   * §312j BGB (Button-Lösung) — the ordering button must state that the
- *     order carries an obligation to pay. Set via submit_type and custom_text.
- *   * §312k BGB (Kündigungsbutton) — cancelling must be as easy as subscribing
- *     and reachable without logging in to support. The billing portal is that
- *     button; see createPortalSession, linked from the account page.
- *   * Widerrufsrecht — 14-day withdrawal for digital services, which lapses
- *     only with express consent to immediate performance. Collected as a
- *     required consent checkbox at checkout.
+ *   * PAngV — the price a consumer sees must be the total payable. Prices are
+ *     gross and final; no tax is added at checkout (see below).
+ *   * §312j BGB (Button-Lösung) — the ordering button must state that the order
+ *     carries an obligation to pay. Set via submit_type and custom_text.
+ *   * §312k BGB (Kündigungsbutton) — cancelling must be as easy as subscribing.
+ *     The billing portal is that button; see createPortalSession.
+ *   * Widerrufsrecht — 14-day withdrawal for digital services, which lapses only
+ *     with express consent to immediate performance. Collected as a required
+ *     consent checkbox at checkout.
+ *
+ * VAT IS DELIBERATELY OFF. The provider is a §19 UStG Kleinunternehmer
+ * (src/config/legal.ts) and holds no VAT identification number, so collecting
+ * VAT would mean charging tax there is no entitlement to collect. Two
+ * thresholds end this: cross-border B2C digital sales into other EU states
+ * above €10,000/year (this one arrives first), and domestic turnover above the
+ * §19 limits. At that point enable tax handling here and flip VAT.exempt.
+ * Not tax advice — confirm with a Steuerberater.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf, integer } from "@/lib/validate";
-import { priceIdFor, type BillingInterval, type PaidPlanId } from "@/config/stripe-prices";
+import {
+  priceIdFor,
+  TEAMS_SEAT_MAX,
+  TEAMS_SEAT_MIN,
+  type BillingInterval,
+  type PaidPlanId,
+} from "@/config/stripe-prices";
+import {
+  createStripeClient,
+  getStripeErrorMessage,
+  type StripeEnv,
+} from "@/lib/stripe.server";
 
-const STRIPE_API = "https://api.stripe.com/v1";
+type CheckoutResult = { clientSecret: string } | { error: string };
+type PortalResult = { url: string } | { error: string };
 
-/** Stripe expects application/x-www-form-urlencoded with bracketed nesting. */
-function formEncode(obj: Record<string, unknown>, prefix = ""): string[] {
-  const out: string[] = [];
-  for (const [k, v] of Object.entries(obj)) {
-    if (v === undefined || v === null) continue;
-    const key = prefix ? `${prefix}[${k}]` : k;
-    if (typeof v === "object" && !Array.isArray(v)) {
-      out.push(...formEncode(v as Record<string, unknown>, key));
-    } else if (Array.isArray(v)) {
-      v.forEach((item, i) => {
-        if (typeof item === "object") {
-          out.push(...formEncode(item as Record<string, unknown>, `${key}[${i}]`));
-        } else {
-          out.push(`${encodeURIComponent(`${key}[${i}]`)}=${encodeURIComponent(String(item))}`);
-        }
-      });
-    } else {
-      out.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(v))}`);
+function envOf(value: unknown): StripeEnv {
+  return oneOf(value, ["sandbox", "live"] as const, "Environment") as StripeEnv;
+}
+
+/**
+ * userId lives on the CUSTOMER, not only on the session: sessions are not
+ * searchable, so without this no later read path (portal, dashboards,
+ * commission reconciliation) can find a user's Stripe records.
+ */
+async function resolveOrCreateCustomer(
+  stripe: ReturnType<typeof createStripeClient>,
+  options: { email?: string | undefined; userId: string },
+): Promise<string> {
+  if (!/^[a-zA-Z0-9_-]+$/.test(options.userId)) throw new Error("Invalid userId");
+
+  const found = await stripe.customers.search({
+    query: `metadata['userId']:'${options.userId}'`,
+    limit: 1,
+  });
+  if (found.data.length && found.data[0]) return found.data[0].id;
+
+  if (options.email) {
+    const existing = await stripe.customers.list({ email: options.email, limit: 1 });
+    const customer = existing.data[0];
+    if (customer) {
+      if (customer.metadata?.["userId"] !== options.userId) {
+        await stripe.customers.update(customer.id, {
+          metadata: { ...customer.metadata, userId: options.userId },
+        });
+      }
+      return customer.id;
     }
   }
-  return out;
-}
 
-async function stripe<T>(path: string, body: Record<string, unknown>): Promise<T> {
-  const key = process.env["STRIPE_SECRET_KEY"];
-  if (!key) throw new Error("Billing is not configured yet.");
-  const res = await fetch(`${STRIPE_API}${path}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: formEncode(body).join("&"),
+  const created = await stripe.customers.create({
+    ...(options.email ? { email: options.email } : {}),
+    metadata: { userId: options.userId },
   });
-  const json = (await res.json()) as { error?: { message: string } };
-  if (!res.ok) throw new Error(json.error?.message ?? "Stripe request failed.");
-  return json as T;
-}
-
-function siteUrl(): string {
-  const url = process.env["SITE_URL"] ?? process.env["VITE_SITE_URL"];
-  if (!url) throw new Error("SITE_URL is not set — checkout needs absolute return URLs.");
-  return url.replace(/\/$/, "");
+  return created.id;
 }
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { plan: string; interval: string; seats?: number }) => ({
+  .inputValidator((d: { plan: string; interval: string; seats?: number; environment: string; returnUrl: string }) => ({
     plan: oneOf(d?.plan, ["starter", "pro", "teams"] as const, "Plan") as PaidPlanId,
     interval: oneOf(d?.interval, ["monthly", "yearly"] as const, "Interval") as BillingInterval,
     // Seats only apply to Teams; clamped so a crafted request cannot bill 10,000 seats.
-    seats: d?.seats == null ? 1 : integer(d.seats, "Seats", 1, 500),
+    seats: d?.seats == null ? TEAMS_SEAT_MIN : integer(d.seats, "Seats", 1, TEAMS_SEAT_MAX),
+    environment: envOf(d?.environment),
+    returnUrl: String(d?.returnUrl ?? ""),
   }))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<CheckoutResult> => {
     const { userId, supabase } = context;
     const { data: auth } = await supabase.auth.getUser();
     const email = auth?.user?.email ?? undefined;
 
-    const session = await stripe<{ id: string; url: string }>("/checkout/sessions", {
-      mode: "subscription",
-      line_items: [
-        {
-          price: priceIdFor(data.plan, data.interval),
-          quantity: data.plan === "teams" ? data.seats : 1,
-          /**
-           * Per-seat plans: let the buyer set the seat count on Stripe's page,
-           * where the total updates as they change it. Sending a fixed
-           * quantity from the app meant the amount charged could differ from
-           * the price on the card that was clicked — the exact thing PAngV and
-           * §312j are about.
-           *
-           * Bounded to match the server-side clamp on `seats`.
-           */
-          ...(data.plan === "teams"
-            ? { adjustable_quantity: { enabled: true, minimum: 1, maximum: 500 } }
-            : {}),
-        },
-      ],
-      /**
-       * VAT IS DELIBERATELY OFF — the provider is a §19 UStG Kleinunternehmer.
-       *
-       * This previously ran `automatic_tax: { enabled: true }`, which makes
-       * Stripe compute and add VAT at the customer's rate. The Impressum states
-       * the provider is exempt under the small-business regulation and holds no
-       * VAT identification number, so collecting VAT would mean charging tax
-       * there is no entitlement to collect and no registration to remit it
-       * against. That is a worse problem than under-charging.
-       *
-       * Prices are therefore gross AND final: what the pricing page shows is
-       * what is taken, which satisfies PAngV directly rather than via Stripe.
-       *
-       * ── WHEN THIS MUST CHANGE ──────────────────────────────────────────
-       * The exemption is not unconditional. Two thresholds end it:
-       *
-       *   1. Cross-border B2C digital sales into other EU states above
-       *      €10,000/year. Past that, VAT is due at the CUSTOMER's rate and
-       *      OSS registration is required — Kleinunternehmer status does not
-       *      cover it.
-       *   2. Domestic turnover above the §19 limits.
-       *
-       * This product sells digital subscriptions to consumers across the EU,
-       * so threshold 1 is the one that will bite first and it can arrive
-       * quickly. Monitor EU-consumer revenue; when it approaches €10,000,
-       * register for OSS and set `automatic_tax` back to enabled with
-       * tax-exclusive prices.
-       *
-       * Not tax advice. Confirm with a Steuerberater before launch.
-       */
-      automatic_tax: { enabled: false },
-      // Still collect a VAT ID from business customers: it is needed on the
-      // invoice for their own records even where no VAT is charged.
-      tax_id_collection: { enabled: true },
-      billing_address_collection: "required",
-      customer_email: email,
-      client_reference_id: userId,
-      // The commission webhook reads metadata.user_id off the invoice's
-      // subscription. Without this, referral accrual silently stops.
-      subscription_data: { metadata: { user_id: userId, plan: data.plan } },
-      metadata: { user_id: userId, plan: data.plan },
-      allow_promotion_codes: true,
-      // §312j BGB: the button must say the order obliges payment.
-      submit_type: "pay",
-      custom_text: {
-        submit: {
-          message:
-            "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
-        },
-        terms_of_service_acceptance: {
-          message:
-            "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-        },
-      },
-      consent_collection: { terms_of_service: "required" },
-      /**
-       * /profile, not /account — there IS no /account route. This pointed at
-       * one, which meant a customer who had just been charged landed on a 404:
-       * the single worst moment in the product to show a broken page, and
-       * invisible in testing because it only happens after a real payment.
-       *
-       * If an /account route is ever added, change both URLs here AND the
-       * portal return_url below in the same commit.
-       */
-      success_url: `${siteUrl()}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl()}/pricing?checkout=cancelled`,
-    });
+    try {
+      const stripe = createStripeClient(data.environment);
 
-    return { url: session.url };
+      const prices = await stripe.prices.list({
+        lookup_keys: [priceIdFor(data.plan, data.interval)],
+      });
+      const price = prices.data[0];
+      if (!price) throw new Error("Price not found — publish the product catalogue first.");
+
+      const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
+      const isTeams = data.plan === "teams";
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        ui_mode: "embedded_page",
+        return_url: data.returnUrl,
+        customer: customerId,
+        line_items: [
+          {
+            price: price.id,
+            quantity: isTeams ? Math.max(data.seats, TEAMS_SEAT_MIN) : 1,
+            /**
+             * Per-seat plans: the buyer sets the seat count on the checkout
+             * form, where the total updates as it changes. Sending a fixed
+             * quantity meant the amount charged could differ from the price on
+             * the card that was clicked — the exact thing PAngV and §312j are
+             * about.
+             */
+            ...(isTeams
+              ? {
+                  adjustable_quantity: {
+                    enabled: true,
+                    minimum: TEAMS_SEAT_MIN,
+                    maximum: TEAMS_SEAT_MAX,
+                  },
+                }
+              : {}),
+          },
+        ],
+        client_reference_id: userId,
+        // The commission webhook reads metadata.user_id off the invoice's
+        // subscription. Without this, referral accrual silently stops.
+        subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
+        metadata: { user_id: userId, userId, plan: data.plan },
+        allow_promotion_codes: true,
+        // Still collect a VAT ID from business customers: they need it on the
+        // invoice for their own records even where no VAT is charged.
+        tax_id_collection: { enabled: true },
+        billing_address_collection: "required",
+        // §312j BGB: the button must say the order obliges payment.
+        submit_type: "pay",
+        custom_text: {
+          submit: {
+            message:
+              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
+          },
+          terms_of_service_acceptance: {
+            message:
+              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
+          },
+        },
+        consent_collection: { terms_of_service: "required" },
+      });
+
+      return { clientSecret: session.client_secret ?? "" };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
   });
 
 /**
  * Billing portal — this IS the Kündigungsbutton under §312k BGB. Cancelling
- * must be no harder than subscribing, so the account page links straight here
- * rather than asking anyone to email support.
+ * must be no harder than subscribing and must not require emailing support, so
+ * the account page links straight here. Plan changes (upgrade now, downgrade at
+ * period end) are configured on the portal itself.
  */
 export const createPortalSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { userId } = context;
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
+  .inputValidator((d: { environment: string; returnUrl?: string }) => ({
+    environment: envOf(d?.environment),
+    returnUrl: d?.returnUrl ? String(d.returnUrl) : undefined,
+  }))
+  .handler(async ({ data, context }): Promise<PortalResult> => {
+    const { userId, supabase } = context;
+
+    const { data: sub } = await supabase
+      .from("subscriptions")
       .select("stripe_customer_id")
-      .eq("id", userId)
+      .eq("user_id", userId)
+      .eq("environment", data.environment)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    const customer = (profile as { stripe_customer_id?: string } | null)?.stripe_customer_id;
-    if (!customer) throw new Error("No subscription found for this account.");
+    let customer = (sub as { stripe_customer_id?: string } | null)?.stripe_customer_id ?? null;
 
-    const session = await stripe<{ url: string }>("/billing_portal/sessions", {
-      customer,
-      return_url: `${siteUrl()}/profile`,
-    });
-    return { url: session.url };
+    // Fall back to the profile: one-off historic customers, and anyone whose
+    // subscription row has not landed yet, still need the cancel button.
+    if (!customer) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("stripe_customer_id")
+        .eq("id", userId)
+        .maybeSingle();
+      customer = (profile as { stripe_customer_id?: string } | null)?.stripe_customer_id ?? null;
+    }
+    if (!customer) return { error: "No subscription found for this account." };
+
+    try {
+      const stripe = createStripeClient(data.environment);
+      const portal = await stripe.billingPortal.sessions.create({
+        customer,
+        ...(data.returnUrl ? { return_url: data.returnUrl } : {}),
+      });
+      return { url: portal.url };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
   });
