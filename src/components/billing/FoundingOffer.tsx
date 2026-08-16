@@ -47,7 +47,7 @@ import {
 import { tier } from "@/config/pricing";
 
 export function FoundingOffer() {
-  const { signedIn } = useSession();
+  const { ready, signedIn } = useSession();
   const { profile } = useProfile();
   const [taken, setTaken] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -160,7 +160,16 @@ export function FoundingOffer() {
           You are already on a paid plan. If you would rather hold a founding spot than keep
           subscribing, email us and we will sort it out.
         </p>
-      ) : signedIn ? (
+       ) : !ready ? (
+         <button
+           type="button"
+           disabled
+           className="mt-5 inline-flex cursor-wait items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground opacity-60"
+         >
+           <InfinityIcon className="h-4 w-4" aria-hidden />
+           Checking account…
+         </button>
+       ) : signedIn ? (
         <>
           <button
             type="button"
