@@ -161,7 +161,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ...(!isOneTime && {
           subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
         }),
-        ...(isOneTime && { payment_intent_data: { description: productDescription } }),
+        ...(isOneTime && productDescription && { payment_intent_data: { description: productDescription } }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
         // Still collect a VAT ID from business customers: they need it on the
