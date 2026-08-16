@@ -194,7 +194,7 @@ export type IncomeType = "employed" | "freelance" | "founder";
  */
 export type UserStage = "planning" | "abroad";
 /** Tier ids mirror src/config/pricing.ts. Order matters: see PLAN_RANK. */
-export type Plan = "free" | "starter" | "pro" | "teams";
+export type Plan = "free" | "starter" | "pro" | "teams" | "founding_lifetime";
 
 export type Profile = {
   display_name: string;

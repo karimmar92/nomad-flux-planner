@@ -59,6 +59,7 @@ function priceKeyOf(object: Record<string, any>): string | null {
     item?.["price"]?.["metadata"]?.["lovable_external_id"] ??
     item?.["price"]?.["id"] ??
     object["plan"]?.["id"] ??
+    object["metadata"]?.["price_lookup_key"] ??
     null
   );
 }
@@ -74,13 +75,18 @@ export async function handleStripeEvent(
   const object = event.data?.object ?? {};
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  /* ---------------- subscription lifecycle + entitlement ---------------- */
-  if (
-    event.type === "customer.subscription.created" ||
-    event.type === "customer.subscription.updated" ||
-    event.type === "customer.subscription.deleted" ||
-    event.type === "checkout.session.completed"
-  ) {
+  /* ---------------- checkout completion (one-time + subscription) ---------------- */
+  if (event.type === "checkout.session.completed") {
+    const paymentStatus: string = object["payment_status"] ?? "";
+    const mode: string = object["mode"] ?? "";
+
+    // Delayed-notification methods (SEPA, and this audience uses it) fire this
+    // when the payment is SUBMITTED, not when it settles. Granting access there
+    // would hand out paid plans for payments that can still fail days later.
+    if (paymentStatus === "unpaid") {
+      return Response.json({ received: true, pending: "awaiting_settlement" });
+    }
+
     const userId: string | null =
       object["metadata"]?.["user_id"] ??
       object["metadata"]?.["userId"] ??
@@ -90,13 +96,44 @@ export async function handleStripeEvent(
       typeof object["customer"] === "string" ? object["customer"] : null;
     if (!userId) return Response.json({ received: true, skipped: "no_user_reference" });
 
-    // Delayed-notification methods (SEPA, and this audience uses it) fire
-    // checkout.session.completed when the payment is SUBMITTED, not when it
-    // settles. Granting access there would hand out paid plans for payments
-    // that can still fail days later.
-    if (event.type === "checkout.session.completed" && object["payment_status"] === "unpaid") {
-      return Response.json({ received: true, pending: "awaiting_settlement" });
-    }
+    // For subscription mode, the dedicated subscription events will create the
+    // row in the subscriptions table and keep period dates current. We still
+    // update the profile here from the session metadata so the user lands back
+    // in the app with the right plan immediately, rather than waiting for the
+    // subscription event that may arrive a few seconds later.
+    // For payment mode (one-time, e.g. founding_lifetime), the session is the
+    // only entitlement event we get, so we must write the profile here.
+    const priceKey = priceKeyOf(object);
+    const plan =
+      (object["metadata"]?.["plan"] as string | undefined) ||
+      (priceKey && planForPriceId(priceKey)) ||
+      null;
+
+    if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
+
+    const patch: { plan: string; stripe_customer_id?: string } = { plan };
+    if (customerId) patch.stripe_customer_id = customerId;
+
+    const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
+    if (error) return new Response(error.message, { status: 500 });
+
+    return Response.json({ received: true, plan, user_id: userId, mode });
+  }
+
+  /* ---------------- subscription lifecycle + entitlement ---------------- */
+  if (
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.updated" ||
+    event.type === "customer.subscription.deleted"
+  ) {
+    const userId: string | null =
+      object["metadata"]?.["user_id"] ??
+      object["metadata"]?.["userId"] ??
+      object["client_reference_id"] ??
+      null;
+    const customerId: string | null =
+      typeof object["customer"] === "string" ? object["customer"] : null;
+    if (!userId) return Response.json({ received: true, skipped: "no_user_reference" });
 
     const status: string = object["status"] ?? "active";
     const deleted = event.type === "customer.subscription.deleted";
@@ -111,9 +148,7 @@ export async function handleStripeEvent(
 
     if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
 
-    // Subscription rows only exist for subscription events; a checkout session
-    // carries no period or item data worth recording.
-    if (event.type !== "checkout.session.completed" && typeof object["id"] === "string") {
+    if (typeof object["id"] === "string") {
       const item = object["items"]?.["data"]?.[0];
       const { error: subError } = await supabaseAdmin.from("subscriptions").upsert(
         {

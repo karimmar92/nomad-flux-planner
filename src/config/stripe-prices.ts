@@ -26,18 +26,27 @@ import type { PlanId } from "./pricing";
 
 export type BillingInterval = "monthly" | "yearly";
 
+/** Recurring subscription tiers. */
+export type RecurringPlanId = "starter" | "pro" | "teams";
+/** One-time purchase tiers. */
+export type OneTimePlanId = "founding_lifetime";
 /** Paid tiers only — "free" has no price. */
-export type PaidPlanId = Exclude<PlanId, "free">;
+export type PaidPlanId = RecurringPlanId | OneTimePlanId;
 
-const LOOKUP_KEYS: Record<PaidPlanId, Record<BillingInterval, string>> = {
+const RECURRING_KEYS: Record<RecurringPlanId, Record<BillingInterval, string>> = {
   starter: { monthly: "starter_monthly", yearly: "starter_yearly" },
   pro: { monthly: "pro_monthly", yearly: "pro_yearly" },
   teams: { monthly: "teams_monthly", yearly: "teams_yearly" },
 };
 
+const ONE_TIME_KEYS: Record<OneTimePlanId, string> = {
+  founding_lifetime: "founding_lifetime",
+};
+
 /** The lookup key checkout resolves against Stripe. Safe on client or server. */
 export function priceIdFor(plan: PaidPlanId, interval: BillingInterval): string {
-  return LOOKUP_KEYS[plan][interval];
+  if (plan === "founding_lifetime") return ONE_TIME_KEYS[plan];
+  return RECURRING_KEYS[plan][interval];
 }
 
 /**
@@ -49,13 +58,20 @@ export function priceIdFor(plan: PaidPlanId, interval: BillingInterval): string 
  */
 export function planForPriceId(priceId: string | null | undefined): PaidPlanId | null {
   if (!priceId) return null;
-  for (const plan of Object.keys(LOOKUP_KEYS) as PaidPlanId[]) {
+  if (priceId in ONE_TIME_KEYS) return priceId as OneTimePlanId;
+  for (const plan of Object.keys(RECURRING_KEYS) as RecurringPlanId[]) {
     for (const interval of ["monthly", "yearly"] as BillingInterval[]) {
-      if (LOOKUP_KEYS[plan][interval] === priceId) return plan;
+      if (RECURRING_KEYS[plan][interval] === priceId) return plan;
     }
   }
   return null;
 }
+
+/** True for one-time purchases (no renewal, no subscription row). */
+export function isOneTimePlan(plan: PaidPlanId): boolean {
+  return plan in ONE_TIME_KEYS;
+}
+
 
 /** Seat range for the per-seat tier, enforced server-side as well as in Stripe. */
 export const TEAMS_SEAT_MIN = 10;

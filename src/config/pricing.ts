@@ -26,7 +26,7 @@
 
 import { VAT } from "@/config/legal";
 
-export type PlanId = "free" | "starter" | "pro" | "teams";
+export type PlanId = "free" | "starter" | "pro" | "teams" | "founding_lifetime";
 
 export type Tier = {
   id: PlanId;
@@ -40,9 +40,12 @@ export type Tier = {
   features: string[];
   /** Teams is priced per seat; the others are per person. */
   perSeat?: boolean;
+  /** Lifetime tiers are one-time, not recurring. */
+  lifetime?: boolean;
   /** Draws the emphasised border. Exactly one tier should set this. */
   recommended?: boolean;
 };
+
 
 /** Months charged on the annual plan. 10 of 12 = two months free. */
 export const ANNUAL_MONTHS_CHARGED = 10;
@@ -144,4 +147,11 @@ export function tier(id: PlanId): Tier {
   return found;
 }
 
+/** Display name for any plan, including tiers that are not in the public table. */
+export function tierName(id: PlanId): string {
+  if (id === "founding_lifetime") return "Founding Lifetime";
+  return tier(id).name;
+}
+
 export const PAID_TIERS = TIERS.filter((t) => t.monthlyUsd > 0);
+
