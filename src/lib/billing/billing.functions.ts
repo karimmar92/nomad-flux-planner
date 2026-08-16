@@ -261,7 +261,9 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
         // cannot tell a lifetime purchase from any other one-off payment, and
         // the buyer pays and receives nothing.
         metadata: { user_id: userId, userId, founding: "1", plan: "founding_lifetime" },
-        payment_intent_data: { description: productDescription, metadata: { user_id: userId, userId, founding: "1" } },
+        ...(productDescription && {
+          payment_intent_data: { description: productDescription, metadata: { user_id: userId, userId, founding: "1" } },
+        }),
         tax_id_collection: { enabled: true },
         billing_address_collection: "required",
         // §312j BGB: the button must say the order obliges payment.
