@@ -33,7 +33,9 @@ import {
 } from "@/lib/referrals/commission";
 import { CREATOR_PROGRAM } from "@/lib/referrals/config";
 import { planForPriceId } from "@/config/stripe-prices";
+import { claimFoundingSpot } from "@/lib/founding/rpc";
 import type { StripeEnv } from "@/lib/stripe.server";
+
 
 const DAY_MS = 86_400_000;
 
