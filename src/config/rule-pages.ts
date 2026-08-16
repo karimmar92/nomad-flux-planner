@@ -92,6 +92,63 @@ export const RULE_PAGES: RulePage[] = [
     defaultCountry: "PT",
   },
   {
+    /**
+     * Shares `id: "schengen"` on purpose. EES is not a separate count, it is
+     * the automatic enforcement of the count above, so the calculator on this
+     * page should be the Schengen one. Lookup is by slug, and the "other
+     * pages" list filters by slug too, so two pages can share an id safely.
+     */
+    id: "schengen",
+    slug: "ees-entry-exit-system",
+    title: "EES: what the EU Entry/Exit System changed for your 90/180 days",
+    metaDescription:
+      "The EU Entry/Exit System has been fully operational since 10 April 2026. Passport stamps are gone, overstays are flagged automatically and kept for five years. What that means for counting your Schengen days.",
+    h1: "The Entry/Exit System, and why you still have to count",
+    intro:
+      "Since 10 April 2026 the EU records entries and exits biometrically instead of stamping passports, and computes the 90/180 rule itself. The rule did not change. What changed is that the counting is now done for you, accurately, at the moment you reach the border.",
+    mistakes: [
+      {
+        title: "Counting from your stamps no longer works, because there are none",
+        body: "Entries and exits are recorded as a facial image, fingerprints and a crossing record. If your method was flicking back through your passport, that method has run out of inputs. Your own trip history is now the only record you can read before you travel.",
+      },
+      {
+        title: "The system knows your number, and it will not tell you early",
+        body: "EES computes your days at the border. It does not send you a warning in June that the trip you are about to book pushes you over in October. Knowing the number in advance is the only part still left to you.",
+      },
+      {
+        title: "An overstay now follows you for five years",
+        body: "Overstays are flagged automatically and the record is readable by border officers and consulates across all 29 countries. It surfaces again when you next apply for a visa, so the consequence outlives the trip that caused it.",
+      },
+      {
+        title: "Quiet overstays are closing as an option",
+        body: "Inconsistent stamping used to mean some overstays were never noticed. That gap is what EES was built to remove. Advice written before April 2026 that treats detection as unlikely is describing a system that no longer exists.",
+      },
+    ],
+    faq: [
+      {
+        q: "Did the 90/180 rule itself change?",
+        a: "No. Ninety days in any rolling 180-day period, one allowance shared across all 29 Schengen countries. Only the enforcement changed.",
+      },
+      {
+        q: "Can I see my own remaining days from the EES?",
+        a: "Not as a running total you can consult while planning. The system holds the record and applies it at the border, which is why keeping your own trip history still matters.",
+      },
+      {
+        q: "Does this apply to me if I hold an EU passport?",
+        a: "No. EES registers non-EU nationals crossing an external Schengen border. If you hold an EU, EEA or Swiss passport you have free movement, no 90/180 limit, and no EES record.",
+      },
+      {
+        q: "Is ETIAS live as well?",
+        a: "No. ETIAS is a separate travel authorisation and it is not in operation. The EU removed its late-2026 target in July 2026 and a revised timeline is expected after September 2026. A lot of published advice still says it is required this year.",
+      },
+      {
+        q: "What about the bilateral visa waiver agreements?",
+        a: "Some Schengen states hold pre-Schengen agreements that are widely read as allowing an additional 90 days in that country. Their application varies by state, Italy has narrowed its interpretation, and an automated system computing the standard 90/180 will flag you regardless of what an agreement says on paper. Treat them as something to confirm with the consulate rather than to rely on.",
+      },
+    ],
+    defaultCountry: "PT",
+  },
+  {
     id: "feie",
     slug: "feie-330-day-test",
     title: "FEIE 330-day physical presence test calculator",

@@ -431,8 +431,12 @@ function PlanCard({
       </ul>
 
       {search ? (
+        // Hardcoded to "/pricing" rather than {to}. A variable `to` widens to
+        // every route in the tree, so TanStack falls back to the root search
+        // schema and rejects { plan, interval }. Naming the route restores the
+        // check that these params match what /pricing's validateSearch accepts.
         <Link
-          to={to}
+          to="/pricing"
           search={search}
           className={cn(
             "mt-7 rounded-full py-3 text-center text-sm font-medium transition-colors",

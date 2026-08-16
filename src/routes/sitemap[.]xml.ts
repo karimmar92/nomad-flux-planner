@@ -15,6 +15,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
+import { RULE_PAGES } from "@/config/rule-pages";
 import { absoluteUrl } from "@/lib/app";
 
 type Entry = { path: string; changefreq: string; priority: string; lastmod?: string };
@@ -65,9 +66,26 @@ export const Route = createFileRoute("/sitemap.xml")({
           lastmod: SEED_LAST_VERIFIED,
         }));
 
+        /**
+         * The rule pages were missing from this sitemap entirely, which is the
+         * wrong way round: "schengen 90/180 calculator" is a higher-intent
+         * search than any city name, and these are the pages most likely to
+         * earn a link. Priority above the city pages for that reason.
+         *
+         * Generated from RULE_PAGES so adding a page is enough, the same
+         * argument as the cities. No lastmod: unlike the cost figures there is
+         * no verification date to report honestly, and inventing one to look
+         * fresh is how a sitemap stops being trusted.
+         */
+        const ruleEntries: Entry[] = RULE_PAGES.map((p) => ({
+          path: `/rules/${p.slug}`,
+          changefreq: "monthly",
+          priority: "0.9",
+        }));
+
         const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...STATIC_PAGES, ...cityEntries].map(urlEntry).join("\n")}
+${[...STATIC_PAGES, ...ruleEntries, ...cityEntries].map(urlEntry).join("\n")}
 </urlset>
 `;
 

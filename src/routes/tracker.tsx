@@ -2,12 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Info, Trash2, X } from "lucide-react";
-import {
-  SCHENGEN_COUNTRIES,
-  SCHENGEN_MAX_DAYS,
-  maxStayFrom,
-  schengenStatus,
-} from "@/lib/schengen";
+import { SCHENGEN_COUNTRIES, SCHENGEN_MAX_DAYS, maxStayFrom, schengenStatus } from "@/lib/schengen";
 import {
   addDaysIso,
   daysInCountryTaxYear,
@@ -26,6 +21,7 @@ import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
 import { detectPreDeparture } from "@/lib/pre-departure";
 import { PreDepartureCard } from "@/components/predeparture/PreDepartureCard";
 import { TripChecklistCard } from "@/components/predeparture/TripChecklist";
+import { GuidedTripFlow } from "@/components/tracker/GuidedTripFlow";
 import { hasTickedEsimAnywhere } from "@/lib/checklist";
 import { toDayIndex } from "@/lib/schengen";
 import { TransportGroup } from "@/components/partners/TransportGroup";
@@ -101,9 +97,10 @@ const PALETTE = [
 function Tracker() {
   const { i18n } = useTranslation();
   const { trips, addTrip, removeTrip, hydrated } = useTrips();
-  const { profile } = useProfile();
+  const { profile, patchProfile } = useProfile();
   const today = useMemo(() => todayIso(), []);
   const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
+  const [entryMode, setEntryMode] = useState<"guided" | "quick">("guided");
   const [justAdded, setJustAdded] = useState<Trip | null>(null);
   const [preDepartureDismissed, setPreDepartureDismissed] = useState(false);
   const { signedIn, ready: sessionReady } = useSession();
@@ -166,8 +163,7 @@ function Tracker() {
     ...(schengen.status !== "ok"
       ? [
           {
-            level:
-              schengen.status === "warning" ? "warn" : "high",
+            level: schengen.status === "warning" ? "warn" : "high",
             text: `Schengen: ${schengen.used} of ${SCHENGEN_MAX_DAYS} days used in the current rolling window. ${schengen.remaining} remaining today.`,
           },
         ]
@@ -185,8 +181,8 @@ function Tracker() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Visa tracker</h1>
         <p className="text-sm text-muted-foreground">
-          Rolling Schengen 90/180 and per-country tax day counters. Entry and exit days both
-          count as full days.
+          Rolling Schengen 90/180 and per-country tax day counters. Entry and exit days both count
+          as full days.
         </p>
       </div>
 
@@ -330,7 +326,6 @@ function Tracker() {
             </div>
           </LockedPreview>
         )}
-
       </section>
 
       {/* Timeline */}
@@ -388,19 +383,46 @@ function Tracker() {
         )}
       </section>
 
-      <AddTrip
-        onAdd={(trip) => {
-          addTrip(trip);
-          setJustAdded(trip.entry_date > today ? trip : null);
-        }}
-      />
+      {/* Guided by default, the old form one tap away.
+          Someone logging their first trip needs the questions explained;
+          someone back-filling two years of travel needs four fields on one
+          row. Defaulting to guided and remembering nothing means the second
+          person pays one extra tap per session, which is the cheaper mistake. */}
+      {entryMode === "guided" ? (
+        <GuidedTripFlow
+          passport={profile.nationality || null}
+          onSetPassport={(code) => patchProfile({ nationality: code })}
+          onAdd={(trip) => {
+            addTrip(trip);
+            setJustAdded(trip.entry_date > today ? trip : null);
+          }}
+          onSwitchToQuick={() => setEntryMode("quick")}
+        />
+      ) : (
+        <div className="space-y-2">
+          <AddTrip
+            onAdd={(trip) => {
+              addTrip(trip);
+              setJustAdded(trip.entry_date > today ? trip : null);
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setEntryMode("guided")}
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            Walk me through it instead
+          </button>
+        </div>
+      )}
 
       {justAdded ? (
         <TripConfirmKit
           trip={justAdded}
           originCityName={
-            (currentTripCity(trips, today) ??
-              (profile.home_city_id ? getCity(profile.home_city_id)?.city : undefined)) ?? null
+            currentTripCity(trips, today) ??
+            (profile.home_city_id ? getCity(profile.home_city_id)?.city : undefined) ??
+            null
           }
           /* One card per screen: the border-run card already carries this
              screen's single partner link when a deadline is live. */
@@ -408,7 +430,6 @@ function Tracker() {
           onDismiss={() => setJustAdded(null)}
         />
       ) : null}
-
 
       {upcomingTrips.length > 0 ? (
         <div className="space-y-3">
@@ -429,8 +450,8 @@ function Tracker() {
         <div className="flex items-start gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
           <p className="text-foreground">
-            Saved on this device only. If you clear your browser or switch
-            phones, these trips are gone.{" "}
+            Saved on this device only. If you clear your browser or switch phones, these trips are
+            gone.{" "}
             <Link
               to="/auth"
               search={{ next: "/tracker" }}
@@ -440,7 +461,8 @@ function Tracker() {
             </Link>{" "}
             and everything you have already logged is uploaded automatically.
           </p>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setDeviceNoticeDismissed(true)}
             aria-label="Dismiss"
             className="ms-auto shrink-0 text-muted-foreground hover:text-foreground"
@@ -479,10 +501,12 @@ function Tracker() {
                     <div className="num text-xs text-muted-foreground">
                       {formatDate(trip.entry_date, i18n.language)} →{" "}
                       {trip.exit_date ? formatDate(trip.exit_date, i18n.language) : "still here"} ·{" "}
-                      {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days · {trip.purpose.replace("_", " ")}
+                      {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days ·{" "}
+                      {trip.purpose.replace("_", " ")}
                     </div>
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => removeTrip(trip.id)}
                     aria-label="Delete trip"
                     className="text-muted-foreground hover:text-negative"
@@ -544,9 +568,7 @@ function Timeline({
             key={`s-${day}`}
             className="h-full flex-1"
             style={{
-              background: schengenDays.has(day)
-                ? "var(--negative)"
-                : "transparent",
+              background: schengenDays.has(day) ? "var(--negative)" : "transparent",
             }}
           />
         ))}
@@ -663,7 +685,8 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
         </p>
       ) : null}
 
-      <button type="button"
+      <button
+        type="button"
         onClick={() => {
           const problem = validate();
           if (problem) {
@@ -735,7 +758,8 @@ function TripConfirmKit({
             Our notes, not the partners&apos;. Dismiss if you&apos;re already set.
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
           className="shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"
@@ -775,4 +799,3 @@ function TripConfirmKit({
     </section>
   );
 }
-

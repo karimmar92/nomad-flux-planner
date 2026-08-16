@@ -6,6 +6,7 @@
  * demonstrates rather than asserts.
  */
 import { SCHENGEN_MAX_DAYS, schengenStatus } from "@/lib/schengen";
+import { hasSchengenLimit } from "@/config/passports";
 import { toEngineTrips } from "@/lib/trip-dates";
 import { CITIES } from "@/lib/cities";
 import { daysInCountryTaxYear } from "@/lib/trip-dates";
@@ -33,7 +34,7 @@ export function evaluateSchengen(inputs: RuleInputs): RuleResult {
         ? "No Schengen days recorded in the current rolling window."
         : `${status.used} of ${SCHENGEN_MAX_DAYS} days used in the current 180-day window, ${status.remaining} remaining today.`,
     convention:
-      "A rolling 180-day window, not an annual reset — leaving does not clear the clock. Both the entry day and the exit day count as full days.",
+      "A rolling 180-day window, not an annual reset. Leaving does not clear the clock, and both the entry day and the exit day count as full days. Since 10 April 2026 the EU Entry/Exit System computes this same count at the border and flags overstays automatically.",
     detail: status.nextFullNinety
       ? `Your allowance next returns to a full 90 days on ${status.nextFullNinety}.`
       : undefined,
@@ -73,7 +74,8 @@ export function evaluateTaxResidency(inputs: RuleInputs): RuleResult {
       threshold: 183,
       unit: "days",
       status: "insufficient_data",
-      headline: "No trips recorded yet, so there is nothing to count against a residency threshold.",
+      headline:
+        "No trips recorded yet, so there is nothing to count against a residency threshold.",
       convention:
         "Most countries treat 183 days in their tax year as the point where residency is presumed — but the tax year is not always January to December.",
     };
@@ -110,4 +112,25 @@ export const RULE_ORDER: RuleId[] = ["schengen", "tax_183", "feie", "uk_srt"];
 
 export function evaluateAll(inputs: RuleInputs): RuleResult[] {
   return RULE_ORDER.map((id) => evaluateRule(id, inputs));
+}
+
+/**
+ * The rules that actually bind this passport, in display order.
+ *
+ * Separate from RULE_ORDER rather than replacing it. RULE_ORDER is what the
+ * marketing calculator shows — there the point is to demonstrate that one trip
+ * history produces four different numbers, so it should show all four
+ * regardless of who is looking. In the tracker the point is the opposite: show
+ * the person only what constrains them.
+ *
+ * Only Schengen is filtered today. FEIE and the UK SRT are opt-in by nature
+ * (you know if you file US or UK taxes) and the 183-day count applies to
+ * everyone, so hiding those would remove information rather than noise.
+ */
+export function applicableRules(passport: string | null | undefined): RuleId[] {
+  return RULE_ORDER.filter((id) => id !== "schengen" || hasSchengenLimit(passport));
+}
+
+export function evaluateApplicable(inputs: RuleInputs): RuleResult[] {
+  return applicableRules(inputs.passport).map((id) => evaluateRule(id, inputs));
 }

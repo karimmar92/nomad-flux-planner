@@ -135,23 +135,24 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          */
         mode: isOneTime ? "payment" : "subscription",
         /**
-         * "embedded", NOT "embedded_page". This has now been reintroduced twice
-         * by regeneration, so leaving the reason here rather than in a commit
-         * message.
+         * "embedded_page" is what the installed SDK accepts. This was changed
+         * to "embedded" twice on the belief that Lovable had regenerated it
+         * wrongly. That was wrong, and the correction is recorded here so it
+         * does not get "fixed" a third time.
          *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js (see CheckoutDialog.tsx) mount a session
-         * created with ui_mode "embedded". Given "embedded_page" the client
-         * secret belongs to a different rendering path, so Stripe.js
-         * initialises, draws its skeleton, then fails with "Something went
-         * wrong. Please try again or contact the merchant."
+         * stripe@22.0.2 declares:
+         *   type UiMode = 'elements' | 'embedded_page' | 'form' | 'hosted_page'
+         * (node_modules/stripe/esm/resources/Checkout/Sessions.d.ts:702)
          *
-         * Nothing shows in our logs, because from the server's point of view
-         * the session was created successfully. If this ever needs to be
-         * "embedded_page" again, CheckoutDialog has to change in the same
-         * commit.
+         * The prose doc comments in that same file still say "embedded" and
+         * "Defaults to `hosted`" — neither of which is in the union. The docs
+         * lag the generated types by an API revision, and the union is what
+         * the wire actually validates against, so the union wins.
+         *
+         * Do not trust this comment over a failure. If checkout breaks here,
+         * read the union in the installed SDK again; it moves between versions.
          */
-        ui_mode: "embedded",
+        ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
@@ -278,20 +279,9 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        /**
-         * "embedded", NOT "embedded_page".
-         *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js mount a session created with ui_mode
-         * "embedded". Given "embedded_page" the client secret is for a
-         * different rendering path, so Stripe.js initialises, draws its
-         * skeleton, then fails: the user sees a long load followed by
-         * "Something went wrong. Please try again or contact the merchant."
-         *
-         * Nothing in our logs shows it, because from the server's point of
-         * view the session was created successfully.
-         */
-        ui_mode: "embedded",
+        // Must match the subscription session above. See the long note there
+        // for why this is "embedded_page" and not "embedded".
+        ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],

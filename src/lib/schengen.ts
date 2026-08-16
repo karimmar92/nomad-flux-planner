@@ -17,8 +17,35 @@
 // Iceland and Liechtenstein are Schengen but NOT EU.
 // REVIEW ANNUALLY — membership changes.
 export const SCHENGEN_COUNTRIES = new Set([
-  "AT","BE","BG","HR","CZ","DK","EE","FI","FR","DE","GR","HU","IS","IT",
-  "LV","LI","LT","LU","MT","NL","NO","PL","PT","RO","SK","SI","ES","SE","CH",
+  "AT",
+  "BE",
+  "BG",
+  "HR",
+  "CZ",
+  "DK",
+  "EE",
+  "FI",
+  "FR",
+  "DE",
+  "GR",
+  "HU",
+  "IS",
+  "IT",
+  "LV",
+  "LI",
+  "LT",
+  "LU",
+  "MT",
+  "NL",
+  "NO",
+  "PL",
+  "PT",
+  "RO",
+  "SK",
+  "SI",
+  "ES",
+  "SE",
+  "CH",
 ]);
 
 export const SCHENGEN_MAX_DAYS = 90;
@@ -26,8 +53,8 @@ export const SCHENGEN_WINDOW_DAYS = 180;
 
 export interface Trip {
   countryCode: string;
-  entryDate: string;          // YYYY-MM-DD
-  exitDate: string | null;    // null = still there
+  entryDate: string; // YYYY-MM-DD
+  exitDate: string | null; // null = still there
   purpose?: "tourist" | "nomad_visa" | "residence";
 }
 
@@ -41,10 +68,28 @@ export function fromDayIndex(n: number): string {
   return new Date(n * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** Trips on a national long-stay visa or residence permit do not consume
- *  the 90-day short-stay allowance. */
+/**
+ * Trips on a national long-stay visa or residence permit do not consume the
+ * 90-day short-stay allowance.
+ *
+ * `nomad_visa` was previously counted as if it were tourism, which contradicted
+ * both this comment and the published FAQ on /rules/schengen-90-180. The EU
+ * nomad visas people actually hold — Portugal's D8, Spain's DNV, Greece,
+ * Croatia, Estonia — are national long-stay visas or residence permits, and
+ * days under them sit outside the 90/180 short-stay allowance. Counting them
+ * told holders they were near a limit that does not bind them.
+ *
+ * THE RISK OF THIS FIX, STATED PLAINLY. The opposite error is worse: excluding
+ * days that should have counted produces an overstay, and under EES an overstay
+ * is now flagged automatically and kept for five years. So the classification
+ * has to be right at the point of entry, which is why the guided flow asks
+ * "what let you stay" and describes each option concretely, rather than
+ * offering a bare "nomad visa" label that people apply to visa-free stays in
+ * countries that simply tolerate remote work.
+ */
 function consumesAllowance(trip: Trip): boolean {
-  return SCHENGEN_COUNTRIES.has(trip.countryCode) && trip.purpose !== "residence";
+  if (!SCHENGEN_COUNTRIES.has(trip.countryCode)) return false;
+  return trip.purpose !== "residence" && trip.purpose !== "nomad_visa";
 }
 
 /** Days used in the 180-day window ending on (and including) refDate. */
@@ -58,7 +103,7 @@ export function schengenDaysUsed(trips: Trip[], refDate: string): number {
     const exit = trip.exitDate ? toDayIndex(trip.exitDate) : ref;
     const lo = Math.max(entry, windowStart);
     const hi = Math.min(exit, ref);
-    if (lo <= hi) total += hi - lo + 1;   // inclusive of both endpoints
+    if (lo <= hi) total += hi - lo + 1; // inclusive of both endpoints
   }
   return total;
 }
@@ -166,13 +211,25 @@ export function nextFullNinetyDate(
 
 export type SchengenStatus = "ok" | "warning" | "critical" | "violation";
 
-export function schengenStatus(trips: Trip[], refDate: string): {
-  used: number; remaining: number; status: SchengenStatus; nextFullNinety: string | null;
+export function schengenStatus(
+  trips: Trip[],
+  refDate: string,
+): {
+  used: number;
+  remaining: number;
+  status: SchengenStatus;
+  nextFullNinety: string | null;
 } {
   const used = schengenDaysUsed(trips, refDate);
   const remaining = Math.max(0, SCHENGEN_MAX_DAYS - used);
   const pct = used / SCHENGEN_MAX_DAYS;
   const status: SchengenStatus =
-    used > SCHENGEN_MAX_DAYS ? "violation" : pct >= 0.9 ? "critical" : pct >= 0.75 ? "warning" : "ok";
+    used > SCHENGEN_MAX_DAYS
+      ? "violation"
+      : pct >= 0.9
+        ? "critical"
+        : pct >= 0.75
+          ? "warning"
+          : "ok";
   return { used, remaining, status, nextFullNinety: nextFullNinetyDate(trips, refDate) };
 }

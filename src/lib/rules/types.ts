@@ -63,6 +63,16 @@ export type RuleInputs = {
   today: string;
   /** ISO country code of the user's home/citizenship country, where relevant. */
   homeCountry?: string;
+  /**
+   * ISO code of the passport the person travels on.
+   *
+   * Distinct from `homeCountry`, which is about where their life and tax
+   * affairs sit. A German citizen tax-resident in Portugal has passport DE and
+   * homeCountry PT, and only the passport decides whether the Schengen 90/180
+   * binds them. Conflating the two silently gives free-movement holders a limit
+   * they do not have.
+   */
+  passport?: string;
   /** UK SRT: number of ties declared by the user (0–5). */
   ukTies?: number;
   /** UK SRT: resident in the UK in any of the previous three tax years. */
