@@ -135,23 +135,14 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          */
         mode: isOneTime ? "payment" : "subscription",
         /**
-         * "embedded", NOT "embedded_page". This has now been reintroduced twice
-         * by regeneration, so leaving the reason here rather than in a commit
-         * message.
-         *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js (see CheckoutDialog.tsx) mount a session
-         * created with ui_mode "embedded". Given "embedded_page" the client
-         * secret belongs to a different rendering path, so Stripe.js
-         * initialises, draws its skeleton, then fails with "Something went
-         * wrong. Please try again or contact the merchant."
-         *
-         * Nothing shows in our logs, because from the server's point of view
-         * the session was created successfully. If this ever needs to be
-         * "embedded_page" again, CheckoutDialog has to change in the same
-         * commit.
+         * "embedded_page", not "embedded". The dahlia API rejects the old
+         * value outright ("The ui_mode value `embedded` is no longer
+         * supported"), which surfaced in the app as Stripe's generic
+         * "Something went wrong" inside the iframe. EmbeddedCheckoutProvider
+         * from @stripe/react-stripe-js mounts this session type.
          */
         ui_mode: "embedded_page",
+
         /**
          * Managed Payments is on by default on the account, and it REFUSES
          * custom_text, tax_id_collection and consent_collection — the session
