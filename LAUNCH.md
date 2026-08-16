@@ -180,6 +180,79 @@ Every one of these has been broken at some point in this build.
 
 ---
 
+## Phase 3.5 — Threshold alerts (Scaleway TEM)
+
+`pricing.ts` sells "Threshold alerts at 75% and 90%, by email and in-app" on
+Starter. The code now exists; **until this phase is done the claim is still
+false**, so either finish it or pull the line.
+
+Scaleway was chosen over Resend and Postmark because the alert body contains
+travel history tied to a named person, and the landing page states we host in
+the EU. Scaleway is French infrastructure, so no SCCs and no new US
+sub-processor.
+
+### 3.5.1 Domain and keys
+
+- [ ] **YOU:** Scaleway account, Transactional Email enabled
+- [ ] **YOU:** Add the sending domain and publish **SPF, DKIM and DMARC** DNS
+      records, then verify in the console. This is the step that matters: an
+      unverified domain puts overstay warnings in spam, and a warning nobody
+      sees is worse than none, because the person believes they are covered
+- [ ] **YOU:** API key with `TransactionalEmailFullAccess`
+
+Set in the platform project settings, **never in `.env`** (tracked in git):
+
+```
+SCALEWAY_SECRET_KEY     API secret key
+SCALEWAY_PROJECT_ID     Project holding the verified domain
+SCALEWAY_TEM_REGION     fr-par
+ALERT_FROM_EMAIL        must be on the verified domain
+ALERT_FROM_NAME         Driftly
+ALERT_CRON_SECRET       long random string, see below
+```
+
+### 3.5.2 Migration
+
+- [ ] **YOU:** Apply `20260817090000_alert_state.sql`. It adds `alert_state`
+      and `profiles.nationality` — the passport previously lived only in
+      localStorage, so the server could not tell who the Schengen rule even
+      applies to
+- [ ] **YOU:** Regenerate types, then drop the `UntypedDb` cast in
+      `src/routes/api/public/alerts/run.ts`
+
+### 3.5.3 Schedule it
+
+The job is an endpoint, not a scheduled function, so any scheduler works:
+
+```
+POST https://<your-domain>/api/public/alerts/run
+Header: x-alert-secret: <ALERT_CRON_SECRET>
+```
+
+`/api/public/` is the only prefix the proxy passes through unauthenticated,
+same as the Stripe webhook. It is *not* unauthenticated: the secret is compared
+in constant time, and the route accepts no user id or address from the caller,
+so holding the secret cannot be turned into sending mail to arbitrary people
+from your verified domain.
+
+- [ ] **YOU:** Point something at it nightly — Supabase `pg_cron` + `pg_net`, a
+      scheduled edge function, GitHub Actions, or a hosted cron service
+- [ ] **YOU:** Confirm a wrong secret returns 403 and a missing one returns 503
+
+### 3.5.4 Test
+
+1. Log trips putting yourself over 75% of Schengen, run the job, check the mail
+2. Run it **again** with nothing changed. No second email. This is the whole
+   deduplication design and the thing most likely to be wrong in practice
+3. Add trips crossing 90%. A second email arrives
+4. Check the text part renders in a plain-text client
+5. Confirm a free-plan account is skipped entirely
+6. Confirm an EU-passport account gets no Schengen alert
+
+- [ ] **YOU:** All six pass
+
+---
+
 ## Phase 4 — Public
 
 - [ ] `SITE_URL` set to the real domain (canonicals currently fall back to
@@ -221,3 +294,11 @@ calls it yet — schedule it before you have real customers.
 
 **Zero users.** The free tracker works and nobody has used it. Five
 conversations would tell you more than a working checkout with nobody to charge.
+
+**The alert job reads every eligible profile on each run.** Fine at this size,
+wrong at fifty thousand. The fix then is to filter on plan in the query and
+page the results, not to run it less often.
+
+**Alerts cover limit rules only.** FEIE counts up toward a good outcome, so it
+is deliberately excluded — "90% of 330 days" is progress, not danger. Falling
+short of FEIE deserves its own alert with inverted logic and different copy.

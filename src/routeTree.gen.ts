@@ -62,6 +62,7 @@ import { Route as SetupCompanyRouteImport } from './routes/setup.company'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
+import { Route as ApiPublicAlertsRunRouteImport } from './routes/api/public/alerts/run'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -332,6 +333,11 @@ const RecordReportYearRoute = RecordReportYearRouteImport.update({
   path: '/report/$year',
   getParentRoute: () => RecordRoute,
 } as any)
+const ApiPublicAlertsRunRoute = ApiPublicAlertsRunRouteImport.update({
+  id: '/api/public/alerts/run',
+  path: '/api/public/alerts/run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -393,6 +399,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
+  '/api/public/alerts/run': typeof ApiPublicAlertsRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -447,6 +454,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
+  '/api/public/alerts/run': typeof ApiPublicAlertsRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -504,6 +512,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
+  '/api/public/alerts/run': typeof ApiPublicAlertsRunRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -562,6 +571,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
+    | '/api/public/alerts/run'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -616,6 +626,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
+    | '/api/public/alerts/run'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -672,6 +683,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
+    | '/api/public/alerts/run'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -721,6 +733,7 @@ export interface RootRouteChildren {
   CommunityIndexRoute: typeof CommunityIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicAlertsRunRoute: typeof ApiPublicAlertsRunRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -1097,6 +1110,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordReportYearRouteImport
       parentRoute: typeof RecordRoute
     }
+    '/api/public/alerts/run': {
+      id: '/api/public/alerts/run'
+      path: '/api/public/alerts/run'
+      fullPath: '/api/public/alerts/run'
+      preLoaderRoute: typeof ApiPublicAlertsRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -1195,18 +1215,9 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityIndexRoute: CommunityIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicAlertsRunRoute: ApiPublicAlertsRunRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
