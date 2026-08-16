@@ -15,7 +15,7 @@ import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
 import { APP_NAME } from "@/lib/app";
-import { RULE_PAGES } from "@/config/rule-pages";
+import { RULE_PAGES, ruleLabel } from "@/config/rule-pages";
 import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { usePlanSync } from "@/lib/billing/use-plan-sync";
@@ -170,7 +170,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   params={{ slug: r.slug }}
                   className="transition-colors hover:text-foreground"
                 >
-                  {r.title.split("—")[0]!.trim()}
+                  {ruleLabel(r)}
                 </Link>
               </li>
             ))}

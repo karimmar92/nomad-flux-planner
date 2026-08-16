@@ -204,7 +204,7 @@ export function WorkWindowCard({ city }: { city: City }) {
           {formatMinute(then.endMinute)} local, an hour{" "}
           {then.startMinute > now.startMinute ? "later" : "earlier"}
           {city.timezone.startsWith("Asia/") || city.timezone.startsWith("Indian/")
-            ? " — not because anything changes here, but because Europe shifts."
+            ? ". Not because anything changes here, but because Europe shifts."
             : "."}
         </p>
       ) : null}

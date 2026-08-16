@@ -104,7 +104,7 @@ function Cookies() {
       <LegalSection title="Clearing it">
         <p>
           Clearing site data in your browser removes everything above. If you have an account, your
-          trips are restored on next sign-in. If you do not, they are gone — an account is the only
+          trips are restored on next sign-in. If you do not, they are gone. An account is the only
           backup.
         </p>
       </LegalSection>

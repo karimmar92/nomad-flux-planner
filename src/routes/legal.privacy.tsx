@@ -59,40 +59,40 @@ function Privacy() {
         <p>
           There is no analytics or tracking script anywhere in this app. Nothing follows you between
           sites. The database is hosted in the EU. Your travel history is yours: you can export all
-          of it as a file, or delete everything permanently, from your profile — no email to support
+          of it as a file, or delete everything permanently, from your profile. No email to support
           required.
         </p>
       </LegalSection>
 
       <LegalSection title="What is collected, and why">
         <p>
-          <span className="font-medium text-foreground">Account details</span> — email address, when
+          <span className="font-medium text-foreground">Account details</span>: email address, when
           you create an account. Needed to sign you in and back up your data. Lawful basis:
           performance of a contract (Art. 6(1)(b)).
         </p>
         <p>
-          <span className="font-medium text-foreground">Trips and profile</span> — countries, entry
+          <span className="font-medium text-foreground">Trips and profile</span>: countries, entry
           and exit dates, nationality, income if you enter it. This is the product: the calculations
           are impossible without it. Lawful basis: contract.
         </p>
         <p>
-          <span className="font-medium text-foreground">Documents</span> — anything you choose to
+          <span className="font-medium text-foreground">Documents</span>: anything you choose to
           upload to the vault, which may include passport scans and insurance certificates. Stored
           in a private bucket, encrypted at rest, retrievable only by you. Entirely optional. Lawful
           basis: consent (Art. 6(1)(a)).
         </p>
         <p>
-          <span className="font-medium text-foreground">Location</span> — the community radar is
+          <span className="font-medium text-foreground">Location</span>: the community radar is
           currently a preview that runs entirely on your device. No coordinate of any kind is sent
           to us today. See the section below for what will happen when the networked version ships.
         </p>
         <p>
-          <span className="font-medium text-foreground">Waitlist email</span> — if you ask to be
+          <span className="font-medium text-foreground">Waitlist email</span>: if you ask to be
           notified when the radar launches, we store your email address and the city you chose, for
           that purpose only. Lawful basis: consent.
         </p>
         <p>
-          <span className="font-medium text-foreground">Payment details</span> — handled entirely by
+          <span className="font-medium text-foreground">Payment details</span>: handled entirely by
           Stripe. We receive a subscription status and an invoice reference; we never see or store
           card numbers. Lawful basis: contract.
         </p>
@@ -109,7 +109,7 @@ function Privacy() {
           are invisible by default and must choose to appear; your coordinate is rounded to a grid
           cell of roughly one kilometre <em>on your device</em>, so your exact position is never
           transmitted; you are shown only where at least five people share a cell, so a position
-          cannot be narrowed down by watching it; and no location history is kept — a single current
+          cannot be narrowed down by watching it; and no location history is kept. A single current
           cell is stored and overwritten, never appended to.
         </p>
         <p>This page will be updated before any of that goes live, not after.</p>
@@ -117,14 +117,14 @@ function Privacy() {
 
       <LegalSection title="What never leaves your device">
         <p>
-          Emergency health information — blood type, allergies, current medication — is stored only
-          in your browser&apos;s local storage. It is deliberately excluded from synchronisation and
+          Emergency health information (blood type, allergies, current medication) is stored only in
+          your browser&apos;s local storage. It is deliberately excluded from synchronisation and
           never reaches our servers.
         </p>
         <p>
           Health data is special category personal data under Art. 9 and carries a higher bar than
           anything else here. Since the feature&apos;s entire value is being available offline on
-          your device, there is no reason to accept that exposure — so we do not.
+          your device, there is no reason to accept that exposure, so we do not.
         </p>
       </LegalSection>
 
@@ -132,7 +132,7 @@ function Privacy() {
         <p>
           No advertising or analytics cookies are set. The app uses local storage and IndexedDB to
           hold your trips and cached city data so it works offline, and a session cookie to keep you
-          signed in — both strictly necessary for a service you have asked for.
+          signed in. Both are strictly necessary for a service you have asked for.
         </p>
         <p>
           Referral links are held for the current browsing session only and are cleared when the tab
@@ -144,7 +144,7 @@ function Privacy() {
         <ul className="space-y-1.5">
           {SUB_PROCESSORS.map((p) => (
             <li key={p.name}>
-              <span className="font-medium text-foreground">{p.name}</span> — {p.purpose}.{" "}
+              <span className="font-medium text-foreground">{p.name}</span>: {p.purpose}.{" "}
               {p.location}.
             </li>
           ))}
@@ -159,7 +159,7 @@ function Privacy() {
       <LegalSection title="If your employer provides your account">
         <p>
           Where a company pays for your seat, it can see only country day-counts and threshold
-          status — the minimum needed for its own compliance obligations.
+          status: the minimum needed for its own compliance obligations.
         </p>
         <p>
           It cannot see your radar activity, your income or savings, your documents, your saved
@@ -171,7 +171,7 @@ function Privacy() {
       <LegalSection title="How long it is kept">
         <p>
           Account data is kept while your account exists. Delete your account and it is removed
-          permanently, including stored files — this is immediate and cannot be undone.
+          permanently, including stored files. This is immediate and cannot be undone.
         </p>
         <p>
           Invoices and payment records are retained where tax and commercial law requires it,
@@ -191,14 +191,15 @@ function Privacy() {
         </p>
         <p>
           Two of these are built in rather than requiring a request:{" "}
-          <strong>Download my data</strong> produces a JSON file of everything held — profile,
-          trips, document details, saved cities, connections and referral records — and{" "}
+          <strong>Download my data</strong> produces a JSON file of everything held: profile, trips,
+          document details, saved cities, connections and referral records.{" "}
           <strong>Delete account</strong> erases it. Both are on your profile page. Files in your
           vault are downloaded from the vault itself.
         </p>
         <p>
           For anything else, email {PROVIDER.email}. You also have the right to complain to a
-          supervisory authority — in Germany, the data protection authority of your federal state.
+          supervisory authority. In Germany that is the data protection authority of your federal
+          state.
         </p>
       </LegalSection>
 

@@ -44,7 +44,7 @@ export const VAT = {
    * that turns a refund request into a complaint.
    */
   notice:
-    "Prices are in USD and final — the amount shown is the amount charged. No VAT is added: the provider is a sole proprietor under § 19 UStG (Kleinunternehmerregelung, Germany). An invoice is emailed automatically after payment.",
+    "Prices are in USD and final. The amount shown is the amount charged. No VAT is added: the provider is a sole proprietor under § 19 UStG (Kleinunternehmerregelung, Germany). An invoice is emailed automatically after payment.",
 } as const;
 
 /**

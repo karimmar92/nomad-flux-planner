@@ -53,7 +53,7 @@ function Refunds() {
           withdraw from it without giving any reason.
         </p>
         <p>
-          To exercise it, tell us clearly — an email to {PROVIDER.email} saying you withdraw is
+          To exercise it, tell us clearly. An email to {PROVIDER.email} saying you withdraw is
           enough. Sending it before the 14 days expire is what counts, not when we read it. You may
           use the model withdrawal form below, but you do not have to.
         </p>
@@ -71,7 +71,7 @@ function Refunds() {
         </p>
         <p>
           In principle that consent can cause the right to lapse once the service has been fully
-          provided. We do not rely on that during your first 14 days — the policy above applies
+          provided. We do not rely on that during your first 14 days. The policy above applies
           regardless.
         </p>
       </LegalSection>
@@ -80,7 +80,7 @@ function Refunds() {
         <p>
           Subscriptions are billed in advance for a period. After the withdrawal window, payments
           for a period already begun are not automatically refundable, and cancelling stops the next
-          renewal rather than refunding the current period — your access continues until the period
+          renewal rather than refunding the current period. Your access continues until the period
           ends.
         </p>
         <p>
@@ -92,7 +92,7 @@ function Refunds() {
 
       <LegalSection title="Cancelling">
         <p>
-          Cancel any time from your account — there is a cancellation button and no requirement to
+          Cancel any time from your account. There is a cancellation button and no requirement to
           contact support, as required by § 312k BGB. You keep access until the end of the period
           you have paid for.
         </p>
@@ -101,7 +101,7 @@ function Refunds() {
       <LegalSection title="Model withdrawal form">
         <div className="rounded-md border border-border bg-muted/30 p-4 text-xs leading-relaxed">
           <p>
-            To: {PROVIDER.legalName}, {PROVIDER.addressLines.join(", ")} — {PROVIDER.email}
+            To: {PROVIDER.legalName}, {PROVIDER.addressLines.join(", ")}, {PROVIDER.email}
           </p>
           <p className="mt-2">
             I/we hereby give notice that I/we withdraw from my/our contract for the provision of the

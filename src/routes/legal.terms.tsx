@@ -42,7 +42,7 @@ function Terms() {
         </p>
       </LegalSection>
 
-      <LegalSection title="2. What the service does — and does not — do">
+      <LegalSection title="2. What the service does, and does not, do">
         <p>
           {APP_NAME} counts days you record against published thresholds: the Schengen 90/180 rule,
           per-country tax-residency day limits, and similar tests. It reports arithmetic on the
@@ -54,9 +54,9 @@ function Terms() {
         </p>
         <p>
           The service never states that you are tax resident in a country, or that a stay is lawful.
-          Residency and admissibility depend on factors beyond day counting — permanent home, centre
-          of vital interests, family ties, the discretion of a border officer — and those are
-          questions for a qualified adviser or the relevant authority.
+          Residency and admissibility depend on factors beyond day counting: permanent home, centre
+          of vital interests, family ties, the discretion of a border officer. Those are questions
+          for a qualified adviser or the relevant authority.
         </p>
         <p>
           Cost-of-living, visa and tax figures are researched estimates carrying a visible
@@ -129,13 +129,13 @@ function Terms() {
         <p>
           Nothing in these terms limits liability for death or personal injury caused by negligence,
           for intent or gross negligence, for fraudulent misrepresentation, or for any liability
-          that cannot be excluded under German law — including under the Produkthaftungsgesetz.
+          that cannot be excluded under German law, including under the Produkthaftungsgesetz.
         </p>
         <p>
           Subject to that, and for slight negligence, liability is limited to breach of material
-          obligations (Kardinalpflichten) — those whose fulfilment makes proper performance possible
-          and on which you may routinely rely — and in that case to foreseeable damage typical for
-          this kind of contract.
+          obligations (Kardinalpflichten), meaning those whose fulfilment makes proper performance
+          possible and on which you may routinely rely, and in that case to foreseeable damage
+          typical for this kind of contract.
         </p>
         <p>
           We are not liable for consequences arising from information you entered incorrectly or

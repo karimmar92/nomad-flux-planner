@@ -17,6 +17,20 @@
  */
 import type { RuleId } from "@/lib/rules/types";
 
+/**
+ * The short label for a rule, for nav and chips.
+ *
+ * Titles are full SEO strings ("Schengen 90/180 calculator: how the rolling
+ * window really works") and the part before the colon is the label. This used
+ * to be done inline in two places with `title.split("—")[0]`, which silently
+ * broke the moment the titles switched from an em dash to a colon: no error,
+ * just the entire SEO title rendered inside a nav chip. Deriving it once means
+ * the next punctuation change is a one-line fix.
+ */
+export function ruleLabel(page: RulePage): string {
+  return page.title.split(":")[0]!.trim();
+}
+
 export type RulePage = {
   id: RuleId;
   /** URL segment. */
@@ -37,7 +51,7 @@ export const RULE_PAGES: RulePage[] = [
   {
     id: "schengen",
     slug: "schengen-90-180",
-    title: "Schengen 90/180 calculator — how the rolling window really works",
+    title: "Schengen 90/180 calculator: how the rolling window really works",
     metaDescription:
       "Work out your Schengen days from your actual trips. The 90/180 rule is a rolling window, not an annual reset, and both your entry and exit days count in full. Free, no account.",
     h1: "The Schengen 90/180 rule, counted properly",
@@ -58,7 +72,7 @@ export const RULE_PAGES: RulePage[] = [
       },
       {
         title: "It is one allowance across 29 countries",
-        body: "Days in Portugal, Germany and Greece all come from the same 90. Overstaying risks a fine, a removal order and an entry ban of up to three years — recorded against you across the whole area.",
+        body: "Days in Portugal, Germany and Greece all come from the same 90. Overstaying risks a fine, a removal order and an entry ban of up to three years, recorded against you across the whole area.",
       },
     ],
     faq: [
@@ -72,7 +86,7 @@ export const RULE_PAGES: RulePage[] = [
       },
       {
         q: "Do Ireland, Romania or Bulgaria count?",
-        a: "Ireland is not in the Schengen area and has its own rules. Bulgaria and Romania joined, so their days now count toward the same allowance — a change that catches out people relying on older advice.",
+        a: "Ireland is not in the Schengen area and has its own rules. Bulgaria and Romania joined, so their days now count toward the same allowance. That change catches out people relying on older advice.",
       },
     ],
     defaultCountry: "PT",
@@ -89,7 +103,7 @@ export const RULE_PAGES: RulePage[] = [
     mistakes: [
       {
         title: "Arrival days do not count",
-        body: "A qualifying day is a full day, midnight to midnight, in a foreign country. Land in Lisbon at 14:00 and that day is worth nothing to this test — the exact opposite of Schengen, where the same day is burned in full.",
+        body: "A qualifying day is a full day, midnight to midnight, in a foreign country. Land in Lisbon at 14:00 and that day is worth nothing to this test, the exact opposite of Schengen, where the same day is burned in full.",
       },
       {
         title: "The 12-month window rolls, and you choose it",
@@ -97,7 +111,7 @@ export const RULE_PAGES: RulePage[] = [
       },
       {
         title: "International waters count toward nothing",
-        body: "Time over international waters or in international airspace is neither in the US nor in a foreign country. A week-long Atlantic crossing costs seven days from your 330 — a costly surprise for anyone who takes a repositioning cruise.",
+        body: "Time over international waters or in international airspace is neither in the US nor in a foreign country. A week-long Atlantic crossing costs seven days from your 330, a costly surprise for anyone who takes a repositioning cruise.",
       },
       {
         title: "Short trips home are what usually break it",
@@ -115,7 +129,7 @@ export const RULE_PAGES: RulePage[] = [
       },
       {
         q: "How exact does my day count need to be?",
-        a: "Exact enough to defend. This calculator deliberately errs low by excluding the travel days at each end of a period abroad — understating your qualifying days is the safe direction of error when the alternative is claiming an exclusion you did not earn.",
+        a: "Exact enough to defend. This calculator deliberately errs low by excluding the travel days at each end of a period abroad. Understating your qualifying days is the safe direction of error when the alternative is claiming an exclusion you did not earn.",
       },
     ],
     defaultCountry: "TH",
@@ -123,7 +137,7 @@ export const RULE_PAGES: RulePage[] = [
   {
     id: "tax_183",
     slug: "183-day-rule",
-    title: "The 183-day rule — tax residency day counter by country",
+    title: "The 183-day rule: tax residency day counter by country",
     metaDescription:
       "Count your days against each country's residency threshold, on that country's own tax year. South Africa runs March–February, Mauritius July–June. Free, no account.",
     h1: "The 183-day rule, on each country's own calendar",
@@ -146,7 +160,7 @@ export const RULE_PAGES: RulePage[] = [
     faq: [
       {
         q: "Can I be tax resident in two countries at once?",
-        a: "Yes, and it happens often. Double tax treaties contain tie-breaker rules — permanent home, then centre of vital interests, then habitual abode, then nationality — to allocate residence between them.",
+        a: "Yes, and it happens often. Double tax treaties contain tie-breaker rules to allocate residence between them: permanent home, then centre of vital interests, then habitual abode, then nationality.",
       },
       {
         q: "Does this app tell me where I am tax resident?",
@@ -158,12 +172,12 @@ export const RULE_PAGES: RulePage[] = [
   {
     id: "uk_srt",
     slug: "uk-statutory-residence-test",
-    title: "UK Statutory Residence Test — day counter and ties thresholds",
+    title: "UK Statutory Residence Test: day counter and ties thresholds",
     metaDescription:
       "Count your UK days across the 6 April tax year and see which SRT test they engage: automatic overseas, automatic UK, or the sufficient ties bands. Free, no account.",
     h1: "The UK Statutory Residence Test, one step at a time",
     intro:
-      "The SRT is not a single day count. It is three tests applied in order: the automatic overseas tests, the automatic UK tests, and — for everything in between — the sufficient ties test, where the day threshold moves according to how many ties you have to the UK.",
+      "The SRT is not a single day count. It is three tests applied in order: the automatic overseas tests, the automatic UK tests, and, for everything in between, the sufficient ties test, where the day threshold moves according to how many ties you have to the UK.",
     mistakes: [
       {
         title: "The UK tax year starts on 6 April",
@@ -171,11 +185,11 @@ export const RULE_PAGES: RulePage[] = [
       },
       {
         title: "The threshold depends on your history, not just your days",
-        body: "If you were UK resident in any of the previous three tax years you are a 'leaver' and the thresholds are tighter — 16 days rather than 46 for the automatic overseas test, and a lower bar in every ties band.",
+        body: "If you were UK resident in any of the previous three tax years you are a 'leaver' and the thresholds are tighter: 16 days rather than 46 for the automatic overseas test, and a lower bar in every ties band.",
       },
       {
         title: "Ties are defined in statute, not by intuition",
-        body: "Family, accommodation, work, the 90-day tie and — for leavers only — the country tie each have precise definitions. Miscounting your ties moves your threshold by 30 days or more.",
+        body: "Family, accommodation, work, the 90-day tie and, for leavers only, the country tie each have precise definitions. Miscounting your ties moves your threshold by 30 days or more.",
       },
       {
         title: "Days are counted at midnight",

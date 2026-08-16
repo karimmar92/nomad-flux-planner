@@ -50,7 +50,7 @@ export function PricingTable({
                 billing === b ? "bg-primary text-primary-foreground" : "text-muted-foreground",
               )}
             >
-              {b === "monthly" ? "Monthly" : `Annual — ${12 - ANNUAL_MONTHS_CHARGED} months free`}
+              {b === "monthly" ? "Monthly" : `Annual · ${12 - ANNUAL_MONTHS_CHARGED} months free`}
             </button>
           ))}
         </div>
@@ -73,7 +73,7 @@ export function PricingTable({
           places. VAT.notice is generated from the provider's actual tax status
           in src/config/legal.ts, so it cannot drift from what Stripe charges. */}
       <p className="text-center text-xs text-muted-foreground">
-        {VAT.notice} Annual plans are billed as {ANNUAL_MONTHS_CHARGED} months — the other{" "}
+        {VAT.notice} Annual plans are billed as {ANNUAL_MONTHS_CHARGED} months. The other{" "}
         {12 - ANNUAL_MONTHS_CHARGED} are free. Cancel any time; cancelling stops the next renewal
         and your record stays yours to export.
       </p>
@@ -132,7 +132,7 @@ function TierCard({
           "No card, no trial clock."
         ) : billing === "annual" ? (
           <>
-            ${annualUsd(tier)}/yr{PRICE_VAT_NOTE ? ` ${PRICE_VAT_NOTE}` : ""} —{" "}
+            ${annualUsd(tier)}/yr{PRICE_VAT_NOTE ? ` ${PRICE_VAT_NOTE}` : ""} ·{" "}
             {12 - ANNUAL_MONTHS_CHARGED} months free
           </>
         ) : (
@@ -165,7 +165,7 @@ function TierCard({
           to="/tracker"
           className="mt-5 rounded-md border border-border py-2.5 text-center text-sm font-medium"
         >
-          Start tracking — no account needed
+          Start tracking, no account needed
         </Link>
       ) : (
         <button

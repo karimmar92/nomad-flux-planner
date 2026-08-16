@@ -119,7 +119,7 @@ export const Route = createFileRoute("/")({
                     name: "Does it track tax residency as well as visa days?",
                     acceptedAnswer: {
                       "@type": "Answer",
-                      text: "Yes. It counts days per country against each country's own residency threshold, including countries whose tax year is not January to December — South Africa runs March to February and Mauritius July to June. It reports your recorded days against the published threshold; it never tells you that you are tax resident somewhere, because that depends on factors beyond day counting.",
+                      text: "Yes. It counts days per country against each country's own residency threshold, including countries whose tax year is not January to December. South Africa runs March to February, Mauritius July to June. It reports your recorded days against the published threshold; it never tells you that you are tax resident somewhere, because that depends on factors beyond day counting.",
                     },
                   },
                   {
