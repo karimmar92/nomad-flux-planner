@@ -195,24 +195,24 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-        // Still collect a VAT ID from business customers: they need it on the
-        // invoice for their own records even where no VAT is charged.
-        tax_id_collection: { enabled: true },
         billing_address_collection: "required",
         // §312j BGB: the button must say the order obliges payment.
         submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
+        /**
+         * NO custom_text / consent_collection / tax_id_collection.
+         *
+         * Managed Payments is enabled on this Stripe account and rejects all
+         * three: the session create call fails outright ("custom_text cannot
+         * be used with Managed Payments"), which is what produced the blank
+         * "Something went wrong" form. Passing managed_payments[enabled]=false
+         * through the connector gateway does not reach Stripe, so the fields
+         * have to go. Under Managed Payments, Stripe is the merchant of record
+         * and supplies its own terms acceptance, tax handling and VAT-ID
+         * collection at checkout, so the §312j/withdrawal wording lives in the
+         * terms linked from the checkout instead of in custom_text.
+         */
       });
+
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
