@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
 import { PricingTable } from "@/components/PricingTable";
+import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
 import { createCheckoutSession } from "@/lib/billing/billing.functions";
@@ -49,6 +50,14 @@ function Pricing() {
           <span className="font-medium capitalize text-foreground">{profile.plan}</span> plan.
         </p>
       </div>
+
+      {/*
+        Above the plan table, on purpose. The founding offer is strictly better
+        than any subscription for the first hundred people, so burying it under
+        the monthly tiers would mean most readers price-anchor on $29/mo and
+        never scroll to the thing we actually want them to take.
+      */}
+      <FoundingOffer />
 
       {/*
         DEV ONLY — and it was not.

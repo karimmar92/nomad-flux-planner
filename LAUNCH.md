@@ -146,6 +146,31 @@ production pages are duplicates of a machine nobody can reach.
 
 - [ ] **YOU:** All variables set in Vercel
 
+### 2.3b Create the Founding 100 price (ONE-TIME, not recurring)
+
+In Stripe, add a product "Driftly Founding 100" with a **one-time** price of
+**$99**. If you create it as recurring by mistake, Stripe rejects the checkout
+session, which is the one place this is hard to get wrong silently.
+
+```
+STRIPE_PRICE_FOUNDING_LIFETIME=price_...
+```
+
+Then apply `supabase/migrations/20260816120000_founding_members.sql`, which
+creates the spot counter and the claim function. **The offer cannot work
+without it**: the cap is enforced in the database, not in the interface,
+because a limit checked in React fails the moment two people click at once.
+
+Add `checkout.session.completed` to the webhook events below if it is not
+already there. That single event carries both subscriptions and the founding
+purchase; the handler tells them apart by `mode` and `metadata.founding`.
+
+- [ ] **YOU:** One-time $99 price created
+- [ ] **YOU:** `STRIPE_PRICE_FOUNDING_LIFETIME` set in Lovable
+- [ ] Migration applied
+- [ ] Founding purchase tested with `4242 4242 4242 4242`, spot number issued,
+      Pro unlocked, and a second webhook replay does **not** issue a second spot
+
 ### 2.4 Register the webhook
 
 Stripe Dashboard → Developers → Webhooks → Add endpoint:

@@ -23,6 +23,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf, integer } from "@/lib/validate";
 import { priceIdFor, type BillingInterval, type PaidPlanId } from "@/config/stripe-prices";
+import { FOUNDING_PRICE_ENV, foundingIsOpen } from "@/config/founding";
 
 const STRIPE_API = "https://api.stripe.com/v1";
 
@@ -169,6 +170,89 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
        * portal return_url below in the same commit.
        */
       success_url: `${siteUrl()}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl()}/pricing?checkout=cancelled`,
+    });
+
+    return { url: session.url };
+  });
+
+/**
+ * Founding 100: a ONE-TIME payment that grants Pro permanently.
+ *
+ * `mode: "payment"`, not `"subscription"`. Getting that wrong charges a
+ * founding member $99 every month, and they would be right to be furious.
+ * The Stripe price behind FOUNDING_PRICE_ENV must also be created as a
+ * one-off price, not a recurring one; Stripe rejects the mismatch, which is
+ * the one place this is hard to get wrong silently.
+ *
+ * The cap is NOT checked here. It is checked in the database when the
+ * webhook claims the spot, because two people can pass a check in this
+ * function at the same moment and only one spot can exist. What this
+ * function does is refuse to open checkout when the cohort is already
+ * visibly full, so nobody reaches a payment page for something that is gone.
+ */
+export const createFoundingCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId, supabase } = context;
+    const { data: auth } = await supabase.auth.getUser();
+    const email = auth?.user?.email ?? undefined;
+
+    const priceId = process.env[FOUNDING_PRICE_ENV];
+    if (!priceId) {
+      throw new Error(
+        `Missing ${FOUNDING_PRICE_ENV}. Create a ONE-TIME price in Stripe (not recurring) and set it in the environment.`,
+      );
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Already a founding member: do not let anyone buy the same thing twice.
+    const { data: mine } = await supabaseAdmin
+      .from("profiles")
+      .select("founding_number")
+      .eq("id", userId)
+      .maybeSingle();
+    if ((mine as { founding_number?: number | null } | null)?.founding_number != null) {
+      throw new Error("You already have a founding spot.");
+    }
+
+    const { fetchFoundingTaken } = await import("@/lib/founding/rpc");
+    const taken = (await fetchFoundingTaken(supabaseAdmin)) ?? 0;
+    if (!foundingIsOpen(taken)) {
+      throw new Error("All 100 founding spots have been taken.");
+    }
+
+    const session = await stripe<{ id: string; url: string }>("/checkout/sessions", {
+      mode: "payment",
+      line_items: [{ price: priceId, quantity: 1 }],
+      // Same §19 UStG position as the subscriptions. See the long note above.
+      automatic_tax: { enabled: false },
+      tax_id_collection: { enabled: true },
+      billing_address_collection: "required",
+      customer_email: email,
+      client_reference_id: userId,
+      /**
+       * `founding: "1"` is what the webhook keys on. Without it the handler
+       * cannot tell a lifetime purchase from any other one-off payment, and
+       * the buyer pays and receives nothing.
+       */
+      metadata: { user_id: userId, founding: "1" },
+      payment_intent_data: { metadata: { user_id: userId, founding: "1" } },
+      // §312j BGB: the button must say the order obliges payment.
+      submit_type: "pay",
+      custom_text: {
+        submit: {
+          message:
+            "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists.",
+        },
+        terms_of_service_acceptance: {
+          message:
+            "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
+        },
+      },
+      consent_collection: { terms_of_service: "required" },
+      success_url: `${siteUrl()}/profile?checkout=founding&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl()}/pricing?checkout=cancelled`,
     });
 

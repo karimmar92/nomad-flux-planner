@@ -55,13 +55,85 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           return new Response("Invalid signature", { status: 401 });
         }
 
-        const event = JSON.parse(body) as {
-          type: string;
-          data: { object: Record<string, any> };
-        };
+        /**
+         * `any` is deliberate here and confined to this one declaration.
+         *
+         * A Stripe event payload is a different shape per event type, nested
+         * several levels deep, and the fields we read differ per branch below.
+         * Typing it as `unknown` would mean a cast at every property access,
+         * which is more unsafe code, not less. The safety comes from the
+         * signature check above: nothing reaches this line unless Stripe signed
+         * it.
+         */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const event = JSON.parse(body) as { type: string; data: { object: Record<string, any> } };
         const object = event.data?.object ?? {};
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        /* ---------------- founding 100 ----------------
+         *
+         * MUST come before plan provisioning. A founding purchase is a
+         * `checkout.session.completed` with mode=payment, and the block below
+         * also handles that event type for subscriptions. If the subscription
+         * branch runs first it finds no price id, logs "unmapped_price" and
+         * returns, and the customer who just paid $99 gets nothing.
+         *
+         * Idempotency lives in the database: claim_founding_spot() keys on the
+         * checkout session id, so a Stripe retry returns the same number
+         * instead of burning a second spot.
+         */
+        if (
+          event.type === "checkout.session.completed" &&
+          object["mode"] === "payment" &&
+          object["metadata"]?.["founding"] === "1"
+        ) {
+          const userId: string | null =
+            object["metadata"]?.["user_id"] ?? object["client_reference_id"] ?? null;
+          const sessionId: string | null = object["id"] ?? null;
+          const paid = object["payment_status"] === "paid";
+
+          if (!userId || !sessionId) {
+            return Response.json({ received: true, skipped: "no_user_reference" });
+          }
+          if (!paid) {
+            // Delayed payment methods land here. Stripe sends another event
+            // when the money actually arrives; granting now would give away a
+            // permanent spot for a payment that may never complete.
+            return Response.json({ received: true, skipped: "not_paid_yet" });
+          }
+
+          const customerId: string | null =
+            typeof object["customer"] === "string" ? object["customer"] : null;
+          if (customerId) {
+            await supabaseAdmin
+              .from("profiles")
+              .update({ stripe_customer_id: customerId })
+              .eq("id", userId);
+          }
+
+          const { claimFoundingSpot } = await import("@/lib/founding/rpc");
+          const { spot, error } = await claimFoundingSpot(supabaseAdmin, userId, sessionId);
+          if (error) return new Response(error, { status: 500 });
+
+          if (spot == null) {
+            /**
+             * Sold out between opening checkout and paying. The customer has
+             * been charged for something that no longer exists, so this needs a
+             * refund rather than a silent 200. Flagged loudly because it is a
+             * money-owed situation, not a logging line.
+             */
+            return Response.json({
+              received: true,
+              founding: "sold_out_after_payment",
+              action_required: "REFUND",
+              user_id: userId,
+              session_id: sessionId,
+            });
+          }
+
+          return Response.json({ received: true, founding_number: spot, user_id: userId });
+        }
 
         /* ---------------- plan provisioning ----------------
          *
@@ -97,9 +169,7 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           const entitled = ["active", "trialing", "past_due"].includes(status);
 
           const priceId: string | null =
-            object["items"]?.["data"]?.[0]?.["price"]?.["id"] ??
-            object["plan"]?.["id"] ??
-            null;
+            object["items"]?.["data"]?.[0]?.["price"]?.["id"] ?? object["plan"]?.["id"] ?? null;
 
           const plan =
             event.type === "customer.subscription.deleted" || !entitled
@@ -126,7 +196,9 @@ export const Route = createFileRoute("/api/public/webhooks/stripe")({
           const invoiceId: string | null = object["id"] ?? null;
           const collected: number = object["amount_paid"] ?? 0;
           const referredUserId: string | null =
-            object["metadata"]?.["user_id"] ?? object["subscription_details"]?.["metadata"]?.["user_id"] ?? null;
+            object["metadata"]?.["user_id"] ??
+            object["subscription_details"]?.["metadata"]?.["user_id"] ??
+            null;
 
           if (!invoiceId || !referredUserId || collected <= 0) {
             return Response.json({ received: true, skipped: "missing_reference" });
