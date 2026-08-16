@@ -36,9 +36,11 @@ import {
   priceIdFor,
   TEAMS_SEAT_MAX,
   TEAMS_SEAT_MIN,
+  isOneTimePlan,
   type BillingInterval,
   type PaidPlanId,
 } from "@/config/stripe-prices";
+
 import {
   createStripeClient,
   getStripeErrorMessage,
@@ -92,7 +94,7 @@ async function resolveOrCreateCustomer(
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { plan: string; interval: string; seats?: number; environment: string; returnUrl: string }) => ({
-    plan: oneOf(d?.plan, ["starter", "pro", "teams"] as const, "Plan") as PaidPlanId,
+    plan: oneOf(d?.plan, ["starter", "pro", "teams", "founding_lifetime"] as const, "Plan") as PaidPlanId,
     interval: oneOf(d?.interval, ["monthly", "yearly"] as const, "Interval") as BillingInterval,
     // Seats only apply to Teams; clamped so a crafted request cannot bill 10,000 seats.
     seats: d?.seats == null ? TEAMS_SEAT_MIN : integer(d.seats, "Seats", 1, TEAMS_SEAT_MAX),
@@ -115,8 +117,10 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
       const isTeams = data.plan === "teams";
+      const isOneTime = isOneTimePlan(data.plan);
 
       const session = await stripe.checkout.sessions.create({
+<<<<<<< HEAD
         mode: "subscription",
         /**
          * "embedded", NOT "embedded_page".
@@ -132,12 +136,16 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          * view the session was created successfully.
          */
         ui_mode: "embedded",
+=======
+        mode: isOneTime ? "payment" : "subscription",
+        ui_mode: "embedded_page",
+>>>>>>> f2b023d7d6068541676c0c1d7f96cec9567f0a16
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
           {
             price: price.id,
-            quantity: isTeams ? Math.max(data.seats, TEAMS_SEAT_MIN) : 1,
+            quantity: isOneTime ? 1 : isTeams ? Math.max(data.seats, TEAMS_SEAT_MIN) : 1,
             /**
              * Per-seat plans: the buyer sets the seat count on the checkout
              * form, where the total updates as it changes. Sending a fixed
@@ -159,7 +167,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         client_reference_id: userId,
         // The commission webhook reads metadata.user_id off the invoice's
         // subscription. Without this, referral accrual silently stops.
-        subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
+        ...(!isOneTime && {
+          subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
+        }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
         // Still collect a VAT ID from business customers: they need it on the
@@ -312,6 +322,7 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
+
 
 /**
  * Billing portal — this IS the Kündigungsbutton under §312k BGB. Cancelling

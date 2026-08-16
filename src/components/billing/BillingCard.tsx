@@ -29,7 +29,7 @@ import { createPortalSession } from "@/lib/billing/billing.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
-import { tier } from "@/config/pricing";
+import { tierName } from "@/config/pricing";
 
 export function BillingCard() {
   const { signedIn } = useSession();
@@ -99,7 +99,7 @@ export function BillingCard() {
         {paid ? (
           <>
             You are on{" "}
-            <span className="font-medium text-foreground">{tier(profile.plan).name}</span>. Manage
+            <span className="font-medium text-foreground">{tierName(profile.plan)}</span>. Manage
             your payment method, download invoices, or cancel — cancelling stops the next renewal
             and you keep access until the end of the period you have paid for.
           </>

@@ -34,7 +34,7 @@ export type ProFeature = (typeof PRO_FEATURES)[number];
  * once here means a new tier cannot accidentally *remove* access — a bug that
  * would be invisible until a paying customer lost a feature they had.
  */
-const PLAN_RANK: Record<Plan, number> = { free: 0, starter: 1, pro: 2, teams: 3 };
+const PLAN_RANK: Record<Plan, number> = { free: 0, starter: 1, pro: 2, founding_lifetime: 3, teams: 4 };
 
 /** Lowest tier that unlocks each paid feature. */
 const FEATURE_MIN_PLAN: Record<ProFeature, Plan> = {
