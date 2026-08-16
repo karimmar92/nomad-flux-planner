@@ -39,7 +39,7 @@ export const Route = createFileRoute("/pricing")({
 function Pricing() {
   const { t } = useTranslation("common");
   const { profile, patchProfile } = useProfile();
-  const { signedIn } = useSession();
+  const { ready, signedIn } = useSession();
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
@@ -110,7 +110,10 @@ function Pricing() {
       ) : null}
 
       <PricingTable
-        busyPlan={busy}
+        // Until auth hydration completes, paid controls stay inert. Otherwise
+        // a fast first click can be mistaken for a signed-out user and bounce
+        // through /auth before the existing session is restored.
+        busyPlan={ready ? busy : "account-session"}
         onChoose={(chosen, billing) => {
           if (!signedIn) {
             void navigate({ to: "/auth", search: { next: "/pricing" } });

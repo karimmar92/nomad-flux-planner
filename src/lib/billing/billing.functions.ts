@@ -30,6 +30,7 @@
  * Not tax advice — confirm with a Steuerberater.
  */
 import { createServerFn } from "@tanstack/react-start";
+import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf, integer } from "@/lib/validate";
 import {
@@ -110,9 +111,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    const { userId, supabase } = context;
-    const { data: auth } = await supabase.auth.getUser();
-    const email = auth?.user?.email ?? undefined;
+    const { userId, claims } = context;
+    const email = typeof claims.email === "string" ? claims.email : undefined;
 
     try {
       const stripe = createStripeClient(data.environment);
@@ -185,24 +185,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-        // Still collect a VAT ID from business customers: they need it on the
-        // invoice for their own records even where no VAT is charged.
-        tax_id_collection: { enabled: true },
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
-      });
+        // Full handling supplies its own terms, tax treatment and checkout
+        // disclosures. custom_text, consent_collection and tax_id_collection
+        // conflict with it and make the embedded form fail after loading.
+        managed_payments: { enabled: true },
+      } as Stripe.Checkout.SessionCreateParams);
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
@@ -246,9 +233,8 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
     returnUrl: String(d?.returnUrl ?? ""),
   }))
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    const { userId, supabase } = context;
-    const { data: auth } = await supabase.auth.getUser();
-    const email = auth?.user?.email ?? undefined;
+    const { userId, supabase, claims } = context;
+    const email = typeof claims.email === "string" ? claims.email : undefined;
 
     try {
       const { FOUNDING_PRICE_LOOKUP_KEY, foundingIsOpen } = await import("@/config/founding");
@@ -292,23 +278,13 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * the buyer pays and receives nothing.
          */
         metadata: { user_id: userId, userId, founding: "1" },
-        payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        tax_id_collection: { enabled: true },
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
+        payment_intent_data: {
+          description: "Driftly Founding Lifetime",
+          metadata: { user_id: userId, userId, founding: "1" },
         },
-        consent_collection: { terms_of_service: "required" },
-      });
+        managed_payments: { enabled: true },
+        submit_type: "pay",
+      } as Stripe.Checkout.SessionCreateParams);
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
