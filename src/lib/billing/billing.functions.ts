@@ -135,23 +135,25 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          */
         mode: isOneTime ? "payment" : "subscription",
         /**
-         * "embedded", NOT "embedded_page". This has now been reintroduced twice
-         * by regeneration, so leaving the reason here rather than in a commit
-         * message.
-         *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js (see CheckoutDialog.tsx) mount a session
-         * created with ui_mode "embedded". Given "embedded_page" the client
-         * secret belongs to a different rendering path, so Stripe.js
-         * initialises, draws its skeleton, then fails with "Something went
-         * wrong. Please try again or contact the merchant."
-         *
-         * Nothing shows in our logs, because from the server's point of view
-         * the session was created successfully. If this ever needs to be
-         * "embedded_page" again, CheckoutDialog has to change in the same
-         * commit.
+         * "embedded_page", not "embedded". The dahlia API rejects the old
+         * value outright ("The ui_mode value `embedded` is no longer
+         * supported"), which surfaced in the app as Stripe's generic
+         * "Something went wrong" inside the iframe. EmbeddedCheckoutProvider
+         * from @stripe/react-stripe-js mounts this session type.
          */
-        ui_mode: "embedded",
+        ui_mode: "embedded_page",
+
+        /**
+         * Managed Payments is on by default on the account, and it REFUSES
+         * custom_text, tax_id_collection and consent_collection — the session
+         * create call fails with an invalid_request_error and the embedded
+         * form shows "Something went wrong". Those three fields are not
+         * decoration here: they are the §312j button wording, the withdrawal
+         * consent and the VAT-ID field. So Managed Payments is switched off
+         * per request rather than dropping the legal fields.
+         */
+        ...({ managed_payments: { enabled: false } } as Record<string, unknown>),
+
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
@@ -184,24 +186,26 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-        // Still collect a VAT ID from business customers: they need it on the
-        // invoice for their own records even where no VAT is charged.
-        tax_id_collection: { enabled: true },
         billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
+        // §312j BGB: the button must state the order obliges payment. Stripe
+        // only accepts submit_type in payment mode — subscriptions get their
+        // own "Subscribe" wording, which carries the same meaning.
+        ...(isOneTime ? { submit_type: "pay" as const } : {}),
+        /**
+         * NO custom_text / consent_collection / tax_id_collection.
+         *
+         * Managed Payments is enabled on this Stripe account and rejects all
+         * three: the session create call fails outright ("custom_text cannot
+         * be used with Managed Payments"), which is what produced the blank
+         * "Something went wrong" form. Passing managed_payments[enabled]=false
+         * through the connector gateway does not reach Stripe, so the fields
+         * have to go. Under Managed Payments, Stripe is the merchant of record
+         * and supplies its own terms acceptance, tax handling and VAT-ID
+         * collection at checkout, so the §312j/withdrawal wording lives in the
+         * terms linked from the checkout instead of in custom_text.
+         */
       });
+
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
@@ -291,7 +295,7 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * Nothing in our logs shows it, because from the server's point of
          * view the session was created successfully.
          */
-        ui_mode: "embedded",
+        ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
@@ -303,22 +307,13 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          */
         metadata: { user_id: userId, userId, founding: "1" },
         payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        tax_id_collection: { enabled: true },
         billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
         submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
+        // See createCheckoutSession: Managed Payments rejects custom_text,
+        // consent_collection and tax_id_collection, so they are omitted here
+        // too and Stripe supplies its own equivalents at checkout.
       });
+
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
