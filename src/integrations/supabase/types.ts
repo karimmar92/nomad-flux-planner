@@ -560,6 +560,9 @@ export type Database = {
           cell_lng: number | null
           created_at: string
           display_name: string | null
+          founding_number: number | null
+          founding_payment_id: string | null
+          founding_purchased_at: string | null
           free_months_granted: number
           headline: string | null
           heard_about: string | null
@@ -587,6 +590,9 @@ export type Database = {
           cell_lng?: number | null
           created_at?: string
           display_name?: string | null
+          founding_number?: number | null
+          founding_payment_id?: string | null
+          founding_purchased_at?: string | null
           free_months_granted?: number
           headline?: string | null
           heard_about?: string | null
@@ -614,6 +620,9 @@ export type Database = {
           cell_lng?: number | null
           created_at?: string
           display_name?: string | null
+          founding_number?: number | null
+          founding_payment_id?: string | null
+          founding_purchased_at?: string | null
           free_months_granted?: number
           headline?: string | null
           heard_about?: string | null
@@ -1085,6 +1094,10 @@ export type Database = {
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       caller_bucket_key: { Args: never; Returns: string }
       cell_occupancy: { Args: { _lat: number; _lng: number }; Returns: number }
+      claim_founding_spot: {
+        Args: { p_payment_id: string; p_user_id: string }
+        Returns: number
+      }
       creator_balance: {
         Args: { _creator_id: string }
         Returns: {
@@ -1096,6 +1109,7 @@ export type Database = {
       }
       delete_my_account: { Args: never; Returns: undefined }
       delete_my_radar_data: { Args: never; Returns: undefined }
+      founding_spots_taken: { Args: never; Returns: number }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean

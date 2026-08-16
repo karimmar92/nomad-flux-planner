@@ -33,7 +33,9 @@ import {
 } from "@/lib/referrals/commission";
 import { CREATOR_PROGRAM } from "@/lib/referrals/config";
 import { planForPriceId } from "@/config/stripe-prices";
+import { claimFoundingSpot } from "@/lib/founding/rpc";
 import type { StripeEnv } from "@/lib/stripe.server";
+
 
 const DAY_MS = 86_400_000;
 
@@ -117,8 +119,23 @@ export async function handleStripeEvent(
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     if (error) return new Response(error.message, { status: 500 });
 
+    // The founding member flow is one-time: claim the numbered spot here. The
+    // claim function sets plan='pro' itself, so the patch above is harmless.
+    if (object["metadata"]?.["founding"] === "1") {
+      const sessionId = typeof object["id"] === "string" ? object["id"] : null;
+      if (sessionId) {
+        const { error: claimError } = await claimFoundingSpot(supabaseAdmin, userId, sessionId);
+        if (claimError) {
+          // Do not fail the webhook — Stripe would retry and the user already
+          // paid. Log loudly and let the admin reconcile.
+          console.error("Founding spot claim failed for user", userId, claimError);
+        }
+      }
+    }
+
     return Response.json({ received: true, plan, user_id: userId, mode });
   }
+
 
   /* ---------------- subscription lifecycle + entitlement ---------------- */
   if (

@@ -119,27 +119,18 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const isTeams = data.plan === "teams";
       const isOneTime = isOneTimePlan(data.plan);
 
+      // For one-time purchases, the dashboard renders the product name from
+      // the PaymentIntent description; for subscriptions the dashboard reads
+      // the product name from the invoice line items.
+      let productDescription: string | undefined;
+      if (isOneTime && typeof price.product === "string") {
+        const product = await stripe.products.retrieve(price.product);
+        productDescription = product.name;
+      }
+
       const session = await stripe.checkout.sessions.create({
-<<<<<<< HEAD
-        mode: "subscription",
-        /**
-         * "embedded", NOT "embedded_page".
-         *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js mount a session created with ui_mode
-         * "embedded". Given "embedded_page" the client secret is for a
-         * different rendering path, so Stripe.js initialises, draws its
-         * skeleton, then fails: the user sees a long load followed by
-         * "Something went wrong. Please try again or contact the merchant."
-         *
-         * Nothing in our logs shows it, because from the server's point of
-         * view the session was created successfully.
-         */
-        ui_mode: "embedded",
-=======
         mode: isOneTime ? "payment" : "subscription",
         ui_mode: "embedded_page",
->>>>>>> f2b023d7d6068541676c0c1d7f96cec9567f0a16
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
@@ -170,6 +161,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         ...(!isOneTime && {
           subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
         }),
+        ...(isOneTime && productDescription && { payment_intent_data: { description: productDescription } }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
         // Still collect a VAT ID from business customers: they need it on the
@@ -180,8 +172,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         submit_type: "pay",
         custom_text: {
           submit: {
-            message:
-              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
+            message: isOneTime
+              ? "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists."
+              : "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
           },
           terms_of_service_acceptance: {
             message:
@@ -209,22 +202,9 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 /**
  * Founding 100: a ONE-TIME payment granting Pro permanently.
  *
- * PORTED to Lovable's payments layer. The first version of this called
- * api.stripe.com directly with a STRIPE_SECRET_KEY, which does not exist in
- * this project — every request would have failed authentication. It now goes
- * through createStripeClient like everything else here.
- *
- * `mode: "payment"`, not `"subscription"`. Getting that wrong bills a founding
- * member $99 every month, and they would be right to be furious. The Stripe
- * price behind the lookup key must also be one-off rather than recurring;
- * Stripe rejects the mismatch, which is the one place this is hard to get
- * wrong silently.
- *
- * The 100 cap is NOT enforced here. Two people can pass a check in this
- * function at the same instant and only one spot can exist, so the real limit
- * lives in claim_founding_spot() in the database. What this does is refuse to
- * open checkout when the cohort is already visibly full, so nobody reaches a
- * payment form for something that is gone.
+ * Kept as a separate checkout function because it enforces the hard 100-spot
+ * cap and the "already has a founding_number" check. The underlying price
+ * is the same lookup key as `founding_lifetime` in the product catalogue.
  */
 export const createFoundingCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -264,33 +244,26 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
 
       const customerId = await resolveOrCreateCustomer(stripe, { email, userId });
 
+      let productDescription: string | undefined;
+      if (typeof price.product === "string") {
+        const product = await stripe.products.retrieve(price.product);
+        productDescription = product.name;
+      }
+
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        /**
-         * "embedded", NOT "embedded_page".
-         *
-         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js mount a session created with ui_mode
-         * "embedded". Given "embedded_page" the client secret is for a
-         * different rendering path, so Stripe.js initialises, draws its
-         * skeleton, then fails: the user sees a long load followed by
-         * "Something went wrong. Please try again or contact the merchant."
-         *
-         * Nothing in our logs shows it, because from the server's point of
-         * view the session was created successfully.
-         */
-        ui_mode: "embedded",
+        ui_mode: "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
         client_reference_id: userId,
-        /**
-         * `founding: "1"` is what the webhook keys on. Without it the handler
-         * cannot tell a lifetime purchase from any other one-off payment, and
-         * the buyer pays and receives nothing.
-         */
-        metadata: { user_id: userId, userId, founding: "1" },
-        payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
+        // `founding: "1"` is what the webhook keys on. Without it the handler
+        // cannot tell a lifetime purchase from any other one-off payment, and
+        // the buyer pays and receives nothing.
+        metadata: { user_id: userId, userId, founding: "1", plan: "founding_lifetime" },
+        ...(productDescription && {
+          payment_intent_data: { description: productDescription, metadata: { user_id: userId, userId, founding: "1" } },
+        }),
         tax_id_collection: { enabled: true },
         billing_address_collection: "required",
         // §312j BGB: the button must say the order obliges payment.
@@ -308,12 +281,6 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
         consent_collection: { terms_of_service: "required" },
       });
 
-      /**
-       * No `?? ""`. An empty client secret is not a checkout session; passing
-       * one on turns a clear server-side failure into an opaque error inside
-       * Stripe's iframe, which is far harder to diagnose and is what the user
-       * actually saw.
-       */
       if (!session.client_secret) {
         return { error: "Stripe did not return a checkout session. Please try again." };
       }
