@@ -20,7 +20,7 @@ describe("expectedPlanFor", () => {
   it("keeps a founding member on pro with no subscription at all", () => {
     expect(
       expectedPlanFor({ foundingNumber: 7, subscriptionStatus: null, planFromPrice: null }),
-    ).toBe("pro");
+    ).toBe("founding_lifetime");
   });
 
   it("keeps a founding member on pro even when a subscription was cancelled", () => {
@@ -28,13 +28,13 @@ describe("expectedPlanFor", () => {
     // because taking away something bought permanently is unrecoverable trust.
     expect(
       expectedPlanFor({ foundingNumber: 1, subscriptionStatus: "canceled", planFromPrice: null }),
-    ).toBe("pro");
+    ).toBe("founding_lifetime");
   });
 
   it("does not downgrade a founding member who also has a lapsed Teams sub", () => {
     expect(
       expectedPlanFor({ foundingNumber: 42, subscriptionStatus: "unpaid", planFromPrice: "teams" }),
-    ).toBe("pro");
+    ).toBe("founding_lifetime");
   });
 
   it("gives free when there is no subscription and no founding spot", () => {

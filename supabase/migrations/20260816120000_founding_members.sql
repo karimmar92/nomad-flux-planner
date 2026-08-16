@@ -84,11 +84,15 @@ begin
     return null;  -- sold out; caller must refund
   end if;
 
+  -- 'founding_lifetime', not 'pro'. The app ranks it above pro in PLAN_RANK,
+  -- so entitlements are identical, but the label survives: the profile page
+  -- can say "Founding Lifetime" and support can tell a founder apart from a
+  -- Pro subscriber without joining another table.
   update public.profiles
      set founding_number = v_next,
          founding_purchased_at = now(),
          founding_payment_id = p_payment_id,
-         plan = 'pro'
+         plan = 'founding_lifetime'
    where id = p_user_id;
 
   return v_next;
@@ -115,7 +119,7 @@ language plpgsql
 as $$
 begin
   if old.founding_number is not null and new.plan = 'free' then
-    new.plan := 'pro';
+    new.plan := 'founding_lifetime';
   end if;
   return new;
 end;

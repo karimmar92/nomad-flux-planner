@@ -24,6 +24,7 @@ import {
   type BillingRow,
   type WebhookEventRow,
 } from "@/lib/billing/admin-billing.functions";
+import { getStripeEnvironment } from "@/lib/stripe";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/billing")({
@@ -76,7 +77,7 @@ function AdminBilling() {
           onSubmit={(e) => {
             e.preventDefault();
             void run(
-              () => adminSearchBilling({ data: { query } }),
+              () => adminSearchBilling({ data: { query, environment: getStripeEnvironment() } }),
               (r) => setRows(r.rows),
             );
           }}
@@ -146,7 +147,10 @@ function AdminBilling() {
                 disabled={busy}
                 onClick={() =>
                   void run(
-                    () => adminReconcileEntitlement({ data: { userId: r.userId } }),
+                    () =>
+                      adminReconcileEntitlement({
+                        data: { userId: r.userId, environment: getStripeEnvironment() },
+                      }),
                     (res) => {
                       setNote(
                         res.changed
@@ -154,7 +158,10 @@ function AdminBilling() {
                           : `Already correct (${res.before}). Nothing changed.`,
                       );
                       void run(
-                        () => adminSearchBilling({ data: { query } }),
+                        () =>
+                          adminSearchBilling({
+                            data: { query, environment: getStripeEnvironment() },
+                          }),
                         (s) => setRows(s.rows),
                       );
                     },

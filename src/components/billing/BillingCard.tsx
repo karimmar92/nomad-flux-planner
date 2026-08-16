@@ -98,10 +98,9 @@ export function BillingCard() {
       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
         {paid ? (
           <>
-            You are on{" "}
-            <span className="font-medium text-foreground">{tierName(profile.plan)}</span>. Manage
-            your payment method, download invoices, or cancel — cancelling stops the next renewal
-            and you keep access until the end of the period you have paid for.
+            You are on <span className="font-medium text-foreground">{tierName(profile.plan)}</span>
+            . Manage your payment method, download invoices, or cancel — cancelling stops the next
+            renewal and you keep access until the end of the period you have paid for.
           </>
         ) : (
           <>

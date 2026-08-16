@@ -41,11 +41,7 @@ import {
   type PaidPlanId,
 } from "@/config/stripe-prices";
 
-import {
-  createStripeClient,
-  getStripeErrorMessage,
-  type StripeEnv,
-} from "@/lib/stripe.server";
+import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
@@ -93,14 +89,26 @@ async function resolveOrCreateCustomer(
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { plan: string; interval: string; seats?: number; environment: string; returnUrl: string }) => ({
-    plan: oneOf(d?.plan, ["starter", "pro", "teams", "founding_lifetime"] as const, "Plan") as PaidPlanId,
-    interval: oneOf(d?.interval, ["monthly", "yearly"] as const, "Interval") as BillingInterval,
-    // Seats only apply to Teams; clamped so a crafted request cannot bill 10,000 seats.
-    seats: d?.seats == null ? TEAMS_SEAT_MIN : integer(d.seats, "Seats", 1, TEAMS_SEAT_MAX),
-    environment: envOf(d?.environment),
-    returnUrl: String(d?.returnUrl ?? ""),
-  }))
+  .inputValidator(
+    (d: {
+      plan: string;
+      interval: string;
+      seats?: number;
+      environment: string;
+      returnUrl: string;
+    }) => ({
+      plan: oneOf(
+        d?.plan,
+        ["starter", "pro", "teams", "founding_lifetime"] as const,
+        "Plan",
+      ) as PaidPlanId,
+      interval: oneOf(d?.interval, ["monthly", "yearly"] as const, "Interval") as BillingInterval,
+      // Seats only apply to Teams; clamped so a crafted request cannot bill 10,000 seats.
+      seats: d?.seats == null ? TEAMS_SEAT_MIN : integer(d.seats, "Seats", 1, TEAMS_SEAT_MAX),
+      environment: envOf(d?.environment),
+      returnUrl: String(d?.returnUrl ?? ""),
+    }),
+  )
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
     const { userId, supabase } = context;
     const { data: auth } = await supabase.auth.getUser();
@@ -120,26 +128,30 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const isOneTime = isOneTimePlan(data.plan);
 
       const session = await stripe.checkout.sessions.create({
-<<<<<<< HEAD
-        mode: "subscription",
         /**
-         * "embedded", NOT "embedded_page".
+         * Lovable's one-time support, kept: `founding_lifetime` is a payment,
+         * everything else is a subscription. Charging a lifetime purchase as a
+         * subscription would bill someone $99 every month.
+         */
+        mode: isOneTime ? "payment" : "subscription",
+        /**
+         * "embedded", NOT "embedded_page". This has now been reintroduced twice
+         * by regeneration, so leaving the reason here rather than in a commit
+         * message.
          *
          * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
-         * @stripe/react-stripe-js mount a session created with ui_mode
-         * "embedded". Given "embedded_page" the client secret is for a
-         * different rendering path, so Stripe.js initialises, draws its
-         * skeleton, then fails: the user sees a long load followed by
-         * "Something went wrong. Please try again or contact the merchant."
+         * @stripe/react-stripe-js (see CheckoutDialog.tsx) mount a session
+         * created with ui_mode "embedded". Given "embedded_page" the client
+         * secret belongs to a different rendering path, so Stripe.js
+         * initialises, draws its skeleton, then fails with "Something went
+         * wrong. Please try again or contact the merchant."
          *
-         * Nothing in our logs shows it, because from the server's point of
-         * view the session was created successfully.
+         * Nothing shows in our logs, because from the server's point of view
+         * the session was created successfully. If this ever needs to be
+         * "embedded_page" again, CheckoutDialog has to change in the same
+         * commit.
          */
         ui_mode: "embedded",
-=======
-        mode: isOneTime ? "payment" : "subscription",
-        ui_mode: "embedded_page",
->>>>>>> f2b023d7d6068541676c0c1d7f96cec9567f0a16
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
@@ -322,7 +334,6 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
-
 
 /**
  * Billing portal — this IS the Kündigungsbutton under §312k BGB. Cancelling

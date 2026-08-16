@@ -68,10 +68,7 @@ function toIso(seconds: unknown): string | null {
   return typeof seconds === "number" ? new Date(seconds * 1000).toISOString() : null;
 }
 
-export async function handleStripeEvent(
-  event: StripeEvent,
-  env: StripeEnv,
-): Promise<Response> {
+export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Promise<Response> {
   const object = event.data?.object ?? {};
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -110,6 +107,71 @@ export async function handleStripeEvent(
       null;
 
     if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
+
+    /**
+     * FOUNDING 100 — must not fall through to the generic plan write below.
+     *
+     * `plan` here is the literal price key, so a founding purchase produces
+     * "founding_lifetime". Writing that into profiles.plan looks like it
+     * works and silently breaks everything: entitlements only understand
+     * free | starter | pro | teams, so PLAN_RANK["founding_lifetime"] is
+     * undefined, every atLeast() check returns false, and tier() throws on
+     * the profile page. The customer pays $99 and unlocks less than the free
+     * tier.
+     *
+     * claim_founding_spot() assigns the next number, enforces the 100 cap in
+     * the database where a race cannot beat it, and sets plan to
+     * 'founding_lifetime' itself. It is keyed on the checkout session id, so a Stripe retry
+     * returns the number already issued instead of burning a second spot.
+     */
+    if (plan === "founding_lifetime") {
+      const sessionId: string | null = object["id"] ?? null;
+      const paid = object["payment_status"] === "paid";
+
+      if (!sessionId) {
+        return Response.json({ received: true, skipped: "no_session_id" });
+      }
+      if (!paid) {
+        // Delayed payment methods land here. Stripe sends another event when
+        // the money actually arrives. Granting a permanent spot now would
+        // give one away for a payment that may never complete.
+        return Response.json({ received: true, skipped: "not_paid_yet" });
+      }
+
+      if (customerId) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ stripe_customer_id: customerId })
+          .eq("id", userId);
+      }
+
+      const { claimFoundingSpot } = await import("@/lib/founding/rpc");
+      const { spot, error: claimError } = await claimFoundingSpot(supabaseAdmin, userId, sessionId);
+      if (claimError) return new Response(claimError, { status: 500 });
+
+      if (spot == null) {
+        /**
+         * Sold out between opening checkout and paying. Somebody has been
+         * charged for something that no longer exists, so this is a refund,
+         * not a log line. Returned loudly enough to be visible in the webhook
+         * event list on /admin/billing.
+         */
+        return Response.json({
+          received: true,
+          founding: "sold_out_after_payment",
+          action_required: "REFUND",
+          user_id: userId,
+          session_id: sessionId,
+        });
+      }
+
+      return Response.json({
+        received: true,
+        founding_number: spot,
+        plan: "founding_lifetime",
+        user_id: userId,
+      });
+    }
 
     const patch: { plan: string; stripe_customer_id?: string } = { plan };
     if (customerId) patch.stripe_customer_id = customerId;

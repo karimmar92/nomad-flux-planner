@@ -24,28 +24,40 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { oneOf } from "@/lib/validate";
+import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
 
-const STRIPE_API = "https://api.stripe.com/v1";
+type RpcClient = {
+  rpc: (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => PromiseLike<{ data: unknown; error: unknown }>;
+};
 
-async function assertAdmin(ctx: { supabase: { rpc: Function }; userId: string }) {
-  const { data, error } = (await ctx.supabase.rpc("has_role", {
+/**
+ * The only thing between a stranger and the ability to grant paid access.
+ * Called first in every exported function here, with no exceptions.
+ */
+async function assertAdmin(ctx: { supabase: unknown; userId: string }) {
+  const { data, error } = await (ctx.supabase as RpcClient).rpc("has_role", {
     _user_id: ctx.userId,
     _role: "admin",
-  })) as { data: unknown; error: unknown };
+  });
   if (error || !data) throw new Error("Forbidden");
 }
 
-/** Stripe GET. The billing module only had POST, and reads need one too. */
-async function stripeGet<T>(path: string): Promise<T> {
-  const key = process.env["STRIPE_SECRET_KEY"];
-  if (!key) throw new Error("Billing is not configured yet.");
-  const res = await fetch(`${STRIPE_API}${path}`, {
-    headers: { Authorization: `Bearer ${key}` },
-  });
-  const json = (await res.json()) as { error?: { message: string } };
-  if (!res.ok) throw new Error(json.error?.message ?? "Stripe request failed.");
-  return json as T;
-}
+/**
+ * Reads go through the SAME gateway client as writes.
+ *
+ * This used to call api.stripe.com directly with STRIPE_SECRET_KEY. That key
+ * does not exist in this project: Lovable's connector gateway holds the real
+ * secret and the values in STRIPE_*_API_KEY are connection identifiers that
+ * fail authentication against Stripe directly.
+ *
+ * The effect was worse than it looks. Search swallowed the failure and quietly
+ * showed every account as having no Stripe state, and reconcile threw outright,
+ * so the one tool meant to repair a broken payment was itself broken.
+ */
 
 export type BillingRow = {
   userId: string;
@@ -75,7 +87,12 @@ export function expectedPlanFor(input: {
 }): string {
   // A founding member paid once, permanently. Nothing about a subscription can
   // take that away, including the absence of one.
-  if (input.foundingNumber != null) return "pro";
+  //
+  // Returns "founding_lifetime" rather than "pro" so this agrees with what
+  // claim_founding_spot() writes. If the two disagreed, every founding member
+  // would show as permanent drift on the admin page and reconciling them would
+  // silently downgrade the label on every run.
+  if (input.foundingNumber != null) return "founding_lifetime";
 
   const entitling = ["active", "trialing", "past_due"];
   if (!input.subscriptionStatus || !entitling.includes(input.subscriptionStatus)) return "free";
@@ -83,21 +100,29 @@ export function expectedPlanFor(input: {
 }
 
 type StripeSubList = {
-  data: Array<{ status: string; items?: { data?: Array<{ price?: { id?: string } }> } }>;
+  data: Array<{
+    status: string;
+    items?: { data?: Array<{ price?: { id?: string; lookup_key?: string | null } }> };
+  }>;
 };
 
-async function stripeStateFor(customerId: string | null) {
+async function stripeStateFor(customerId: string | null, env: StripeEnv) {
   if (!customerId) return { status: null, priceId: null };
-  const subs = await stripeGet<StripeSubList>(
-    `/subscriptions?customer=${encodeURIComponent(customerId)}&status=all&limit=10`,
-  );
+  const stripe = createStripeClient(env);
+  const subs = (await stripe.subscriptions.list({
+    customer: customerId,
+    status: "all",
+    limit: 10,
+  })) as unknown as StripeSubList;
   // Prefer an entitling subscription if the customer has several, which happens
   // after an upgrade leaves an old cancelled one behind.
   const entitling = ["active", "trialing", "past_due"];
   const chosen = subs.data.find((s) => entitling.includes(s.status)) ?? subs.data[0] ?? null;
+  // Lookup key, not the price id: ids differ between sandbox and live, so
+  // entitlement must never be decided from one. See stripe-prices.ts.
   return {
     status: chosen?.status ?? null,
-    priceId: chosen?.items?.data?.[0]?.price?.id ?? null,
+    priceId: chosen?.items?.data?.[0]?.price?.lookup_key ?? null,
   };
 }
 
@@ -111,10 +136,15 @@ async function stripeStateFor(customerId: string | null) {
  */
 export const adminSearchBilling = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { query: string }) => ({
+  .inputValidator((d: { query: string; environment?: string }) => ({
     query: String(d?.query ?? "")
       .trim()
       .slice(0, 200),
+    environment: oneOf(
+      d?.environment ?? "sandbox",
+      ["sandbox", "live"] as const,
+      "Environment",
+    ) as StripeEnv,
   }))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
@@ -165,7 +195,7 @@ export const adminSearchBilling = createServerFn({ method: "POST" })
       let status: string | null = null;
       let priceId: string | null = null;
       try {
-        const s = await stripeStateFor(customerId);
+        const s = await stripeStateFor(customerId, data.environment);
         status = s.status;
         priceId = s.priceId;
       } catch {
@@ -230,9 +260,14 @@ export const adminListWebhookEvents = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Cast: webhook_events is not in the generated types yet. See webhook-log.ts.
-    const client = supabaseAdmin as unknown as {
-      from: (t: string) => any;
+    type Query = {
+      select: (cols: string) => Query;
+      order: (col: string, opts: { ascending: boolean }) => Query;
+      limit: (n: number) => Query;
+      eq: (col: string, val: string) => Query;
+      then: PromiseLike<{ data: unknown; error: { message: string } | null }>["then"];
     };
+    const client = supabaseAdmin as unknown as { from: (t: string) => Query };
     let q = client
       .from("webhook_events")
       .select(
@@ -273,7 +308,14 @@ export const adminListWebhookEvents = createServerFn({ method: "POST" })
  */
 export const adminReconcileEntitlement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string }) => ({ userId: String(d?.userId ?? "").slice(0, 64) }))
+  .inputValidator((d: { userId: string; environment?: string }) => ({
+    userId: String(d?.userId ?? "").slice(0, 64),
+    environment: oneOf(
+      d?.environment ?? "sandbox",
+      ["sandbox", "live"] as const,
+      "Environment",
+    ) as StripeEnv,
+  }))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     if (!data.userId) throw new Error("A user id is required.");
@@ -293,7 +335,7 @@ export const adminReconcileEntitlement = createServerFn({ method: "POST" })
     const customerId = (p["stripe_customer_id"] as string | null) ?? null;
     const foundingNumber = (p["founding_number"] as number | null) ?? null;
 
-    const { status, priceId } = await stripeStateFor(customerId);
+    const { status, priceId } = await stripeStateFor(customerId, data.environment);
     const expected = expectedPlanFor({
       foundingNumber,
       subscriptionStatus: status,

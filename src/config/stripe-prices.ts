@@ -72,7 +72,6 @@ export function isOneTimePlan(plan: PaidPlanId): boolean {
   return plan in ONE_TIME_KEYS;
 }
 
-
 /** Seat range for the per-seat tier, enforced server-side as well as in Stripe. */
 export const TEAMS_SEAT_MIN = 10;
 export const TEAMS_SEAT_MAX = 500;

@@ -46,7 +46,6 @@ export type Tier = {
   recommended?: boolean;
 };
 
-
 /** Months charged on the annual plan. 10 of 12 = two months free. */
 export const ANNUAL_MONTHS_CHARGED = 10;
 
@@ -141,10 +140,26 @@ export const TIERS: Tier[] = [
   },
 ];
 
-export function tier(id: PlanId): Tier {
+/**
+ * Never throws on an unrecognised plan.
+ *
+ * It used to, and the blast radius was wrong: a bad value in profiles.plan
+ * would crash the profile page of the one person guaranteed to be looking at
+ * it, the customer who had just paid. A founding purchase briefly wrote
+ * "founding_lifetime" here and that is exactly what happened.
+ *
+ * Falling back to the free tier degrades the display without taking the page
+ * down. Entitlement is decided by PLAN_RANK in entitlements.ts, not here, so
+ * this cannot grant anyone anything they have not paid for.
+ */
+export function tier(id: PlanId | string): Tier {
   const found = TIERS.find((t) => t.id === id);
-  if (!found) throw new Error(`Unknown plan: ${id}`);
-  return found;
+  if (found) return found;
+  if (id === "founding_lifetime") {
+    const pro = TIERS.find((t) => t.id === "pro");
+    if (pro) return pro;
+  }
+  return TIERS.find((t) => t.id === "free")!;
 }
 
 /** Display name for any plan, including tiers that are not in the public table. */
@@ -154,4 +169,3 @@ export function tierName(id: PlanId): string {
 }
 
 export const PAID_TIERS = TIERS.filter((t) => t.monthlyUsd > 0);
-

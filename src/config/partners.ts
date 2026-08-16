@@ -94,12 +94,7 @@
  * enforce this by rendering a single card outside the catalogue.
  */
 
-export type PartnerCategory =
-  | "esim"
-  | "insurance"
-  | "transport"
-  | "banking"
-  | "formation";
+export type PartnerCategory = "esim" | "insurance" | "transport" | "banking" | "formation";
 
 /**
  * Categories of partner we will never carry, whatever they pay.
@@ -116,13 +111,7 @@ export const PROHIBITED_PARTNER_TYPES = [
 ] as const;
 
 /** Coarse coverage regions, matching the `region` field on the cities dataset. */
-export type PartnerRegion =
-  | "*"
-  | "Europe"
-  | "Asia"
-  | "Latin America"
-  | "Africa"
-  | "Middle East";
+export type PartnerRegion = "*" | "Europe" | "Asia" | "Latin America" | "Africa" | "Middle East";
 
 export interface Partner {
   id: string;
@@ -150,7 +139,6 @@ export interface Partner {
  */
 export const BANKING_DISCLAIMER =
   "Information only, not financial advice. Availability, fees and features depend on your country of residence. Check the provider's terms.";
-
 
 /**
  * Verdicts from src/lib/formation/eligibility.ts on which formation links must
@@ -426,7 +414,6 @@ export function isCataloguePlacement(placement: PartnerPlacement): boolean {
   return CATALOGUE_PLACEMENTS.includes(placement);
 }
 
-
 /** Partners for a category, in editorial order. Never sorted by payout. */
 export function partnersByCategory(category: PartnerCategory): Partner[] {
   return PARTNERS.filter((p) => p.category === category);
@@ -445,7 +432,6 @@ export function partnersForRegion(category: PartnerCategory, region?: string): P
       p.regions.includes(region as PartnerRegion),
   );
 }
-
 
 export function getPartner(id: string): Partner | undefined {
   return PARTNERS.find((p) => p.id === id);
