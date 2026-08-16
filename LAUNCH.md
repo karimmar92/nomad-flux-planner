@@ -121,7 +121,12 @@ receipts.
 - [ ] **YOU:** Cancellation enabled in portal
 - [ ] **YOU:** Invoice history enabled
 
-### 2.3 Set the environment variables in Vercel
+### 2.3 Set the environment variables where the site is actually hosted
+
+The live site is `nomad-flux-planner.lovable.app`, so these go in **Lovable's**
+project settings, not Vercel. Setting them in Vercel while Lovable serves the
+traffic is a long afternoon of confusion: checkout keeps reporting "Billing is
+not configured yet" and everything in the dashboard looks correct.
 
 ```
 SITE_URL=https://yourdomain.com        # no trailing slash

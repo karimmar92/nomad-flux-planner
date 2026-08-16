@@ -167,10 +167,10 @@ function TierCard({
         >
           Start tracking, no account needed
         </Link>
-      ) : (
+      ) : onChoose ? (
         <button
           type="button"
-          onClick={() => onChoose?.(tier, billing)}
+          onClick={() => onChoose(tier, billing)}
           disabled={busy}
           className={cn(
             busy && "opacity-60",
@@ -180,6 +180,34 @@ function TierCard({
         >
           {busy ? "Opening checkout…" : `Choose ${tier.name}`}
         </button>
+      ) : (
+        /**
+         * NO onChoose: link to /pricing instead of rendering a dead button.
+         *
+         * This is the bug that made the homepage pricing buttons do nothing.
+         * The landing page renders `<PricingTable compact />` with no handler,
+         * so the old unconditional button called `onChoose?.(...)` against
+         * undefined and silently returned. No error, no navigation, no toast —
+         * the single worst failure mode, because it looks like a broken site
+         * and it sits on the page paid traffic lands on.
+         *
+         * Falling back to a Link rather than hiding the button keeps the
+         * pricing section persuasive on the homepage while making the control
+         * honest: it goes somewhere. Checkout itself needs an account, and
+         * /pricing owns that flow, so this is also the correct destination.
+         *
+         * Rendering a <button> that may have no handler is the anti-pattern.
+         * If a future caller needs a button here, it must pass onChoose.
+         */
+        <Link
+          to="/pricing"
+          className={cn(
+            "mt-5 rounded-md py-2.5 text-center text-sm font-medium",
+            tier.recommended ? "bg-primary text-primary-foreground" : "border border-border",
+          )}
+        >
+          Choose {tier.name}
+        </Link>
       )}
     </div>
   );
