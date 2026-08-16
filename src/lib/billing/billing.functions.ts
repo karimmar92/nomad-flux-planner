@@ -303,6 +303,11 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * view the session was created successfully.
          */
         ui_mode: "embedded" as "embedded_page",
+        // Managed Payments (on by default on the account) rejects custom_text,
+        // tax_id_collection and consent_collection. Those carry the §312j
+        // wording and the withdrawal consent, so it is disabled per request.
+        ...({ managed_payments: { enabled: false } } as Record<string, unknown>),
+
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
