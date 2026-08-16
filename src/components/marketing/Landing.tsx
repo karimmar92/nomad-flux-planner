@@ -433,7 +433,7 @@ function PlanCard({
       {search ? (
         <Link
           to={to}
-          search={search}
+          search={search as never}
           className={cn(
             "mt-7 rounded-full py-3 text-center text-sm font-medium transition-colors",
             featured
