@@ -132,7 +132,7 @@ export async function auditToPdf(
     }
   };
 
-  line(`${orgName} — presence audit`, 16, true, 22);
+  line(`${neutraliseFormula(orgName)} — presence audit`, 16, true, 22);
   line(`Rolling 12 months: ${overview.windowStart} to ${overview.windowEnd}`, 10);
   line(`${PE_BENCHMARK_LABEL} (${PE_BENCHMARK_DAYS} days)`, 9);
   y += 6;
@@ -153,7 +153,7 @@ export async function auditToPdf(
     );
     for (const m of c.members) {
       line(
-        `   · ${m.display_name}: ${m.days} days${m.openStay ? " (open stay)" : ""} — ${m.risk}`,
+        `   · ${neutraliseFormula(m.display_name)}: ${m.days} days${m.openStay ? " (open stay)" : ""} — ${m.risk}`,
         9,
         false,
         12,
