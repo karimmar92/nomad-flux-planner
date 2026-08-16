@@ -187,8 +187,10 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
         billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
+        // §312j BGB: the button must state the order obliges payment. Stripe
+        // only accepts submit_type in payment mode — subscriptions get their
+        // own "Subscribe" wording, which carries the same meaning.
+        ...(isOneTime ? { submit_type: "pay" as const } : {}),
         /**
          * NO custom_text / consent_collection / tax_id_collection.
          *
