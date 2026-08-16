@@ -8,7 +8,9 @@ import { useProfile } from "@/lib/store";
 import { PricingTable } from "@/components/PricingTable";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
-import { createCheckoutSession } from "@/lib/billing/billing.functions";
+import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
+import { getStripeEnvironment } from "@/lib/stripe";
+import type { PaidPlanId } from "@/config/stripe-prices";
 import { useSession } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
