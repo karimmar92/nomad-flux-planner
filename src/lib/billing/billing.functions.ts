@@ -118,7 +118,20 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
-        ui_mode: "embedded_page",
+        /**
+         * "embedded", NOT "embedded_page".
+         *
+         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
+         * @stripe/react-stripe-js mount a session created with ui_mode
+         * "embedded". Given "embedded_page" the client secret is for a
+         * different rendering path, so Stripe.js initialises, draws its
+         * skeleton, then fails: the user sees a long load followed by
+         * "Something went wrong. Please try again or contact the merchant."
+         *
+         * Nothing in our logs shows it, because from the server's point of
+         * view the session was created successfully.
+         */
+        ui_mode: "embedded",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [
@@ -168,7 +181,16 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         consent_collection: { terms_of_service: "required" },
       });
 
-      return { clientSecret: session.client_secret ?? "" };
+      /**
+       * No `?? ""`. An empty client secret is not a checkout session; passing
+       * one on turns a clear server-side failure into an opaque error inside
+       * Stripe's iframe, which is far harder to diagnose and is what the user
+       * actually saw.
+       */
+      if (!session.client_secret) {
+        return { error: "Stripe did not return a checkout session. Please try again." };
+      }
+      return { clientSecret: session.client_secret };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
@@ -234,7 +256,20 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        ui_mode: "embedded_page",
+        /**
+         * "embedded", NOT "embedded_page".
+         *
+         * <EmbeddedCheckoutProvider> and <EmbeddedCheckout> from
+         * @stripe/react-stripe-js mount a session created with ui_mode
+         * "embedded". Given "embedded_page" the client secret is for a
+         * different rendering path, so Stripe.js initialises, draws its
+         * skeleton, then fails: the user sees a long load followed by
+         * "Something went wrong. Please try again or contact the merchant."
+         *
+         * Nothing in our logs shows it, because from the server's point of
+         * view the session was created successfully.
+         */
+        ui_mode: "embedded",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
@@ -263,7 +298,16 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
         consent_collection: { terms_of_service: "required" },
       });
 
-      return { clientSecret: session.client_secret ?? "" };
+      /**
+       * No `?? ""`. An empty client secret is not a checkout session; passing
+       * one on turns a clear server-side failure into an opaque error inside
+       * Stripe's iframe, which is far harder to diagnose and is what the user
+       * actually saw.
+       */
+      if (!session.client_secret) {
+        return { error: "Stripe did not return a checkout session. Please try again." };
+      }
+      return { clientSecret: session.client_secret };
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
