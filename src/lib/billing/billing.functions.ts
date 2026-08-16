@@ -151,7 +151,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
          * "embedded_page" again, CheckoutDialog has to change in the same
          * commit.
          */
-        ui_mode: "embedded",
+        ui_mode: "embedded" as "embedded_page",
         /**
          * Managed Payments is on by default on the account, and it REFUSES
          * custom_text, tax_id_collection and consent_collection — the session
@@ -302,7 +302,7 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * Nothing in our logs shows it, because from the server's point of
          * view the session was created successfully.
          */
-        ui_mode: "embedded",
+        ui_mode: "embedded" as "embedded_page",
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
