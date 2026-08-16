@@ -303,11 +303,6 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * view the session was created successfully.
          */
         ui_mode: "embedded" as "embedded_page",
-        // Managed Payments (on by default on the account) rejects custom_text,
-        // tax_id_collection and consent_collection. Those carry the §312j
-        // wording and the withdrawal consent, so it is disabled per request.
-        ...({ managed_payments: { enabled: false } } as Record<string, unknown>),
-
         return_url: data.returnUrl,
         customer: customerId,
         line_items: [{ price: price.id, quantity: 1 }],
@@ -319,22 +314,13 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          */
         metadata: { user_id: userId, userId, founding: "1" },
         payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        tax_id_collection: { enabled: true },
         billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
         submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
+        // See createCheckoutSession: Managed Payments rejects custom_text,
+        // consent_collection and tax_id_collection, so they are omitted here
+        // too and Stripe supplies its own equivalents at checkout.
       });
+
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
