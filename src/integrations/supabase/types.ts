@@ -1015,15 +1015,7 @@ export type Database = {
           status: string | null
           user_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "org_members_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       org_member_presence: {
         Row: {
@@ -1035,15 +1027,7 @@ export type Database = {
           trip_id: string | null
           user_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "org_members_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       radar_profiles: {
         Row: {
@@ -1130,6 +1114,31 @@ export type Database = {
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      org_directory_rows: {
+        Args: never
+        Returns: {
+          display_name: string
+          invite_email: string
+          joined_at: string
+          member_id: string
+          org_id: string
+          role: string
+          status: string
+          user_id: string
+        }[]
+      }
+      org_presence_rows: {
+        Args: never
+        Returns: {
+          country_code: string
+          entry_date: string
+          exit_date: string
+          logged_at: string
+          org_id: string
+          trip_id: string
+          user_id: string
+        }[]
       }
       radar_peers: {
         Args: never
