@@ -63,8 +63,16 @@ export function BillingCard() {
     setBusy(true);
     setError(null);
     try {
-      const { url } = await createPortalSession();
-      window.location.href = url;
+      const result = await createPortalSession({
+        data: {
+          environment: getStripeEnvironment(),
+          returnUrl: `${window.location.origin}/profile`,
+        },
+      });
+      if ("error" in result) throw new Error(result.error);
+      // Same tab: the portal is the cancellation route (§312k BGB) and must not
+      // depend on a popup surviving a blocker.
+      window.location.href = result.url;
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Could not open the billing portal. Please try again.",
