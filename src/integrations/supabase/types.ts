@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_state: {
+        Row: {
+          last_band: number
+          last_error: string | null
+          last_sent_at: string | null
+          rule_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_band?: number
+          last_error?: string | null
+          last_sent_at?: string | null
+          rule_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_band?: number
+          last_error?: string | null
+          last_sent_at?: string | null
+          rule_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       b2b_leads: {
         Row: {
           company_name: string
@@ -570,6 +597,7 @@ export type Database = {
           last_active_at: string | null
           links: Json
           looking_for: string[]
+          nationality: string | null
           plan: string
           radar_city_id: string | null
           referral_code: string
@@ -600,6 +628,7 @@ export type Database = {
           last_active_at?: string | null
           links?: Json
           looking_for?: string[]
+          nationality?: string | null
           plan?: string
           radar_city_id?: string | null
           referral_code: string
@@ -630,6 +659,7 @@ export type Database = {
           last_active_at?: string | null
           links?: Json
           looking_for?: string[]
+          nationality?: string | null
           plan?: string
           radar_city_id?: string | null
           referral_code?: string
@@ -1011,6 +1041,48 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_events: {
+        Row: {
+          delivery_count: number
+          error: string | null
+          id: string
+          payload: Json
+          processed_at: string | null
+          received_at: string
+          result: Json | null
+          status: string
+          stripe_event_id: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          delivery_count?: number
+          error?: string | null
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          received_at?: string
+          result?: Json | null
+          status?: string
+          stripe_event_id: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          delivery_count?: number
+          error?: string | null
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          received_at?: string
+          result?: Json | null
+          status?: string
+          stripe_event_id?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       org_member_directory: {
@@ -1154,6 +1226,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      purge_old_webhook_events: { Args: never; Returns: number }
       radar_peers: {
         Args: never
         Returns: {
