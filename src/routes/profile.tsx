@@ -10,8 +10,31 @@ import { HeardAboutField } from "@/components/referrals/HeardAboutField";
 import { useSession } from "@/lib/use-session";
 import { DeleteAccount } from "@/components/account/DeleteAccount";
 import { BillingCard } from "@/components/billing/BillingCard";
+import { CheckoutReturn } from "@/components/billing/CheckoutReturn";
 
 export const Route = createFileRoute("/profile")({
+  /**
+   * The checkout return lands here as ?checkout=…&session_id=…
+   *
+   * Both were previously ignored, so a buyer came back from paying to a page
+   * that said nothing and a product that still behaved as if they had not. The
+   * session id is the only thing needed; it is verified against Stripe
+   * server-side and grants nothing on its own.
+   */
+  validateSearch: (s: Record<string, unknown>): { checkout?: string; session_id?: string } => {
+    /**
+     * Keys are OMITTED when absent, not set to undefined.
+     *
+     * Under exactOptionalPropertyTypes, returning `{ session_id: undefined }`
+     * makes the property required-and-possibly-undefined, which forced every
+     * one of the twelve `<Link to="/profile">` call sites in the app to pass a
+     * `search` prop. Building the object conditionally keeps them optional.
+     */
+    const out: { checkout?: string; session_id?: string } = {};
+    if (typeof s["checkout"] === "string") out.checkout = s["checkout"];
+    if (typeof s["session_id"] === "string") out.session_id = s["session_id"];
+    return out;
+  },
   head: () => ({
     meta: [
       { title: `Your profile | ${APP_NAME}` },
@@ -35,10 +58,15 @@ function ProfilePage() {
   const { profile, patchProfile } = useProfile();
   const { saved, toggle } = useSavedCities();
   const { signedIn } = useSession();
+  const { session_id: sessionId } = Route.useSearch();
 
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold tracking-tight">Your profile</h1>
+
+      {/* First thing on the page after paying, above everything else. The
+          buyer's only question at this moment is "did that work". */}
+      {sessionId ? <CheckoutReturn sessionId={sessionId} /> : null}
 
       <section className="panel grid gap-4 p-4 sm:grid-cols-2">
         <Field label="Display name">

@@ -42,6 +42,7 @@ import {
 } from "@/config/stripe-prices";
 
 import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib/stripe.server";
+import { FOUNDING_PRICE_LOOKUP_KEY } from "@/config/founding";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
 type PortalResult = { url: string } | { error: string };
@@ -210,7 +211,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         custom_text: {
           submit: {
             message:
-              "By completing this order you enter a paid subscription. It renews automatically until cancelled, and you can cancel any time from your account.",
+              "By completing this order you enter a paid subscription. The amount shown is the total — no VAT is added. It renews automatically until cancelled, and you can cancel any time from your account.",
           },
           terms_of_service_acceptance: {
             message:
@@ -319,8 +320,11 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
         submit_type: "pay",
         custom_text: {
           submit: {
+            // States the total explicitly. The buyer is looking at the amount
+            // right now, and "is anything going to be added?" is the last
+            // question in their head before they click.
             message:
-              "One payment. No subscription, nothing to cancel, and no renewal. This grants Pro access for as long as Driftly exists.",
+              "One payment. The amount shown is the total — no VAT is added, there is no subscription, nothing to cancel and no renewal. This grants Pro access for as long as Driftly exists.",
           },
           terms_of_service_acceptance: {
             message:
@@ -394,3 +398,121 @@ export const createPortalSession = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
+
+/**
+ * Verify a completed checkout on return, and grant entitlement immediately.
+ *
+ * ── WHY THIS EXISTS: THE WEBHOOK IS A SINGLE POINT OF FAILURE ──────────
+ *
+ * Until now the only path from "money taken" to "features unlocked" was the
+ * Stripe webhook. That is one hop, off-site, that can fail for reasons the
+ * buyer will never see and we cannot control from here: the endpoint is not
+ * registered, the URL changed after a deploy, the signing secret does not
+ * match, the proxy returns 403, Stripe retries for three days and gives up.
+ *
+ * Every one of those failures looks identical to the customer. They pay, they
+ * come back, and the product behaves as though nothing happened. That is the
+ * single most damaging thing an online shop can do, and it is exactly what
+ * happened here: a completed payment, and the arbitrage page still blurred.
+ *
+ * So this is the second path, which is what any serious checkout has:
+ *
+ *   RETURN PATH (this function)  — instant, runs while the buyer is watching,
+ *                                  and covers the case where the webhook is
+ *                                  misconfigured or slow.
+ *   WEBHOOK (webhook-handler.ts) — authoritative and asynchronous, covers the
+ *                                  buyer who closes the tab before redirect.
+ *
+ * Neither is trusted alone and both are idempotent, so whichever arrives first
+ * wins and the second is a no-op. That is the whole design.
+ *
+ * ── WHY IT IS SAFE ────────────────────────────────────────────────────
+ *
+ * The client sends only a session id, which is not a secret worth stealing on
+ * its own. Everything that matters is checked here against Stripe:
+ *
+ *   1. The session must exist and be `payment_status: "paid"`. We never take
+ *      the client's word that a payment succeeded.
+ *   2. The session must belong to the CALLER. A session id belonging to
+ *      somebody else grants nothing, which is what stops a copied return URL
+ *      from being replayed to upgrade a different account.
+ *   3. Entitlement is derived from the price lookup key on the session, not
+ *      from anything the client sent.
+ */
+export const verifyCheckoutSession = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { sessionId: string; environment: string }) => ({
+    sessionId: String(d?.sessionId ?? ""),
+    environment: envOf(d?.environment),
+  }))
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<
+      { plan: string; foundingNumber: number | null } | { error: string; pending?: boolean }
+    > => {
+      const { userId } = context;
+      if (!data.sessionId || data.sessionId.startsWith("{")) {
+        // "{CHECKOUT_SESSION_ID}" arrives verbatim when Stripe did not
+        // substitute it. Treated as "nothing to verify" rather than an error.
+        return { error: "No checkout session to verify.", pending: true };
+      }
+
+      try {
+        const stripe = createStripeClient(data.environment);
+        const session = (await stripe.checkout.sessions.retrieve(data.sessionId, {
+          expand: ["line_items.data.price"],
+        })) as unknown as {
+          payment_status?: string;
+          status?: string;
+          customer?: string | null;
+          client_reference_id?: string | null;
+          metadata?: Record<string, string> | null;
+          line_items?: { data?: { price?: { lookup_key?: string | null } | null }[] };
+        };
+
+        // 2. Ownership. Checked before anything is granted.
+        const owner = session.client_reference_id ?? session.metadata?.["user_id"] ?? null;
+        if (owner !== userId) {
+          return { error: "That checkout session belongs to a different account." };
+        }
+
+        // 1. Actually paid. Delayed methods land here unpaid and settle later,
+        // which is what the webhook is for — so this is `pending`, not an error.
+        if (session.payment_status !== "paid") {
+          return { error: "Payment has not completed yet.", pending: true };
+        }
+
+        const lookupKey = session.line_items?.data?.[0]?.price?.lookup_key ?? null;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+        // Store the customer link. Its absence is what previously made the
+        // admin repair tool unable to find a payment that had definitely
+        // happened.
+        if (typeof session.customer === "string") {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ stripe_customer_id: session.customer })
+            .eq("id", userId);
+        }
+
+        // 3. Entitlement from the lookup key, never from the client.
+        if (lookupKey === FOUNDING_PRICE_LOOKUP_KEY) {
+          const { claimFoundingSpot } = await import("@/lib/founding/rpc");
+          const { spot, error } = await claimFoundingSpot(supabaseAdmin, userId, data.sessionId);
+          if (error) return { error };
+          return { plan: "founding_lifetime", foundingNumber: spot };
+        }
+
+        const { planForPriceId } = await import("@/config/stripe-prices");
+        const plan = lookupKey ? planForPriceId(lookupKey) : null;
+        if (!plan) return { error: "That purchase does not map to a plan." };
+
+        await supabaseAdmin.from("profiles").update({ plan }).eq("id", userId);
+        return { plan, foundingNumber: null };
+      } catch (error) {
+        return { error: getStripeErrorMessage(error) };
+      }
+    },
+  );
