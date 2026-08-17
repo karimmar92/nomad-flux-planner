@@ -7,6 +7,7 @@
  * the Vietnam figures model the published PIT treatment of service income.
  * Both are labelled as estimates in the UI.
  */
+import { clampFeeRate, type FeeBasis } from "@/config/platforms";
 
 /** Working assumption for USD→EUR conversion. Update alongside seed data. */
 export const EUR_PER_USD = 0.86;
@@ -26,6 +27,15 @@ export type FreelanceInputs = {
   workdaysPerMonth: number;
   /** Platform cut as a fraction (0.1 = 10%). */
   platformFeePct: number;
+  /**
+   * What the cut is charged on. See config/platforms.ts.
+   *
+   * Optional so existing callers and stored inputs keep working; absent means
+   * "all", which is what the model did before this existed. Defaulting to the
+   * old behaviour rather than the more generous one matters: a silent switch to
+   * "hourly" would quietly raise everybody's projected take-home.
+   */
+  platformFeeBasis?: FeeBasis;
   /** Dialer, phone, tools — monthly, USD. */
   businessExpensesUsd: number;
 };
@@ -49,6 +59,10 @@ export type FreelanceIncome = {
   hourlyBilledUsd: number;
   appointmentBilledUsd: number;
   grossBilledUsd: number;
+  /** What the platform took, in USD. Shown so the number is checkable. */
+  platformCutUsd: number;
+  /** The revenue the cut was charged on. Differs from gross on "hourly". */
+  feeBaseUsd: number;
   afterPlatformUsd: number;
   /** Monthly profit before tax and insurance, USD. */
   profitUsd: number;
@@ -59,11 +73,31 @@ export function computeFreelanceIncome(i: FreelanceInputs): FreelanceIncome {
   const hourlyBilledUsd = hours * i.hourlyRateUsd;
   const appointmentBilledUsd = i.clients * i.appointmentsPerClient * i.appointmentFeeUsd;
   const grossBilledUsd = hourlyBilledUsd + appointmentBilledUsd;
-  const afterPlatformUsd = grossBilledUsd * (1 - i.platformFeePct);
+
+  /**
+   * The cut is charged on a BASE, which is not always the gross.
+   *
+   * This used to be `grossBilledUsd * (1 - platformFeePct)`, which assumes
+   * every platform takes a cut of performance fees as well as hourly work.
+   * Many do; some only intermediate the hourly engagement. On the default
+   * inputs that assumption is worth about $420 a month at a 15% rate, and it
+   * was invisible and unchangeable.
+   *
+   * `platformCutUsd` and `feeBaseUsd` are returned rather than folded away so
+   * the UI can show what was taken and what it was taken from. A fee the user
+   * cannot reconcile against their own statement is a fee they will not trust.
+   */
+  const rate = clampFeeRate(i.platformFeePct);
+  const feeBaseUsd = i.platformFeeBasis === "hourly" ? hourlyBilledUsd : grossBilledUsd;
+  const platformCutUsd = feeBaseUsd * rate;
+  const afterPlatformUsd = grossBilledUsd - platformCutUsd;
+
   return {
     hourlyBilledUsd,
     appointmentBilledUsd,
     grossBilledUsd,
+    platformCutUsd,
+    feeBaseUsd,
     afterPlatformUsd,
     profitUsd: afterPlatformUsd - i.businessExpensesUsd,
   };

@@ -18,28 +18,51 @@ import type { Trip } from "./types";
 
 describe("mergeRanges", () => {
   it("leaves disjoint ranges alone", () => {
-    expect(mergeRanges([{ from: 1, to: 3 }, { from: 10, to: 12 }])).toEqual([
+    expect(
+      mergeRanges([
+        { from: 1, to: 3 },
+        { from: 10, to: 12 },
+      ]),
+    ).toEqual([
       { from: 1, to: 3 },
       { from: 10, to: 12 },
     ]);
   });
 
   it("merges overlapping ranges", () => {
-    expect(mergeRanges([{ from: 1, to: 10 }, { from: 5, to: 20 }])).toEqual([{ from: 1, to: 20 }]);
+    expect(
+      mergeRanges([
+        { from: 1, to: 10 },
+        { from: 5, to: 20 },
+      ]),
+    ).toEqual([{ from: 1, to: 20 }]);
   });
 
   it("merges adjacent ranges, because they describe continuous presence", () => {
-    expect(mergeRanges([{ from: 1, to: 5 }, { from: 6, to: 9 }])).toEqual([{ from: 1, to: 9 }]);
+    expect(
+      mergeRanges([
+        { from: 1, to: 5 },
+        { from: 6, to: 9 },
+      ]),
+    ).toEqual([{ from: 1, to: 9 }]);
   });
 
   it("absorbs a range fully inside another", () => {
-    expect(mergeRanges([{ from: 1, to: 100 }, { from: 40, to: 50 }])).toEqual([
-      { from: 1, to: 100 },
-    ]);
+    expect(
+      mergeRanges([
+        { from: 1, to: 100 },
+        { from: 40, to: 50 },
+      ]),
+    ).toEqual([{ from: 1, to: 100 }]);
   });
 
   it("does not care about input order", () => {
-    expect(mergeRanges([{ from: 50, to: 60 }, { from: 1, to: 55 }])).toEqual([{ from: 1, to: 60 }]);
+    expect(
+      mergeRanges([
+        { from: 50, to: 60 },
+        { from: 1, to: 55 },
+      ]),
+    ).toEqual([{ from: 1, to: 60 }]);
   });
 
   it("drops inverted ranges rather than producing negative days", () => {
@@ -55,12 +78,21 @@ describe("countDistinctDays", () => {
 
   it("counts an overlapping day once", () => {
     // The whole point. Naive summing gives 10 + 16 = 26; the union is 20.
-    expect(countDistinctDays([{ from: 1, to: 10 }, { from: 5, to: 20 }])).toBe(20);
+    expect(
+      countDistinctDays([
+        { from: 1, to: 10 },
+        { from: 5, to: 20 },
+      ]),
+    ).toBe(20);
   });
 
   it("handles three-way overlap", () => {
     expect(
-      countDistinctDays([{ from: 1, to: 10 }, { from: 1, to: 10 }, { from: 1, to: 10 }]),
+      countDistinctDays([
+        { from: 1, to: 10 },
+        { from: 1, to: 10 },
+        { from: 1, to: 10 },
+      ]),
     ).toBe(10);
   });
 
@@ -71,12 +103,20 @@ describe("countDistinctDays", () => {
 
 describe("findOverlaps", () => {
   it("reports the overlapping pair and how many days they share", () => {
-    const found = findOverlaps([{ from: 1, to: 10 }, { from: 5, to: 20 }]);
+    const found = findOverlaps([
+      { from: 1, to: 10 },
+      { from: 5, to: 20 },
+    ]);
     expect(found).toEqual([{ a: 0, b: 1, days: 6 }]);
   });
 
   it("reports nothing for clean records", () => {
-    expect(findOverlaps([{ from: 1, to: 4 }, { from: 5, to: 9 }])).toEqual([]);
+    expect(
+      findOverlaps([
+        { from: 1, to: 4 },
+        { from: 5, to: 9 },
+      ]),
+    ).toEqual([]);
   });
 });
 

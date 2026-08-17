@@ -20,10 +20,7 @@ export function inclusiveDays(startIso: string, endIso: string): number {
   return toDayIndex(endIso) - toDayIndex(startIso) + 1;
 }
 
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /** "Aug 2026" for an ISO date, without touching local time. */
 export function monthYearLabel(iso: string): string {

@@ -26,6 +26,7 @@ import {
 import { useProfile } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
+import { PLATFORM_PRESETS, clampFeeRate, presetById } from "@/config/platforms";
 import { isPro } from "@/lib/entitlements";
 import { LockedPreview } from "@/components/ProGate";
 
@@ -70,79 +71,79 @@ function CalculatorPage() {
   const best = rows[0];
 
   const rankingTable = (
-      <section className="panel overflow-hidden">
-        <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold">
-            {inc ? `${formatUsd(inc)}/mo across ${CITIES.length} cities` : "Enter an income"}
-          </h2>
-          <span className="label-xs">{APP_NAME}</span>
-        </div>
-        <div className="overflow-x-auto hide-scrollbar">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-border text-start">
-                <Th>City</Th>
-                <Th right>Cost/mo</Th>
-                <Th right>Surplus/mo</Th>
-                <Th right>Surplus/yr</Th>
-                <Th right>Rate</Th>
-                <Th right>To {formatUsd(targetNum)}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ city, arb, months }) => (
-                <tr key={city.id} className="border-b border-border/60 last:border-0">
-                  <td className="px-4 py-2.5">
-                    <Link
-                      to="/city/$cityId"
-                      params={{ cityId: city.id }}
-                      className="flex items-center gap-2 hover:text-primary"
-                    >
-                      <span aria-hidden>{flagEmoji(city.country_code)}</span>
-                      <span className="font-medium">{city.city}</span>
-                      <span className="text-xs text-muted-foreground">{city.country}</span>
-                    </Link>
-                  </td>
-                  <Td right>
-                    <div>{formatUsd(arb.cost)}</div>
-                    {formatLocal(arb.cost, city.local_currency) && (
-                      <div className="text-[11px] font-normal text-muted-foreground">
-                        {formatLocal(arb.cost, city.local_currency)}
-                        {isVolatileCurrency(city.local_currency) ? " ±" : ""}
-                      </div>
-                    )}
-                  </Td>
-                  <Td
-                    right
-                    className={cn(
-                      "font-semibold",
-                      inc ? (arb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
-                    )}
+    <section className="panel overflow-hidden">
+      <div className="flex items-baseline justify-between border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold">
+          {inc ? `${formatUsd(inc)}/mo across ${CITIES.length} cities` : "Enter an income"}
+        </h2>
+        <span className="label-xs">{APP_NAME}</span>
+      </div>
+      <div className="overflow-x-auto hide-scrollbar">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead>
+            <tr className="border-b border-border text-start">
+              <Th>City</Th>
+              <Th right>Cost/mo</Th>
+              <Th right>Surplus/mo</Th>
+              <Th right>Surplus/yr</Th>
+              <Th right>Rate</Th>
+              <Th right>To {formatUsd(targetNum)}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ city, arb, months }) => (
+              <tr key={city.id} className="border-b border-border/60 last:border-0">
+                <td className="px-4 py-2.5">
+                  <Link
+                    to="/city/$cityId"
+                    params={{ cityId: city.id }}
+                    className="flex items-center gap-2 hover:text-primary"
                   >
-                    {inc ? formatUsd(arb.surplusMonthly) : "—"}
-                  </Td>
-                  <Td right>{inc ? formatUsd(arb.surplusAnnual) : "—"}</Td>
-                  <Td right>{inc ? `${arb.savingsRate.toFixed(0)}%` : "—"}</Td>
-                  <Td right>
-                    {!inc || months == null
-                      ? "Never"
-                      : months < 12
-                        ? `${months.toFixed(1)} mo`
-                        : `${(months / 12).toFixed(1)} yr`}
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-          {tier === "luxury"
-            ? "Luxury is a derived estimate: serviced/luxury apartment, everything eaten out incl. fine dining, housekeeper, ride-hailing everywhere, premium gym/spa and a regional-trips budget — priced from each city's own component costs."
-            : `Surplus = income − (rent central + coworking + groceries + eating out + utilities + mobile + transport + gym) at the ${tier === "mid" ? "mid-range" : "lean"} tier.`}{" "}
-          Local-currency figures use reference rates as of {FX_AS_OF}; ± marks volatile
-          currencies. Each city page shows its last-verified date.
-        </p>
-      </section>
+                    <span aria-hidden>{flagEmoji(city.country_code)}</span>
+                    <span className="font-medium">{city.city}</span>
+                    <span className="text-xs text-muted-foreground">{city.country}</span>
+                  </Link>
+                </td>
+                <Td right>
+                  <div>{formatUsd(arb.cost)}</div>
+                  {formatLocal(arb.cost, city.local_currency) && (
+                    <div className="text-[11px] font-normal text-muted-foreground">
+                      {formatLocal(arb.cost, city.local_currency)}
+                      {isVolatileCurrency(city.local_currency) ? " ±" : ""}
+                    </div>
+                  )}
+                </Td>
+                <Td
+                  right
+                  className={cn(
+                    "font-semibold",
+                    inc ? (arb.surplusMonthly >= 0 ? "text-positive" : "text-negative") : "",
+                  )}
+                >
+                  {inc ? formatUsd(arb.surplusMonthly) : "—"}
+                </Td>
+                <Td right>{inc ? formatUsd(arb.surplusAnnual) : "—"}</Td>
+                <Td right>{inc ? `${arb.savingsRate.toFixed(0)}%` : "—"}</Td>
+                <Td right>
+                  {!inc || months == null
+                    ? "Never"
+                    : months < 12
+                      ? `${months.toFixed(1)} mo`
+                      : `${(months / 12).toFixed(1)} yr`}
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
+        {tier === "luxury"
+          ? "Luxury is a derived estimate: serviced/luxury apartment, everything eaten out incl. fine dining, housekeeper, ride-hailing everywhere, premium gym/spa and a regional-trips budget — priced from each city's own component costs."
+          : `Surplus = income − (rent central + coworking + groceries + eating out + utilities + mobile + transport + gym) at the ${tier === "mid" ? "mid-range" : "lean"} tier.`}{" "}
+        Local-currency figures use reference rates as of {FX_AS_OF}; ± marks volatile currencies.
+        Each city page shows its last-verified date.
+      </p>
+    </section>
   );
 
   const rankingSection = pro ? (
@@ -151,7 +152,8 @@ function CalculatorPage() {
     <>
       <section className="panel p-4">
         <h2 className="text-sm font-semibold">
-          {flagEmoji(focusCity.country_code)} {focusCity.city} on {inc ? formatUsd(inc) : "your income"}
+          {flagEmoji(focusCity.country_code)} {focusCity.city} on{" "}
+          {inc ? formatUsd(inc) : "your income"}
         </h2>
         <div className="mt-3 grid grid-cols-3 gap-3 text-sm">
           <div>
@@ -259,7 +261,8 @@ function CalculatorPage() {
           <span className="label-xs">Cost tier</span>
           <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
             {(["lean", "mid", "luxury"] as const).map((t) => (
-              <button type="button"
+              <button
+                type="button"
                 key={t}
                 onClick={() => setTier(t)}
                 className={cn(
@@ -295,16 +298,14 @@ function CalculatorPage() {
 function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
   const [open, setOpen] = useState(false);
   const [inputs, setInputs] = useState<FreelanceInputs>(DEFAULT_FREELANCE_INPUTS);
+  // Which preset is selected. Separate from the rate itself, because two
+  // presets can share a rate and differ only in what it is charged on.
+  const [presetId, setPresetId] = useState("flat-10");
   const income = computeFreelanceIncome(inputs);
   const scenarios = computeScenarios(inputs);
 
   const patch = (p: Partial<FreelanceInputs>) => setInputs((s) => ({ ...s, ...p }));
-  const numField = (
-    id: string,
-    label: string,
-    value: number,
-    set: (n: number) => void,
-  ) => (
+  const numField = (id: string, label: string, value: number, set: (n: number) => void) => (
     <div>
       <label className="label-xs" htmlFor={id}>
         {label}
@@ -321,7 +322,8 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
 
   return (
     <section className="panel">
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-baseline justify-between px-4 py-3 text-start"
       >
@@ -337,7 +339,8 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
               <span className="label-xs">Client slots</span>
               <div className="mt-1 flex rounded-md border border-border p-0.5 text-sm">
                 {([2, 3] as const).map((n) => (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={n}
                     onClick={() => patch({ clients: n })}
                     className={cn(
@@ -358,20 +361,83 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
             {numField("fl-fee", "Fee per appointment (USD)", inputs.appointmentFeeUsd, (n) =>
               patch({ appointmentFeeUsd: n }),
             )}
-            {numField(
-              "fl-appts",
-              "Appointments / client / mo",
-              inputs.appointmentsPerClient,
-              (n) => patch({ appointmentsPerClient: n }),
+            {numField("fl-appts", "Appointments / client / mo", inputs.appointmentsPerClient, (n) =>
+              patch({ appointmentsPerClient: n }),
             )}
           </div>
 
+          {/* ── Platform fee ─────────────────────────────────────────
+              Was a fixed 10% displayed but not editable, applied to all
+              revenue. Two platforms at 10% and 15% produce materially
+              different take-home, and whether the cut touches performance
+              fees changes it again — so both are inputs now, not assumptions. */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label-xs" htmlFor="fl-platform">
+                Platform fee
+              </label>
+              <select
+                id="fl-platform"
+                value={presetId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setPresetId(id);
+                  const preset = presetById(id);
+                  if (preset) {
+                    patch({ platformFeePct: preset.rate, platformFeeBasis: preset.basis });
+                  }
+                }}
+                className="mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-sm"
+              >
+                {PLATFORM_PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+                <option value="custom">Custom…</option>
+              </select>
+            </div>
+
+            {presetId === "custom" ? (
+              <div className="grid grid-cols-2 gap-2">
+                {numField("fl-feepct", "Fee %", Math.round(inputs.platformFeePct * 100), (n) =>
+                  patch({ platformFeePct: clampFeeRate(n / 100) }),
+                )}
+                <div>
+                  <label className="label-xs" htmlFor="fl-feebasis">
+                    Charged on
+                  </label>
+                  <select
+                    id="fl-feebasis"
+                    value={inputs.platformFeeBasis ?? "all"}
+                    onChange={(e) =>
+                      patch({ platformFeeBasis: e.target.value as "all" | "hourly" })
+                    }
+                    className="mt-1 w-full rounded-md border border-input bg-surface px-3 py-2 text-sm"
+                  >
+                    <option value="all">All earnings</option>
+                    <option value="hourly">Hourly only</option>
+                  </select>
+                </div>
+              </div>
+            ) : (
+              <p className="self-end text-xs leading-relaxed text-muted-foreground">
+                {presetById(presetId)?.note}
+              </p>
+            )}
+          </div>
+
+          {/* The cut is stated in money as well as percent, against the base it
+              was charged on. A freelancer should be able to reconcile this line
+              against their own platform statement without doing the arithmetic
+              themselves — if they cannot, they will not trust the net figure. */}
           <p className="text-xs text-muted-foreground">
             {formatUsd(income.hourlyBilledUsd)} hourly + {formatUsd(income.appointmentBilledUsd)}{" "}
-            appointment fees = {formatUsd(income.grossBilledUsd)} billed ·{" "}
-            {formatUsd(income.afterPlatformUsd)} after the{" "}
-            {Math.round(inputs.platformFeePct * 100)}% platform fee ·{" "}
-            {formatUsd(income.profitUsd)} profit before tax.
+            appointment fees = {formatUsd(income.grossBilledUsd)} billed. Platform takes{" "}
+            {formatUsd(income.platformCutUsd)} ({Math.round(inputs.platformFeePct * 100)}% of{" "}
+            {formatUsd(income.feeBaseUsd)}
+            {inputs.platformFeeBasis === "hourly" ? " hourly earnings" : " all earnings"}), leaving{" "}
+            {formatUsd(income.afterPlatformUsd)} · {formatUsd(income.profitUsd)} profit before tax.
           </p>
 
           <div className="overflow-x-auto hide-scrollbar">
@@ -404,7 +470,8 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
                       </Td>
                       <Td right>{(100 - s.effectiveRate).toFixed(0)}%</Td>
                       <td className="px-4 py-2.5 text-end">
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => onUseNet(s.netUsd)}
                           className="rounded-md border border-border px-2.5 py-1 text-xs font-medium hover:border-primary hover:text-primary"
                         >
@@ -419,11 +486,11 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
           </div>
 
           <p className="text-[11px] text-muted-foreground">
-            Estimates for planning, not tax advice. Capacity assumes ~6 prime calling hours in
-            the 8–18 client-timezone window and 21 workdays. Vietnam rows require actually
-            ending German unlimited tax liability — keeping a Wohnsitz (even a room with a key)
-            keeps the German row in force. Vietnam has no nomad visa; the 90-day e-visa is the
-            practical route, and 183+ days makes you tax resident on worldwide income.
+            Estimates for planning, not tax advice. Capacity assumes ~6 prime calling hours in the
+            8–18 client-timezone window and 21 workdays. Vietnam rows require actually ending German
+            unlimited tax liability — keeping a Wohnsitz (even a room with a key) keeps the German
+            row in force. Vietnam has no nomad visa; the 90-day e-visa is the practical route, and
+            183+ days makes you tax resident on worldwide income.
           </p>
         </div>
       )}
@@ -432,9 +499,7 @@ function FreelancePanel({ onUseNet }: { onUseNet: (net: number) => void }) {
 }
 
 function Th({ children, right }: { children: React.ReactNode; right?: boolean }) {
-  return (
-    <th className={cn("label-xs px-4 py-2 font-medium", right && "text-end")}>{children}</th>
-  );
+  return <th className={cn("label-xs px-4 py-2 font-medium", right && "text-end")}>{children}</th>;
 }
 
 function Td({
@@ -446,7 +511,5 @@ function Td({
   right?: boolean;
   className?: string;
 }) {
-  return (
-    <td className={cn("num px-4 py-2.5", right && "text-end", className)}>{children}</td>
-  );
+  return <td className={cn("num px-4 py-2.5", right && "text-end", className)}>{children}</td>;
 }

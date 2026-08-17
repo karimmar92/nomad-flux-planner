@@ -107,7 +107,10 @@ export function taxReportToCsv(report: TaxReport): string {
   rows.push(["Days recorded in the Schengen Area", report.schengen.daysInSchengen]);
   rows.push(["Maximum days used in any rolling 180-day window", report.schengen.maxWindowDays]);
   rows.push(["Date of that maximum", report.schengen.maxWindowDate ?? "n/a"]);
-  rows.push(["Dates where the recorded 90-day limit was exceeded", report.schengen.exceededDates.length]);
+  rows.push([
+    "Dates where the recorded 90-day limit was exceeded",
+    report.schengen.exceededDates.length,
+  ]);
   for (const d of report.schengen.exceededDates) rows.push(["", d]);
   rows.push([]);
 

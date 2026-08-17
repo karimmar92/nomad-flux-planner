@@ -18,6 +18,7 @@
  * Accountants want defensible day counts they can rely on, not our verdict.
  * =========================================================================
  */
+import { findOverlaps } from "@/lib/day-union";
 import { CITIES } from "@/lib/cities";
 import {
   fromDayIndex,
@@ -50,8 +51,18 @@ export type CountryTaxBasis = {
 function startMonthFor(taxYear: string): number {
   const first = taxYear.split("-")[0]?.trim().toLowerCase();
   const months = [
-    "january", "february", "march", "april", "may", "june",
-    "july", "august", "september", "october", "november", "december",
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
   ];
   const i = months.indexOf(first ?? "");
   return i === -1 ? 0 : i;
@@ -105,7 +116,9 @@ export const COUNTRY_TAX_BASIS: Record<string, CountryTaxBasis> = (() => {
       basisLabel: startMonth === 0 ? "calendar year" : city.tax.taxYear.replace("-", "–"),
       otherTests: OTHER_TESTS[code] ?? GENERIC_OTHER_TEST,
       ...(city.tax.specialRegime
-        ? { specialRegime: { name: city.tax.specialRegime.name, rate: city.tax.specialRegime.rate } }
+        ? {
+            specialRegime: { name: city.tax.specialRegime.name, rate: city.tax.specialRegime.rate },
+          }
         : {}),
     };
   }
@@ -188,7 +201,7 @@ export type SchengenYearSummary = {
 };
 
 export type DataQualityFlag = {
-  kind: "gap" | "open_trip" | "retrospective";
+  kind: "gap" | "open_trip" | "overlap" | "retrospective";
   severity: "info" | "warning";
   label: string;
   detail: string;
@@ -379,11 +392,7 @@ export function schengenYearSummary(
  * What makes the report credible. An accountant needs to know which numbers
  * are solid — a report that hides its own weaknesses is worse than useless.
  */
-export function dataQualityFlags(
-  trips: Trip[],
-  year: number,
-  todayIso: string,
-): DataQualityFlag[] {
+export function dataQualityFlags(trips: Trip[], year: number, todayIso: string): DataQualityFlag[] {
   const flags: DataQualityFlag[] = [];
   const start = toDayIndex(isoFromParts(year, 0, 1));
   const end = Math.min(toDayIndex(isoFromParts(year, 11, 31)), toDayIndex(todayIso));
@@ -426,7 +435,51 @@ export function dataQualityFlags(
     });
   }
 
-  // 3. Entries added retrospectively, more than 30 days after the fact.
+  /**
+   * 3. Overlapping trips — two records claiming the same day.
+   *
+   * This is the flag that should have appeared on the 2026 report and did not.
+   * Two open Portugal trips (16 April and 23 June) were each counted to today,
+   * and because the counter summed trip lengths rather than distinct days, the
+   * report showed 180 days of presence for someone who had been in the country
+   * 124. The Schengen section inherited it and printed the impossible "180 of
+   * 90".
+   *
+   * The count itself is now correct (lib/day-union.ts counts the union), but
+   * correcting the arithmetic quietly is not enough. An overlap means the
+   * RECORD is wrong — you cannot be in two places at once, and you cannot enter
+   * a country you never left. The person needs to fix it, and anyone reading
+   * the document needs to know the underlying data contradicts itself.
+   *
+   * Overlaps across DIFFERENT countries are reported too, and are the more
+   * serious case: being simultaneously in Portugal and Thailand is not a
+   * rounding problem, it is a missing exit date somewhere.
+   */
+  const dated = trips
+    .filter((t) => toDayIndex(t.entry_date) <= end)
+    .map((t) => ({
+      trip: t,
+      from: toDayIndex(t.entry_date),
+      to: t.exit_date ? toDayIndex(t.exit_date) : toDayIndex(todayIso),
+    }));
+
+  for (const pair of findOverlaps(dated.map((d) => ({ from: d.from, to: d.to })))) {
+    const a = dated[pair.a]!;
+    const b = dated[pair.b]!;
+    const sameCountry = a.trip.country_code === b.trip.country_code;
+    flags.push({
+      kind: "overlap",
+      severity: "warning",
+      label: sameCountry
+        ? `Overlapping trips — ${a.trip.country_code}`
+        : `Two countries at once — ${a.trip.country_code} and ${b.trip.country_code}`,
+      detail: sameCountry
+        ? `The trips entered ${a.trip.entry_date} and ${b.trip.entry_date} both cover ${pair.days} of the same day${pair.days === 1 ? "" : "s"}. Those days are counted once, not twice, but one of the two records is probably missing an exit date.`
+        : `The trip entered ${a.trip.entry_date} (${a.trip.country_code}) and the trip entered ${b.trip.entry_date} (${b.trip.country_code}) overlap by ${pair.days} day${pair.days === 1 ? "" : "s"}. You cannot be in both at once, so an exit date is missing and at least one country's total is wrong.`,
+    });
+  }
+
+  // 4. Entries added retrospectively, more than 30 days after the fact.
   for (const trip of trips) {
     if (!trip.created_at) continue;
     const loggedOn = trip.created_at.slice(0, 10);

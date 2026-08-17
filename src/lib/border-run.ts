@@ -128,8 +128,7 @@ export function distanceKm(a: City, b: City): number {
   const dLat = rad(b.lat - a.lat);
   const dLng = rad(b.lng - a.lng);
   const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return Math.round(2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h)));
 }
 
@@ -182,11 +181,33 @@ function daysAvailableIn(city: City, trips: Trip[], from: string): number {
     // Any trip still open ends the day the user departs. Passing an open trip
     // through with exitDate === null makes the engine treat them as still
     // present on every simulated future day — i.e. in two Schengen countries at
-    // once — so each simulated day gets counted twice and the days-available
-    // figure comes out roughly half what it should be. Close them at `from`.
+    // once. Close them at `from`.
     const engine = toEngineTrips(trips).map((t) =>
       t.exitDate === null ? { ...t, exitDate: from } : t,
     );
+
+    /**
+     * No allowance left means a Schengen destination is not an option at all.
+     *
+     * This guard used to be unnecessary by accident. While schengenDaysUsed
+     * summed trip lengths instead of counting distinct days, the traveller's
+     * existing stay and the simulated arrival both claimed the travel day, the
+     * total came out one over, and the loop below returned 0 on the first
+     * iteration. The right answer for the wrong reason.
+     *
+     * Counting the union fixed the arithmetic and removed that accident. On the
+     * day someone reaches exactly 90 days, moving to another Schengen country
+     * adds no new day — they are already inside the area — so the loop now
+     * reports "1 day available". That is arithmetically true and terrible
+     * advice: it describes a day they are already spending, on which they must
+     * leave the area entirely.
+     *
+     * So the rule is stated directly instead of emerging from an off-by-one. If
+     * there is no allowance left beyond the travel day, every Schengen
+     * destination is worth zero days, and the ranking drops it.
+     */
+    if (schengenDaysUsed(engine, from) >= SCHENGEN_MAX_DAYS) return 0;
+
     let n = 0;
     for (let k = 0; k < SCHENGEN_MAX_DAYS; k++) {
       const day = addDaysIso(from, k);

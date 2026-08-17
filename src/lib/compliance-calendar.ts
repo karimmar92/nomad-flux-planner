@@ -1,3 +1,4 @@
+import { countDistinctDays, type DayRange } from "@/lib/day-union";
 import { CITIES } from "@/lib/cities";
 import { expiryState, warningThresholds, type VaultDocument } from "@/lib/documents/vault";
 import { basisFor, periodFor } from "@/lib/reports/tax-report";
@@ -71,7 +72,11 @@ const FILING_DEADLINES: Record<string, { monthIndex: number; day: number; note: 
   TW: { monthIndex: 4, day: 31, note: "Taiwanese returns are usually filed in May." },
   KR: { monthIndex: 4, day: 31, note: "Korean returns are usually due by 31 May." },
   ZA: { monthIndex: 9, day: 23, note: "South African filing season usually runs Jul–Oct." },
-  MU: { monthIndex: 8, day: 30, note: "Mauritian returns are usually due by the end of September." },
+  MU: {
+    monthIndex: 8,
+    day: 30,
+    note: "Mauritian returns are usually due by the end of September.",
+  },
   AL: { monthIndex: 5, day: 30, note: "Albanian returns are usually due by 30 June." },
   AE: { monthIndex: 0, day: 1, note: "The UAE has no personal income tax filing for individuals." },
 };
@@ -216,15 +221,17 @@ export function buildComplianceCalendar(
       const { start, end } = periodFor(year - 1, basis.taxYearStartMonth);
       const lo = toDayIndex(start);
       const hi = toDayIndex(end);
-      let days = 0;
+      // DISTINCT days. Summing per trip double counts overlapping records and
+      // can push the total past a threshold, which here means showing somebody
+      // a filing deadline for a country they may have no obligation in.
+      const ranges: DayRange[] = [];
       for (const trip of trips) {
         if (trip.country_code.toUpperCase() !== code) continue;
         const entry = toDayIndex(trip.entry_date);
         const exit = trip.exit_date ? toDayIndex(trip.exit_date) : Math.min(t0, hi);
-        const from = Math.max(entry, lo);
-        const to = Math.min(exit, hi);
-        if (from <= to) days += to - from + 1;
+        ranges.push({ from: Math.max(entry, lo), to: Math.min(exit, hi) });
       }
+      const days = countDistinctDays(ranges);
       if (days < basis.thresholdDays) continue;
 
       const date = isoFromParts(year, deadline.monthIndex, deadline.day);

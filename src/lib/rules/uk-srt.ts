@@ -23,6 +23,7 @@
  *
  * The UK tax year runs 6 April to 5 April, not January to December.
  */
+import { countDistinctDays, type DayRange } from "@/lib/day-union";
 import { toDayIndex } from "@/lib/schengen";
 import type { RuleInputs, RuleResult, RuleStatus } from "./types";
 
@@ -65,17 +66,25 @@ export function ukDaysInTaxYear(inputs: RuleInputs): number {
   const lo = toDayIndex(start);
   const hi = Math.min(toDayIndex(end), toDayIndex(inputs.today));
 
-  let days = 0;
+  /**
+   * DISTINCT days. Same bug class as the presence report, same fix.
+   *
+   * Summing each trip's length counts an overlapping day once per trip, and two
+   * overlapping UK trips — a forgotten exit date, an arrival logged before the
+   * previous departure — inflate the total. That matters more here than almost
+   * anywhere else in the app: the SRT bands are step functions, so a handful of
+   * invented days can move somebody across a threshold and tell them their
+   * recorded presence meets a residence test it does not meet.
+   */
+  const ranges: DayRange[] = [];
   for (const trip of inputs.trips) {
     if (trip.country_code.toUpperCase() !== "GB") continue;
-    const from = Math.max(toDayIndex(trip.entry_date), lo);
-    const to = Math.min(
-      trip.exit_date ? toDayIndex(trip.exit_date) : toDayIndex(inputs.today),
-      hi,
-    );
-    if (to >= from) days += to - from + 1;
+    ranges.push({
+      from: Math.max(toDayIndex(trip.entry_date), lo),
+      to: Math.min(trip.exit_date ? toDayIndex(trip.exit_date) : toDayIndex(inputs.today), hi),
+    });
   }
-  return days;
+  return countDistinctDays(ranges);
 }
 
 export function bandFor(days: number, leaver: boolean): Band | null {

@@ -77,7 +77,19 @@ export async function taxReportToPdf(report: TaxReport, ownerName: string): Prom
       `${c.basis.thresholdDays} days`,
       c.exceedsThreshold ? "Exceeds day-count threshold" : "Below day-count threshold",
       c.basis.basisLabel,
-      `${c.periodStart} → ${c.periodEnd}`,
+      /**
+       * "to", not "→".
+       *
+       * The arrow is not in the PDF's standard WinAnsi font, so it rendered as
+       * `!'` in the exported file and dragged the surrounding digits into
+       * letter-spaced garbage: "2 0 2 6 - 0 1 - 0 1 !' 2 0 2 6 - 1 2 - 3 1".
+       *
+       * That matters more here than it would elsewhere. This document goes to a
+       * tax adviser or an auditor, and a period that renders as mojibake is a
+       * period that cannot be relied on. Anything outside Latin-1 needs an
+       * embedded font; until one is embedded, this file stays ASCII.
+       */
+      `${c.periodStart} to ${c.periodEnd}`,
     ]),
   });
   y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 20;
@@ -145,7 +157,9 @@ export async function taxReportToPdf(report: TaxReport, ownerName: string): Prom
   // ---- Regimes -------------------------------------------------------
   if (report.regimes.length > 0) {
     heading("Special regimes that may be relevant");
-    body("Factual pointers only. Not a recommendation and not a statement that you qualify — ask your adviser.");
+    body(
+      "Factual pointers only. Not a recommendation and not a statement that you qualify — ask your adviser.",
+    );
     autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
