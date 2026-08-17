@@ -82,11 +82,40 @@ export function usePlanSync() {
     }
     window.addEventListener("focus", onFocus);
 
+    /**
+     * RETURN FROM CHECKOUT — do not just wait for the webhook.
+     *
+     * A webhook is a delivery that can be dropped or misrouted, and when it is
+     * the customer has paid and still sees the free tier. So on return we ask
+     * the server to verify this exact session with Stripe and apply the
+     * entitlement itself. It is idempotent, so it is harmless when the webhook
+     * already did the work.
+     */
+    const params =
+      typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const sessionId = params?.get("session_id") ?? null;
+    const justPaid = !!params?.get("checkout");
+
+    if (sessionId) {
+      void (async () => {
+        try {
+          const [{ confirmCheckout }, { getStripeEnvironment }] = await Promise.all([
+            import("@/lib/billing/billing.functions"),
+            import("@/lib/stripe"),
+          ]);
+          await confirmCheckout({
+            data: { environment: getStripeEnvironment(), sessionId },
+          });
+        } catch {
+          // The webhook and the delayed re-check below remain as fallbacks.
+        }
+        if (active) void pull();
+      })();
+    }
+
     // One delayed re-check, for the race between the redirect and the webhook.
-    const justPaid =
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).get("checkout") === "success";
     const timer = justPaid ? window.setTimeout(() => void pull(), AFTER_CHECKOUT_RECHECK_MS) : null;
+
 
     return () => {
       active = false;
