@@ -157,9 +157,12 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { signedIn, ready } = useSession();
 
-  // Render nothing rather than flashing the wrong page for a frame while the
-  // session resolves — the flicker reads as a bug.
-  if (!ready) return null;
+  // While the session resolves we must render *something*: returning null meant
+  // the server-rendered "/" was an empty body, so the landing page did not
+  // exist for crawlers, link previews, or the first paint on a slow device.
+  // Only a visitor with a persisted auth token could be signed in, so anyone
+  // else gets the landing page immediately with no flicker.
+  if (!ready) return hasStoredSession() ? null : <Landing />;
 
   if (signedIn) return <Explore />;
 
@@ -168,6 +171,26 @@ function Home() {
   // gets updated in one place and not the other.
   return <Landing />;
 }
+
+/**
+ * True when a Supabase session token is present in localStorage, i.e. this
+ * browser is probably signed in. Synchronous, so it can be read during the
+ * first render; on the server it is always false, which is what we want —
+ * SSR should emit the landing page.
+ */
+function hasStoredSession() {
+  if (typeof window === "undefined") return false;
+  try {
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 
 type SortKey = "savings" | "cheapest" | "internet" | "weather";
 
