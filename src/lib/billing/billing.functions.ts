@@ -398,7 +398,7 @@ export const confirmCheckout = createServerFn({ method: "POST" })
         data.environment,
       );
       const result = (await response.json().catch(() => ({}))) as { plan?: string };
-      return { plan: result?.plan };
+      return result?.plan ? { plan: result.plan } : {};
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
