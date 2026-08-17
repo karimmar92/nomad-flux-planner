@@ -30,6 +30,7 @@
  * Not tax advice — confirm with a Steuerberater.
  */
 import { createServerFn } from "@tanstack/react-start";
+import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf, integer } from "@/lib/validate";
 import {
@@ -111,9 +112,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    const { userId, supabase } = context;
-    const { data: auth } = await supabase.auth.getUser();
-    const email = auth?.user?.email ?? undefined;
+    const { userId, claims } = context;
+    const email = typeof claims.email === "string" ? claims.email : undefined;
 
     try {
       const stripe = createStripeClient(data.environment);
@@ -186,6 +186,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
+<<<<<<< HEAD
         /**
          * NO tax_id_collection — removed deliberately.
          *
@@ -220,6 +221,13 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         },
         consent_collection: { terms_of_service: "required" },
       });
+=======
+        // Full handling supplies its own terms, tax treatment and checkout
+        // disclosures. custom_text, consent_collection and tax_id_collection
+        // conflict with it and make the embedded form fail after loading.
+        managed_payments: { enabled: true },
+      } as Stripe.Checkout.SessionCreateParams);
+>>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
@@ -263,9 +271,8 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
     returnUrl: String(d?.returnUrl ?? ""),
   }))
   .handler(async ({ data, context }): Promise<CheckoutResult> => {
-    const { userId, supabase } = context;
-    const { data: auth } = await supabase.auth.getUser();
-    const email = auth?.user?.email ?? undefined;
+    const { userId, supabase, claims } = context;
+    const email = typeof claims.email === "string" ? claims.email : undefined;
 
     try {
       const { FOUNDING_PRICE_LOOKUP_KEY, foundingIsOpen } = await import("@/config/founding");
@@ -309,6 +316,7 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * the buyer pays and receives nothing.
          */
         metadata: { user_id: userId, userId, founding: "1" },
+<<<<<<< HEAD
         payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
         // No tax_id_collection here either. See the note in the subscription
         // session above: under § 19 UStG no VAT is charged, so a VAT field at
@@ -330,9 +338,15 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
             message:
               "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
           },
+=======
+        payment_intent_data: {
+          description: "Driftly Founding Lifetime",
+          metadata: { user_id: userId, userId, founding: "1" },
+>>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
         },
-        consent_collection: { terms_of_service: "required" },
-      });
+        managed_payments: { enabled: true },
+        submit_type: "pay",
+      } as Stripe.Checkout.SessionCreateParams);
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
@@ -400,6 +414,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
   });
 
 /**
+<<<<<<< HEAD
  * Verify a completed checkout on return, and grant entitlement immediately.
  *
  * ── WHY THIS EXISTS: THE WEBHOOK IS A SINGLE POINT OF FAILURE ──────────
@@ -622,6 +637,55 @@ export const getSubscriptionState = createServerFn({ method: "POST" })
         lifetime,
         hasCustomer: true,
       };
+=======
+ * Confirm a checkout on return from Stripe — the safety net under the webhook.
+ *
+ * The webhook is still the source of truth, but it is a delivery that can be
+ * misconfigured, delayed or dropped, and the failure mode is the worst one in
+ * the product: the customer is charged and stays on the free tier. This runs
+ * when they land back in the app, verifies with Stripe that THIS session was
+ * actually paid and belongs to THIS user, and then applies exactly the same
+ * entitlement logic the webhook uses.
+ *
+ * Safe to run repeatedly: the founding claim is keyed on the session id and
+ * the plan write is idempotent.
+ */
+export const confirmCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { environment: string; sessionId: string }) => ({
+    environment: envOf(d?.environment),
+    sessionId: String(d?.sessionId ?? ""),
+  }))
+  .handler(async ({ data, context }): Promise<{ plan?: string; error?: string }> => {
+    const { userId } = context;
+    if (!data.sessionId.startsWith("cs_")) return { error: "Invalid checkout session." };
+
+    try {
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId, {
+        expand: ["line_items.data.price"],
+      });
+
+      // Never grant entitlement from a session the caller does not own.
+      const owner =
+        (session.metadata?.["user_id"] as string | undefined) ??
+        (session.metadata?.["userId"] as string | undefined) ??
+        session.client_reference_id ??
+        null;
+      if (owner !== userId) return { error: "This checkout belongs to another account." };
+      if (session.payment_status !== "paid") return { error: "Payment not completed yet." };
+
+      const { handleStripeEvent } = await import("@/lib/billing/webhook-handler");
+      const response = await handleStripeEvent(
+        {
+          type: "checkout.session.completed",
+          data: { object: session as unknown as Record<string, any> },
+        },
+        data.environment,
+      );
+      const result = (await response.json().catch(() => ({}))) as { plan?: string };
+      return result?.plan ? { plan: result.plan } : {};
+>>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }

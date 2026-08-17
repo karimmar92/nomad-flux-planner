@@ -1,0 +1,1 @@
+select public.claim_founding_spot('1c557acc-4636-4085-a157-8dfad8a6cd43'::uuid,'cs_test_a1feI5PMIkTDlMW0DjGpxF9q5a7dxQpH9Nb3AfRNy21kr2oUqxRl58PSx8');

@@ -101,12 +101,23 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
     // For payment mode (one-time, e.g. founding_lifetime), the session is the
     // only entitlement event we get, so we must write the profile here.
     const priceKey = priceKeyOf(object);
-    const plan =
-      (object["metadata"]?.["plan"] as string | undefined) ||
-      (priceKey && planForPriceId(priceKey)) ||
-      null;
+    /**
+     * `metadata.founding === "1"` is checked FIRST and on its own.
+     *
+     * A founding session carries no `metadata.plan`, and a checkout.session
+     * object has no expanded line items, so priceKeyOf() returns null: the
+     * old code fell straight through to "unmapped_price" and the buyer paid
+     * $99 for nothing. The founding flag is the only reliable marker here.
+     */
+    const isFounding = object["metadata"]?.["founding"] === "1";
+    const plan = isFounding
+      ? "founding_lifetime"
+      : (object["metadata"]?.["plan"] as string | undefined) ||
+        (priceKey && planForPriceId(priceKey)) ||
+        null;
 
     if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
+
 
     /**
      * FOUNDING 100 — must not fall through to the generic plan write below.
