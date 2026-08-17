@@ -353,7 +353,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
   });
 
 /**
-<<<<<<< HEAD
+
  * Verify a completed checkout on return, and grant entitlement immediately.
  *
  * ── WHY THIS EXISTS: THE WEBHOOK IS A SINGLE POINT OF FAILURE ──────────
