@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Driftly">
+  <!--
+    THE GAUGE. Days used against days allowed, with a marker for today.
+
+    ── TWO EARLIER VERSIONS WERE THROWN AWAY, AND WHY ─────────────────────
+
+    V1, a ring of radial ticks around a centre dot, rendered at 512px looked
+    considered. At 64, 32 and 16 it was unmistakably a LOADING SPINNER: a ring
+    of ticks around a dot is the most recognisable "wait" icon in software. An
+    app icon that reads as "loading" on a home screen is worse than none. The
+    fault was rotational symmetry — anything symmetric reads as something that
+    spins.
+
+    V2 was this gauge with hand-written arc flags, and the two arcs used
+    different large-arc flags, so they swept opposite ways round the circle
+    instead of overlaying. It rendered as a lopsided comma. The geometry below
+    is computed, not guessed: a 270-degree track from 135 to 405 degrees, and a
+    filled sweep covering 68% of it, both large-arc=1 sweep=1 so they sit on
+    exactly the same path.
+
+    BOTH FAILURES WERE ONLY VISIBLE BY RENDERING IT. An SVG that looks right in
+    source is not a logo; it has to be looked at, small, on both backgrounds.
+
+    ── WHY IT IS SHAPED LIKE THIS ─────────────────────────────────────────
+
+      * ASYMMETRIC ON PURPOSE. The open sector at the bottom gives the shape an
+        obvious start and end, which is what stops it reading as a throbber.
+      * 9-unit stroke on a 64 grid is about 2px at favicon size, the floor
+        before a shape turns to grey mush.
+      * ONE accent, spent on the single element that carries meaning: today.
+      * No lettering. Wordmarks are unreadable at icon sizes.
+      * The empty sector sits at the bottom, where a gauge's empty sector
+        belongs, so the shape reads correctly even to someone who never works
+        out what it represents.
+  -->
+  <g transform="translate(32 32)" fill="none" stroke-linecap="round">
+    <!-- The allowance: the whole track, quiet. 270 degrees, open at the bottom. -->
+    <path
+      d="M -14.85 14.85 A 21 21 0 1 1 14.85 14.85"
+      stroke="currentColor"
+      stroke-width="9"
+      opacity="0.2"
+    />
+
+    <!-- Days used. Same start point, same flags, so it overlays the track exactly. -->
+    <path
+      d="M -14.85 14.85 A 21 21 0 1 1 15.75 -13.89"
+      stroke="currentColor"
+      stroke-width="9"
+    />
+
+    <!--
+      Today, at the end of the used sweep. Accent-filled and slightly wider than
+      the stroke so it separates from the arc by shape as well as by colour —
+      colour alone fails in a monochrome app-switcher render.
+    -->
+    <circle cx="15.75" cy="-13.89" r="6.5" fill="var(--logo-accent, #f5a524)" stroke="none" />
+  </g>
+</svg>

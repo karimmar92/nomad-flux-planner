@@ -95,8 +95,29 @@ function TierCard({
   busy?: boolean;
 }) {
   const free = tier.monthlyUsd === 0;
-  const shown = billing === "annual" ? annualMonthlyEquivalentUsd(tier) : tier.monthlyUsd;
   const features = compact ? tier.features.slice(0, 4) : tier.features;
+
+  /**
+   * ANNUAL SHOWS THE ANNUAL PRICE, NOT A DIVISION OF IT.
+   *
+   * The headline used to be annualMonthlyEquivalentUsd(), which is the yearly
+   * figure divided by twelve. On a $140 plan that renders as "$11.67/mo" — a
+   * number nobody is ever charged, carrying two decimal places into the largest
+   * type on the page.
+   *
+   * It reads as arithmetic rather than a price. Every trailing cent says the
+   * number was reverse-engineered to look small, which is the opposite of the
+   * premium, confident positioning the rest of the page is going for, and it
+   * fails the one job of a headline price: telling somebody what leaves their
+   * account. What actually leaves their account annually is $140, once.
+   *
+   * So annual headlines the annual price. The per-month equivalent survives
+   * only in the small print, rounded to whole dollars and hedged with "about",
+   * because that is what it is: a comparison aid, not a charge.
+   */
+  const annual = billing === "annual";
+  const shown = annual ? annualUsd(tier) : tier.monthlyUsd;
+  const unit = annual ? "/yr" : "/mo";
 
   return (
     <div
@@ -121,7 +142,8 @@ function TierCard({
           <>
             ${shown}
             <span className="text-sm font-normal text-muted-foreground">
-              /mo{tier.perSeat ? " per seat" : ""}
+              {unit}
+              {tier.perSeat ? " per seat" : ""}
             </span>
           </>
         )}
@@ -132,13 +154,13 @@ function TierCard({
           "No card, no trial clock."
         ) : billing === "annual" ? (
           <>
-            ${annualUsd(tier)}/yr{PRICE_VAT_NOTE ? ` ${PRICE_VAT_NOTE}` : ""} ·{" "}
-            {12 - ANNUAL_MONTHS_CHARGED} months free
+            {PRICE_VAT_NOTE ? `${PRICE_VAT_NOTE} · ` : ""}
+            {12 - ANNUAL_MONTHS_CHARGED} months free · about $
+            {Math.round(annualMonthlyEquivalentUsd(tier))} a month
           </>
         ) : (
           <>
-            {PRICE_VAT_NOTE ? `${PRICE_VAT_NOTE} · ` : ""}${annualMonthlyEquivalentUsd(tier)}/mo
-            billed annually
+            {PRICE_VAT_NOTE ? `${PRICE_VAT_NOTE} · ` : ""}${annualUsd(tier)}/yr billed annually
           </>
         )}
       </div>

@@ -22,6 +22,7 @@ import { detectPreDeparture } from "@/lib/pre-departure";
 import { PreDepartureCard } from "@/components/predeparture/PreDepartureCard";
 import { TripChecklistCard } from "@/components/predeparture/TripChecklist";
 import { GuidedTripFlow } from "@/components/tracker/GuidedTripFlow";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { hasTickedEsimAnywhere } from "@/lib/checklist";
 import { toDayIndex } from "@/lib/schengen";
 import { TransportGroup } from "@/components/partners/TransportGroup";
@@ -382,6 +383,10 @@ function Tracker() {
           </div>
         )}
       </section>
+
+      {/* Offline is only real once installed, and the tracker is the page
+          whose value depends on it. */}
+      <InstallPrompt />
 
       {/* Guided by default, the old form one tap away.
           Someone logging their first trip needs the questions explained;
