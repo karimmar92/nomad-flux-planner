@@ -131,7 +131,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         /**
          * Lovable's one-time support, kept: `founding_lifetime` is a payment,
          * everything else is a subscription. Charging a lifetime purchase as a
-         * subscription would bill someone $99 every month.
+         * subscription would bill someone $149 every month.
          */
         mode: isOneTime ? "payment" : "subscription",
         /**
@@ -185,9 +185,25 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-        // Still collect a VAT ID from business customers: they need it on the
-        // invoice for their own records even where no VAT is charged.
-        tax_id_collection: { enabled: true },
+        /**
+         * NO tax_id_collection — removed deliberately.
+         *
+         * It used to be enabled with the reasoning that business customers
+         * want their VAT ID on the invoice anyway. That reasoning was wrong in
+         * a way that costs conversions. Under § 19 UStG this business charges
+         * no VAT, so a "VAT ID" field at the moment of payment tells the buyer
+         * that tax is about to be added, makes them stop and work out how much,
+         * and contradicts VAT.notice in config/legal.ts, which promises in
+         * writing that "the amount shown is the amount charged".
+         *
+         * A field that raises a question the checkout then refuses to answer is
+         * worse than no field. Business customers who need their VAT ID on
+         * record can add it in the customer portal, where it costs nothing to
+         * ask because nobody is mid-purchase.
+         *
+         * If the Kleinunternehmer status ever ends, this comes back in the same
+         * commit that turns on Stripe Tax and updates VAT.exempt.
+         */
         billing_address_collection: "required",
         // §312j BGB: the button must say the order obliges payment.
         submit_type: "pay",
@@ -228,7 +244,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
  * through createStripeClient like everything else here.
  *
  * `mode: "payment"`, not `"subscription"`. Getting that wrong bills a founding
- * member $99 every month, and they would be right to be furious. The Stripe
+ * member $149 every month, and they would be right to be furious. The Stripe
  * price behind the lookup key must also be one-off rather than recurring;
  * Stripe rejects the mismatch, which is the one place this is hard to get
  * wrong silently.
@@ -293,7 +309,11 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          */
         metadata: { user_id: userId, userId, founding: "1" },
         payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        tax_id_collection: { enabled: true },
+        // No tax_id_collection here either. See the note in the subscription
+        // session above: under § 19 UStG no VAT is charged, so a VAT field at
+        // the payment step raises a question the checkout then refuses to
+        // answer. It matters more on this screen than any other, because this
+        // is a one-time 99 dollar decision made in a single sitting.
         billing_address_collection: "required",
         // §312j BGB: the button must say the order obliges payment.
         submit_type: "pay",

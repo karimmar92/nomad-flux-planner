@@ -112,9 +112,24 @@ export function FoundingOffer() {
         <span className="num text-4xl font-semibold">${FOUNDING_PRICE_USD}</span>
         <span className="text-sm text-muted-foreground">once, not per month</span>
       </div>
+
+      {/*
+        THE TOTAL, STATED BEFORE THE BUTTON.
+        The single most common complaint about any checkout is a number going
+        up between the page and the payment screen. Nothing is added here — no
+        VAT under § 19 UStG, no renewal, no stored card — so say all three
+        plainly at the point of decision rather than leaving the buyer to find
+        out by clicking. The payback line is derived, not written by hand: it
+        was hardcoded as "under four months" and silently became wrong the
+        moment the price moved.
+      */}
+      <p className="mt-2 text-sm font-medium">
+        ${FOUNDING_PRICE_USD} is the total you pay. No VAT on top, no renewal, no card kept on file.
+      </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Pro is ${tier("pro").monthlyUsd}/mo, so this pays for itself in under four months and then
-        never asks again. Compare ${proYear} for a year.
+        Pro is ${tier("pro").monthlyUsd}/mo, so this pays for itself in about{" "}
+        {Math.round(FOUNDING_PRICE_USD / tier("pro").monthlyUsd)} months and then never asks again.
+        Compare ${proYear} for a single year.
       </p>
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2">

@@ -26,6 +26,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf } from "@/lib/validate";
 import { createStripeClient, type StripeEnv } from "@/lib/stripe.server";
+import { FOUNDING_PRICE_LOOKUP_KEY } from "@/config/founding";
 
 type RpcClient = {
   rpc: (
@@ -105,6 +106,77 @@ type StripeSubList = {
     items?: { data?: Array<{ price?: { id?: string; lookup_key?: string | null } }> };
   }>;
 };
+
+/**
+ * Has this customer actually paid for a founding spot?
+ *
+ * WHY THIS EXISTS. `stripeStateFor` below reads subscriptions, and a founding
+ * purchase is a one-time payment, so it creates no subscription at all. That
+ * left reconciliation unable to repair the single most damaging failure this
+ * product has: somebody pays 99 dollars, the webhook does not land, and the
+ * app still shows them the free tier. Reconcile would read no subscription,
+ * conclude "free", and report that nothing needed fixing — confidently wrong
+ * about the one case where being wrong costs a paying customer.
+ *
+ * Searches completed checkout sessions rather than trusting our own database,
+ * because the whole point of reconciliation is that our database may be the
+ * thing that is broken. Stripe is the source of truth.
+ */
+/**
+ * Find the Stripe customer for an email when we never stored the id.
+ *
+ * WHY THIS IS NEEDED. `profiles.stripe_customer_id` is written by the webhook.
+ * If the webhook never landed — or, as happened here, the profile row did not
+ * exist for it to write to — the column stays null, and every repair path that
+ * starts from a customer id begins at a dead end. Reconciliation would report
+ * "no Stripe state" for somebody who had definitely paid.
+ *
+ * Stripe is the source of truth, so when our copy of the link is missing we go
+ * and find it rather than concluding nothing happened.
+ */
+async function customerIdForEmail(email: string | null, env: StripeEnv): Promise<string | null> {
+  if (!email) return null;
+  const stripe = createStripeClient(env);
+  const found = (await stripe.customers.list({ email, limit: 1 })) as unknown as {
+    data: { id: string }[];
+  };
+  return found.data[0]?.id ?? null;
+}
+
+async function foundingPaymentFor(
+  customerId: string | null,
+  env: StripeEnv,
+): Promise<{ sessionId: string; paid: boolean } | null> {
+  if (!customerId) return null;
+  const stripe = createStripeClient(env);
+
+  const sessions = (await stripe.checkout.sessions.list({
+    customer: customerId,
+    limit: 20,
+  })) as unknown as {
+    data: { id: string; payment_status?: string; mode?: string }[];
+  };
+
+  for (const session of sessions.data) {
+    if (session.mode !== "payment") continue;
+    if (session.payment_status !== "paid") continue;
+
+    // Confirm it was the founding price and not some other one-time purchase.
+    // Matched on lookup key, never the price id: ids differ between sandbox
+    // and live, so entitlement must not be decided from one.
+    const items = (await stripe.checkout.sessions.listLineItems(session.id, {
+      limit: 10,
+      expand: ["data.price"],
+    })) as unknown as {
+      data: { price?: { lookup_key?: string | null } | null }[];
+    };
+
+    const isFounding = items.data.some((i) => i.price?.lookup_key === FOUNDING_PRICE_LOOKUP_KEY);
+    if (isFounding) return { sessionId: session.id, paid: true };
+  }
+
+  return null;
+}
 
 async function stripeStateFor(customerId: string | null, env: StripeEnv) {
   if (!customerId) return { status: null, priceId: null };
@@ -332,12 +404,65 @@ export const adminReconcileEntitlement = createServerFn({ method: "POST" })
 
     const p = profile as unknown as Record<string, unknown>;
     const before = String(p["plan"] ?? "free");
-    const customerId = (p["stripe_customer_id"] as string | null) ?? null;
     const foundingNumber = (p["founding_number"] as number | null) ?? null;
 
+    /**
+     * Fall back to finding the customer by email, and write the id back.
+     *
+     * A null stripe_customer_id used to end reconciliation immediately, which
+     * meant the tool was useless in exactly the situation it was built for: a
+     * webhook that never ran, so nothing about the payment was ever recorded
+     * locally. Looking the customer up by email recovers the link, and storing
+     * it means the next run and every webhook afterwards has it.
+     */
+    let customerId = (p["stripe_customer_id"] as string | null) ?? null;
+    if (!customerId) {
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+      customerId = await customerIdForEmail(userData?.user?.email ?? null, data.environment);
+      if (customerId) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ stripe_customer_id: customerId })
+          .eq("id", data.userId);
+      }
+    }
+
     const { status, priceId } = await stripeStateFor(customerId, data.environment);
+
+    /**
+     * Repair a paid-but-ungranted founding spot before deciding anything else.
+     *
+     * This is the case the whole reconcile button exists for. If Stripe holds a
+     * paid founding session and we never issued a spot, the webhook did not
+     * land, and no amount of reasoning about subscriptions will fix it because
+     * there is no subscription to reason about.
+     *
+     * claim_founding_spot is keyed on the payment id and is idempotent, so
+     * pressing this twice returns the number already issued rather than
+     * burning a second spot out of the hundred.
+     */
+    let effectiveFoundingNumber = foundingNumber;
+    if (foundingNumber == null) {
+      const payment = await foundingPaymentFor(customerId, data.environment);
+      if (payment) {
+        const { claimFoundingSpot } = await import("@/lib/founding/rpc");
+        const { spot, error: claimError } = await claimFoundingSpot(
+          supabaseAdmin,
+          data.userId,
+          payment.sessionId,
+        );
+        if (claimError) {
+          // Surfaced, not swallowed. "Sold out" is a real answer here and means
+          // this person paid and cannot be granted a spot — which is a refund
+          // decision for a human, not something to paper over.
+          throw new Error(`Founding spot could not be granted: ${claimError}`);
+        }
+        effectiveFoundingNumber = spot;
+      }
+    }
+
     const expected = expectedPlanFor({
-      foundingNumber,
+      foundingNumber: effectiveFoundingNumber,
       subscriptionStatus: status,
       planFromPrice: priceId ? planForPriceId(priceId) : null,
     });
