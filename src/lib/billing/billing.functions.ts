@@ -186,48 +186,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-<<<<<<< HEAD
-        /**
-         * NO tax_id_collection — removed deliberately.
-         *
-         * It used to be enabled with the reasoning that business customers
-         * want their VAT ID on the invoice anyway. That reasoning was wrong in
-         * a way that costs conversions. Under § 19 UStG this business charges
-         * no VAT, so a "VAT ID" field at the moment of payment tells the buyer
-         * that tax is about to be added, makes them stop and work out how much,
-         * and contradicts VAT.notice in config/legal.ts, which promises in
-         * writing that "the amount shown is the amount charged".
-         *
-         * A field that raises a question the checkout then refuses to answer is
-         * worse than no field. Business customers who need their VAT ID on
-         * record can add it in the customer portal, where it costs nothing to
-         * ask because nobody is mid-purchase.
-         *
-         * If the Kleinunternehmer status ever ends, this comes back in the same
-         * commit that turns on Stripe Tax and updates VAT.exempt.
-         */
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "By completing this order you enter a paid subscription. The amount shown is the total — no VAT is added. It renews automatically until cancelled, and you can cancel any time from your account.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
-      });
-=======
         // Full handling supplies its own terms, tax treatment and checkout
         // disclosures. custom_text, consent_collection and tax_id_collection
         // conflict with it and make the embedded form fail after loading.
         managed_payments: { enabled: true },
       } as Stripe.Checkout.SessionCreateParams);
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
@@ -316,33 +279,9 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * the buyer pays and receives nothing.
          */
         metadata: { user_id: userId, userId, founding: "1" },
-<<<<<<< HEAD
-        payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        // No tax_id_collection here either. See the note in the subscription
-        // session above: under § 19 UStG no VAT is charged, so a VAT field at
-        // the payment step raises a question the checkout then refuses to
-        // answer. It matters more on this screen than any other, because this
-        // is a one-time 99 dollar decision made in a single sitting.
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            // States the total explicitly. The buyer is looking at the amount
-            // right now, and "is anything going to be added?" is the last
-            // question in their head before they click.
-            message:
-              "One payment. The amount shown is the total — no VAT is added, there is no subscription, nothing to cancel and no renewal. This grants Pro access for as long as Driftly exists.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-=======
         payment_intent_data: {
           description: "Driftly Founding Lifetime",
           metadata: { user_id: userId, userId, founding: "1" },
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
         },
         managed_payments: { enabled: true },
         submit_type: "pay",
@@ -414,7 +353,7 @@ export const createPortalSession = createServerFn({ method: "POST" })
   });
 
 /**
-<<<<<<< HEAD
+
  * Verify a completed checkout on return, and grant entitlement immediately.
  *
  * ── WHY THIS EXISTS: THE WEBHOOK IS A SINGLE POINT OF FAILURE ──────────
@@ -637,7 +576,12 @@ export const getSubscriptionState = createServerFn({ method: "POST" })
         lifetime,
         hasCustomer: true,
       };
-=======
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+/**
  * Confirm a checkout on return from Stripe — the safety net under the webhook.
  *
  * The webhook is still the source of truth, but it is a delivery that can be
@@ -685,7 +629,7 @@ export const confirmCheckout = createServerFn({ method: "POST" })
       );
       const result = (await response.json().catch(() => ({}))) as { plan?: string };
       return result?.plan ? { plan: result.plan } : {};
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
+
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
