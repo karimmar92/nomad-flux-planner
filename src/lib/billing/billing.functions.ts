@@ -576,7 +576,12 @@ export const getSubscriptionState = createServerFn({ method: "POST" })
         lifetime,
         hasCustomer: true,
       };
-=======
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
+
+/**
  * Confirm a checkout on return from Stripe — the safety net under the webhook.
  *
  * The webhook is still the source of truth, but it is a delivery that can be
