@@ -279,33 +279,9 @@ export const createFoundingCheckout = createServerFn({ method: "POST" })
          * the buyer pays and receives nothing.
          */
         metadata: { user_id: userId, userId, founding: "1" },
-<<<<<<< HEAD
-        payment_intent_data: { metadata: { user_id: userId, userId, founding: "1" } },
-        // No tax_id_collection here either. See the note in the subscription
-        // session above: under § 19 UStG no VAT is charged, so a VAT field at
-        // the payment step raises a question the checkout then refuses to
-        // answer. It matters more on this screen than any other, because this
-        // is a one-time 99 dollar decision made in a single sitting.
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            // States the total explicitly. The buyer is looking at the amount
-            // right now, and "is anything going to be added?" is the last
-            // question in their head before they click.
-            message:
-              "One payment. The amount shown is the total — no VAT is added, there is no subscription, nothing to cancel and no renewal. This grants Pro access for as long as Driftly exists.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that access begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-=======
         payment_intent_data: {
           description: "Driftly Founding Lifetime",
           metadata: { user_id: userId, userId, founding: "1" },
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
         },
         managed_payments: { enabled: true },
         submit_type: "pay",
