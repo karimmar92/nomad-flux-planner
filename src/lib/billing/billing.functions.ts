@@ -350,3 +350,56 @@ export const createPortalSession = createServerFn({ method: "POST" })
       return { error: getStripeErrorMessage(error) };
     }
   });
+
+/**
+ * Confirm a checkout on return from Stripe — the safety net under the webhook.
+ *
+ * The webhook is still the source of truth, but it is a delivery that can be
+ * misconfigured, delayed or dropped, and the failure mode is the worst one in
+ * the product: the customer is charged and stays on the free tier. This runs
+ * when they land back in the app, verifies with Stripe that THIS session was
+ * actually paid and belongs to THIS user, and then applies exactly the same
+ * entitlement logic the webhook uses.
+ *
+ * Safe to run repeatedly: the founding claim is keyed on the session id and
+ * the plan write is idempotent.
+ */
+export const confirmCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { environment: string; sessionId: string }) => ({
+    environment: envOf(d?.environment),
+    sessionId: String(d?.sessionId ?? ""),
+  }))
+  .handler(async ({ data, context }): Promise<{ plan?: string; error?: string }> => {
+    const { userId } = context;
+    if (!data.sessionId.startsWith("cs_")) return { error: "Invalid checkout session." };
+
+    try {
+      const stripe = createStripeClient(data.environment);
+      const session = await stripe.checkout.sessions.retrieve(data.sessionId, {
+        expand: ["line_items.data.price"],
+      });
+
+      // Never grant entitlement from a session the caller does not own.
+      const owner =
+        (session.metadata?.["user_id"] as string | undefined) ??
+        (session.metadata?.["userId"] as string | undefined) ??
+        session.client_reference_id ??
+        null;
+      if (owner !== userId) return { error: "This checkout belongs to another account." };
+      if (session.payment_status !== "paid") return { error: "Payment not completed yet." };
+
+      const { handleStripeEvent } = await import("@/lib/billing/webhook-handler");
+      const response = await handleStripeEvent(
+        {
+          type: "checkout.session.completed",
+          data: { object: session as unknown as Record<string, any> },
+        },
+        data.environment,
+      );
+      const result = (await response.json().catch(() => ({}))) as { plan?: string };
+      return result?.plan ? { plan: result.plan } : {};
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });
