@@ -16,7 +16,7 @@ export const APP_TAGLINE = "What a city costs you.";
 export const SITE_URL = (
   import.meta.env?.["VITE_SITE_URL"] ??
   process.env?.["SITE_URL"] ??
-  "http://localhost:8080"
+  (import.meta.env?.DEV ? "http://localhost:8080" : "https://mydriftly.life")
 ).replace(/\/$/, "");
 
 export function absoluteUrl(path: string): string {
