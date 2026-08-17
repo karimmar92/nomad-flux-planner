@@ -629,7 +629,7 @@ export const confirmCheckout = createServerFn({ method: "POST" })
       );
       const result = (await response.json().catch(() => ({}))) as { plan?: string };
       return result?.plan ? { plan: result.plan } : {};
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
+
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }
