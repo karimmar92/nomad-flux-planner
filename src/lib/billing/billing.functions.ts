@@ -516,3 +516,113 @@ export const verifyCheckoutSession = createServerFn({ method: "POST" })
       }
     },
   );
+
+/**
+ * What Stripe currently says about this customer's billing.
+ *
+ * ── WHY THE CANCEL BUTTON MUST NOT KEY OFF `profile.plan` ──────────────
+ *
+ * It used to. `BillingCard` decided with `paid = profile.plan !== "free"`,
+ * reading a plan string cached in localStorage and refreshed by usePlanSync.
+ * Two ways that goes wrong, and both happened:
+ *
+ *   1. PLAN SAYS FREE WHEN THEY PAID. Any break in the entitlement chain — a
+ *      webhook that never fired, a missing profile row — leaves the plan at
+ *      "free", and the cancel button disappears for somebody with an active
+ *      subscription. § 312k BGB requires that button be permanently available
+ *      and easily reachable. "Hidden because our own cache is stale" is not a
+ *      defence, and a customer who cannot find how to cancel disputes the
+ *      charge instead.
+ *
+ *   2. PLAN SAYS PAID WHEN THERE IS NOTHING TO CANCEL. A founding member has
+ *      `plan = founding_lifetime` and no subscription at all. They were shown
+ *      "Manage or cancel subscription", and clicking it produced "No
+ *      subscription found for this account" — telling somebody who paid for
+ *      lifetime access that their account has no record of it.
+ *
+ * So the button now asks Stripe. Stripe is where the money is, and it is the
+ * only thing that knows whether a cancellable subscription exists.
+ *
+ * Returns a shape the UI can render without further reasoning, including
+ * `cancelAtPeriodEnd`, so somebody who has already cancelled sees that fact
+ * rather than a button implying they have not.
+ */
+export type SubscriptionState = {
+  /** True when there is a subscription that can actually be cancelled. */
+  cancellable: boolean;
+  status: string | null;
+  /** ISO date access runs until. Null when there is no subscription. */
+  periodEnd: string | null;
+  /** Already cancelled, still inside the paid period. */
+  cancelAtPeriodEnd: boolean;
+  /** A one-time lifetime purchase, which has nothing to cancel by design. */
+  lifetime: boolean;
+  /** True when a Stripe customer exists at all — the portal needs one. */
+  hasCustomer: boolean;
+};
+
+export const getSubscriptionState = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { environment: string }) => ({ environment: envOf(d?.environment) }))
+  .handler(async ({ data, context }): Promise<SubscriptionState | { error: string }> => {
+    const { userId, supabase } = context;
+
+    const empty: SubscriptionState = {
+      cancellable: false,
+      status: null,
+      periodEnd: null,
+      cancelAtPeriodEnd: false,
+      lifetime: false,
+      hasCustomer: false,
+    };
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("stripe_customer_id, founding_number")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const p = (profile ?? {}) as { stripe_customer_id?: string | null; founding_number?: number | null };
+      const lifetime = p.founding_number != null;
+      const customerId = p.stripe_customer_id ?? null;
+
+      if (!customerId) return { ...empty, lifetime };
+
+      const stripe = createStripeClient(data.environment);
+      const subs = (await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 10,
+      })) as unknown as {
+        data: {
+          status: string;
+          cancel_at_period_end?: boolean;
+          current_period_end?: number;
+          items?: { data?: { current_period_end?: number }[] };
+        }[];
+      };
+
+      // An upgrade can leave an old cancelled subscription behind, so prefer
+      // one that still entitles rather than whichever Stripe lists first.
+      const entitling = ["active", "trialing", "past_due", "unpaid"];
+      const chosen = subs.data.find((s) => entitling.includes(s.status)) ?? null;
+
+      if (!chosen) return { ...empty, lifetime, hasCustomer: true };
+
+      // current_period_end moved onto the item in newer API versions; read
+      // both so this does not silently return null on one of them.
+      const endUnix = chosen.current_period_end ?? chosen.items?.data?.[0]?.current_period_end ?? null;
+
+      return {
+        cancellable: !chosen.cancel_at_period_end,
+        status: chosen.status,
+        periodEnd: endUnix ? new Date(endUnix * 1000).toISOString().slice(0, 10) : null,
+        cancelAtPeriodEnd: chosen.cancel_at_period_end === true,
+        lifetime,
+        hasCustomer: true,
+      };
+    } catch (error) {
+      return { error: getStripeErrorMessage(error) };
+    }
+  });

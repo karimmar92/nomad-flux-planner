@@ -16,6 +16,8 @@
 // accession in 2025. Ireland is EU but NOT Schengen. Switzerland, Norway,
 // Iceland and Liechtenstein are Schengen but NOT EU.
 // REVIEW ANNUALLY — membership changes.
+import { countDistinctDays, type DayRange } from "./day-union";
+
 export const SCHENGEN_COUNTRIES = new Set([
   "AT",
   "BE",
@@ -92,20 +94,31 @@ function consumesAllowance(trip: Trip): boolean {
   return trip.purpose !== "residence" && trip.purpose !== "nomad_visa";
 }
 
-/** Days used in the 180-day window ending on (and including) refDate. */
+/**
+ * Days used in the 180-day window ending on (and including) refDate.
+ *
+ * COUNTS DISTINCT DAYS. This summed each trip's length independently, so
+ * overlapping records — two open trips, a missing exit date, an arrival logged
+ * before the previous departure — counted the same day more than once. The
+ * exported presence record printed the result of that: "180 of 90", which
+ * cannot happen and told the reader the document could not be trusted.
+ *
+ * `buildDayIndex` below always did this correctly by marking a byte per day.
+ * Two implementations of the same idea sat in this file and only one was right;
+ * both now share lib/day-union.ts.
+ */
 export function schengenDaysUsed(trips: Trip[], refDate: string): number {
   const ref = toDayIndex(refDate);
   const windowStart = ref - (SCHENGEN_WINDOW_DAYS - 1);
-  let total = 0;
+  const ranges: DayRange[] = [];
   for (const trip of trips) {
     if (!consumesAllowance(trip)) continue;
     const entry = toDayIndex(trip.entryDate);
     const exit = trip.exitDate ? toDayIndex(trip.exitDate) : ref;
-    const lo = Math.max(entry, windowStart);
-    const hi = Math.min(exit, ref);
-    if (lo <= hi) total += hi - lo + 1; // inclusive of both endpoints
+    // Inclusive of both endpoints: entry day and exit day are both full days.
+    ranges.push({ from: Math.max(entry, windowStart), to: Math.min(exit, ref) });
   }
-  return total;
+  return countDistinctDays(ranges);
 }
 
 export function schengenDaysRemaining(trips: Trip[], refDate: string): number {

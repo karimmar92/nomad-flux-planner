@@ -1,3 +1,4 @@
+import { countDistinctDays, type DayRange } from "./day-union";
 /**
  * Date helpers shared by trip/tax UI. Everything routes through the
  * day-index arithmetic in `schengen.ts` — no local-timezone Date maths.
@@ -76,17 +77,29 @@ export function daysInCountryTaxYear(
   const lo = toDayIndex(periodStart);
   const hi = Math.min(toDayIndex(periodEnd), ref);
 
-  let days = 0;
+  /**
+   * DISTINCT days, not the sum of trip lengths.
+   *
+   * This was `days += to - from + 1` inside the loop, which counts an
+   * overlapping day once per trip. Two open trips to the same country produced
+   * 180 days of presence for someone who had been there 124 — in the direction
+   * that invents tax liability, printed in a document meant for an adviser or
+   * an auditor. See lib/day-union.ts for the full account.
+   */
+  const ranges: DayRange[] = [];
   for (const trip of trips) {
     if (trip.country_code.toUpperCase() !== countryCode.toUpperCase()) continue;
     const entry = toDayIndex(trip.entry_date);
     const exit = trip.exit_date ? toDayIndex(trip.exit_date) : ref;
-    const from = Math.max(entry, lo);
-    const to = Math.min(exit, hi);
-    if (from <= to) days += to - from + 1;
+    ranges.push({ from: Math.max(entry, lo), to: Math.min(exit, hi) });
   }
 
-  return { country_code: countryCode.toUpperCase(), days, periodStart, periodEnd };
+  return {
+    country_code: countryCode.toUpperCase(),
+    days: countDistinctDays(ranges),
+    periodStart,
+    periodEnd,
+  };
 }
 
 /** Set of ISO days inside the current rolling Schengen window that count. */
