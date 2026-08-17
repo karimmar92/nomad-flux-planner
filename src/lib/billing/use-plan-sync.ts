@@ -25,7 +25,10 @@ import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
-const VALID: readonly Plan[] = ["free", "starter", "pro", "teams"];
+// Must list EVERY plan the webhook can write. Omitting one (founding_lifetime
+// was missing) silently drops the paid plan on the way from server to device:
+// the customer pays and stays on the free tier forever.
+const VALID: readonly Plan[] = ["free", "starter", "pro", "founding_lifetime", "teams"];
 
 /** Delay before the post-checkout re-check, in ms. */
 const AFTER_CHECKOUT_RECHECK_MS = 4000;
