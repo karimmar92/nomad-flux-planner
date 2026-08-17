@@ -186,48 +186,11 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,
-<<<<<<< HEAD
-        /**
-         * NO tax_id_collection — removed deliberately.
-         *
-         * It used to be enabled with the reasoning that business customers
-         * want their VAT ID on the invoice anyway. That reasoning was wrong in
-         * a way that costs conversions. Under § 19 UStG this business charges
-         * no VAT, so a "VAT ID" field at the moment of payment tells the buyer
-         * that tax is about to be added, makes them stop and work out how much,
-         * and contradicts VAT.notice in config/legal.ts, which promises in
-         * writing that "the amount shown is the amount charged".
-         *
-         * A field that raises a question the checkout then refuses to answer is
-         * worse than no field. Business customers who need their VAT ID on
-         * record can add it in the customer portal, where it costs nothing to
-         * ask because nobody is mid-purchase.
-         *
-         * If the Kleinunternehmer status ever ends, this comes back in the same
-         * commit that turns on Stripe Tax and updates VAT.exempt.
-         */
-        billing_address_collection: "required",
-        // §312j BGB: the button must say the order obliges payment.
-        submit_type: "pay",
-        custom_text: {
-          submit: {
-            message:
-              "By completing this order you enter a paid subscription. The amount shown is the total — no VAT is added. It renews automatically until cancelled, and you can cancel any time from your account.",
-          },
-          terms_of_service_acceptance: {
-            message:
-              "I agree to the terms and privacy policy, and I request that the service begins immediately. I understand that my 14-day right of withdrawal lapses once the service has been fully provided.",
-          },
-        },
-        consent_collection: { terms_of_service: "required" },
-      });
-=======
         // Full handling supplies its own terms, tax treatment and checkout
         // disclosures. custom_text, consent_collection and tax_id_collection
         // conflict with it and make the embedded form fail after loading.
         managed_payments: { enabled: true },
       } as Stripe.Checkout.SessionCreateParams);
->>>>>>> 1bddccb00faf8fb93ffb8fa1bfd3af5499624c29
 
       /**
        * No `?? ""`. An empty client secret is not a checkout session; passing
