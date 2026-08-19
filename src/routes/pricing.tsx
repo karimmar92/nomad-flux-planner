@@ -7,6 +7,7 @@ import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
 import { PlanCardGrid, type PlanCardBilling } from "@/components/marketing/PlanCards";
 import { VAT } from "@/config/legal";
+import { FOUNDING_PRICE_USD } from "@/config/founding";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/pricing")({
       { title: `Pricing | ${APP_NAME}` },
       {
         name: "description",
-        content: `Unlimited trip tracking, free forever. Starter $${tier("starter").monthlyUsd}/mo, Pro $${tier("pro").monthlyUsd}/mo, Teams $${tier("teams").monthlyUsd}/seat — two months free on annual.`,
+        content: `Unlimited trip tracking, free forever. Pro $${tier("pro").monthlyUsd}/mo with two months free on annual, or $${FOUNDING_PRICE_USD} once for the Founding 100.`,
       },
       { property: "og:title", content: `Pricing | ${APP_NAME}` },
       {
