@@ -34,6 +34,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { createFoundingCheckout } from "@/lib/billing/billing.functions";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { pricingNextUrl, writePurchaseIntent } from "@/lib/billing/purchase-intent";
+
 import { useSession, resolveSignedIn } from "@/lib/use-session";
 import { useProfile } from "@/lib/store";
 import {
