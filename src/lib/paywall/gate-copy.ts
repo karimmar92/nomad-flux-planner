@@ -22,11 +22,11 @@ export function gateLines(args: {
   variant: GateCopyVariant;
   metered: boolean;
   used: number;
-  feature: ProFeature;
+  feature: ProFeature | null;
   /** Feature names already spent this month, when known. */
   spent?: ProFeature[];
 }): GateLines {
-  const label = featureLabel(args.feature);
+  const label = args.feature ? featureLabel(args.feature) : "this answer";
   const spentList = (args.spent ?? []).map((f) => featureLabel(f)).join(", ");
 
   if (args.variant === "b") {
