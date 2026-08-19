@@ -116,9 +116,9 @@ export function Landing() {
           right for a product whose value is a figure you can trust. */}
       <Reveal as="section" className="content-auto grid gap-3 sm:grid-cols-3">
         {[
-          { n: "4", l: "rules, one trip history" },
-          { n: String(cityCount), l: "cities, priced and checked" },
-          { n: "0", l: "trackers, on any page" },
+          { n: "4", l: "rules counted from one history" },
+          { n: String(cityCount), l: "cities with the rules already checked" },
+          { n: "0", l: "trackers watching you" },
         ].map((s) => (
           <div key={s.l} className="surface px-6 py-7 text-center">
             <div className="num text-4xl font-semibold tracking-tight">{s.n}</div>
@@ -135,20 +135,60 @@ export function Landing() {
           <h2 className="display-lg text-balance">Three things stop being your problem.</h2>
         </Reveal>
 
-        <div className="mt-14">
-          <PlanCardGrid billing="monthly" includeFounding />
+        <div className="mt-14 grid gap-5 md:grid-cols-3">
+          {[
+            {
+              Icon: CalendarClock,
+              title: "You stop guessing your leave-by date.",
+              body: `${APP_NAME} counts the rolling 180-day window the way the border does and tells you the last day you can legally stay, months before it matters.`,
+            },
+            {
+              Icon: Globe2,
+              title: "You stop crossing tax lines you did not know you were near.",
+              body: "Per-country day counters run against each country's real rule, including the ones that measure over any rolling twelve months rather than the calendar year.",
+            },
+            {
+              Icon: WifiOff,
+              title: "You stop needing signal to know where you stand.",
+              body: "Everything works offline, so the number is on your phone in the queue at the border, not on a server you cannot reach.",
+            },
+          ].map(({ Icon, title, body }, i) => (
+            <Reveal key={title} delay={i * 70}>
+              <div className="surface h-full p-7">
+                <Icon className="h-5 w-5 text-primary" aria-hidden />
+                <h3 className="mt-4 text-base font-semibold tracking-tight text-balance">
+                  {title}
+                </h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
-
-        <Reveal className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">{VAT.notice}</p>
-          <Link
-            to="/pricing"
-            className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline"
-          >
-            Compare every plan
-          </Link>
-        </Reveal>
       </section>
+
+      {/* ── ACCOUNT ────────────────────────────────────────────────────
+          The account is earned, not walled. The tracker stays open without
+          one; this section names what a reader loses by staying local. */}
+      <Reveal as="section" className="content-auto surface-raised p-8 sm:p-12">
+        <div className="max-w-2xl">
+          <h2 className="display-md text-balance">Your history should outlive the phone.</h2>
+          <p className="lede mt-4 text-pretty">
+            Everything you log lives in one browser on one device. Clear it, lose the phone, or move
+            to a new laptop and the record goes with it. A travel record you cannot produce later is
+            the one thing you actually needed it for.
+          </p>
+          <div className="mt-8">
+            <Link to="/auth" search={{ next: "/tracker" }} className="cta">
+              Create your account
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Free. Everything you have already logged uploads automatically.
+            </p>
+          </div>
+        </div>
+      </Reveal>
+
 
       {/* ── HONEST LIMITS ──────────────────────────────────────────────
           Deliberately flatter than everything around it. It works because it
