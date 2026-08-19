@@ -277,11 +277,17 @@ export function FoundingOffer({
           <div className="mb-2 flex justify-end">
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                // Closed without paying: drop ?founding=1 so a refresh does not
+                // put the payment form back in front of them.
+                onAutoOpened?.();
+              }}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               Close
             </button>
+
           </div>
           <EmbeddedCheckoutProvider stripe={getStripe()} options={options}>
             <EmbeddedCheckout />
