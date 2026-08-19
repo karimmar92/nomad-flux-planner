@@ -235,6 +235,34 @@ function PaywallSheet({
 
         <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{copy.limit}</p>
 
+        {/* ── WHAT YOU ALREADY USED, AND WHAT COMES NEXT ─────────────
+            Naming the free value already delivered is the most honest upsell
+            available: it is a receipt, not a claim. The "next" line then says
+            what the same click buys from here on. */}
+        <div className="mt-4 rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed">
+          {meter.spent.length > 0 ? (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                Used this month: {meter.spent.length} of {FREE_MONTHLY_CHECKS} free checks
+              </span>{" "}
+              — {meter.spent.map((f) => featureLabel(f)).join(", ")}.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {FREE_MONTHLY_CHECKS} free checks a month
+              </span>{" "}
+              cover a look at the forward-looking tools. {featureLabel(args.feature)} sits
+              outside them.
+            </p>
+          )}
+          <p className="mt-1.5 text-muted-foreground">
+            <span className="font-medium text-foreground">Next:</span> unlimited{" "}
+            {featureLabel(args.feature)}, no monthly check counter, and every other Pro
+            answer unlocked at the same time.
+          </p>
+        </div>
+
         {/* ── PRICE, once, annual first, anchored ───────────────────── */}
         <div className="mt-5 rounded-xl border border-border bg-surface-2 p-4">
           <div className="flex items-center gap-2" role="group" aria-label="Billing period">
