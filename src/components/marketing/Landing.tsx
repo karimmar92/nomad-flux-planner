@@ -59,9 +59,8 @@ import { listApprovedReviews } from "@/lib/reviews/reviews.functions";
 
 export function Landing() {
   const cityCount = CITIES.length;
-  // The "no customers yet" admission below must retire itself the moment
-  // there are published reviews, otherwise the honest section becomes the
-  // untrue one.
+  // The testimonial strip is rendered only when real reviews exist. The same
+  // query also lets the section below frame itself honestly around that fact.
   const { data: reviews } = useQuery({
     queryKey: ["reviews", "approved", "strip"],
     queryFn: () => listApprovedReviews({ data: { limit: 3 } }),
