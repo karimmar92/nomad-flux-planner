@@ -134,47 +134,80 @@ function Pricing() {
         </div>
       ) : null}
 
-      <PricingTable
-        // Only the tier being opened is busy. Auth hydration NEVER disables a
-        // purchase button: if the session has not resolved when the click
-        // arrives, it is resolved inside the handler instead.
-        busyPlan={busy}
-        initialBilling={deepLinkInterval ?? "annual"}
-        highlightPlan={deepLinkPlan ?? null}
-        onChoose={(chosen, billing) => {
-          if (chosen.id === "free") return;
-          try {
-            // Throws when the build shipped without a payments token. Better a
-            // named error here than a dead button or a broken form.
-            getStripeEnvironment();
-          } catch (e) {
-            toast("Checkout is not available", {
-              description: e instanceof Error ? e.message : undefined,
-            });
-            return;
-          }
-          setBusy(chosen.id);
-          void (async () => {
-            const authed = ready ? signedIn : await resolveSignedIn();
-            if (!authed) {
-              setBusy(null);
-              void navigate({ to: "/auth", search: { next: "/pricing" } });
+      {/* The same cards as the homepage, deliberately. Someone who clicked
+          "Choose Pro" there should recognise what they land on; a different
+          pricing presentation at the point of payment is where trust goes. */}
+      <div className="space-y-4">
+        <div className="flex justify-center">
+          <div
+            className="inline-flex rounded-full border border-border p-1"
+            role="group"
+            aria-label="Billing period"
+          >
+            {(["monthly", "annual"] as const).map((b) => (
+              <button
+                key={b}
+                type="button"
+                onClick={() => setBilling(b)}
+                aria-pressed={billing === b}
+                className={
+                  billing === b
+                    ? "min-h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground"
+                    : "min-h-11 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground"
+                }
+              >
+                {b === "monthly" ? "Monthly" : "Annual · two months free"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <PlanCardGrid
+          billing={billing}
+          busyPlan={busy}
+          highlight={deepLinkPlan ?? null}
+          onSelect={(chosen, chosenBilling) => {
+            if (chosen === "free") {
+              void navigate({ to: "/tracker" });
               return;
             }
-            /**
-             * Seats are not sent from here. This previously sent a fixed count
-             * for per-seat plans, so someone clicking Teams landed on a
-             * checkout for seats they never asked for — a different price from
-             * the card they clicked. The seat picker lives on the checkout
-             * form itself, where the total updates as it changes.
-             */
-            setCheckout({
-              plan: chosen.id as PaidPlanId,
-              interval: billing === "annual" ? "yearly" : "monthly",
-            });
-          })();
-        }}
-      />
+            try {
+              // Throws when the build shipped without a payments token. Better a
+              // named error here than a dead button or a broken form.
+              getStripeEnvironment();
+            } catch (e) {
+              toast("Checkout is not available", {
+                description: e instanceof Error ? e.message : undefined,
+              });
+              return;
+            }
+            setBusy(chosen);
+            void (async () => {
+              // Auth hydration NEVER disables a purchase button: if the session
+              // has not resolved when the click arrives, resolve it here.
+              const authed = ready ? signedIn : await resolveSignedIn();
+              if (!authed) {
+                setBusy(null);
+                void navigate({ to: "/auth", search: { next: "/pricing" } });
+                return;
+              }
+              setCheckout({
+                plan: chosen as PaidPlanId,
+                interval: chosenBilling === "annual" ? "yearly" : "monthly",
+              });
+            })();
+          }}
+        />
+
+        <p className="text-center text-xs text-muted-foreground">
+          {VAT.notice} Managing several people?{" "}
+          <Link to="/business" className="underline hover:text-foreground">
+            See how team accounts work
+          </Link>
+          .
+        </p>
+      </div>
+
 
 
       {checkout ? (
