@@ -51,7 +51,6 @@ import { Reveal } from "@/components/marketing/Reveal";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { APP_NAME } from "@/lib/app";
 import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
-import { RULE_PAGES, ruleLabel } from "@/config/rule-pages";
 import { VAT } from "@/config/legal";
 import { PlanCardGrid } from "@/components/marketing/PlanCards";
 import { useQuery } from "@tanstack/react-query";
