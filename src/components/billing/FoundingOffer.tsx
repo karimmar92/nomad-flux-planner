@@ -110,7 +110,7 @@ export function FoundingOffer() {
   const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
 
   return (
-    <section className="panel border-primary/40 ring-1 ring-primary/15 p-6">
+    <section id="founding" className="panel border-primary/40 ring-1 ring-primary/15 p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="label-xs text-primary">Founding {FOUNDING_SPOTS}</div>

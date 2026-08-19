@@ -5,7 +5,9 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
-import { PricingTable, type Billing } from "@/components/PricingTable";
+import { PlanCardGrid, type PlanCardBilling } from "@/components/marketing/PlanCards";
+import { VAT } from "@/config/legal";
+import { FOUNDING_PRICE_USD } from "@/config/founding";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
@@ -16,7 +18,7 @@ import { useSession, resolveSignedIn } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
 /** Deep-link params the homepage plan cards send, e.g. ?plan=pro&interval=annual. */
-type PricingSearch = { plan?: PlanId; interval?: Billing };
+type PricingSearch = { plan?: PlanId; interval?: PlanCardBilling };
 
 const DEEP_LINK_PLANS: PlanId[] = ["free", "starter", "pro", "teams"];
 
@@ -24,7 +26,7 @@ export const Route = createFileRoute("/pricing")({
   validateSearch: (search: Record<string, unknown>): PricingSearch => {
     const plan = DEEP_LINK_PLANS.find((p) => p === search["plan"]);
     const interval = search["interval"] === "monthly" || search["interval"] === "annual"
-      ? (search["interval"] as Billing)
+      ? (search["interval"] as PlanCardBilling)
       : undefined;
     return {
       ...(plan ? { plan } : {}),
@@ -36,7 +38,7 @@ export const Route = createFileRoute("/pricing")({
       { title: `Pricing | ${APP_NAME}` },
       {
         name: "description",
-        content: `Unlimited trip tracking, free forever. Starter $${tier("starter").monthlyUsd}/mo, Pro $${tier("pro").monthlyUsd}/mo, Teams $${tier("teams").monthlyUsd}/seat — two months free on annual.`,
+        content: `Unlimited trip tracking, free forever. Pro $${tier("pro").monthlyUsd}/mo with two months free on annual, or $${FOUNDING_PRICE_USD} once for the Founding 100.`,
       },
       { property: "og:title", content: `Pricing | ${APP_NAME}` },
       {
@@ -59,6 +61,7 @@ function Pricing() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
+  const [billing, setBilling] = useState<PlanCardBilling>(deepLinkInterval ?? "annual");
 
   // Scroll the named tier into view once, so ?plan=pro lands on the card the
   // homepage button promised rather than at the top of the page.
@@ -134,47 +137,80 @@ function Pricing() {
         </div>
       ) : null}
 
-      <PricingTable
-        // Only the tier being opened is busy. Auth hydration NEVER disables a
-        // purchase button: if the session has not resolved when the click
-        // arrives, it is resolved inside the handler instead.
-        busyPlan={busy}
-        initialBilling={deepLinkInterval ?? "annual"}
-        highlightPlan={deepLinkPlan ?? null}
-        onChoose={(chosen, billing) => {
-          if (chosen.id === "free") return;
-          try {
-            // Throws when the build shipped without a payments token. Better a
-            // named error here than a dead button or a broken form.
-            getStripeEnvironment();
-          } catch (e) {
-            toast("Checkout is not available", {
-              description: e instanceof Error ? e.message : undefined,
-            });
-            return;
-          }
-          setBusy(chosen.id);
-          void (async () => {
-            const authed = ready ? signedIn : await resolveSignedIn();
-            if (!authed) {
-              setBusy(null);
-              void navigate({ to: "/auth", search: { next: "/pricing" } });
+      {/* The same cards as the homepage, deliberately. Someone who clicked
+          "Choose Pro" there should recognise what they land on; a different
+          pricing presentation at the point of payment is where trust goes. */}
+      <div className="space-y-4">
+        <div className="flex justify-center">
+          <div
+            className="inline-flex rounded-full border border-border p-1"
+            role="group"
+            aria-label="Billing period"
+          >
+            {(["monthly", "annual"] as const).map((b) => (
+              <button
+                key={b}
+                type="button"
+                onClick={() => setBilling(b)}
+                aria-pressed={billing === b}
+                className={
+                  billing === b
+                    ? "min-h-11 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground"
+                    : "min-h-11 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground"
+                }
+              >
+                {b === "monthly" ? "Monthly" : "Annual · two months free"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <PlanCardGrid
+          billing={billing}
+          busyPlan={busy}
+          highlight={deepLinkPlan ?? null}
+          onSelect={(chosen, chosenBilling) => {
+            if (chosen === "free") {
+              void navigate({ to: "/tracker" });
               return;
             }
-            /**
-             * Seats are not sent from here. This previously sent a fixed count
-             * for per-seat plans, so someone clicking Teams landed on a
-             * checkout for seats they never asked for — a different price from
-             * the card they clicked. The seat picker lives on the checkout
-             * form itself, where the total updates as it changes.
-             */
-            setCheckout({
-              plan: chosen.id as PaidPlanId,
-              interval: billing === "annual" ? "yearly" : "monthly",
-            });
-          })();
-        }}
-      />
+            try {
+              // Throws when the build shipped without a payments token. Better a
+              // named error here than a dead button or a broken form.
+              getStripeEnvironment();
+            } catch (e) {
+              toast("Checkout is not available", {
+                description: e instanceof Error ? e.message : undefined,
+              });
+              return;
+            }
+            setBusy(chosen);
+            void (async () => {
+              // Auth hydration NEVER disables a purchase button: if the session
+              // has not resolved when the click arrives, resolve it here.
+              const authed = ready ? signedIn : await resolveSignedIn();
+              if (!authed) {
+                setBusy(null);
+                void navigate({ to: "/auth", search: { next: "/pricing" } });
+                return;
+              }
+              setCheckout({
+                plan: chosen as PaidPlanId,
+                interval: chosenBilling === "annual" ? "yearly" : "monthly",
+              });
+            })();
+          }}
+        />
+
+        <p className="text-center text-xs text-muted-foreground">
+          {VAT.notice} Managing several people?{" "}
+          <Link to="/business" className="underline hover:text-foreground">
+            See how team accounts work
+          </Link>
+          .
+        </p>
+      </div>
+
 
 
       {checkout ? (

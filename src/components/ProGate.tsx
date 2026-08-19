@@ -2,6 +2,36 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FOUNDING_PRICE_USD } from "@/config/founding";
+
+/**
+ * Two ways out of every gate, not one.
+ *
+ * A single "See Pro" button hides the fact that there is a one-off option, and
+ * people who will not start a subscription frequently will pay once. The
+ * subscription stays the primary button; the lifetime offer is a quiet second
+ * line so the pair does not read as two competing pitches.
+ */
+function UpgradeActions({ cta }: { cta: string }) {
+  return (
+    <div className="flex shrink-0 flex-col items-end gap-1">
+      <Link
+        to="/pricing"
+        search={{ plan: "pro" as const, interval: "annual" as const }}
+        className="inline-flex min-h-9 items-center rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground"
+      >
+        {cta}
+      </Link>
+      <Link
+        to="/pricing"
+        hash="founding"
+        className="text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+      >
+        or ${FOUNDING_PRICE_USD} once — Founder 100
+      </Link>
+    </div>
+  );
+}
 
 /**
  * Upgrade prompts live at the point of need — never as an interstitial.
@@ -44,12 +74,7 @@ export function LockedPreview({
             <p className="text-sm font-semibold leading-snug">{headline}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
           </div>
-          <Link
-            to="/pricing"
-            className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-          >
-            {cta}
-          </Link>
+          <UpgradeActions cta={cta} />
         </div>
       </div>
     </div>
@@ -73,12 +98,7 @@ export function ProPrompt({
         <p className="text-sm font-semibold">{title}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
       </div>
-      <Link
-        to="/pricing"
-        className="shrink-0 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
-      >
-        {cta}
-      </Link>
+      <UpgradeActions cta={cta} />
     </div>
   );
 }

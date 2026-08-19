@@ -11,6 +11,7 @@ import { useSession } from "@/lib/use-session";
 import { DeleteAccount } from "@/components/account/DeleteAccount";
 import { BillingCard } from "@/components/billing/BillingCard";
 import { CheckoutReturn } from "@/components/billing/CheckoutReturn";
+import { ErrorCard, SectionBoundary } from "@/components/SectionBoundary";
 
 export const Route = createFileRoute("/profile")({
   /**
@@ -49,6 +50,22 @@ export const Route = createFileRoute("/profile")({
       },
     ],
   }),
+  /**
+   * A route-level net. Anything that escapes the per-section boundaries below
+   * lands here instead of on a blank page — which is what a buyer hit when
+   * they clicked "profile" straight after paying.
+   */
+  errorComponent: ({ error, reset }) => (
+    <div className="space-y-4">
+      <h1 className="text-xl font-semibold tracking-tight">Your profile</h1>
+      <ErrorCard
+        title="Your profile could not be loaded"
+        body="Your account and any payment you made are unaffected — payments are recorded with our payment provider, not by this page. Try again, and if it keeps happening, contact support with the message below."
+        detail={error instanceof Error ? error.message : String(error)}
+        onRetry={reset}
+      />
+    </div>
+  ),
   component: ProfilePage,
 });
 
@@ -66,7 +83,14 @@ function ProfilePage() {
 
       {/* First thing on the page after paying, above everything else. The
           buyer's only question at this moment is "did that work". */}
-      {sessionId ? <CheckoutReturn sessionId={sessionId} /> : null}
+      {sessionId ? (
+        <SectionBoundary
+          title="We could not confirm the payment on this page"
+          body="That does not mean the payment failed. Reload in a moment, or open your billing section below — if the charge went through, your plan updates there."
+        >
+          <CheckoutReturn sessionId={sessionId} />
+        </SectionBoundary>
+      ) : null}
 
       <section className="panel grid gap-4 p-4 sm:grid-cols-2">
         <Field label="Display name">
@@ -151,7 +175,9 @@ function ProfilePage() {
       </section>
 
       {/* Program B — free months only. The cash creator programme lives at /creator. */}
-      <UserReferralCard signedIn={signedIn} />
+      <SectionBoundary title="Referrals could not be shown">
+        <UserReferralCard signedIn={signedIn} />
+      </SectionBoundary>
 
       <HeardAboutField signedIn={signedIn} />
 
@@ -213,14 +239,21 @@ function ProfilePage() {
         "Plan: free · See Pro" that showed the plan but gave a paying customer
         no way to change or end it.
       */}
-      <BillingCard />
+      <SectionBoundary
+        title="Billing could not be loaded"
+        body="Your subscription is unaffected. Reload the page, and if this persists, contact support — cancelling is always possible by email as well as here."
+      >
+        <BillingCard />
+      </SectionBoundary>
 
       {/*
         GDPR Art.17 and App Store 5.1.1(v) both require in-app account
         deletion. Last on the page, but on the page — not hidden behind a
         support email, which is the pattern Apple rejects.
       */}
-      <DeleteAccount />
+      <SectionBoundary title="Account deletion is unavailable right now">
+        <DeleteAccount />
+      </SectionBoundary>
     </div>
   );
 }
