@@ -30,6 +30,7 @@ import { Route as PlansRouteImport } from './routes/plans'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RecordRouteImport } from './routes/record'
+import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StaysRouteImport } from './routes/stays'
 import { Route as TrackerRouteImport } from './routes/tracker'
@@ -38,6 +39,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as BusinessExplainRouteImport } from './routes/business.explain'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
@@ -170,6 +172,11 @@ const RecordRoute = RecordRouteImport.update({
   path: '/record',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -210,6 +217,11 @@ const AdminBillingRoute = AdminBillingRouteImport.update({
 const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
   id: '/admin/creators',
   path: '/admin/creators',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/admin/reviews',
+  path: '/admin/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
@@ -367,6 +379,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
+  '/reviews': typeof ReviewsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
@@ -375,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -422,6 +436,7 @@ export interface FileRoutesByTo {
   '/plans': typeof PlansRouteWithChildren
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
+  '/reviews': typeof ReviewsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
@@ -430,6 +445,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -480,6 +496,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/profile': typeof ProfileRoute
   '/record': typeof RecordRouteWithChildren
+  '/reviews': typeof ReviewsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stays': typeof StaysRoute
   '/tracker': typeof TrackerRoute
@@ -488,6 +505,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -539,6 +557,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/record'
+    | '/reviews'
     | '/sitemap.xml'
     | '/stays'
     | '/tracker'
@@ -547,6 +566,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/reviews'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -594,6 +614,7 @@ export interface FileRouteTypes {
     | '/plans'
     | '/pricing'
     | '/profile'
+    | '/reviews'
     | '/sitemap.xml'
     | '/stays'
     | '/tracker'
@@ -602,6 +623,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/reviews'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -651,6 +673,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/record'
+    | '/reviews'
     | '/sitemap.xml'
     | '/stays'
     | '/tracker'
@@ -659,6 +682,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/reviews'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -709,6 +733,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   ProfileRoute: typeof ProfileRoute
   RecordRoute: typeof RecordRouteWithChildren
+  ReviewsRoute: typeof ReviewsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StaysRoute: typeof StaysRoute
   TrackerRoute: typeof TrackerRoute
@@ -717,6 +742,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminBillingRoute: typeof AdminBillingRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
   BusinessExplainRoute: typeof BusinessExplainRoute
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
@@ -886,6 +912,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -940,6 +973,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/creators'
       fullPath: '/admin/creators'
       preLoaderRoute: typeof AdminCreatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/admin/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/business/': {
@@ -1190,6 +1230,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   ProfileRoute: ProfileRoute,
   RecordRoute: RecordRouteWithChildren,
+  ReviewsRoute: ReviewsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StaysRoute: StaysRoute,
   TrackerRoute: TrackerRoute,
@@ -1199,6 +1240,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminBillingRoute: AdminBillingRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
   BusinessExplainRoute: BusinessExplainRoute,
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,

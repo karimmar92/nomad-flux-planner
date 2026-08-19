@@ -101,7 +101,7 @@ export function GuidedTripFlow({
   // stop logging trips.
   const [step, setStep] = useState<Step>(passport ? "country" : "passport");
   const [country, setCountry] = useState<string | null>(null);
-  const [entry, setEntry] = useState<string | null>(null);
+  const [entry, setEntry] = useState<string | null>(todayIso());
   const [exit, setExit] = useState<string | null>(null);
   const [stillThere, setStillThere] = useState(false);
   const [purpose, setPurpose] = useState<TripPurpose | null>(null);
@@ -120,7 +120,7 @@ export function GuidedTripFlow({
 
   function reset() {
     setCountry(null);
-    setEntry(null);
+    setEntry(todayIso());
     setExit(null);
     setStillThere(false);
     setPurpose(null);

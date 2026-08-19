@@ -55,9 +55,22 @@ import { RULE_PAGES, ruleLabel } from "@/config/rule-pages";
 import { tier } from "@/config/pricing";
 import { VAT } from "@/config/legal";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { TestimonialStrip } from "@/components/reviews/TestimonialStrip";
+import { listApprovedReviews } from "@/lib/reviews/reviews.functions";
 
 export function Landing() {
   const cityCount = CITIES.length;
+  // The "no customers yet" admission below must retire itself the moment
+  // there are published reviews, otherwise the honest section becomes the
+  // untrue one.
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", "approved", "strip"],
+    queryFn: () => listApprovedReviews({ data: { limit: 3 } }),
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  const hasReviews = (reviews?.length ?? 0) > 0;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4">
@@ -207,6 +220,8 @@ export function Landing() {
         </ul>
       </Reveal>
 
+      <TestimonialStrip />
+
       {/* ── PRICING ────────────────────────────────────────────────────
           Three plans. Each card leads with the OUTCOME it buys rather than a
           feature list, and carries four lines at most, so the comparison is
@@ -287,9 +302,9 @@ export function Landing() {
           Built by one person. Here is exactly where that shows.
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          There are no customer logos on this page because there are no customers yet. You would
-          work that out within a week, and a product about getting the awkward details right should
-          not open with a decorative lie.
+          {hasReviews
+            ? "This is a small product built by one person. The reviews above are from real paying customers, unedited — there are not many of them yet, and pretending otherwise would be the wrong start."
+            : "There are no customer logos on this page because there are no customers yet. You would work that out within a week, and a product about getting the awkward details right should not open with a decorative lie."}
         </p>
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div>
