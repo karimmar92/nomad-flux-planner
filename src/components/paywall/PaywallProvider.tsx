@@ -29,11 +29,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import type { ProFeature } from "@/lib/entitlements";
-import { paywallCopy } from "@/lib/paywall/value";
+import { featureLabel, paywallCopy } from "@/lib/paywall/value";
+import { track } from "@/lib/analytics/funnel";
 import {
   FREE_MONTHLY_CHECKS,
   isMetered,
   readMeter,
+  remaining,
   spend,
   writeMeter,
   type MeterState,
@@ -87,7 +89,14 @@ export function PaywallProvider({ children }: { children: ReactNode }) {
   // Read after mount: localStorage in a state initialiser mismatches hydration.
   useEffect(() => setMeter(readMeter()), []);
 
-  const open = useCallback((next: OpenArgs) => setArgs(next), []);
+  const open = useCallback((next: OpenArgs) => {
+    track("paywall_intent", {
+      feature: next.feature,
+      reason: next.reason ?? "hard",
+      checksLeft: remaining(readMeter()),
+    });
+    setArgs(next);
+  }, []);
 
   const spendCheck = useCallback(
     (feature: ProFeature): boolean => {
@@ -114,12 +123,22 @@ export function PaywallProvider({ children }: { children: ReactNode }) {
   return (
     <PaywallContext.Provider value={value}>
       {children}
-      {args ? <PaywallSheet args={args} onClose={() => setArgs(null)} /> : null}
+      {args ? (
+        <PaywallSheet args={args} meter={meter} onClose={() => setArgs(null)} />
+      ) : null}
     </PaywallContext.Provider>
   );
 }
 
-function PaywallSheet({ args, onClose }: { args: OpenArgs; onClose: () => void }) {
+function PaywallSheet({
+  args,
+  meter,
+  onClose,
+}: {
+  args: OpenArgs;
+  meter: MeterState;
+  onClose: () => void;
+}) {
   const copy = paywallCopy(args.feature);
   const navigate = useNavigate();
   const { ready, signedIn } = useSession();
@@ -142,6 +161,7 @@ function PaywallSheet({ args, onClose }: { args: OpenArgs; onClose: () => void }
       return;
     }
     setBusy(true);
+    track("trial_start", { feature: args.feature, reason: interval });
     void (async () => {
       const authed = ready ? signedIn : await resolveSignedIn();
       if (!authed) {
@@ -214,6 +234,34 @@ function PaywallSheet({ args, onClose }: { args: OpenArgs; onClose: () => void }
         </ul>
 
         <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{copy.limit}</p>
+
+        {/* ── WHAT YOU ALREADY USED, AND WHAT COMES NEXT ─────────────
+            Naming the free value already delivered is the most honest upsell
+            available: it is a receipt, not a claim. The "next" line then says
+            what the same click buys from here on. */}
+        <div className="mt-4 rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed">
+          {meter.spent.length > 0 ? (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                Used this month: {meter.spent.length} of {FREE_MONTHLY_CHECKS} free checks
+              </span>{" "}
+              — {meter.spent.map((f) => featureLabel(f)).join(", ")}.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {FREE_MONTHLY_CHECKS} free checks a month
+              </span>{" "}
+              cover a look at the forward-looking tools. The {featureLabel(args.feature)}{" "}
+              sits outside them.
+            </p>
+          )}
+          <p className="mt-1.5 text-muted-foreground">
+            <span className="font-medium text-foreground">Next:</span> unlimited{" "}
+            {featureLabel(args.feature)}, no monthly check counter, and every other Pro
+            answer unlocked at the same time.
+          </p>
+        </div>
 
         {/* ── PRICE, once, annual first, anchored ───────────────────── */}
         <div className="mt-5 rounded-xl border border-border bg-surface-2 p-4">

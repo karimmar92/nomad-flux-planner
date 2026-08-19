@@ -15,10 +15,15 @@ import { useProfile } from "@/lib/store";
 import { canUse, type ProFeature } from "@/lib/entitlements";
 import { isMetered, isUnlocked, remaining, type MeteredFeature } from "@/lib/paywall/meter";
 import { usePaywall } from "@/components/paywall/PaywallProvider";
+import { track } from "@/lib/analytics/funnel";
 
 export type Gate = {
+  /** The feature this gate protects — used for the upgrade copy. */
+  feature: ProFeature;
   /** True when the content may render in full, right now. */
   allowed: boolean;
+  /** Free checks already spent this month. Drives the "already used" line. */
+  used: number;
   /** True when a free check would open it. Drives the button label. */
   metered: boolean;
   /** Free forward-looking checks left this month. */
@@ -43,14 +48,27 @@ export function useGate(feature: ProFeature, opts?: { emergency?: boolean }): Ga
   const request = useCallback(() => {
     if (entitled) return;
     if (metered && checksLeft > 0) {
-      spendCheck(feature);
+      const granted = spendCheck(feature);
+      if (granted) {
+        track("soft_gate_upsell", {
+          feature,
+          reason: "metered_spend",
+          plan: profile.plan,
+          checksLeft: checksLeft - 1,
+        });
+      }
       return;
     }
+    if (!metered) {
+      track("hard_gate_block", { feature, reason: "hard", plan: profile.plan });
+    }
     open({ feature, reason: metered ? "meter_exhausted" : "hard" });
-  }, [entitled, metered, checksLeft, spendCheck, open, feature]);
+  }, [entitled, metered, checksLeft, spendCheck, open, feature, profile.plan]);
 
   return {
+    feature,
     allowed: entitled || unlocked,
+    used: meter.period === "" ? 0 : meter.spent.length,
     metered: metered && !entitled && !unlocked && checksLeft > 0,
     checksLeft,
     request,
