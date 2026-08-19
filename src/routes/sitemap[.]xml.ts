@@ -36,6 +36,7 @@ const STATIC_PAGES: Entry[] = [
   { path: "/setup/company", changefreq: "monthly", priority: "0.7" },
   { path: "/business", changefreq: "monthly", priority: "0.6" },
   { path: "/creators", changefreq: "monthly", priority: "0.5" },
+  { path: "/reviews", changefreq: "weekly", priority: "0.5" },
   { path: "/how-we-make-money", changefreq: "yearly", priority: "0.4" },
 ];
 
