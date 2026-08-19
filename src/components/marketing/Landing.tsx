@@ -285,12 +285,14 @@ export function Landing() {
             Most people are fairly sure. Fairly sure is what a three-year entry ban is made of.
           </p>
           <div className="mt-9">
-            <Link to="/tracker" className="cta">
-              Find out
+            <Link to="/auth" search={{ next: "/tracker" }} className="cta">
+              Keep my record safe
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">No account, nothing to cancel.</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Free. Your trips sync to every device you use.
+          </p>
         </div>
       </Reveal>
     </div>
