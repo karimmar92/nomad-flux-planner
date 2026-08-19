@@ -4,8 +4,8 @@ import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
 import type { Gate } from "@/lib/paywall/use-gate";
-import { FREE_MONTHLY_CHECKS } from "@/lib/paywall/meter";
-import { featureLabel } from "@/lib/paywall/value";
+import { gateLines } from "@/lib/paywall/gate-copy";
+import { gateCopyVariant } from "@/lib/analytics/experiment";
 
 /**
  * VALUE BEFORE THE ASK, at the gate itself.
@@ -18,23 +18,15 @@ import { featureLabel } from "@/lib/paywall/value";
  */
 function GateValueNote({ gate }: { gate?: Gate | undefined }) {
   if (!gate) return null;
-  const label = featureLabel(gate.feature);
-
-  if (gate.metered) {
-    return (
-      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-        {gate.used > 0
-          ? `You have used ${gate.used} of ${FREE_MONTHLY_CHECKS} free checks this month.`
-          : `Free accounts get ${FREE_MONTHLY_CHECKS} checks a month.`}{" "}
-        This opens {label} until the month ends — Pro removes the counter.
-      </p>
-    );
-  }
-
+  const lines = gateLines({
+    variant: gateCopyVariant(),
+    metered: gate.metered,
+    used: gate.used,
+    feature: gate.feature,
+  });
   return (
     <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-      Not part of the free monthly checks. Pro unlocks {label} outright, plus the tax
-      presence report, exports and the 12-month calendar.
+      {lines.used} {lines.next}
     </p>
   );
 }
