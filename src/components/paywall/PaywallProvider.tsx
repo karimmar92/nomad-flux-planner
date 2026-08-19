@@ -252,8 +252,8 @@ function PaywallSheet({
               <span className="font-medium text-foreground">
                 {FREE_MONTHLY_CHECKS} free checks a month
               </span>{" "}
-              cover a look at the forward-looking tools. {featureLabel(args.feature)} sits
-              outside them.
+              cover a look at the forward-looking tools. The {featureLabel(args.feature)}{" "}
+              sits outside them.
             </p>
           )}
           <p className="mt-1.5 text-muted-foreground">
