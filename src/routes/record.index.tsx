@@ -6,7 +6,8 @@ import { useVault } from "@/lib/documents/use-vault";
 import { expiryState } from "@/lib/documents/vault";
 import { yearsWithData } from "@/lib/reports/tax-report";
 import { useProfile, useTrips } from "@/lib/store";
-import { FREE_CALENDAR_HORIZON_DAYS, isPro } from "@/lib/entitlements";
+import { FREE_CALENDAR_HORIZON_DAYS } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview, ProBadge } from "@/components/ProGate";
 import { buildComplianceCalendar } from "@/lib/compliance-calendar";
 
@@ -37,7 +38,8 @@ function RecordHub() {
   const { trips } = useTrips();
   const { documents } = useVault();
   const { profile } = useProfile();
-  const pro = isPro(profile.plan);
+  const horizonGate = useGate("calendar_horizon");
+  const pro = horizonGate.allowed;
   const years = yearsWithData(trips, todayIso());
   const beyond = buildComplianceCalendar(trips, documents).filter(
     (o) => o.daysAway > FREE_CALENDAR_HORIZON_DAYS,
@@ -121,6 +123,7 @@ function RecordHub() {
         />
         {pro || beyond.length === 0 ? null : (
           <LockedPreview
+            gate={horizonGate}
             headline={`${beyond.length} more dated obligation${beyond.length === 1 ? "" : "s"} further out · next is ${beyond[0]!.title}`}
             detail="Pro shows every dated obligation ahead of you — renewal windows, passport validity and filing deadlines months out, while you can still act on them."
           >

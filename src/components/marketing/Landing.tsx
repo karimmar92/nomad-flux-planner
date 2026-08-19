@@ -273,7 +273,7 @@ export function Landing() {
       {/* ── PRICING ────────────────────────────────────────────────────
           After the proof and the honest limits, never before them. */}
       <section className="section-gap">
-        <PlanCardGrid billing="monthly" includeFounding />
+        <PlanCardGrid billing="annual" includeFounding />
 
         <Reveal className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">{VAT.notice}</p>

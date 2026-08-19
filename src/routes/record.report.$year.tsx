@@ -8,7 +8,7 @@ import { buildTaxReport, yearsWithData } from "@/lib/reports/tax-report";
 import { useProfile, useTrips } from "@/lib/store";
 import { todayIso } from "@/lib/trip-dates";
 import { cn } from "@/lib/utils";
-import { isPro } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 
 export const Route = createFileRoute("/record/report/$year")({
@@ -39,7 +39,9 @@ function ReportPage() {
 
   const report = useMemo(() => buildTaxReport(trips, year, todayIso()), [trips, year]);
   const years = yearsWithData(trips, todayIso());
-  const pro = isPro(profile.plan);
+  // Hard gate: a half-visible tax report is worse than none.
+  const reportGate = useGate("tax_report");
+  const pro = reportGate.allowed;
   const topCountry = [...report.countries].sort((a, b) => b.days - a.days)[0];
   const overThreshold = report.countries.filter((c) => c.exceedsThreshold).length;
   const headline = topCountry
@@ -214,6 +216,7 @@ function ReportPage() {
         </>
       ) : (
         <LockedPreview
+          gate={reportGate}
           headline={headline}
           detail="Pro opens the full presence record — days per country against each threshold, the entry and exit log behind it, and PDF or CSV export for your adviser."
         >

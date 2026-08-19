@@ -10,18 +10,22 @@ import { formatDateLong } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 import { isEmergency } from "@/lib/entitlements";
 import { EmergencyUnlockNote, LockedPreview } from "@/components/ProGate";
+import { useGate } from "@/lib/paywall/use-gate";
 
 /**
  * Border-run planner. Deadline-triggered only — this card never appears
  * unless a move is already forced by a visa limit. That is also the only
  * reason a transport link is allowed inside it.
  */
-export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boolean }) {
+export function BorderRunCard({ plan }: { plan: BorderRunPlan }) {
   const { i18n } = useTranslation();
   const { deadline, origin, departOn, options } = plan;
   const [openId, setOpenId] = useState<string | null>(options[0]?.city.id ?? null);
   // EMERGENCY RULE: over a limit, or inside 7 days of one, the gate comes off.
+  // It is passed into the gate itself so the paywall can never open here.
   const emergency = isEmergency(deadline);
+  const gate = useGate("border_run_full", { emergency });
+  const isPro = gate.allowed;
   const unlocked = isPro || emergency;
   const visible = unlocked ? options : options.slice(0, 1);
   const locked = unlocked ? [] : options.slice(1);
@@ -89,6 +93,7 @@ export function BorderRunCard({ plan, isPro }: { plan: BorderRunPlan; isPro: boo
 
         {locked.length > 0 ? (
           <LockedPreview
+            gate={gate}
             className="mt-2"
             headline={`${options.length} exit options found · cheapest is ${cheapest ? cheapest.city.city : "—"}`}
             detail="Pro shows every destination ranked, with its cost delta, days available and nomad-visa eligibility against your income."

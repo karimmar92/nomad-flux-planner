@@ -16,36 +16,63 @@ import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CITIES } from "@/lib/cities";
-import { annualUsd, tier } from "@/config/pricing";
+import {
+  ANNUAL_MONTHS_FREE,
+  TRIAL_DAYS,
+  annualMonthlyEquivalentUsd,
+  annualSavingPercent,
+  annualUsd,
+  tier,
+} from "@/config/pricing";
 import { FOUNDING_PRICE_USD, FOUNDING_SPOTS } from "@/config/founding";
 
 export type PlanCardBilling = "monthly" | "annual";
 
-/** The two self-serve plans, in order. Content lives here, not in the pages. */
+/**
+ * The three self-serve plans, in order: Free, Pro, Founding.
+ *
+ * THREE, not two. Two options is a yes/no on one price; three is a choice
+ * between shapes — free, subscription, pay-once — and the middle one is the
+ * one being recommended. The founding card is not a fourth column of features,
+ * it is the "I do not want a subscription" answer.
+ *
+ * Annual leads: the price shown is the monthly-equivalent on annual, with the
+ * true monthly figure struck through beside it, so the comparison is honest
+ * and the cheaper commitment is the default rather than the hidden option.
+ *
+ * TEAMS IS STILL NOT HERE. Per-seat sales need a conversation; /business
+ * explains it.
+ */
 function planContent(billing: PlanCardBilling) {
   const pro = tier("pro");
   const proAnnual = annualUsd(pro);
+  const perMonth = annualMonthlyEquivalentUsd(pro);
+  const annual = billing === "annual";
   return [
     {
       id: "free" as const,
       name: "Free",
       price: "$0",
-      unit: "always",
+      unit: "always, no card",
       outcome: "Know where you stand today.",
       points: [
         "Unlimited trips, no cap, ever",
         "Your Schengen status right now",
         "Day counts for every country",
-        `All ${CITIES.length} cities and their costs`,
+        `Three forward-looking checks a month, then ${CITIES.length} cities to browse`,
       ],
       cta: "Start tracking",
       featured: false,
+      strikethrough: null as string | null,
+      badge: null as string | null,
     },
     {
       id: "pro" as const,
       name: "Pro",
-      price: billing === "annual" ? `$${proAnnual}` : `$${pro.monthlyUsd}`,
-      unit: billing === "annual" ? "per year · two months free" : "per month",
+      price: annual ? `$${perMonth}` : `$${pro.monthlyUsd}`,
+      unit: annual
+        ? `per month, billed $${proAnnual} yearly · ${ANNUAL_MONTHS_FREE} months free`
+        : "per month, billed monthly",
       outcome: "Plan the next move before it becomes urgent.",
       points: [
         "Border-run planning, every exit ranked",
@@ -53,8 +80,11 @@ function planContent(billing: PlanCardBilling) {
         "Tax presence report and exports",
         "Document vault, offline at the border",
       ],
-      cta: "Choose Pro",
+      cta: `Start ${TRIAL_DAYS}-day free trial`,
       featured: true,
+      // The anchor. Annual is priced against the monthly it replaces.
+      strikethrough: annual ? `$${pro.monthlyUsd}` : null,
+      badge: annual ? `Save ${annualSavingPercent()}%` : null,
     },
   ];
 }
@@ -68,7 +98,7 @@ export function PlanCardGrid({
   onSelect,
   busyPlan,
   highlight,
-  includeFounding = false,
+  includeFounding = true,
 }: {
   billing?: PlanCardBilling;
   onSelect?: (plan: "free" | "pro", billing: PlanCardBilling) => void;
@@ -89,6 +119,8 @@ export function PlanCardGrid({
           outcome={p.outcome}
           points={p.points}
           featured={p.featured}
+          strikethrough={p.strikethrough}
+          badge={p.badge}
           highlighted={highlight === p.id}
           cta={busyPlan === p.id ? "Opening checkout…" : p.cta}
           {...(onSelect
@@ -143,6 +175,8 @@ export function PlanCard({
   onSelect,
   hash,
   featured = false,
+  strikethrough = null,
+  badge = null,
   highlighted = false,
   footer,
 }: {
@@ -159,6 +193,10 @@ export function PlanCard({
   /** Links to /pricing#<hash>, used by the Founding card on marketing pages. */
   hash?: string;
   featured?: boolean;
+  /** The monthly price this one is anchored against, struck through. */
+  strikethrough?: string | null;
+  /** "Save XX%" — derived upstream, never typed by hand. */
+  badge?: string | null;
   highlighted?: boolean;
   footer?: ReactNode;
 }) {
@@ -182,15 +220,26 @@ export function PlanCard({
     >
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{name}</span>
-        {featured ? (
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
-            Most chosen
-          </span>
-        ) : null}
+        <span className="flex items-center gap-1.5">
+          {badge ? (
+            <span className="rounded-full bg-positive-muted px-2.5 py-0.5 text-[11px] font-semibold text-positive">
+              {badge}
+            </span>
+          ) : null}
+          {featured ? (
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
+              Most chosen
+            </span>
+          ) : null}
+        </span>
       </div>
 
       <div className="mt-5 flex items-baseline gap-1.5">
         <span className="num text-4xl font-semibold tracking-tight">{price}</span>
+        {/* The anchor sits next to the price, not in the footnotes. */}
+        {strikethrough ? (
+          <span className="num text-lg text-muted-foreground line-through">{strikethrough}</span>
+        ) : null}
         <span className="text-sm text-muted-foreground">{unit}</span>
       </div>
 

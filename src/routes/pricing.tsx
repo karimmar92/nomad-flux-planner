@@ -10,7 +10,14 @@ import { VAT } from "@/config/legal";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
-import { annualUsd, tier, type PlanId } from "@/config/pricing";
+import {
+  ANNUAL_MONTHS_FREE,
+  TRIAL_DAYS,
+  annualSavingPercent,
+  annualUsd,
+  tier,
+  type PlanId,
+} from "@/config/pricing";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { getStripeEnvironment } from "@/lib/stripe";
 import type { BillingInterval, PaidPlanId } from "@/config/stripe-prices";
@@ -61,7 +68,7 @@ export const Route = createFileRoute("/pricing")({
       { title: `Pricing | ${APP_NAME}` },
       {
         name: "description",
-        content: `Unlimited trip tracking, free forever. Pro $${tier("pro").monthlyUsd}/mo with two months free on annual, or $${FOUNDING_PRICE_USD} once for the Founding 100.`,
+        content: `Unlimited trip tracking, free forever. Pro $${tier("pro").monthlyUsd}/mo, or save ${annualSavingPercent()}% on annual. ${TRIAL_DAYS}-day free trial, or $${FOUNDING_PRICE_USD} once for the Founding 100.`,
       },
       { property: "og:title", content: `Pricing | ${APP_NAME}` },
       {
@@ -345,7 +352,7 @@ function Pricing() {
                     : "min-h-11 rounded-full px-4 text-sm text-muted-foreground hover:text-foreground"
                 }
               >
-                {b === "monthly" ? "Monthly" : "Annual · two months free"}
+                {b === "monthly" ? "Monthly" : `Annual · save ${annualSavingPercent()}%`}
               </button>
             ))}
           </div>
@@ -396,6 +403,10 @@ function Pricing() {
         />
 
         <p className="text-center text-xs text-muted-foreground">
+          {/* Said once, plainly, next to the buttons that start it. */}
+          Every paid plan starts with {TRIAL_DAYS} free days. A card is required, nothing is
+          charged until day {TRIAL_DAYS + 1}, and cancelling before then costs nothing. Annual is
+          billed once and saves {annualSavingPercent()}% — {ANNUAL_MONTHS_FREE} months free.{" "}
           {VAT.notice} Managing several people?{" "}
           <Link to="/business" className="underline hover:text-foreground">
             See how team accounts work

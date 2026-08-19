@@ -221,6 +221,18 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
 
     if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
 
+    /*
+      THE TRIAL GRANTS PRO, whatever tier is being trialled.
+
+      `subscriptions.plan` keeps the plan that will actually be billed — that
+      row is the billing record and must not lie about what the customer
+      bought. `profiles.plan` is the entitlement, and during a trial it is Pro.
+      When the trial converts, Stripe sends the same event with status
+      "active" and this branch stops applying, so entitlement drops back to
+      the purchased tier on its own.
+    */
+    const entitlementPlan = status === "trialing" && plan !== "free" ? "pro" : plan;
+
     if (typeof object["id"] === "string") {
       const item = object["items"]?.["data"]?.[0];
       const { error: subError } = await supabaseAdmin.from("subscriptions").upsert(
@@ -246,13 +258,13 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
       if (subError) return new Response(subError.message, { status: 500 });
     }
 
-    const patch: { plan: string; stripe_customer_id?: string } = { plan };
+    const patch: { plan: string; stripe_customer_id?: string } = { plan: entitlementPlan };
     if (customerId) patch.stripe_customer_id = customerId;
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     if (error) return new Response(error.message, { status: 500 });
 
-    return Response.json({ received: true, plan, user_id: userId });
+    return Response.json({ received: true, plan: entitlementPlan, billed: plan, user_id: userId });
   }
 
   /* ---------------- accrual ---------------- */

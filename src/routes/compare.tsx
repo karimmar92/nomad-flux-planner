@@ -17,7 +17,7 @@ import {
   touristDaysFor,
 } from "@/lib/arbitrage";
 import { useProfile } from "@/lib/store";
-import { isPro } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 import { EmptyState } from "@/components/Primitives";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -56,7 +56,9 @@ function ComparePage() {
   const ids = raw.split(",").filter(Boolean).slice(0, 4);
   const selected = ids.map(getCity).filter(Boolean) as City[];
 
-  const proCompare = isPro(profile.plan);
+  // Soft gate: three full comparisons a month before the wall appears.
+  const compareGate = useGate("compare");
+  const proCompare = compareGate.allowed;
 
   const cheapest = selected.length
     ? [...selected].sort((a, b) => monthlyCost(a) - monthlyCost(b))[0]!
@@ -254,6 +256,7 @@ function ComparePage() {
             tableEl
           ) : (
             <LockedPreview
+              gate={compareGate}
               headline={headline}
               detail="Pro puts 2–4 cities side by side: cost, surplus, savings rate, visa days, tax triggers and scores, with the best value per row highlighted."
             >

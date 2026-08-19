@@ -19,7 +19,7 @@ import { useOnline } from "@/lib/offline/use-online";
 import { useSession } from "@/lib/use-session";
 import { StepUpGate } from "@/components/account/StepUpGate";
 import { useProfile } from "@/lib/store";
-import { isPro } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +49,9 @@ function VaultPage() {
   const { documents, refresh, setDocuments } = useVault();
   const { signedIn } = useSession();
   const { profile } = useProfile();
-  const pro = isPro(profile.plan);
+  // Hard gate. The evidence layer is never metered — see meter.ts.
+  const vaultGate = useGate("vault");
+  const pro = vaultGate.allowed;
   const online = useOnline();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -105,6 +107,7 @@ function VaultPage() {
 
       {!pro ? (
         <LockedPreview
+          gate={vaultGate}
           headline={
             documents.length > 0
               ? `${documents.length} document${documents.length === 1 ? "" : "s"} on this device${expiring.length > 0 ? ` · ${expiring.length} approaching expiry` : ""}`

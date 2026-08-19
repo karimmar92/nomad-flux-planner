@@ -34,6 +34,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type Stripe from "stripe";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { oneOf, integer } from "@/lib/validate";
+import { TRIAL_DAYS } from "@/config/pricing";
 import {
   priceIdFor,
   TEAMS_SEAT_MAX,
@@ -182,8 +183,26 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         client_reference_id: userId,
         // The commission webhook reads metadata.user_id off the invoice's
         // subscription. Without this, referral accrual silently stops.
+        /*
+          THE TRIAL — three days, card required.
+
+          `trial_period_days` makes Stripe collect the payment method now and
+          take the first payment on day 4. That is the point of a card-required
+          trial: it filters for intent, and Stripe sends its own "trial ends
+          tomorrow" mail so nobody is charged by surprise.
+
+          One-time purchases get no trial; there would be nothing to cancel.
+
+          Entitlement DURING the trial is Pro whatever tier was bought — see
+          the trialing branch in webhook-handler.ts. Trialling the smaller tier
+          means judging the product on the half that is not the reason to pay.
+        */
         ...(!isOneTime && {
-          subscription_data: { metadata: { user_id: userId, userId, plan: data.plan } },
+          subscription_data: {
+            metadata: { user_id: userId, userId, plan: data.plan, trial_grants: "pro" },
+            trial_period_days: TRIAL_DAYS,
+            trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
+          },
         }),
         metadata: { user_id: userId, userId, plan: data.plan },
         allow_promotion_codes: true,

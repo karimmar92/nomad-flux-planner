@@ -33,7 +33,7 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
-import { isPro as planIsPro, canUse } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 import { ImportTrips } from "@/components/trips/ImportTrips";
 import type { Trip, TripPurpose } from "@/lib/types";
@@ -119,7 +119,9 @@ function Tracker() {
     () => maxStayFrom(engineTrips, plannedEntry),
     [engineTrips, plannedEntry],
   );
-  const proPlanning = planIsPro(profile.plan);
+  // Soft gate: the planner is a forward-looking check, three free a month.
+  const plannerGate = useGate("forward_planning");
+  const proPlanning = plannerGate.allowed;
   const plannerLastDay = plannerDays > 0 ? addDaysIso(plannedEntry, plannerDays - 1) : null;
 
   // Border-run planner. Deadline-triggered only — never a speculative prompt.
@@ -365,6 +367,7 @@ function Tracker() {
           </div>
         ) : (
           <LockedPreview
+            gate={plannerGate}
             className="mt-6"
             headline={`Entering ${formatDate(plannedEntry, i18n.language)} gives you a legal stay — Pro shows how long`}
             detail="Plan any future entry date, and a whole year of trips, against your rolling window."
@@ -406,7 +409,7 @@ function Tracker() {
 
       {/* 3 ─ WHAT TO DO NEXT */}
       {borderRun ? (
-        <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
+        <BorderRunCard plan={borderRun} />
       ) : null}
 
       {preDeparture && !preDepartureDismissed ? (

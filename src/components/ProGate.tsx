@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
+import type { Gate } from "@/lib/paywall/use-gate";
 
 /**
  * Two ways out of every gate, not one.
@@ -12,7 +13,37 @@ import { FOUNDING_PRICE_USD } from "@/config/founding";
  * subscription stays the primary button; the lifetime offer is a quiet second
  * line so the pair does not read as two competing pitches.
  */
-function UpgradeActions({ cta }: { cta: string }) {
+function UpgradeActions({ cta, gate }: { cta: string; gate?: Gate | undefined }) {
+  /*
+    THE TRIGGER IS THE CLICK.
+
+    When a gate is supplied the button no longer navigates to /pricing: it
+    either spends one of the free monthly checks (soft gate) or opens the
+    paywall sheet right here, at the moment of intent. Sending someone to a
+    price table to answer "what does this do" is backwards — the sheet shows
+    the outcome first and the price once.
+
+    Without a gate (marketing surfaces, older call sites) the old links stand.
+  */
+  if (gate) {
+    return (
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <button
+          type="button"
+          onClick={gate.request}
+          className="inline-flex min-h-9 items-center rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground"
+        >
+          {gate.metered ? "Unlock this" : cta}
+        </button>
+        {gate.metered ? (
+          <span className="text-[11px] text-muted-foreground">
+            {gate.checksLeft} free {gate.checksLeft === 1 ? "check" : "checks"} left this month
+          </span>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="flex shrink-0 flex-col items-end gap-1">
       <Link
@@ -44,6 +75,7 @@ export function LockedPreview({
   headline,
   detail,
   cta = "See Pro",
+  gate,
   children,
   className,
 }: {
@@ -51,6 +83,8 @@ export function LockedPreview({
   headline: string;
   detail: string;
   cta?: string;
+  /** Supply to trigger the paywall in place instead of linking to /pricing. */
+  gate?: Gate;
   /** The full answer, rendered blurred and inert behind the prompt. */
   children: ReactNode;
   className?: string;
@@ -74,7 +108,7 @@ export function LockedPreview({
             <p className="text-sm font-semibold leading-snug">{headline}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
           </div>
-          <UpgradeActions cta={cta} />
+          <UpgradeActions cta={cta} gate={gate} />
         </div>
       </div>
     </div>
@@ -86,10 +120,12 @@ export function ProPrompt({
   title,
   body,
   cta = "See Pro",
+  gate,
 }: {
   title: string;
   body: string;
   cta?: string;
+  gate?: Gate;
 }) {
   return (
     <div className="panel flex items-start gap-2.5 p-4">
@@ -98,7 +134,7 @@ export function ProPrompt({
         <p className="text-sm font-semibold">{title}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
       </div>
-      <UpgradeActions cta={cta} />
+      <UpgradeActions cta={cta} gate={gate} />
     </div>
   );
 }
