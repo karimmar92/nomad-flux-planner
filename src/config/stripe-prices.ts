@@ -11,9 +11,12 @@
  * the site displays. The site showing one figure and the checkout charging
  * another is a misleading price claim, not a cosmetic bug.
  *
- *   Starter  $14/mo   $140/yr    starter_monthly / starter_yearly
- *   Pro      $29/mo   $290/yr    pro_monthly     / pro_yearly
- *   Teams    $59/seat $590/seat  teams_monthly   / teams_yearly
+ * Annual is eight months charged for twelve — a 33% saving, and the number in
+ * the "Save 33%" badge is derived from that same constant, never typed in.
+ *
+ *   Starter  $14/mo   $112/yr    starter_monthly / starter_yearly
+ *   Pro      $29/mo   $232/yr    pro_monthly     / pro_yearly
+ *   Teams    $59/seat $472/seat  teams_monthly   / teams_yearly  (not sold yet)
  *
  * TAX — deliberately NOT automated. The provider is a §19 UStG
  * Kleinunternehmer (src/config/legal.ts): there is no entitlement to collect
