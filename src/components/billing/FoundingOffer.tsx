@@ -47,7 +47,14 @@ import {
 } from "@/config/founding";
 import { tier } from "@/config/pricing";
 
-export function FoundingOffer() {
+export function FoundingOffer({
+  autoOpen = false,
+  onAutoOpened,
+}: {
+  /** Set by /pricing when a FRESH founding intent survived the sign-in. */
+  autoOpen?: boolean;
+  onAutoOpened?: () => void;
+} = {}) {
   const { ready, signedIn } = useSession();
   const { profile } = useProfile();
   const navigate = useNavigate();
@@ -59,6 +66,27 @@ export function FoundingOffer() {
   const createSessionRef = useRef(createSession);
   createSessionRef.current = createSession;
   const sessionPromiseRef = useRef<Promise<string> | null>(null);
+  const autoOpenedRef = useRef(false);
+
+  // At most once per arrival: dismissing the form must not reopen it.
+  useEffect(() => {
+    if (!autoOpen || autoOpenedRef.current) return;
+    if (profile.plan !== "free") return;
+    autoOpenedRef.current = true;
+    try {
+      getStripeEnvironment();
+    } catch (e) {
+      toast("Checkout is not available", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+      onAutoOpened?.();
+      return;
+    }
+    setOpen(true);
+    onAutoOpened?.();
+  }, [autoOpen, profile.plan, onAutoOpened]);
+
+
 
 
   useEffect(() => {
