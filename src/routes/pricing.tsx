@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
-import { PricingTable, type Billing } from "@/components/PricingTable";
+import { PlanCardGrid, type PlanCardBilling } from "@/components/marketing/PlanCards";
+import { VAT } from "@/config/legal";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
@@ -16,7 +17,7 @@ import { useSession, resolveSignedIn } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
 /** Deep-link params the homepage plan cards send, e.g. ?plan=pro&interval=annual. */
-type PricingSearch = { plan?: PlanId; interval?: Billing };
+type PricingSearch = { plan?: PlanId; interval?: PlanCardBilling };
 
 const DEEP_LINK_PLANS: PlanId[] = ["free", "starter", "pro", "teams"];
 
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/pricing")({
   validateSearch: (search: Record<string, unknown>): PricingSearch => {
     const plan = DEEP_LINK_PLANS.find((p) => p === search["plan"]);
     const interval = search["interval"] === "monthly" || search["interval"] === "annual"
-      ? (search["interval"] as Billing)
+      ? (search["interval"] as PlanCardBilling)
       : undefined;
     return {
       ...(plan ? { plan } : {}),
@@ -59,6 +60,7 @@ function Pricing() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
+  const [billing, setBilling] = useState<PlanCardBilling>(deepLinkInterval ?? "annual");
 
   // Scroll the named tier into view once, so ?plan=pro lands on the card the
   // homepage button promised rather than at the top of the page.
