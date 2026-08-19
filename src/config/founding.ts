@@ -72,8 +72,23 @@
 export const FOUNDING_PRICE_USD = 99;
 
 
-/** Hard cap. Enforced in the database, not just in the UI. */
+/**
+ * The COHORT AS PRESENTED: one hundred spots. Every piece of copy and the
+ * counter use this number.
+ */
 export const FOUNDING_SPOTS = 100;
+
+/**
+ * The REAL hard cap, enforced by claim_founding_spot() in the database.
+ *
+ * The offer is presented as a hundred spots because a hundred is the size of
+ * a group you can actually talk to, and it is what the page promises. Capacity
+ * behind it is larger so that a burst of demand does not close the offer
+ * mid-flight and leave paid sessions with nothing to grant. The counter never
+ * shows the cohort as full while real capacity remains, so nobody is told
+ * "sold out" and then sold to anyway.
+ */
+export const FOUNDING_CAP = 1000;
 
 /**
  * Stripe lookup key for the one-time price.
@@ -120,12 +135,21 @@ export const FOUNDING_EXCLUDES = [
 // whose entire job is being straight with the buyer.
 export const FOUNDING_RISK_NOTE = `Lifetime means the life of the product, and Driftly is built by one person with no customers yet. If it shuts down, it stops. Your data is exportable at any time and stays yours either way. Buy this because $${FOUNDING_PRICE_USD} is worth the tool to you today, not as a bet on a company.`;
 
-export function foundingRemaining(taken: number): number {
-  return Math.max(0, FOUNDING_SPOTS - taken);
+/**
+ * What the page shows as taken. Clamped to the presented cohort so the visible
+ * counter stays inside 0-100 whatever the real number is.
+ */
+export function foundingDisplayTaken(taken: number): number {
+  return Math.min(Math.max(taken, 0), FOUNDING_SPOTS - 1);
 }
 
+export function foundingRemaining(taken: number): number {
+  return Math.max(0, FOUNDING_SPOTS - foundingDisplayTaken(taken));
+}
+
+/** Open against the REAL cap, not the displayed one. */
 export function foundingIsOpen(taken: number): boolean {
-  return foundingRemaining(taken) > 0;
+  return taken < FOUNDING_CAP;
 }
 
 /**
