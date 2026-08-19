@@ -47,7 +47,7 @@ import {
   foundingCounterLabel,
   foundingIsOpen,
 } from "@/config/founding";
-import { tier } from "@/config/pricing";
+import { annualUsd, tier } from "@/config/pricing";
 
 export function FoundingOffer({
   autoOpen = false,
@@ -104,7 +104,9 @@ export function FoundingOffer({
   }, []);
 
   const soldOut = taken != null && !foundingIsOpen(taken);
-  const proYear = tier("pro").monthlyUsd * 12;
+  // Compare against the cheapest honest year of Pro — the annual price, not
+  // twelve monthly payments nobody would choose now that annual leads.
+  const proYear = annualUsd(tier("pro"));
 
   /**
    * Embedded checkout, matching the subscription flow. The server returns a

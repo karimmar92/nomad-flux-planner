@@ -46,8 +46,30 @@ export type Tier = {
   recommended?: boolean;
 };
 
-/** Months charged on the annual plan. 10 of 12 = two months free. */
-export const ANNUAL_MONTHS_CHARGED = 10;
+/**
+ * Months charged on the annual plan. 8 of 12 = FOUR MONTHS FREE.
+ *
+ * The saving badge is derived from this number (annualSavingPercent), never
+ * typed by hand, so "Save 33%" cannot drift away from what is charged.
+ */
+export const ANNUAL_MONTHS_CHARGED = 8;
+
+/**
+ * Free trial length in days. Card required — Stripe collects the payment
+ * method up front and the first charge lands on day 4 unless cancelled.
+ *
+ * Three days, not the usual seven. This product answers a question in one
+ * sitting: log the trips, see the leave-by date, run the border list. Someone
+ * who has not done that within three days was not going to do it in seven,
+ * and a shorter window makes the decision now instead of at a forgotten
+ * reminder next week.
+ *
+ * Whichever tier is being bought, the TRIAL GRANTS PRO. Trialling a lesser
+ * tier means judging the product on the half of it that is not the reason to
+ * pay. Billing after the trial is still the plan the buyer actually chose.
+ */
+export const TRIAL_DAYS = 3;
+
 
 /**
  * The short tax note shown next to a price. Empty while the §19 exemption
@@ -63,8 +85,26 @@ export function annualUsd(tier: Tier): number {
 
 /** Effective monthly cost on the annual plan, for the "as low as" line. */
 export function annualMonthlyEquivalentUsd(tier: Tier): number {
-  return Math.round((annualUsd(tier) / 12) * 100) / 100;
+  /*
+    Rounded to whole dollars on purpose. "$19.33/mo" reads like an attempt to
+    look cheaper by two decimal places, and the exact figure that will be
+    charged ($232 once) is printed immediately beside it — so the whole number
+    is the honest headline and the annual total is the precise one.
+  */
+  return Math.round(annualUsd(tier) / 12);
 }
+
+/**
+ * The number in the "Save XX%" badge. Derived, and identical for every tier
+ * because the discount is a month count, not a per-tier negotiation.
+ */
+export function annualSavingPercent(): number {
+  return Math.round(((12 - ANNUAL_MONTHS_CHARGED) / 12) * 100);
+}
+
+/** Months not charged on annual — "four months free", derived. */
+export const ANNUAL_MONTHS_FREE = 12 - ANNUAL_MONTHS_CHARGED;
+
 
 /** What the annual plan saves against paying monthly for a year. */
 export function annualSavingUsd(tier: Tier): number {

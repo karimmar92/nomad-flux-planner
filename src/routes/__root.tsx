@@ -20,6 +20,7 @@ import { ReferralCapture } from "@/components/referrals/ReferralCapture";
 import { onServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa/register-sw";
 import { warmCityCache } from "@/lib/offline/cache";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
+import { PaywallProvider } from "@/components/paywall/PaywallProvider";
 import { hreflangLinks } from "@/lib/i18n/hreflang";
 import { useTranslation } from "react-i18next";
 import { flushQueue } from "@/lib/offline/sync-queue";
@@ -169,14 +170,17 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <ReferralCapture />
-        <PaymentTestModeBanner />
-        <AppShell>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </AppShell>
-        <Toaster position="top-center" />
+        <PaywallProvider>
+          <ReferralCapture />
+          <PaymentTestModeBanner />
+          <AppShell>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </AppShell>
+          <Toaster position="top-center" />
+        </PaywallProvider>
       </I18nProvider>
     </QueryClientProvider>
+
   );
 }

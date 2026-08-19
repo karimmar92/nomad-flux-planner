@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   ANNUAL_MONTHS_CHARGED,
+  ANNUAL_MONTHS_FREE,
   PAID_TIERS,
+  TRIAL_DAYS,
+  annualSavingPercent,
   TIERS,
   annualMonthlyEquivalentUsd,
   annualSavingUsd,
@@ -12,12 +15,26 @@ import { PRO_FEATURES, atLeast, canUse, isPaid, isPro } from "@/lib/entitlements
 import type { Plan } from "@/lib/types";
 
 describe("annual pricing — the claim must match the arithmetic", () => {
-  it("charges ten months, so two really are free", () => {
-    expect(ANNUAL_MONTHS_CHARGED).toBe(10);
+  it("charges eight months, so four really are free", () => {
+    expect(ANNUAL_MONTHS_CHARGED).toBe(8);
+    expect(ANNUAL_MONTHS_FREE).toBe(4);
     for (const t of PAID_TIERS) {
-      expect(annualUsd(t)).toBe(t.monthlyUsd * 10);
-      expect(annualSavingUsd(t)).toBe(t.monthlyUsd * 2);
+      expect(annualUsd(t)).toBe(t.monthlyUsd * 8);
+      expect(annualSavingUsd(t)).toBe(t.monthlyUsd * 4);
     }
+  });
+
+  it("the badge percentage is the discount actually charged, not a claim", () => {
+    // Guards the one number a customer could check with a calculator.
+    expect(annualSavingPercent()).toBe(33);
+    for (const t of PAID_TIERS) {
+      const claimed = t.monthlyUsd * 12 * (1 - annualSavingPercent() / 100);
+      expect(Math.abs(annualUsd(t) - claimed)).toBeLessThan(t.monthlyUsd * 0.5);
+    }
+  });
+
+  it("the trial is three days, and the checkout must not diverge from it", () => {
+    expect(TRIAL_DAYS).toBe(3);
   });
 
   it("the effective monthly figure is genuinely cheaper than paying monthly", () => {

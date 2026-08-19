@@ -27,7 +27,7 @@ import { useProfile } from "@/lib/store";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { PLATFORM_PRESETS, clampFeeRate, presetById } from "@/config/platforms";
-import { isPro } from "@/lib/entitlements";
+import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 
 export const Route = createFileRoute("/calculator")({
@@ -59,7 +59,8 @@ function CalculatorPage() {
   const targetNum = target ? Number(target) : 0;
   // FREE: arbitrage against one chosen city. PRO: the ranking across all of
   // them, plus the savings-target column.
-  const pro = isPro(profile.plan);
+  const rankingGate = useGate("arbitrage_ranking");
+  const pro = rankingGate.allowed;
   const [focusId, setFocusId] = useState<string>(CITIES[0]!.id);
   const focusCity = CITIES.find((c) => c.id === focusId) ?? CITIES[0]!;
   const focusArb = computeArbitrage(focusCity, inc, tier);
@@ -186,6 +187,7 @@ function CalculatorPage() {
         </div>
       </section>
       <LockedPreview
+        gate={rankingGate}
         headline={
           inc && best
             ? `Best of ${CITIES.length} cities is ${best.city.city} · ${formatUsd(best.arb.surplusMonthly)}/mo surplus`
