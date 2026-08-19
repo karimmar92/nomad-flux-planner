@@ -45,7 +45,7 @@
  * "not just X but Y", no filler triplets, no superlatives.
  */
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarClock, Check, Globe2, WifiOff } from "lucide-react";
+import { ArrowRight, CalendarClock, Check, Globe2, MapPin, WifiOff } from "lucide-react";
 import { RuleCalculator } from "@/components/marketing/RuleCalculator";
 import { Reveal } from "@/components/marketing/Reveal";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
@@ -190,28 +190,59 @@ export function Landing() {
       </Reveal>
 
 
-      {/* ── HONEST LIMITS ──────────────────────────────────────────────
-          Deliberately flatter than everything around it. It works because it
-          does not sound like marketing, and polishing it into the same voice
-          as the rest of the page would turn it into a technique. */}
+      {/* ── SOCIAL PROOF ───────────────────────────────────────────────
+          Real reviews from paying customers, surfaced only when they exist. */}
+      {hasReviews && (
+        <Reveal className="content-auto">
+          <TestimonialStrip />
+        </Reveal>
+      )}
+
+      {/* ── HOW IT WORKS ───────────────────────────────────────────────
+          A clear loop plus honest limits. The outcome is the date in your
+          hand, not the feature on the screen. */}
       <Reveal as="section" className="content-auto surface border-primary/25 p-8 sm:p-10">
-        <div className="label-xs text-primary">Straight answer</div>
+        <div className="label-xs text-primary">How it works</div>
         <h2 className="mt-2 text-xl font-semibold tracking-tight">
-          Built by one person. Here is exactly where that shows.
+          Log the trip. See the number. Move before the deadline.
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-          {hasReviews
-            ? "This is a small product built by one person. The reviews above are from real paying customers, unedited — there are not many of them yet, and pretending otherwise would be the wrong start."
-            : "There are no customer logos on this page because there are no customers yet. You would work that out within a week, and a product about getting the awkward details right should not open with a decorative lie."}
+          Most people know roughly. {APP_NAME} turns the guess into a date, so you can decide
+          before the border decides for you.
         </p>
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { Icon: MapPin, label: "Log a trip", outcome: "One history, every rule." },
+            { Icon: CalendarClock, label: "See the countdown", outcome: "Your leave-by date, months early." },
+            { Icon: Globe2, label: "Check the thresholds", outcome: "Tax and visa lines before you hit them." },
+            { Icon: ArrowRight, label: "Move on plan", outcome: "No panic, no guessing." },
+          ].map(({ Icon, label, outcome }, i) => (
+            <div key={label} className="surface p-4">
+              <div className="flex items-center gap-3">
+                <div className="surface-raised flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+                  <Icon className="h-4 w-4 text-primary" aria-hidden />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="text-sm font-semibold leading-tight">{label}</h3>
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">{outcome}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div>
-            <h3 className="text-sm font-semibold">What is solid</h3>
+            <h3 className="text-sm font-semibold">What you get out of it</h3>
             <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
               {[
-                "The counting engines have their own tests, run under opposing timezones so a date never shifts by one depending on where you are.",
-                `${cityCount} cities with visa rules, tax thresholds and costs, each carrying the date it was checked.`,
-                "Everything works offline.",
+                "You know your leave-by date months before it matters.",
+                "You carry evidence if a border guard or accountant asks.",
+                "You decide on your own schedule, not on a deadline.",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
                   <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-positive" aria-hidden />
@@ -221,18 +252,15 @@ export function Landing() {
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold">What is not done</h3>
+            <h3 className="text-sm font-semibold">What it does not do</h3>
             <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
               {[
-                "Cost figures are researched estimates, not a live feed. Volatile currencies are marked low-confidence.",
+                "It does not give legal or tax advice. It shows your recorded days against the published threshold.",
+                "Cost figures are estimates, not live exchange rates.",
                 "The community radar is a preview that runs on your own device.",
-                "Nothing here is legal or tax advice. You are told your recorded days against the published threshold, never your status.",
               ].map((t) => (
                 <li key={t} className="flex gap-2">
-                  <span
-                    className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground"
-                    aria-hidden
-                  />
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
                   {t}
                 </li>
               ))}
