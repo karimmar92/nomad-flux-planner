@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -10,10 +10,16 @@ import { VAT } from "@/config/legal";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
-import { tier, type PlanId } from "@/config/pricing";
+import { annualUsd, tier, type PlanId } from "@/config/pricing";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { getStripeEnvironment } from "@/lib/stripe";
-import type { PaidPlanId } from "@/config/stripe-prices";
+import type { BillingInterval, PaidPlanId } from "@/config/stripe-prices";
+import {
+  intentMatches,
+  pricingNextUrl,
+  takePurchaseIntent,
+  writePurchaseIntent,
+} from "@/lib/billing/purchase-intent";
 import { useSession, resolveSignedIn } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
@@ -109,9 +115,9 @@ function Pricing() {
   const clearIntentParams = useCallback(() => {
     void navigate({
       to: "/pricing",
-      search: (prev: PricingSearch) => {
+      search: (prev: Record<string, unknown>) => {
         const { checkout: _c, founding: _f, ...rest } = prev;
-        return rest;
+        return rest as PricingSearch;
       },
       replace: true,
     });
