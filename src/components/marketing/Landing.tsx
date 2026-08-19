@@ -136,7 +136,7 @@ export function Landing() {
         </Reveal>
 
         <div className="mt-14">
-          <PlanCardGrid />
+          <PlanCardGrid billing="monthly" includeFounding />
         </div>
 
         <Reveal className="mt-8 text-center">

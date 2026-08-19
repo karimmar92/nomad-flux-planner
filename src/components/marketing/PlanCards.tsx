@@ -17,6 +17,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CITIES } from "@/lib/cities";
 import { annualUsd, tier } from "@/config/pricing";
+import { FOUNDING_PRICE_USD, FOUNDING_SPOTS } from "@/config/founding";
 
 export type PlanCardBilling = "monthly" | "annual";
 
@@ -67,14 +68,17 @@ export function PlanCardGrid({
   onSelect,
   busyPlan,
   highlight,
+  includeFounding = false,
 }: {
   billing?: PlanCardBilling;
   onSelect?: (plan: "free" | "pro", billing: PlanCardBilling) => void;
   busyPlan?: string | null;
   highlight?: string | null;
+  /** Adds the one-off Founding card so the row is a real three-way choice. */
+  includeFounding?: boolean;
 }) {
   return (
-    <div className="grid gap-5 md:grid-cols-2">
+    <div className={cn("grid gap-5", includeFounding ? "md:grid-cols-3" : "md:grid-cols-2")}>
       {planContent(billing).map((p) => (
         <PlanCard
           key={p.id}
@@ -94,6 +98,24 @@ export function PlanCardGrid({
               : { to: "/tracker" as const })}
         />
       ))}
+
+      {includeFounding ? (
+        <PlanCard
+          id="plan-founding"
+          name={`Founder ${FOUNDING_SPOTS}`}
+          price={`$${FOUNDING_PRICE_USD}`}
+          unit="once, not per month"
+          outcome="Pay once and never think about the price again."
+          points={[
+            "Everything in Pro, for as long as Driftly exists",
+            "No renewal, no card kept on file",
+            "New Pro features as they ship",
+            `Only ${FOUNDING_SPOTS} spots`,
+          ]}
+          cta={`Take a founding spot — $${FOUNDING_PRICE_USD}`}
+          hash="founding"
+        />
+      ) : null}
     </div>
   );
 }
@@ -119,6 +141,7 @@ export function PlanCard({
   to,
   search,
   onSelect,
+  hash,
   featured = false,
   highlighted = false,
   footer,
@@ -133,6 +156,8 @@ export function PlanCard({
   to?: "/tracker" | "/business";
   search?: { plan: "starter" | "pro" | "teams"; interval: PlanCardBilling };
   onSelect?: () => void;
+  /** Links to /pricing#<hash>, used by the Founding card on marketing pages. */
+  hash?: string;
   featured?: boolean;
   highlighted?: boolean;
   footer?: ReactNode;
@@ -186,6 +211,10 @@ export function PlanCard({
         <button type="button" onClick={onSelect} className={ctaClass}>
           {cta}
         </button>
+      ) : hash ? (
+        <Link to="/pricing" hash={hash} className={ctaClass}>
+          {cta}
+        </Link>
       ) : search ? (
         // Hardcoded to "/pricing" rather than a variable route. A variable `to`
         // widens to every route in the tree, so TanStack falls back to the root
