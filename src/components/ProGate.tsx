@@ -4,6 +4,40 @@ import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
 import type { Gate } from "@/lib/paywall/use-gate";
+import { FREE_MONTHLY_CHECKS } from "@/lib/paywall/meter";
+import { featureLabel } from "@/lib/paywall/value";
+
+/**
+ * VALUE BEFORE THE ASK, at the gate itself.
+ *
+ * A gate that only says "Pro" makes someone guess what they are buying. This
+ * line says two concrete things instead: what the free allowance has already
+ * given them this month (a receipt, not a claim), and the single thing that
+ * changes if they upgrade. Soft and hard gates get the same treatment, worded
+ * for what each one actually is.
+ */
+function GateValueNote({ gate }: { gate?: Gate | undefined }) {
+  if (!gate) return null;
+  const label = featureLabel(gate.feature);
+
+  if (gate.metered) {
+    return (
+      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+        {gate.used > 0
+          ? `You have used ${gate.used} of ${FREE_MONTHLY_CHECKS} free checks this month.`
+          : `Free accounts get ${FREE_MONTHLY_CHECKS} checks a month.`}{" "}
+        This opens {label} until the month ends — Pro removes the counter.
+      </p>
+    );
+  }
+
+  return (
+    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+      Not part of the free monthly checks. Pro unlocks {label} outright, plus the tax
+      presence report, exports and the 12-month calendar.
+    </p>
+  );
+}
 
 /**
  * Two ways out of every gate, not one.
@@ -107,6 +141,7 @@ export function LockedPreview({
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold leading-snug">{headline}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
+            <GateValueNote gate={gate} />
           </div>
           <UpgradeActions cta={cta} gate={gate} />
         </div>
@@ -133,6 +168,7 @@ export function ProPrompt({
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold">{title}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
+        <GateValueNote gate={gate} />
       </div>
       <UpgradeActions cta={cta} gate={gate} />
     </div>
