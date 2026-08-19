@@ -782,6 +782,60 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          abbreviated: boolean
+          author_role: string | null
+          body: string
+          country_code: string | null
+          created_at: string
+          display_name: string
+          featured: boolean
+          headline: string
+          id: string
+          plan_at_review: string
+          rating: number
+          review_note: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abbreviated?: boolean
+          author_role?: string | null
+          body: string
+          country_code?: string | null
+          created_at?: string
+          display_name: string
+          featured?: boolean
+          headline: string
+          id?: string
+          plan_at_review?: string
+          rating: number
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abbreviated?: boolean
+          author_role?: string | null
+          body?: string
+          country_code?: string | null
+          created_at?: string
+          display_name?: string
+          featured?: boolean
+          headline?: string
+          id?: string
+          plan_at_review?: string
+          rating?: number
+          review_note?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -1186,6 +1240,7 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_paid_plan: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

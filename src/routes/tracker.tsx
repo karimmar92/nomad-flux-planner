@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Info, Trash2, X } from "lucide-react";
+import { AlertOctagon, AlertTriangle, CheckCircle2, Info, Trash2, X } from "lucide-react";
 import { SCHENGEN_COUNTRIES, SCHENGEN_MAX_DAYS, maxStayFrom, schengenStatus } from "@/lib/schengen";
 import {
   addDaysIso,
@@ -16,7 +16,7 @@ import { CITIES } from "@/lib/cities";
 import { taxYearLabel, taxYearStartMonth } from "@/lib/arbitrage";
 import { useProfile, useTrips } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
-import { buildBorderRunPlan } from "@/lib/border-run";
+import { buildBorderRunPlan, exitDeadline } from "@/lib/border-run";
 import { BorderRunCard } from "@/components/borderrun/BorderRunCard";
 import { detectPreDeparture } from "@/lib/pre-departure";
 import { PreDepartureCard } from "@/components/predeparture/PreDepartureCard";
@@ -97,10 +97,15 @@ const PALETTE = [
 
 function Tracker() {
   const { i18n } = useTranslation();
-  const { trips, addTrip, removeTrip, hydrated } = useTrips();
+  const { trips, addTrip, removeTrip, setTrips, hydrated } = useTrips();
   const { profile, patchProfile } = useProfile();
   const today = useMemo(() => todayIso(), []);
-  const [plannedEntry, setPlannedEntry] = useState(() => addDaysIso(todayIso(), 30));
+  /**
+   * The planner opens on TODAY, not on an arbitrary date a month out. A date
+   * the user did not choose is a question they have to correct before the tool
+   * is usable, and "how long can I stay if I go now" is the common question.
+   */
+  const [plannedEntry, setPlannedEntry] = useState(() => todayIso());
   const [entryMode, setEntryMode] = useState<"guided" | "quick">("guided");
   const [justAdded, setJustAdded] = useState<Trip | null>(null);
   const [preDepartureDismissed, setPreDepartureDismissed] = useState(false);
@@ -177,117 +182,169 @@ function Tracker() {
       })),
   ];
 
+  /**
+   * "Last day you can stay" comes from exitDeadline — the same helper the
+   * border-run card uses. Deriving it separately here (e.g. from maxStayFrom,
+   * which models a NEW entry today) produced a hero date that contradicted the
+   * card directly beneath it by a fortnight.
+   */
+  const deadline = useMemo(() => exitDeadline(trips, today), [trips, today]);
+
+  /**
+   * Status is carried by a WORD and an ICON, never by colour alone — this
+   * page is read by people who are colour-blind, in sunlight, at a border.
+   */
+  const statusWord =
+    schengen.status === "violation"
+      ? "Over the limit"
+      : schengen.status === "ok"
+        ? "Safe"
+        : "Getting close";
+  const StatusIcon =
+    schengen.status === "violation"
+      ? AlertOctagon
+      : schengen.status === "ok"
+        ? CheckCircle2
+        : AlertTriangle;
+  const statusTone =
+    schengen.status === "violation"
+      ? "text-negative"
+      : schengen.status === "ok"
+        ? "text-positive"
+        : "text-primary";
+
+  const entryFlow =
+    entryMode === "guided" ? (
+      <GuidedTripFlow
+        passport={profile.nationality || null}
+        onSetPassport={(code) => patchProfile({ nationality: code })}
+        onAdd={(trip) => {
+          addTrip(trip);
+          setJustAdded(trip.entry_date > today ? trip : null);
+        }}
+        onSwitchToQuick={() => setEntryMode("quick")}
+      />
+    ) : (
+      <div className="space-y-2">
+        <AddTrip
+          onAdd={(trip) => {
+            addTrip(trip);
+            setJustAdded(trip.entry_date > today ? trip : null);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => setEntryMode("guided")}
+          className="min-h-11 text-xs text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Walk me through it instead
+        </button>
+      </div>
+    );
+
+  /**
+   * FIRST VISIT. No trips means no Schengen window, no timeline, no counters
+   * and no list — rendering five empty panels makes a working product look
+   * broken. One line of explanation, the entry flow, the import option.
+   */
+  if (hydrated && trips.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Visa tracker</h1>
+          <p className="text-sm text-muted-foreground">
+            Log where you have been and {APP_NAME} works out how many Schengen days you have left,
+            when you must leave, and when you cross a tax-residency threshold.
+          </p>
+        </div>
+        {entryFlow}
+        <ImportTrips />
+        <LegalFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">Visa tracker</h1>
-        <p className="text-sm text-muted-foreground">
-          Rolling Schengen 90/180 and per-country tax day counters. Entry and exit days both count
-          as full days.
-        </p>
-      </div>
+      <h1 className="sr-only">Visa tracker</h1>
 
-      {alerts.length > 0 ? (
-        <div className="space-y-2">
-          {alerts.map((a, i) => (
-            <div
-              key={i}
-              className={cn(
-                "flex items-start gap-2 rounded-md border px-3 py-2 text-sm",
-                a.level === "high"
-                  ? "border-negative/50 bg-negative-muted text-negative"
-                  : "border-primary/40 bg-primary/10 text-primary",
-              )}
-            >
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{a.text}</span>
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      {/*
-        The full ranked list is an entitlement, so this asks canUse() rather
-        than comparing against a single tier — a literal === "pro" check would
-        re-gate Starter and Teams customers.
-
-        NOTE: this comment sits OUTSIDE the ternary on purpose. A brace-wrapped
-        JSX comment placed inside the parenthesised branch below is a syntax
-        error — JSX comments are only valid where children are expected, and
-        inside parentheses the braces parse as an object literal instead.
-        That exact mistake blanked the entire app. Keep comments out here.
-      */}
-      {trips.length < 5 ? (
-        <ImportTrips />
-      ) : (
-        <details className="panel p-4">
-          <summary className="cursor-pointer text-sm font-medium">
-            Import more trips from a list
-          </summary>
-          <div className="mt-3">
-            <ImportTrips />
+      {/* 1 ─ STATUS HERO. Days remaining is the largest thing on the page. */}
+      <section className="panel p-4 sm:p-5">
+        <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
+          <div className="num text-6xl font-semibold leading-none tracking-tight sm:text-7xl">
+            {schengen.remaining}
           </div>
-        </details>
-      )}
-
-      {borderRun ? (
-        <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
-      ) : null}
-
-      {preDeparture && !preDepartureDismissed ? (
-        <PreDepartureCard
-          trigger={preDeparture}
-          /* One card per screen: the border-run card already holds it. */
-          showPartnerCard={!borderRun}
-          esimAlreadyTicked={hasTickedEsimAnywhere()}
-          onDismiss={() => setPreDepartureDismissed(true)}
-        />
-      ) : null}
-
-      {/* Schengen engine */}
-      <section className="panel p-4">
-        <h2 className="mb-3 text-sm font-semibold">Schengen 90/180</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Stat label="Days used" value={schengen.used} hint="in trailing 180 days" />
-          <Stat
-            label="Days remaining"
-            value={schengen.remaining}
-            tone={schengen.status === "ok" ? "positive" : "negative"}
-            size="lg"
-          />
-          {/*
-            Dates always render through formatDate — never raw ISO. "2026-02-07"
-            is unreadable at a glance, and any numeric-only format is ambiguous
-            across locales (03/04 is 3 April to a German, 4 March to an
-            American). Every date in this app has legal consequences, so the
-            month is always a word.
-          */}
-          <Stat
-            label="Window opened"
-            value={formatDate(addDaysIso(today, -179), i18n.language)}
-            size="sm"
-          />
-          <Stat
-            label="Full 90 available from"
-            value={
-              schengen.nextFullNinety
-                ? formatDate(schengen.nextFullNinety, i18n.language)
-                : "beyond 400 days"
-            }
-            size="sm"
-            hint="earliest date for a fresh full stay"
-          />
+          <div className="min-w-0">
+            <div className="text-sm font-medium">days remaining</div>
+            <div className={cn("flex items-center gap-1.5 text-sm font-semibold", statusTone)}>
+              <StatusIcon className="h-4 w-4 shrink-0" aria-hidden />
+              {statusWord}
+            </div>
+          </div>
         </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          In the rolling Schengen 180-day window. Entry and exit days both count as full days.
+        </p>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-md border border-border p-3">
+            <div className="label-xs">Last day you can stay</div>
+            <div className="num mt-0.5 text-lg font-semibold">
+              {deadline
+                ? deadline.overstayed
+                  ? "Already past"
+                  : formatDate(deadline.lastLegalDay, i18n.language)
+                : "Not in a counted country"}
+            </div>
+          </div>
+          <div className="rounded-md border border-border p-3">
+            <div className="label-xs">Full 90 available again from</div>
+            <div className="num mt-0.5 text-lg font-semibold">
+              {schengen.nextFullNinety
+                ? formatDate(schengen.nextFullNinety, i18n.language)
+                : "beyond 400 days"}
+            </div>
+          </div>
+        </div>
+
         {schengen.status === "violation" ? (
           <p className="mt-3 rounded-md border border-negative/50 bg-negative-muted px-3 py-2 text-xs text-negative">
             Your logged trips exceed 90 days in the current window.
           </p>
         ) : null}
 
+        {/* Trust, not glance: the raw arithmetic folds away. */}
+        <details className="mt-3 rounded-md border border-border">
+          <summary className="min-h-11 cursor-pointer px-3 py-3 text-sm font-medium">
+            How this is calculated
+          </summary>
+          <div className="grid grid-cols-2 gap-4 px-3 pb-3">
+            <Stat label="Days used" value={schengen.used} hint="in trailing 180 days" />
+            <Stat label="Allowance" value={SCHENGEN_MAX_DAYS} hint="days per 180" />
+            {/*
+              Dates always render through formatDate — never raw ISO. Any
+              numeric-only format is ambiguous across locales (03/04 is 3 April
+              to a German, 4 March to an American), and every date here has
+              legal consequences, so the month is always a word.
+            */}
+            <Stat
+              label="Window opened"
+              value={formatDate(addDaysIso(today, -179), i18n.language)}
+              size="sm"
+            />
+            <Stat
+              label="Window closes"
+              value={formatDate(today, i18n.language)}
+              size="sm"
+              hint="the window is re-tested every day"
+            />
+          </div>
+        </details>
+
         {/* FORWARD PLANNING IS PRO. Today's status above is free forever —
             the alarm is free, the answer to "what now?" is paid. */}
         {proPlanning ? (
-          <div className="mt-4 rounded-md border border-border p-3">
+          <div className="mt-3 rounded-md border border-border p-3">
             <label className="label-xs" htmlFor="planner">
               If I enter on…
             </label>
@@ -297,7 +354,7 @@ function Tracker() {
                 type="date"
                 value={plannedEntry}
                 onChange={(e) => setPlannedEntry(e.target.value)}
-                className="rounded-md border border-input bg-surface px-2 py-1.5 text-sm"
+                className="min-h-11 rounded-md border border-input bg-surface px-2 text-sm"
               />
               <p className="num text-sm">
                 you could stay{" "}
@@ -308,7 +365,7 @@ function Tracker() {
           </div>
         ) : (
           <LockedPreview
-            className="mt-4"
+            className="mt-6"
             headline={`Entering ${formatDate(plannedEntry, i18n.language)} gives you a legal stay — Pro shows how long`}
             detail="Plan any future entry date, and a whole year of trips, against your rolling window."
           >
@@ -329,97 +386,41 @@ function Tracker() {
         )}
       </section>
 
-      {/* Timeline */}
-      <section className="panel p-4">
-        <h2 className="mb-3 text-sm font-semibold">Last 12 months</h2>
-        {trips.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Log a trip to draw your timeline.</p>
-        ) : (
-          <Timeline trips={trips} today={today} colorFor={colorFor} schengenDays={windowDays} />
-        )}
-      </section>
-
-      {/* Country counters */}
-      <section className="panel p-4">
-        <h2 className="mb-3 text-sm font-semibold">Tax residency day counters</h2>
-        {counters.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No trips logged yet.</p>
-        ) : (
-          <div className="space-y-3">
-            {counters.map((c) => (
-              <div key={c.code}>
-                <div className="flex items-baseline justify-between text-sm">
-                  <span>
-                    {flagEmoji(c.code)} {countryName(c.code)}{" "}
-                    <span className="text-xs text-muted-foreground">
-                      · {c.meta.label} year
-                      {c.meta.startMonth !== 0 ? " (non-calendar)" : ""}
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "num font-medium",
-                      c.pct >= 90 && "text-negative",
-                      c.pct >= 75 && c.pct < 90 && "text-primary",
-                    )}
-                  >
-                    {c.count.days} / {c.meta.trigger}
-                  </span>
-                </div>
-                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2">
-                  <div
-                    className={cn(
-                      "h-full rounded-full",
-                      c.pct >= 90 ? "bg-negative" : "bg-primary",
-                    )}
-                    style={{ width: `${Math.min(100, c.pct)}%` }}
-                  />
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Counting {c.count.periodStart} → {c.count.periodEnd}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Offline is only real once installed, and the tracker is the page
-          whose value depends on it. */}
-      <InstallPrompt />
-
-      {/* Guided by default, the old form one tap away.
-          Someone logging their first trip needs the questions explained;
-          someone back-filling two years of travel needs four fields on one
-          row. Defaulting to guided and remembering nothing means the second
-          person pays one extra tap per session, which is the cheaper mistake. */}
-      {entryMode === "guided" ? (
-        <GuidedTripFlow
-          passport={profile.nationality || null}
-          onSetPassport={(code) => patchProfile({ nationality: code })}
-          onAdd={(trip) => {
-            addTrip(trip);
-            setJustAdded(trip.entry_date > today ? trip : null);
-          }}
-          onSwitchToQuick={() => setEntryMode("quick")}
-        />
-      ) : (
-        <div className="space-y-2">
-          <AddTrip
-            onAdd={(trip) => {
-              addTrip(trip);
-              setJustAdded(trip.entry_date > today ? trip : null);
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => setEntryMode("guided")}
-            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+      {/* 2 ─ ALERTS. Announced, because one can appear without a navigation. */}
+      <div aria-live="polite" className="space-y-2 empty:hidden">
+        {alerts.map((a, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex items-start gap-2 rounded-md border px-3 py-2 text-sm",
+              a.level === "high"
+                ? "border-negative/50 bg-negative-muted text-negative"
+                : "border-primary/40 bg-primary/10 text-primary",
+            )}
           >
-            Walk me through it instead
-          </button>
-        </div>
-      )}
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <span>{a.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* 3 ─ WHAT TO DO NEXT */}
+      {borderRun ? (
+        <BorderRunCard plan={borderRun} isPro={canUse(profile.plan, "border_run_full")} />
+      ) : null}
+
+      {preDeparture && !preDepartureDismissed ? (
+        <PreDepartureCard
+          trigger={preDeparture}
+          /* One card per screen: the border-run card already holds it. */
+          showPartnerCard={!borderRun}
+          esimAlreadyTicked={hasTickedEsimAnywhere()}
+          onDismiss={() => setPreDepartureDismissed(true)}
+        />
+      ) : null}
+
+      {/* 4 ─ ADD A TRIP. Logging is the habit; it sits above the analysis. */}
+      {entryFlow}
 
       {justAdded ? (
         <TripConfirmKit
@@ -444,14 +445,137 @@ function Tracker() {
         </div>
       ) : null}
 
+      {/* 5 ─ TAX RESIDENCY COUNTERS */}
+      {counters.length > 0 ? (
+        <section className="panel p-4">
+          <h2 className="mb-3 text-sm font-semibold">Tax residency day counters</h2>
+          <div className="space-y-3">
+            {counters.map((c) => (
+              <div key={c.code}>
+                <div className="flex items-baseline justify-between text-sm">
+                  <span>
+                    {flagEmoji(c.code)} {countryName(c.code)}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      · {c.meta.label} year
+                      {c.meta.startMonth !== 0 ? " (non-calendar)" : ""}
+                    </span>
+                  </span>
+                  <span
+                    id={`tax-count-${c.code}`}
+                    className={cn(
+                      "num font-medium",
+                      c.pct >= 90 && "text-negative",
+                      c.pct >= 75 && c.pct < 90 && "text-primary",
+                    )}
+                  >
+                    {c.count.days} / {c.meta.trigger}
+                  </span>
+                </div>
+                {/* The bar is decoration over the number; the number is the
+                    accessible value, associated here rather than duplicated. */}
+                <div
+                  role="progressbar"
+                  aria-labelledby={`tax-count-${c.code}`}
+                  aria-valuenow={c.count.days}
+                  aria-valuemin={0}
+                  aria-valuemax={c.meta.trigger}
+                  aria-valuetext={`${c.count.days} of ${c.meta.trigger} days in ${countryName(c.code)}`}
+                  className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2"
+                >
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      c.pct >= 90 ? "bg-negative" : "bg-primary",
+                    )}
+                    style={{ width: `${Math.min(100, c.pct)}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Counting {c.count.periodStart} → {c.count.periodEnd}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* 6 ─ TIMELINE */}
+      <section className="panel p-4">
+        <h2 className="mb-3 text-sm font-semibold">Last 12 months</h2>
+        <Timeline
+          trips={trips}
+          today={today}
+          countries={countries}
+          colorFor={colorFor}
+          schengenDays={windowDays}
+        />
+      </section>
+
+      {/* 7 ─ YOUR TRIPS */}
+      <section className="space-y-2">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold">Your trips</h2>
+          <ClearAllTrips count={trips.length} onClear={() => setTrips([])} />
+        </div>
+        <div className="panel divide-y divide-border">
+          {[...trips]
+            .sort((a, b) => (a.entry_date < b.entry_date ? 1 : -1))
+            .map((trip) => (
+              <div key={trip.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ background: colorFor(trip.country_code) }}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium">
+                    {flagEmoji(trip.country_code)} {countryName(trip.country_code)}
+                    {SCHENGEN_COUNTRIES.has(trip.country_code) ? (
+                      <span className="ms-2 rounded border border-border px-1 text-[10px] text-muted-foreground">
+                        Schengen
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="num text-xs text-muted-foreground">
+                    {formatDate(trip.entry_date, i18n.language)} →{" "}
+                    {trip.exit_date ? formatDate(trip.exit_date, i18n.language) : "still here"} ·{" "}
+                    {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days ·{" "}
+                    {trip.purpose.replace("_", " ")}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeTrip(trip.id)}
+                  aria-label={`Delete trip to ${countryName(trip.country_code)}`}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center text-muted-foreground hover:text-negative"
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
+            ))}
+        </div>
+      </section>
+
+      {/* 8 ─ SECONDARY. Import, install, device warning, legal. */}
+      <details className="panel p-4">
+        <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium">
+          Import more trips from a list
+        </summary>
+        <div className="mt-3">
+          <ImportTrips />
+        </div>
+      </details>
+
+      {/* Offline is only real once installed, and the tracker is the page
+          whose value depends on it. */}
+      <InstallPrompt />
+
       {/*
         Device-only warning. Everything works without an account — that is
         deliberate, because logging a trip is the habit the product depends on
         and a signup wall kills it. But someone must never accumulate months of
         history believing it is safe when it lives in one browser's storage.
-        Shown only once they actually have something to lose.
       */}
-      {trips.length > 0 && sessionReady && !signedIn && !deviceNoticeDismissed ? (
+      {sessionReady && !signedIn && !deviceNoticeDismissed ? (
         <div className="flex items-start gap-2 rounded-md border border-primary/40 bg-primary/10 px-3 py-2 text-xs">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
           <p className="text-foreground">
@@ -470,125 +594,167 @@ function Tracker() {
             type="button"
             onClick={() => setDeviceNoticeDismissed(true)}
             aria-label="Dismiss"
-            className="ms-auto shrink-0 text-muted-foreground hover:text-foreground"
+            className="ms-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3.5 w-3.5" aria-hidden />
           </button>
         </div>
       ) : null}
-
-      <section className="space-y-2">
-        <h2 className="text-sm font-semibold">Your trips</h2>
-        {hydrated && trips.length === 0 ? (
-          <EmptyState
-            title="No trips logged"
-            body="Add your entries and exits and the Schengen window, tax counters and timeline all fill in automatically."
-          />
-        ) : (
-          <div className="panel divide-y divide-border">
-            {[...trips]
-              .sort((a, b) => (a.entry_date < b.entry_date ? 1 : -1))
-              .map((trip) => (
-                <div key={trip.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ background: colorFor(trip.country_code) }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium">
-                      {flagEmoji(trip.country_code)} {countryName(trip.country_code)}
-                      {SCHENGEN_COUNTRIES.has(trip.country_code) ? (
-                        <span className="ms-2 rounded border border-border px-1 text-[10px] text-muted-foreground">
-                          Schengen
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="num text-xs text-muted-foreground">
-                      {formatDate(trip.entry_date, i18n.language)} →{" "}
-                      {trip.exit_date ? formatDate(trip.exit_date, i18n.language) : "still here"} ·{" "}
-                      {inclusiveDays(trip.entry_date, trip.exit_date ?? today)} days ·{" "}
-                      {trip.purpose.replace("_", " ")}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeTrip(trip.id)}
-                    aria-label="Delete trip"
-                    className="text-muted-foreground hover:text-negative"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-          </div>
-        )}
-      </section>
 
       <LegalFooter />
     </div>
   );
 }
 
+/**
+ * Destructive and therefore two-step. Without any reset at all, leftover test
+ * data looks exactly like data the app invented on its own.
+ */
+function ClearAllTrips({ count, onClear }: { count: number; onClear: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-3 text-xs text-muted-foreground hover:border-negative/50 hover:text-negative"
+      >
+        <Trash2 className="h-3.5 w-3.5" aria-hidden />
+        Clear all trips
+      </button>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground">Delete all {count} trips?</span>
+      <button
+        type="button"
+        onClick={() => {
+          onClear();
+          setConfirming(false);
+        }}
+        className="min-h-11 rounded-md border border-negative bg-negative-muted px-3 text-xs font-medium text-negative"
+      >
+        Yes, delete
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirming(false)}
+        className="min-h-11 rounded-md border border-border px-3 text-xs"
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+/**
+ * One SVG, one rect per contiguous segment.
+ *
+ * This used to render 365 divs for the bars plus 365 for the Schengen strip:
+ * 730 DOM nodes on a page whose whole point is being opened on a phone, on
+ * mobile data, in an immigration queue. Segments carry the same information at
+ * a fraction of the cost.
+ */
 function Timeline({
   trips,
   today,
+  countries,
   colorFor,
   schengenDays,
 }: {
   trips: Trip[];
   today: string;
+  countries: string[];
   colorFor: (code: string) => string | undefined;
   schengenDays: Set<string>;
 }) {
-  const start = addDaysIso(today, -364);
-  const days = Array.from({ length: 365 }, (_, i) => addDaysIso(start, i));
+  const DAYS = 365;
+  const start = addDaysIso(today, -(DAYS - 1));
+  const startIdx = toDayIndex(start);
+  const endIdx = toDayIndex(today);
 
-  const countryOn = (key: string) => {
-    for (const trip of trips) {
-      const entry = trip.entry_date;
-      const exit = trip.exit_date ?? today;
-      if (key >= entry && key <= exit) return trip.country_code;
-    }
-    return null;
-  };
+  /** Trip segments clipped to the visible window, in day offsets. */
+  const segments = trips
+    .map((trip) => {
+      const from = Math.max(toDayIndex(trip.entry_date), startIdx);
+      const to = Math.min(toDayIndex(trip.exit_date ?? today), endIdx);
+      return { trip, from: from - startIdx, span: to - from + 1 };
+    })
+    .filter((s) => s.span > 0);
+
+  /** Contiguous runs of days counted in the current Schengen window. */
+  const countedRuns: { from: number; span: number }[] = [];
+  for (let i = 0; i < DAYS; i++) {
+    if (!schengenDays.has(addDaysIso(start, i))) continue;
+    const last = countedRuns[countedRuns.length - 1];
+    if (last && last.from + last.span === i) last.span += 1;
+    else countedRuns.push({ from: i, span: 1 });
+  }
 
   return (
     <div>
-      <div className="flex h-10 w-full gap-px overflow-hidden rounded">
-        {days.map((day) => {
-          const code = countryOn(day);
-          return (
-            <div
-              key={day}
-              title={`${day}${code ? ` — ${countryName(code)}` : ""}`}
-              className="h-full flex-1"
-              style={{ background: code ? colorFor(code) : "var(--surface-2)" }}
-            />
-          );
-        })}
-      </div>
-      <div className="mt-1 flex h-1.5 w-full gap-px">
-        {days.map((day) => (
-          <div
-            key={`s-${day}`}
-            className="h-full flex-1"
-            style={{
-              background: schengenDays.has(day) ? "var(--negative)" : "transparent",
-            }}
-          />
+      <svg
+        viewBox={`0 0 ${DAYS} 46`}
+        preserveAspectRatio="none"
+        className="h-12 w-full"
+        role="img"
+        aria-label={`Travel timeline for the last 12 months, ${segments.length} trips`}
+      >
+        <rect x={0} y={0} width={DAYS} height={38} rx={2} fill="var(--surface-2)" />
+        {segments.map((s) => (
+          <rect
+            key={s.trip.id}
+            x={s.from}
+            y={0}
+            width={s.span}
+            height={38}
+            fill={colorFor(s.trip.country_code)}
+          >
+            <title>
+              {`${countryName(s.trip.country_code)} · ${s.trip.entry_date} → ${s.trip.exit_date ?? "still here"}`}
+            </title>
+          </rect>
         ))}
-      </div>
+        {countedRuns.map((r) => (
+          <rect key={`c-${r.from}`} x={r.from} y={41} width={r.span} height={5} fill="var(--negative)">
+            <title>Counted in the current Schengen window</title>
+          </rect>
+        ))}
+      </svg>
       <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
         <span>{monthYearLabel(start)}</span>
-        <span>Red strip = days counted in the current Schengen window</span>
         <span>{monthYearLabel(today)}</span>
       </div>
+      {/* Colour needs a key: without one the bars are decoration. */}
+      <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+        {countries.map((code) => (
+          <li key={code} className="flex items-center gap-1.5">
+            <span
+              className="h-2 w-2 rounded-sm"
+              style={{ background: colorFor(code) }}
+              aria-hidden
+            />
+            {countryName(code)}
+          </li>
+        ))}
+        <li className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-sm bg-negative" aria-hidden />
+          Days counted in the current Schengen window
+        </li>
+      </ul>
     </div>
   );
 }
 
+
 function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
-  const [country, setCountry] = useState("PT");
+  /**
+   * No country is preselected. This used to open on "PT", which silently
+   * became the logged country whenever the user did not notice — a wrong
+   * country is a wrong Schengen calculation, so it is asked, not guessed.
+   */
+  const [country, setCountry] = useState("");
   const [entry, setEntry] = useState(() => todayIso());
   const [exit, setExit] = useState("");
   const [stillHere, setStillHere] = useState(false);
@@ -604,6 +770,7 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
    * action the whole product depends on; it must never fail quietly.
    */
   function validate(): string | null {
+    if (!country) return "Add a country.";
     if (!entry) return "Add an entry date.";
     if (!stillHere && !exit) {
       return "Add an exit date, or tick “Still here” if you haven’t left yet.";
@@ -622,9 +789,15 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
           <span className="label-xs">Country</span>
           <select
             value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setError(null);
+            }}
+            className="mt-1 min-h-11 w-full rounded-md border border-input bg-surface px-2 text-sm"
           >
+            <option value="" disabled>
+              Select a country
+            </option>
             {COUNTRY_OPTIONS.map((code) => (
               <option key={code} value={code}>
                 {flagEmoji(code)} {countryName(code)}
@@ -632,6 +805,7 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
             ))}
           </select>
         </label>
+
         <label className="block">
           <span className="label-xs">Entry date</span>
           <input
@@ -641,7 +815,7 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
               setEntry(e.target.value);
               setError(null);
             }}
-            className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
+            className="mt-1 min-h-11 w-full rounded-md border border-input bg-surface px-2 text-sm"
           />
         </label>
         <label className="block">
@@ -654,11 +828,12 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
               setExit(e.target.value);
               setError(null);
             }}
-            className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm disabled:opacity-40"
+            className="mt-1 min-h-11 w-full rounded-md border border-input bg-surface px-2 text-sm disabled:opacity-40"
           />
-          <label className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <label className="mt-1.5 flex min-h-11 items-center gap-1.5 text-xs text-muted-foreground">
             <input
               type="checkbox"
+              className="h-5 w-5"
               checked={stillHere}
               onChange={(e) => {
                 setStillHere(e.target.checked);
@@ -673,7 +848,7 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
           <select
             value={purpose}
             onChange={(e) => setPurpose(e.target.value as TripPurpose)}
-            className="mt-1 w-full rounded-md border border-input bg-surface px-2 py-2 text-sm"
+            className="mt-1 min-h-11 w-full rounded-md border border-input bg-surface px-2 text-sm"
           >
             <option value="tourist">Tourist</option>
             <option value="nomad_visa">Nomad visa</option>
@@ -708,10 +883,11 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
             purpose,
             notes: "",
           });
+          setCountry("");
           setExit("");
           setStillHere(false);
         }}
-        className="mt-3 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
       >
         Add trip
       </button>
