@@ -244,6 +244,23 @@ export function Landing() {
         </p>
       </Reveal>
 
+      {/* ── PRICING ────────────────────────────────────────────────────
+          After the proof and the honest limits, never before them. */}
+      <section className="section-gap">
+        <PlanCardGrid billing="monthly" includeFounding />
+
+        <Reveal className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">{VAT.notice}</p>
+          <Link
+            to="/pricing"
+            className="mt-2 inline-block text-sm text-primary underline-offset-4 hover:underline"
+          >
+            Compare every plan
+          </Link>
+        </Reveal>
+      </section>
+
+
       {/* ── FAQ ────────────────────────────────────────────────────────
           Objections that stand between reading and clicking, nothing else. */}
       <section className="section-gap">
