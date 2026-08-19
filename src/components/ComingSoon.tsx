@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { joinWaitlist } from "@/lib/waitlist.functions";
 import { alreadyJoinedLocally, submitWaitlist } from "@/lib/waitlist";
+import { track } from "@/lib/analytics/funnel";
 
 /** Waitlist capture. Writes to the `waitlist` table, with an offline fallback
  *  that drains through the sync queue when connectivity returns. */
@@ -37,6 +38,7 @@ export function ComingSoon({
     try {
       const result = await submitWaitlist(join, { email, feature });
       setState(result);
+      if (result !== "already") track("waitlist_signup", { feature });
       toast[result === "already" ? "message" : "success"](
         result === "already"
           ? "You're already on the list"

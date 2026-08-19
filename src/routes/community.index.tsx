@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { joinWaitlist } from "@/lib/waitlist.functions";
+import { track } from "@/lib/analytics/funnel";
 import { alreadyJoinedLocally, submitWaitlist } from "@/lib/waitlist";
 import { Inbox, LocateFixed, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -337,6 +338,9 @@ function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
               });
               join(email, cityId);
               setQueued(result === "queued");
+              if (result !== "already") {
+                track("waitlist_signup", { feature: "radar_city", reason: cityId });
+              }
               toast[result === "already" ? "message" : "success"](
                 result === "already"
                   ? "You're already on the list"
@@ -360,7 +364,8 @@ function CityGate({ cityId, cityName }: { cityId: string; cityName: string }) {
             placeholder="you@example.com"
             className="flex-1 rounded-md border border-input bg-surface px-3 py-2 text-sm outline-none focus:border-primary"
           />
-          <button type="button"
+          <button
+            type="submit"
             disabled={busy}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
           >
