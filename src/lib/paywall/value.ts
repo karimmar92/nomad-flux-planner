@@ -118,3 +118,28 @@ export function paywallCopy(feature: ProFeature | null): PaywallCopy {
   if (!feature) return DEFAULT;
   return PAYWALL_COPY[feature] ?? DEFAULT;
 }
+
+/**
+ * Short names used in the "what you have already used" line.
+ *
+ * The wall reads better when it can say "you spent your three checks on the
+ * border run, compare and the ranking" than when it says "3/3". Naming what
+ * someone got for free is also the most honest possible upsell: it shows the
+ * value already delivered before it asks for anything.
+ */
+export const FEATURE_LABELS: Record<ProFeature, string> = {
+  border_run_full: "border-run options",
+  forward_planning: "plan-ahead checks",
+  compare: "city comparison",
+  arbitrage_ranking: "arbitrage ranking",
+  threshold_alerts: "threshold alerts",
+  calendar_horizon: "12-month calendar",
+  tax_report: "tax presence report",
+  exports: "exports",
+  vault: "document vault",
+};
+
+export function featureLabel(feature: ProFeature | string | null): string {
+  if (!feature) return "this";
+  return FEATURE_LABELS[feature as ProFeature] ?? String(feature);
+}
