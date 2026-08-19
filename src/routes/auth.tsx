@@ -3,7 +3,7 @@
  * consent flow at /.lovable/oauth/consent — the `next` param must survive
  * every path out of this page.
  */
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -35,7 +35,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const { next } = Route.useSearch();
-  const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,8 +69,10 @@ function AuthPage() {
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (err) return setError(err.message);
-    void navigate({ to: next as string });
-    window.location.replace(next);
+    // `next` routinely carries a query string now (?plan=pro&checkout=1).
+    // TanStack's `to` takes a path, not a query, and would mangle it — a full
+    // document navigation preserves the purchase intent exactly.
+    window.location.assign(next);
   }
 
   async function google() {

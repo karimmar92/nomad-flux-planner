@@ -34,6 +34,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { createFoundingCheckout } from "@/lib/billing/billing.functions";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
+import { pricingNextUrl, writePurchaseIntent } from "@/lib/billing/purchase-intent";
+
 import { useSession, resolveSignedIn } from "@/lib/use-session";
 import { useProfile } from "@/lib/store";
 import {
@@ -47,7 +49,14 @@ import {
 } from "@/config/founding";
 import { tier } from "@/config/pricing";
 
-export function FoundingOffer() {
+export function FoundingOffer({
+  autoOpen = false,
+  onAutoOpened,
+}: {
+  /** Set by /pricing when a FRESH founding intent survived the sign-in. */
+  autoOpen?: boolean;
+  onAutoOpened?: () => void;
+} = {}) {
   const { ready, signedIn } = useSession();
   const { profile } = useProfile();
   const navigate = useNavigate();
@@ -59,6 +68,27 @@ export function FoundingOffer() {
   const createSessionRef = useRef(createSession);
   createSessionRef.current = createSession;
   const sessionPromiseRef = useRef<Promise<string> | null>(null);
+  const autoOpenedRef = useRef(false);
+
+  // At most once per arrival: dismissing the form must not reopen it.
+  useEffect(() => {
+    if (!autoOpen || autoOpenedRef.current) return;
+    if (profile.plan !== "free") return;
+    autoOpenedRef.current = true;
+    try {
+      getStripeEnvironment();
+    } catch (e) {
+      toast("Checkout is not available", {
+        description: e instanceof Error ? e.message : undefined,
+      });
+      onAutoOpened?.();
+      return;
+    }
+    setOpen(true);
+    onAutoOpened?.();
+  }, [autoOpen, profile.plan, onAutoOpened]);
+
+
 
 
   useEffect(() => {
@@ -215,9 +245,16 @@ export function FoundingOffer() {
                 const authed = ready ? signedIn : await resolveSignedIn();
                 setBusy(false);
                 if (!authed) {
-                  void navigate({ to: "/auth", search: { next: "/pricing" } });
+                  // The choice travels twice: durably in the URL, and freshly
+                  // in sessionStorage so a same-tab sign-in reopens instantly.
+                  writePurchaseIntent({ founding: true });
+                  void navigate({
+                    to: "/auth",
+                    search: { next: pricingNextUrl({ founding: true }) },
+                  });
                   return;
                 }
+
                 setOpen(true);
               })();
             }}
@@ -240,11 +277,17 @@ export function FoundingOffer() {
           <div className="mb-2 flex justify-end">
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                // Closed without paying: drop ?founding=1 so a refresh does not
+                // put the payment form back in front of them.
+                onAutoOpened?.();
+              }}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
               Close
             </button>
+
           </div>
           <EmbeddedCheckoutProvider stripe={getStripe()} options={options}>
             <EmbeddedCheckout />
