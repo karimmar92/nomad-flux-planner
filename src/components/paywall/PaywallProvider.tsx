@@ -29,11 +29,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import type { ProFeature } from "@/lib/entitlements";
-import { paywallCopy } from "@/lib/paywall/value";
+import { featureLabel, paywallCopy } from "@/lib/paywall/value";
+import { track } from "@/lib/analytics/funnel";
 import {
   FREE_MONTHLY_CHECKS,
   isMetered,
   readMeter,
+  remaining,
   spend,
   writeMeter,
   type MeterState,
@@ -121,12 +123,22 @@ export function PaywallProvider({ children }: { children: ReactNode }) {
   return (
     <PaywallContext.Provider value={value}>
       {children}
-      {args ? <PaywallSheet args={args} onClose={() => setArgs(null)} /> : null}
+      {args ? (
+        <PaywallSheet args={args} meter={meter} onClose={() => setArgs(null)} />
+      ) : null}
     </PaywallContext.Provider>
   );
 }
 
-function PaywallSheet({ args, onClose }: { args: OpenArgs; onClose: () => void }) {
+function PaywallSheet({
+  args,
+  meter,
+  onClose,
+}: {
+  args: OpenArgs;
+  meter: MeterState;
+  onClose: () => void;
+}) {
   const copy = paywallCopy(args.feature);
   const navigate = useNavigate();
   const { ready, signedIn } = useSession();
@@ -149,6 +161,7 @@ function PaywallSheet({ args, onClose }: { args: OpenArgs; onClose: () => void }
       return;
     }
     setBusy(true);
+    track("trial_start", { feature: args.feature, reason: interval });
     void (async () => {
       const authed = ready ? signedIn : await resolveSignedIn();
       if (!authed) {
