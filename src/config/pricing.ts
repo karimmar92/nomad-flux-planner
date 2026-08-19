@@ -85,7 +85,13 @@ export function annualUsd(tier: Tier): number {
 
 /** Effective monthly cost on the annual plan, for the "as low as" line. */
 export function annualMonthlyEquivalentUsd(tier: Tier): number {
-  return Math.round((annualUsd(tier) / 12) * 100) / 100;
+  /*
+    Rounded to whole dollars on purpose. "$19.33/mo" reads like an attempt to
+    look cheaper by two decimal places, and the exact figure that will be
+    charged ($232 once) is printed immediately beside it — so the whole number
+    is the honest headline and the annual total is the precise one.
+  */
+  return Math.round(annualUsd(tier) / 12);
 }
 
 /**
