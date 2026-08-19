@@ -243,9 +243,16 @@ export function FoundingOffer({
                 const authed = ready ? signedIn : await resolveSignedIn();
                 setBusy(false);
                 if (!authed) {
-                  void navigate({ to: "/auth", search: { next: "/pricing" } });
+                  // The choice travels twice: durably in the URL, and freshly
+                  // in sessionStorage so a same-tab sign-in reopens instantly.
+                  writePurchaseIntent({ founding: true });
+                  void navigate({
+                    to: "/auth",
+                    search: { next: pricingNextUrl({ founding: true }) },
+                  });
                   return;
                 }
+
                 setOpen(true);
               })();
             }}
