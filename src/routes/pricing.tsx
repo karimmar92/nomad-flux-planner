@@ -17,10 +17,24 @@ import type { PaidPlanId } from "@/config/stripe-prices";
 import { useSession, resolveSignedIn } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
-/** Deep-link params the homepage plan cards send, e.g. ?plan=pro&interval=annual. */
-type PricingSearch = { plan?: PlanId; interval?: PlanCardBilling };
+/**
+ * Deep-link params.
+ *
+ * `plan`/`interval` alone mean HIGHLIGHT AND SCROLL, nothing more — a homepage
+ * "Choose Pro" click must not fire a payment sheet at someone who was only
+ * browsing. `checkout=1` / `founding=1` are the separate, explicit signal that
+ * a purchase was already chosen and interrupted by sign-in.
+ */
+type PricingSearch = {
+  plan?: PlanId;
+  interval?: PlanCardBilling;
+  checkout?: boolean;
+  founding?: boolean;
+};
 
 const DEEP_LINK_PLANS: PlanId[] = ["free", "starter", "pro", "teams"];
+
+const truthy = (v: unknown) => v === true || v === "1" || v === "true";
 
 export const Route = createFileRoute("/pricing")({
   validateSearch: (search: Record<string, unknown>): PricingSearch => {
@@ -31,8 +45,11 @@ export const Route = createFileRoute("/pricing")({
     return {
       ...(plan ? { plan } : {}),
       ...(interval ? { interval } : {}),
+      ...(truthy(search["checkout"]) ? { checkout: true } : {}),
+      ...(truthy(search["founding"]) ? { founding: true } : {}),
     };
   },
+
   head: () => ({
     meta: [
       { title: `Pricing | ${APP_NAME}` },
