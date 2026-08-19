@@ -43,11 +43,22 @@ export function useGate(feature: ProFeature, opts?: { emergency?: boolean }): Ga
   const request = useCallback(() => {
     if (entitled) return;
     if (metered && checksLeft > 0) {
-      spendCheck(feature);
+      const granted = spendCheck(feature);
+      if (granted) {
+        track("soft_gate_upsell", {
+          feature,
+          reason: "metered_spend",
+          plan: profile.plan,
+          checksLeft: checksLeft - 1,
+        });
+      }
       return;
     }
+    if (!metered) {
+      track("hard_gate_block", { feature, reason: "hard", plan: profile.plan });
+    }
     open({ feature, reason: metered ? "meter_exhausted" : "hard" });
-  }, [entitled, metered, checksLeft, spendCheck, open, feature]);
+  }, [entitled, metered, checksLeft, spendCheck, open, feature, profile.plan]);
 
   return {
     allowed: entitled || unlocked,
