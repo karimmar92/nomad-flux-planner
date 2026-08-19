@@ -127,7 +127,7 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
      * works and silently breaks everything: entitlements only understand
      * free | starter | pro | teams, so PLAN_RANK["founding_lifetime"] is
      * undefined, every atLeast() check returns false, and tier() throws on
-     * the profile page. The customer pays $149 and unlocks less than the free
+     * the profile page. The customer pays the founding price and unlocks less than the free
      * tier.
      *
      * claim_founding_spot() assigns the next number, enforces the 100 cap in

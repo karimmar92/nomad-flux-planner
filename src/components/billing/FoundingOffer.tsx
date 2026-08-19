@@ -26,14 +26,15 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Infinity as InfinityIcon, Minus } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchFoundingTaken } from "@/lib/founding/rpc";
 import { useServerFn } from "@tanstack/react-start";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { createFoundingCheckout } from "@/lib/billing/billing.functions";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
-import { useSession } from "@/lib/use-session";
+import { useSession, resolveSignedIn } from "@/lib/use-session";
 import { useProfile } from "@/lib/store";
 import {
   FOUNDING_EXCLUDES,
@@ -49,14 +50,16 @@ import { tier } from "@/config/pricing";
 export function FoundingOffer() {
   const { ready, signedIn } = useSession();
   const { profile } = useProfile();
+  const navigate = useNavigate();
   const [taken, setTaken] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const createSession = useServerFn(createFoundingCheckout);
   const createSessionRef = useRef(createSession);
   createSessionRef.current = createSession;
   const sessionPromiseRef = useRef<Promise<string> | null>(null);
-  const busy = open;
+
 
   useEffect(() => {
     let active = true;
@@ -91,7 +94,16 @@ export function FoundingOffer() {
         if (!result.clientSecret) throw new Error("Checkout could not be started.");
         return result.clientSecret;
       });
+      // Otherwise the buyer just sees an empty iframe. Close it and say why.
+      sessionPromiseRef.current.catch((e: unknown) => {
+        const message = e instanceof Error ? e.message : "Please try again.";
+        setError(message);
+        toast("Checkout could not be opened", { description: message });
+        sessionPromiseRef.current = null;
+        setOpen(false);
+      });
     }
+
     return sessionPromiseRef.current;
   }, []);
 
@@ -132,10 +144,11 @@ export function FoundingOffer() {
         ${FOUNDING_PRICE_USD} is the total you pay. No VAT on top, no renewal, no card kept on file.
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Pro is ${tier("pro").monthlyUsd}/mo, so this pays for itself in about{" "}
-        {Math.round(FOUNDING_PRICE_USD / tier("pro").monthlyUsd)} months and then never asks again.
+        Pro is ${tier("pro").monthlyUsd}/mo, so this pays for itself in under{" "}
+        {Math.ceil(FOUNDING_PRICE_USD / tier("pro").monthlyUsd)} months and then never asks again.
         Compare ${proYear} for a single year.
       </p>
+
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
@@ -180,28 +193,38 @@ export function FoundingOffer() {
           You are already on a paid plan. If you would rather hold a founding spot than keep
           subscribing, email us and we will sort it out.
         </p>
-       ) : !ready ? (
-         <button
-           type="button"
-           disabled
-           className="mt-5 inline-flex cursor-wait items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground opacity-60"
-         >
-           <InfinityIcon className="h-4 w-4" aria-hidden />
-           Checking account…
-         </button>
-       ) : signedIn ? (
+      ) : (
         <>
+          {/*
+            ONE BUTTON, ALWAYS CLICKABLE.
+
+            This used to render a permanently disabled "Checking account…"
+            while the session hydrated. When the session read failed, `ready`
+            never became true and the offer had no buy button at all — the
+            reason people reported the founding spot could not be purchased.
+            The session is resolved on click instead: signed in opens checkout,
+            signed out goes to /auth.
+          */}
           <button
             type="button"
             disabled={busy}
             onClick={() => {
               setError(null);
-              setOpen(true);
+              setBusy(true);
+              void (async () => {
+                const authed = ready ? signedIn : await resolveSignedIn();
+                setBusy(false);
+                if (!authed) {
+                  void navigate({ to: "/auth", search: { next: "/pricing" } });
+                  return;
+                }
+                setOpen(true);
+              })();
             }}
             className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             <InfinityIcon className="h-4 w-4" aria-hidden />
-            {busy ? "Opening checkout…" : `Take a founding spot — $${FOUNDING_PRICE_USD}`}
+            {busy || open ? "Opening checkout…" : `Take a founding spot — $${FOUNDING_PRICE_USD}`}
           </button>
           {error ? (
             <p role="alert" className="mt-2 text-xs text-negative">
@@ -209,16 +232,8 @@ export function FoundingOffer() {
             </p>
           ) : null}
         </>
-      ) : (
-        <Link
-          to="/auth"
-          search={{ next: "/pricing" }}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          <InfinityIcon className="h-4 w-4" aria-hidden />
-          Sign in to take a spot
-        </Link>
       )}
+
 
       {open ? (
         <div className="mt-4 rounded-md border border-border p-2">

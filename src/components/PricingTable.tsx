@@ -26,15 +26,22 @@ export function PricingTable({
   compact = false,
   onChoose,
   busyPlan = null,
+  initialBilling = "annual",
+  highlightPlan = null,
 }: {
   /** Homepage variant: fewer feature lines, no long copy. */
   compact?: boolean;
   onChoose?: (tier: Tier, billing: Billing) => void;
-  /** Tier whose checkout is being created — disables the button so a double
-   *  click cannot open two Stripe sessions. */
+  /** Tier whose checkout is being created — shows a spinner label on that one
+   *  card. It never disables the other cards: a buy button that cannot be
+   *  clicked is indistinguishable from a broken page. */
   busyPlan?: string | null;
+  /** Preselected billing toggle, e.g. from a /pricing?interval=annual link. */
+  initialBilling?: Billing;
+  /** Tier to visually highlight, e.g. from a /pricing?plan=pro deep link. */
+  highlightPlan?: string | null;
 }) {
-  const [billing, setBilling] = useState<Billing>("annual");
+  const [billing, setBilling] = useState<Billing>(initialBilling);
 
   return (
     <div className="space-y-4">
@@ -64,11 +71,12 @@ export function PricingTable({
             billing={billing}
             compact={compact}
             busy={busyPlan === t.id}
-            disabled={busyPlan != null}
+            highlighted={highlightPlan === t.id}
             {...(onChoose ? { onChoose } : {})}
           />
         ))}
       </div>
+
 
       {/* PAngV: the total payable, stated once and in full, not "+ VAT" in six
           places. VAT.notice is generated from the provider's actual tax status
@@ -88,15 +96,16 @@ function TierCard({
   compact,
   onChoose,
   busy = false,
-  disabled = false,
+  highlighted = false,
 }: {
   tier: Tier;
   billing: Billing;
   compact: boolean;
   onChoose?: (tier: Tier, billing: Billing) => void;
   busy?: boolean;
-  disabled?: boolean;
+  highlighted?: boolean;
 }) {
+
   const free = tier.monthlyUsd === 0;
   const features = compact ? tier.features.slice(0, 4) : tier.features;
 
@@ -124,11 +133,14 @@ function TierCard({
 
   return (
     <div
+      id={`plan-${tier.id}`}
       className={cn(
-        "panel flex flex-col p-5",
+        "panel flex flex-col scroll-mt-24 p-5",
         tier.recommended && "border-primary/50 ring-1 ring-primary/20",
+        highlighted && "border-primary ring-2 ring-primary/40",
       )}
     >
+
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">{tier.name}</h3>
         {tier.recommended ? (
@@ -197,13 +209,16 @@ function TierCard({
           type="button"
           onClick={() => onChoose(tier, billing)}
           onPointerEnter={() => void import("@/lib/stripe").then(({ getStripe }) => getStripe())}
-          disabled={disabled}
+          // Deliberately never disabled while the session is resolving. Only
+          // the tier already opening a checkout shows a busy label.
+          disabled={busy}
           className={cn(
-            disabled && "cursor-not-allowed opacity-60",
+            busy && "cursor-wait opacity-70",
             "mt-5 rounded-md py-2.5 text-sm font-medium",
             tier.recommended ? "bg-primary text-primary-foreground" : "border border-border",
           )}
         >
+
           {busy ? "Opening checkout…" : `Choose ${tier.name}`}
         </button>
       ) : (

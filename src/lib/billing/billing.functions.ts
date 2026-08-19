@@ -17,9 +17,10 @@
  *     carries an obligation to pay. Set via submit_type and custom_text.
  *   * §312k BGB (Kündigungsbutton) — cancelling must be as easy as subscribing.
  *     The billing portal is that button; see createPortalSession.
- *   * Widerrufsrecht — 14-day withdrawal for digital services, which lapses only
- *     with express consent to immediate performance. Collected as a required
- *     consent checkbox at checkout.
+ *   * Widerrufsrecht — 14 days to withdraw. Checkout collects NO waiver: full
+ *     compliance handling supplies its own disclosures, and consent_collection
+ *     conflicts with it. We grant the full 14 days to every customer instead,
+ *     which is what the terms and refunds pages say.
  *
  * VAT IS DELIBERATELY OFF. The provider is a §19 UStG Kleinunternehmer
  * (src/config/legal.ts) and holds no VAT identification number, so collecting
@@ -46,7 +47,7 @@ import { createStripeClient, getStripeErrorMessage, type StripeEnv } from "@/lib
 import { FOUNDING_PRICE_LOOKUP_KEY } from "@/config/founding";
 
 type CheckoutResult = { clientSecret: string } | { error: string };
-type PortalResult = { url: string } | { error: string };
+type PortalResult = { url: string } | { lifetime: true; message: string } | { error: string };
 
 function envOf(value: unknown): StripeEnv {
   return oneOf(value, ["sandbox", "live"] as const, "Environment") as StripeEnv;
@@ -132,7 +133,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         /**
          * Lovable's one-time support, kept: `founding_lifetime` is a payment,
          * everything else is a subscription. Charging a lifetime purchase as a
-         * subscription would bill someone $149 every month.
+         * subscription would bill someone the founding price every month.
          */
         mode: isOneTime ? "payment" : "subscription",
         /**
@@ -216,7 +217,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
  * through createStripeClient like everything else here.
  *
  * `mode: "payment"`, not `"subscription"`. Getting that wrong bills a founding
- * member $149 every month, and they would be right to be furious. The Stripe
+ * member the founding price every month, and they would be right to be furious. The Stripe
  * price behind the lookup key must also be one-off rather than recurring;
  * Stripe rejects the mismatch, which is the one place this is hard to get
  * wrong silently.
@@ -316,6 +317,26 @@ export const createPortalSession = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data, context }): Promise<PortalResult> => {
     const { userId, supabase } = context;
+
+    /**
+     * A founding member never had a subscription, so the portal lookup below
+     * would end at "No subscription found for this account." — an error
+     * message for a perfectly healthy account. Answer the actual question
+     * first: there is nothing to cancel, nothing renews.
+     */
+    const { data: planRow } = await supabase
+      .from("profiles")
+      .select("plan")
+      .eq("id", userId)
+      .maybeSingle();
+    if ((planRow as { plan?: string } | null)?.plan === "founding_lifetime") {
+      return {
+        lifetime: true,
+        message:
+          "You bought a founding spot outright. There is no subscription to manage, nothing renews and no card is kept on file. You can export your data at any time, and support can help with anything else.",
+      };
+    }
+
 
     const { data: sub } = await supabase
       .from("subscriptions")

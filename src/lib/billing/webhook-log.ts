@@ -1,10 +1,5 @@
 /**
- * Writes to the Stripe webhook audit log.
- *
- * Same reason for the cast as src/lib/founding/rpc.ts: `webhook_events` is
- * created by 20260816130000_webhook_events.sql, which has not been applied, so
- * the table is absent from the generated Supabase types. Confined here so
- * there is one place to clean up after regenerating them.
+ * Writes to the Stripe webhook audit log (`webhook_events`).
  *
  * ── EVERY FUNCTION HERE SWALLOWS ITS ERRORS, ON PURPOSE ───────────────
  *
@@ -16,22 +11,10 @@
  * So: logging never changes the outcome of a webhook. If the log is empty
  * when you go looking, that is itself the finding.
  */
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
-type TableCapable = {
-  from: (table: string) => {
-    upsert: (
-      values: Record<string, unknown>,
-      opts?: Record<string, unknown>,
-    ) => PromiseLike<unknown>;
-    update: (values: Record<string, unknown>) => {
-      eq: (col: string, val: string) => PromiseLike<unknown>;
-    };
-  };
-};
-
-function asTable(client: unknown): TableCapable {
-  return client as TableCapable;
-}
+type Client = SupabaseClient<Database>;
 
 /**
  * Record that an event arrived, before doing anything with it.
@@ -42,17 +25,17 @@ function asTable(client: unknown): TableCapable {
  * for.
  */
 export async function logWebhookReceived(
-  admin: unknown,
+  admin: Client,
   args: { eventId: string; type: string; userId: string | null; payload: unknown },
 ): Promise<void> {
   try {
-    await asTable(admin).from("webhook_events").upsert(
+    await admin.from("webhook_events").upsert(
       {
         stripe_event_id: args.eventId,
         type: args.type,
         status: "received",
         user_id: args.userId,
-        payload: args.payload,
+        payload: args.payload as never,
       },
       { onConflict: "stripe_event_id" },
     );
@@ -63,7 +46,7 @@ export async function logWebhookReceived(
 
 /** Record what the handler decided. */
 export async function logWebhookOutcome(
-  admin: unknown,
+  admin: Client,
   args: {
     eventId: string;
     userId: string | null;
@@ -73,11 +56,11 @@ export async function logWebhookOutcome(
 ): Promise<void> {
   const status = args.failed ? "error" : args.outcome["skipped"] ? "skipped" : "processed";
   try {
-    await asTable(admin)
+    await admin
       .from("webhook_events")
       .update({
         status,
-        result: args.outcome,
+        result: args.outcome as never,
         error: args.failed ? String(args.outcome["error"] ?? "unknown") : null,
         processed_at: new Date().toISOString(),
         user_id: args.userId,
