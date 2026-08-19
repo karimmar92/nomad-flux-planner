@@ -39,6 +39,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
+import { Route as AdminFunnelRouteImport } from './routes/admin.funnel'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
@@ -220,6 +221,11 @@ const AdminCreatorsRoute = AdminCreatorsRouteImport.update({
   path: '/admin/creators',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFunnelRoute = AdminFunnelRouteImport.update({
+  id: '/admin/funnel',
+  path: '/admin/funnel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/admin/reviews',
   path: '/admin/reviews',
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/funnel': typeof AdminFunnelRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
@@ -452,6 +459,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/funnel': typeof AdminFunnelRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
@@ -513,6 +521,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
+  '/admin/funnel': typeof AdminFunnelRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
@@ -575,6 +584,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/funnel'
     | '/admin/reviews'
     | '/admin/waitlist'
     | '/business/explain'
@@ -633,6 +643,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/funnel'
     | '/admin/reviews'
     | '/admin/waitlist'
     | '/business/explain'
@@ -693,6 +704,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/billing'
     | '/admin/creators'
+    | '/admin/funnel'
     | '/admin/reviews'
     | '/admin/waitlist'
     | '/business/explain'
@@ -754,6 +766,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminBillingRoute: typeof AdminBillingRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
+  AdminFunnelRoute: typeof AdminFunnelRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminWaitlistRoute: typeof AdminWaitlistRoute
   BusinessExplainRoute: typeof BusinessExplainRoute
@@ -986,6 +999,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/creators'
       fullPath: '/admin/creators'
       preLoaderRoute: typeof AdminCreatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/funnel': {
+      id: '/admin/funnel'
+      path: '/admin/funnel'
+      fullPath: '/admin/funnel'
+      preLoaderRoute: typeof AdminFunnelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/reviews': {
@@ -1260,6 +1280,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminBillingRoute: AdminBillingRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
+  AdminFunnelRoute: AdminFunnelRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminWaitlistRoute: AdminWaitlistRoute,
   BusinessExplainRoute: BusinessExplainRoute,
