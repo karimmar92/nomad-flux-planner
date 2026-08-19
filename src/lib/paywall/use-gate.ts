@@ -15,6 +15,7 @@ import { useProfile } from "@/lib/store";
 import { canUse, type ProFeature } from "@/lib/entitlements";
 import { isMetered, isUnlocked, remaining, type MeteredFeature } from "@/lib/paywall/meter";
 import { usePaywall } from "@/components/paywall/PaywallProvider";
+import { track } from "@/lib/analytics/funnel";
 
 export type Gate = {
   /** True when the content may render in full, right now. */
