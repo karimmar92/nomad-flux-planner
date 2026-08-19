@@ -25,7 +25,7 @@ export type FunnelEventRow = {
   checks_left: number | null;
   session_id: string | null;
   user_id: string | null;
-  props: Record<string, unknown> | null;
+  props: Record<string, string | number | boolean | null> | null;
   created_at: string;
 };
 
