@@ -87,7 +87,14 @@ export function PaywallProvider({ children }: { children: ReactNode }) {
   // Read after mount: localStorage in a state initialiser mismatches hydration.
   useEffect(() => setMeter(readMeter()), []);
 
-  const open = useCallback((next: OpenArgs) => setArgs(next), []);
+  const open = useCallback((next: OpenArgs) => {
+    track("paywall_intent", {
+      feature: next.feature,
+      reason: next.reason ?? "hard",
+      checksLeft: remaining(readMeter()),
+    });
+    setArgs(next);
+  }, []);
 
   const spendCheck = useCallback(
     (feature: ProFeature): boolean => {
