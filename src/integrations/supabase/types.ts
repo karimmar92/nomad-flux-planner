@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          checks_left: number | null
+          created_at: string
+          event: string
+          feature: string | null
+          id: string
+          plan: string | null
+          props: Json
+          reason: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          checks_left?: number | null
+          created_at?: string
+          event: string
+          feature?: string | null
+          id?: string
+          plan?: string | null
+          props?: Json
+          reason?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          checks_left?: number | null
+          created_at?: string
+          event?: string
+          feature?: string | null
+          id?: string
+          plan?: string | null
+          props?: Json
+          reason?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       b2b_leads: {
         Row: {
           company_name: string
