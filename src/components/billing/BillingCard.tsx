@@ -55,6 +55,7 @@ import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import { tierName } from "@/config/pricing";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
+import { PROVIDER } from "@/config/legal";
 import { billingView } from "@/lib/billing/billing-view";
 
 export function BillingCard() {
@@ -65,6 +66,8 @@ export function BillingCard() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Founding members have no portal; this holds the friendly explanation.
+  const [notice, setNotice] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -91,6 +94,7 @@ export function BillingCard() {
   async function openPortal() {
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const result = await createPortalSession({
         data: {
@@ -99,9 +103,17 @@ export function BillingCard() {
         },
       });
       if ("error" in result) throw new Error(result.error);
+      if ("lifetime" in result) {
+        // Not an error: a founding member has nothing to manage. Say so where
+        // the error used to appear, and stop.
+        setNotice(result.message);
+        setBusy(false);
+        return;
+      }
       // Same tab: the portal is the cancellation route (§312k BGB) and must not
       // depend on a popup surviving a blocker.
       window.location.href = result.url;
+
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Could not open the billing portal. Please try again.",
@@ -169,7 +181,17 @@ export function BillingCard() {
               {error}
             </p>
           ) : null}
+          {notice ? (
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {notice}{" "}
+              <Link to="/profile" className="underline">
+                Export your data
+              </Link>{" "}
+              at any time, or email {PROVIDER.email}.
+            </p>
+          ) : null}
         </>
+
       ) : (
         <Link
           to="/pricing"

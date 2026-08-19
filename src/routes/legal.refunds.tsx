@@ -43,14 +43,16 @@ function Refunds() {
       <LegalSection title="The short version">
         <p>
           Email {PROVIDER.email} within 14 days of paying and you get your money back. No form, no
-          reason needed, no attempt to talk you out of it.
+          reason needed, no attempt to talk you out of it. This applies to every customer, wherever
+          you live.
         </p>
       </LegalSection>
 
-      <LegalSection title="Your statutory right of withdrawal">
+      <LegalSection title="Your right of withdrawal">
         <p>
-          If you are a consumer in the EU, you have 14 days from the conclusion of the contract to
-          withdraw from it without giving any reason.
+          You have 14 days from the conclusion of the contract to withdraw from it without giving
+          any reason. Consumers in the EU hold this right by statute; we grant the same 14 days
+          contractually to everyone else, so the outcome is the same either way.
         </p>
         <p>
           To exercise it, tell us clearly. An email to {PROVIDER.email} saying you withdraw is
@@ -61,20 +63,13 @@ function Refunds() {
           We refund all payments received within 14 days of being informed, using the same payment
           method you used, at no charge to you.
         </p>
+        <p>
+          Access starts the moment you pay, which is what almost everyone wants. Checkout does not
+          ask you to waive anything, and we do not rely on the right lapsing because performance
+          began. The 14 days above apply regardless.
+        </p>
       </LegalSection>
 
-      <LegalSection title="Why checkout asks you to tick a box">
-        <p>
-          Access starts the moment you pay, which is what almost everyone wants. Under German law,
-          starting a digital service before the withdrawal period ends requires your express
-          consent, so checkout asks for it.
-        </p>
-        <p>
-          In principle that consent can cause the right to lapse once the service has been fully
-          provided. We do not rely on that during your first 14 days. The policy above applies
-          regardless.
-        </p>
-      </LegalSection>
 
       <LegalSection title="After 14 days">
         <p>

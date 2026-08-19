@@ -105,16 +105,21 @@ function Terms() {
 
       <LegalSection title="6. Right of withdrawal">
         <p>
-          Consumers in the EU have a 14-day right of withdrawal on digital services. Because the
-          service begins immediately, you are asked at checkout to consent expressly to immediate
-          performance and to acknowledge that the right lapses once the service has been fully
-          provided.
+          You have 14 days from the conclusion of the contract to withdraw from it without giving
+          any reason. Checkout does not ask you to waive that right, and we do not rely on it
+          lapsing, even though access begins immediately.
+        </p>
+        <p>
+          Consumers in the EU hold this right by statute. We grant the same 14 days contractually to
+          every customer, wherever you live; outside the EU it is our own policy rather than a
+          statutory right, but the outcome is identical.
         </p>
         <p>
           The full policy, including how to withdraw and what happens to any payment, is on the
           Refunds &amp; withdrawal page.
         </p>
       </LegalSection>
+
 
       <LegalSection title="7. Availability">
         <p>

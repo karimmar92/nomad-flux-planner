@@ -15,6 +15,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyWebhook, type StripeEnv } from "@/lib/stripe.server";
 import { handleStripeEvent } from "@/lib/billing/webhook-handler";
+import { logWebhookOutcome, logWebhookReceived } from "@/lib/billing/webhook-log";
 
 export const Route = createFileRoute("/api/public/payments/webhook")({
   server: {
@@ -29,7 +30,47 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
 
         try {
           const event = await verifyWebhook(request, env);
-          return await handleStripeEvent(event, env);
+
+          // Audit log. Admin client is loaded here rather than at module scope
+          // so the server-only module never enters a client chunk. Every call
+          // below swallows its own errors: a missing log line must never turn
+          // a processed payment into a 500 and a Stripe retry.
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const userId =
+            (event.data.object as { metadata?: Record<string, string> } | undefined)?.metadata?.[
+              "userId"
+            ] ?? null;
+          await logWebhookReceived(supabaseAdmin, {
+            eventId: event.id,
+            type: event.type,
+            userId,
+            payload: event as unknown,
+          });
+
+          try {
+            const response = await handleStripeEvent(event, env);
+            let outcome: Record<string, unknown> = {};
+            try {
+              outcome = (await response.clone().json()) as Record<string, unknown>;
+            } catch {
+              outcome = { ok: true };
+            }
+            await logWebhookOutcome(supabaseAdmin, {
+              eventId: event.id,
+              userId,
+              outcome,
+              failed: false,
+            });
+            return response;
+          } catch (handlerError) {
+            await logWebhookOutcome(supabaseAdmin, {
+              eventId: event.id,
+              userId,
+              outcome: { error: String(handlerError) },
+              failed: true,
+            });
+            throw handlerError;
+          }
         } catch (e) {
           console.error("Webhook error:", e);
           return new Response("Webhook error", { status: 400 });
@@ -38,3 +79,4 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
     },
   },
 });
+

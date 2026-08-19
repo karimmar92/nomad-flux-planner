@@ -1,21 +1,36 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { APP_NAME } from "@/lib/app";
 import { useProfile } from "@/lib/store";
-import { PricingTable } from "@/components/PricingTable";
+import { PricingTable, type Billing } from "@/components/PricingTable";
 import { FoundingOffer } from "@/components/billing/FoundingOffer";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { tier, type PlanId } from "@/config/pricing";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { getStripeEnvironment } from "@/lib/stripe";
 import type { PaidPlanId } from "@/config/stripe-prices";
-import { useSession } from "@/lib/use-session";
+import { useSession, resolveSignedIn } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
 
+/** Deep-link params the homepage plan cards send, e.g. ?plan=pro&interval=annual. */
+type PricingSearch = { plan?: PlanId; interval?: Billing };
+
+const DEEP_LINK_PLANS: PlanId[] = ["free", "starter", "pro", "teams"];
+
 export const Route = createFileRoute("/pricing")({
+  validateSearch: (search: Record<string, unknown>): PricingSearch => {
+    const plan = DEEP_LINK_PLANS.find((p) => p === search["plan"]);
+    const interval = search["interval"] === "monthly" || search["interval"] === "annual"
+      ? (search["interval"] as Billing)
+      : undefined;
+    return {
+      ...(plan ? { plan } : {}),
+      ...(interval ? { interval } : {}),
+    };
+  },
   head: () => ({
     meta: [
       { title: `Pricing | ${APP_NAME}` },
@@ -40,9 +55,19 @@ function Pricing() {
   const { t } = useTranslation("common");
   const { profile, patchProfile } = useProfile();
   const { ready, signedIn } = useSession();
+  const { plan: deepLinkPlan, interval: deepLinkInterval } = Route.useSearch();
   const navigate = useNavigate();
   const [busy, setBusy] = useState<PlanId | null>(null);
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
+
+  // Scroll the named tier into view once, so ?plan=pro lands on the card the
+  // homepage button promised rather than at the top of the page.
+  useEffect(() => {
+    if (!deepLinkPlan) return;
+    const el = document.getElementById(`plan-${deepLinkPlan}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [deepLinkPlan]);
+
 
   return (
     <div className="space-y-6">
@@ -110,15 +135,13 @@ function Pricing() {
       ) : null}
 
       <PricingTable
-        // Until auth hydration completes, paid controls stay inert. Otherwise
-        // a fast first click can be mistaken for a signed-out user and bounce
-        // through /auth before the existing session is restored.
-        busyPlan={ready ? busy : "account-session"}
+        // Only the tier being opened is busy. Auth hydration NEVER disables a
+        // purchase button: if the session has not resolved when the click
+        // arrives, it is resolved inside the handler instead.
+        busyPlan={busy}
+        initialBilling={deepLinkInterval ?? "annual"}
+        highlightPlan={deepLinkPlan ?? null}
         onChoose={(chosen, billing) => {
-          if (!signedIn) {
-            void navigate({ to: "/auth", search: { next: "/pricing" } });
-            return;
-          }
           if (chosen.id === "free") return;
           try {
             // Throws when the build shipped without a payments token. Better a
@@ -131,19 +154,28 @@ function Pricing() {
             return;
           }
           setBusy(chosen.id);
-          /**
-           * Seats are not sent from here. This previously sent a fixed count
-           * for per-seat plans, so someone clicking Teams landed on a checkout
-           * for seats they never asked for — a different price from the card
-           * they clicked. The seat picker lives on the checkout form itself,
-           * where the total updates as it changes.
-           */
-          setCheckout({
-            plan: chosen.id as PaidPlanId,
-            interval: billing === "annual" ? "yearly" : "monthly",
-          });
+          void (async () => {
+            const authed = ready ? signedIn : await resolveSignedIn();
+            if (!authed) {
+              setBusy(null);
+              void navigate({ to: "/auth", search: { next: "/pricing" } });
+              return;
+            }
+            /**
+             * Seats are not sent from here. This previously sent a fixed count
+             * for per-seat plans, so someone clicking Teams landed on a
+             * checkout for seats they never asked for — a different price from
+             * the card they clicked. The seat picker lives on the checkout
+             * form itself, where the total updates as it changes.
+             */
+            setCheckout({
+              plan: chosen.id as PaidPlanId,
+              interval: billing === "annual" ? "yearly" : "monthly",
+            });
+          })();
         }}
       />
+
 
       {checkout ? (
         <CheckoutDialog

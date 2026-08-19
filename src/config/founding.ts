@@ -3,9 +3,8 @@
  *
  * ── WHY THIS PRICE ────────────────────────────────────────────────────
  *
- * $149 once. Pro is $29/mo, so this is about five months of Pro for
- * permanent access. Reasoning, since the number is a business decision and
- * not a guess:
+ * $99 once, against Pro at $29/mo — under four months of Pro for permanent
+ * access. Reasoning, since the number is a business decision and not a guess:
  *
  *   Too low ($29-49) and it converts people who will never open the app
  *   again. Those buyers are worse than no buyers: they generate support
@@ -17,12 +16,12 @@
  *   admits it has no customers yet. That admission is the right call, but
  *   it caps what a first cohort will pay.
  *
- *   $149 is still a single evening out for someone earning $3,000+/month
+ *   $99 is still a single evening out for someone earning $3,000+/month
  *   remotely, which is the ICP. Low enough to decide alone, high enough
  *   that the buyer opens the app to justify it. That second part is the
  *   actual product: a hundred people with a reason to give feedback.
  *
- * The goal here is NOT revenue. 100 x $149 is $14,900, which does not fund
+ * The goal here is NOT revenue. 100 founding spots is not an amount that funds
  * anything meaningful. The goal is a hundred real users, a hundred real
  * conversations, and proof that strangers will pay for this at all.
  *
@@ -57,26 +56,21 @@
 /**
  * One-time price in USD. Displayed and charged; there is no VAT on top.
  *
- * WHY 149 AND NOT 99. Two reasons, and the tax one is the lesser of them.
+ * $99 against a $29/month plan pays for itself in under four months, which is
+ * deliberately generous: the point of this cohort is a hundred people with a
+ * reason to open the app and tell us what is wrong with it, not revenue.
  *
- * At $99 against a $29/month plan, a founding spot paid for itself in 3.4
- * months. Lifetime deals conventionally price at ten to twenty times monthly;
- * $99 sat below that range, which reads as low confidence in the product and
- * selects for people hunting a bargain rather than people who would otherwise
- * have paid $29 a month. A founding cohort is meant to be the second group.
+ * Prices here are INCLUSIVE and final. Today the § 19 UStG exemption means all
+ * of it lands; once cross-border B2C digital sales pass €10,000 a year, VAT is
+ * owed in the customer's country and the net drops accordingly. That is
+ * understood and accepted for this one closed cohort.
  *
- * The tax argument is structural. Prices here are INCLUSIVE and final. Today
- * the § 19 UStG exemption means all of it lands; once cross-border B2C digital
- * sales pass €10,000 a year, VAT is owed in the customer's country at 17–27%.
- * At $149 inclusive the net after German VAT is about $121, still comfortably
- * above the ~$96 that $99 nets today with no VAT at all. So the price survives
- * the threshold without a second increase.
- *
- * That matters more than it sounds: raising the price of something sold as
- * "lifetime" is the kind of thing customers write posts about. Better to price
- * once, correctly, than to price low and correct it in public later.
+ * Every piece of copy derives from this constant. Nothing downstream may
+ * hardcode the number — a "lifetime" price that disagrees with itself across
+ * two paragraphs is the sort of thing customers screenshot.
  */
-export const FOUNDING_PRICE_USD = 149;
+export const FOUNDING_PRICE_USD = 99;
+
 
 /** Hard cap. Enforced in the database, not just in the UI. */
 export const FOUNDING_SPOTS = 100;
@@ -89,7 +83,7 @@ export const FOUNDING_SPOTS = 100;
  * and live, so there is no test price id that can leak into production.
  *
  * The price behind it must be ONE-TIME, not recurring. Mixing those up
- * produces a customer charged $149 every month.
+ * produces a customer charged the founding price every month.
  */
 export const FOUNDING_PRICE_LOOKUP_KEY = "founding_lifetime";
 

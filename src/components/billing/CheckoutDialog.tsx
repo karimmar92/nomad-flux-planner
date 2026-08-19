@@ -13,6 +13,7 @@ import { useCallback, useMemo, useRef } from "react";
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { useServerFn } from "@tanstack/react-start";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession } from "@/lib/billing/billing.functions";
 import type { BillingInterval, PaidPlanId } from "@/config/stripe-prices";
@@ -30,6 +31,8 @@ export function CheckoutDialog({
   const createSessionRef = useRef(createSession);
   createSessionRef.current = createSession;
   const requestRef = useRef(request);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const sessionPromiseRef = useRef<Promise<string> | null>(null);
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
@@ -50,11 +53,20 @@ export function CheckoutDialog({
         if (!result.clientSecret) throw new Error("Checkout could not be started.");
         return result.clientSecret;
       });
+      // A rejection here otherwise renders as an empty, broken iframe. Close
+      // the dialog and say what actually went wrong instead.
+      sessionPromiseRef.current.catch((e: unknown) => {
+        toast("Checkout could not be opened", {
+          description: e instanceof Error ? e.message : "Please try again.",
+        });
+        onCloseRef.current();
+      });
     }
     return sessionPromiseRef.current;
   }, []);
 
   const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
+
 
   return (
     <div
