@@ -56,11 +56,12 @@ export function ErrorCard({
           </button>
         ) : null}
         <Link
-          to="/contact"
+          to="/legal/imprint"
           className="inline-flex min-h-9 items-center rounded-full border border-border px-3 text-xs font-medium hover:bg-surface-2"
         >
           Contact support
         </Link>
+
       </div>
     </section>
   );
