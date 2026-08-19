@@ -40,6 +40,8 @@ import {
   writeMeter,
   type MeterState,
 } from "@/lib/paywall/meter";
+import { gateLines } from "@/lib/paywall/gate-copy";
+import { gateCopyVariant } from "@/lib/analytics/experiment";
 import {
   TRIAL_DAYS,
   annualMonthlyEquivalentUsd,
@@ -140,6 +142,14 @@ function PaywallSheet({
   onClose: () => void;
 }) {
   const copy = paywallCopy(args.feature);
+  // Same facts as the inline gate note, same experiment variant, one source.
+  const sheetLines = gateLines({
+    variant: gateCopyVariant(),
+    metered: args.reason === "meter_exhausted",
+    used: meter.spent.length,
+    feature: args.feature,
+    spent: meter.spent,
+  });
   const navigate = useNavigate();
   const { ready, signedIn } = useSession();
   const [interval, setInterval] = useState<"yearly" | "monthly">("yearly");
@@ -237,30 +247,11 @@ function PaywallSheet({
 
         {/* ── WHAT YOU ALREADY USED, AND WHAT COMES NEXT ─────────────
             Naming the free value already delivered is the most honest upsell
-            available: it is a receipt, not a claim. The "next" line then says
-            what the same click buys from here on. */}
+            available: it is a receipt, not a claim. The wording is under an
+            A/B test (see lib/analytics/experiment.ts); the facts are not. */}
         <div className="mt-4 rounded-xl border border-dashed border-border p-3 text-xs leading-relaxed">
-          {meter.spent.length > 0 ? (
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">
-                Used this month: {meter.spent.length} of {FREE_MONTHLY_CHECKS} free checks
-              </span>{" "}
-              — {meter.spent.map((f) => featureLabel(f)).join(", ")}.
-            </p>
-          ) : (
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {FREE_MONTHLY_CHECKS} free checks a month
-              </span>{" "}
-              cover a look at the forward-looking tools. The {featureLabel(args.feature)}{" "}
-              sits outside them.
-            </p>
-          )}
-          <p className="mt-1.5 text-muted-foreground">
-            <span className="font-medium text-foreground">Next:</span> unlimited{" "}
-            {featureLabel(args.feature)}, no monthly check counter, and every other Pro
-            answer unlocked at the same time.
-          </p>
+          <p className="font-medium text-foreground">{sheetLines.used}</p>
+          <p className="mt-1.5 text-muted-foreground">{sheetLines.next}</p>
         </div>
 
         {/* ── PRICE, once, annual first, anchored ───────────────────── */}

@@ -19,6 +19,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { ProFeature } from "@/lib/entitlements";
+import { GATE_COPY_EXPERIMENT, gateCopyVariant } from "./experiment";
 
 export type FunnelEvent =
   | "paywall_intent"
@@ -62,7 +63,15 @@ export function track(event: FunnelEvent, payload: FunnelPayload = {}): void {
     plan: payload.plan ?? null,
     checks_left: payload.checksLeft ?? null,
     session_id: funnelSessionId(),
-    props: payload.props ?? {},
+    // Every event carries the running experiment variant and the route it
+    // fired on. Without the variant the A/B test cannot be read; without the
+    // route you cannot tell a block on /record/vault from one on /compare.
+    props: {
+      ...(payload.props ?? {}),
+      route: window.location.pathname,
+      experiment: GATE_COPY_EXPERIMENT,
+      variant: gateCopyVariant(),
+    },
   };
 
   void (async () => {
