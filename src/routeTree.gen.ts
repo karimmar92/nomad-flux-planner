@@ -40,6 +40,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminCreatorsRouteImport } from './routes/admin.creators'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
+import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as BusinessIndexRouteImport } from './routes/business.index'
 import { Route as BusinessExplainRouteImport } from './routes/business.explain'
 import { Route as CityCityIdRouteImport } from './routes/city.$cityId'
@@ -224,6 +225,11 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
   path: '/admin/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
+  id: '/admin/waitlist',
+  path: '/admin/waitlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/business/',
   path: '/business/',
@@ -389,6 +395,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -446,6 +453,7 @@ export interface FileRoutesByTo {
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -506,6 +514,7 @@ export interface FileRoutesById {
   '/admin/billing': typeof AdminBillingRoute
   '/admin/creators': typeof AdminCreatorsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/business/explain': typeof BusinessExplainRoute
   '/city/$cityId': typeof CityCityIdRoute
   '/community/$peerId': typeof CommunityPeerIdRoute
@@ -567,6 +576,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/creators'
     | '/admin/reviews'
+    | '/admin/waitlist'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/creators'
     | '/admin/reviews'
+    | '/admin/waitlist'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -683,6 +694,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/creators'
     | '/admin/reviews'
+    | '/admin/waitlist'
     | '/business/explain'
     | '/city/$cityId'
     | '/community/$peerId'
@@ -743,6 +755,7 @@ export interface RootRouteChildren {
   AdminBillingRoute: typeof AdminBillingRoute
   AdminCreatorsRoute: typeof AdminCreatorsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminWaitlistRoute: typeof AdminWaitlistRoute
   BusinessExplainRoute: typeof BusinessExplainRoute
   CityCityIdRoute: typeof CityCityIdRoute
   CommunityPeerIdRoute: typeof CommunityPeerIdRoute
@@ -980,6 +993,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/reviews'
       fullPath: '/admin/reviews'
       preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/waitlist': {
+      id: '/admin/waitlist'
+      path: '/admin/waitlist'
+      fullPath: '/admin/waitlist'
+      preLoaderRoute: typeof AdminWaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/business/': {
@@ -1241,6 +1261,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBillingRoute: AdminBillingRoute,
   AdminCreatorsRoute: AdminCreatorsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
+  AdminWaitlistRoute: AdminWaitlistRoute,
   BusinessExplainRoute: BusinessExplainRoute,
   CityCityIdRoute: CityCityIdRoute,
   CommunityPeerIdRoute: CommunityPeerIdRoute,
