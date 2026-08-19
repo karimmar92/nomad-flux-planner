@@ -371,19 +371,26 @@ function Pricing() {
               return;
             }
             setBusy(chosen);
+            const plan = chosen as PaidPlanId;
+            const interval: BillingInterval =
+              chosenBilling === "annual" ? "yearly" : "monthly";
             void (async () => {
               // Auth hydration NEVER disables a purchase button: if the session
               // has not resolved when the click arrives, resolve it here.
               const authed = ready ? signedIn : await resolveSignedIn();
               if (!authed) {
                 setBusy(null);
-                void navigate({ to: "/auth", search: { next: "/pricing" } });
+                // The choice travels twice — durably in `next`, freshly in
+                // sessionStorage — so signing in finishes the purchase rather
+                // than dumping the buyer back on a page to click again.
+                writePurchaseIntent({ plan, interval });
+                void navigate({
+                  to: "/auth",
+                  search: { next: pricingNextUrl({ plan, interval }) },
+                });
                 return;
               }
-              setCheckout({
-                plan: chosen as PaidPlanId,
-                interval: chosenBilling === "annual" ? "yearly" : "monthly",
-              });
+              setCheckout({ plan, interval });
             })();
           }}
         />
@@ -405,6 +412,9 @@ function Pricing() {
           onClose={() => {
             setCheckout(null);
             setBusy(null);
+            // Closed without paying: drop the intent params so a refresh does
+            // not put the payment sheet back in front of them.
+            clearIntentParams();
           }}
         />
       ) : null}
