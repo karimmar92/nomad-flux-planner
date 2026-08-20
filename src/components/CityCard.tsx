@@ -54,29 +54,43 @@ export function CityCard({
   const positive = arb.surplusMonthly > 0;
   const schengen = isSchengenCity(city);
 
+  const photo = cityImage(city.id);
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_6px_20px_rgba(0,0,0,0.07)]">
       {/* Cover band */}
       <Link
         to="/city/$cityId"
         params={{ cityId: city.id }}
-        className="relative block h-32 sm:h-36"
-        style={coverStyle(city.id)}
+        className="relative block h-32 overflow-hidden sm:h-36"
+        style={photo ? undefined : coverStyle(city.id)}
         aria-label={`${city.city}, ${city.country}`}
       >
-        <span
-          aria-hidden
-          className="absolute inset-0 grid place-items-center"
-        >
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/25 text-xl font-semibold text-white backdrop-blur-sm">
-            {city.country_code}
+        {photo ? (
+          <img
+            src={photo}
+            alt={`${city.city}, ${city.country}`}
+            loading="lazy"
+            width={768}
+            height={512}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="absolute inset-0 grid place-items-center"
+          >
+            <span className="grid h-14 w-14 place-items-center rounded-full bg-white/25 text-xl font-semibold text-white backdrop-blur-sm">
+              {city.country_code}
+            </span>
           </span>
-        </span>
+        )}
         <span
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/20 to-transparent"
+          className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/25 to-transparent"
         />
       </Link>
+
 
       {onToggleSave ? (
         <button type="button"
