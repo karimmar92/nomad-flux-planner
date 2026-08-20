@@ -19,23 +19,23 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "Portuguese MFA (vistos.mne.gov.pt)",
   },
   ES: {
-    url: "https://www.exteriores.gob.es/es/ServiciosAlCiudadano/Paginas/Teletrabajadores-internacionales.aspx",
-    authority: "Spanish MFA / UGE",
+    url: "https://www.one.gob.es/es/tramites/solicitud-del-visado-de-nomada-digital",
+    authority: "Plataforma ONE (Spanish government)",
   },
   GR: {
     url: "https://www.mfa.gr/en/visas/visas-for-foreigners-traveling-to-greece/national-visa-type-d.html",
     authority: "Greek MFA",
   },
   EE: {
-    url: "https://www.politsei.ee/en/digital-nomad-visa",
+    url: "https://www.politsei.ee/en/instructions/visa-and-extending-period-of-stay/long-term-visa",
     authority: "Estonian Police and Border Guard",
   },
   CZ: {
-    url: "https://mzv.gov.cz/jnp/en/information_for_aliens/digital_nomad_visa/index.html",
-    authority: "Czech MFA",
+    url: "https://ipc.gov.cz/en/",
+    authority: "Czech Immigration Portal",
   },
   HU: {
-    url: "https://oif.gov.hu/en/white-card/",
+    url: "https://oif.gov.hu/factsheets/white-card-residency-for-digital-nomads",
     authority: "Hungarian Immigration Office",
   },
   RS: {
@@ -67,8 +67,8 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "MDEC DE Rantau",
   },
   VN: {
-    url: "https://evisa.gov.vn/",
-    authority: "Vietnam National e-Visa",
+    url: "https://immigration.gov.vn/",
+    authority: "Vietnam Immigration Department",
   },
   TW: {
     url: "https://goldcard.nat.gov.tw/en/",
@@ -83,7 +83,7 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "Chinese Visa Application Service Centre",
   },
   AE: {
-    url: "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/virtual-work-residence-visa",
+    url: "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/residence-visa-for-working-outside-the-uae",
     authority: "UAE government portal",
   },
   MX: {
@@ -91,11 +91,11 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "Mexican MFA (SRE)",
   },
   CO: {
-    url: "https://www.cancilleria.gov.co/tramites_servicios/visa",
-    authority: "Colombian MFA",
+    url: "https://tramitesmre.cancilleria.gov.co/tramites/enlinea/solicitarVisa.xhtml",
+    authority: "Colombian MFA visa portal",
   },
   AR: {
-    url: "https://www.argentina.gob.ar/interior/migraciones/nomadas-digitales",
+    url: "https://www.argentina.gob.ar/servicio/obtener-una-residencia-transitoria-como-nomada-digital",
     authority: "Argentine Migraciones",
   },
   ZA: {
@@ -103,8 +103,8 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "South African Home Affairs",
   },
   MU: {
-    url: "https://residency.mu/premium-visa/",
-    authority: "EDB Mauritius",
+    url: "https://passport.govmu.org/passport/?page_id=595",
+    authority: "Mauritius Passport & Immigration Office",
   },
   PL: {
     url: "https://www.gov.pl/web/udsc",

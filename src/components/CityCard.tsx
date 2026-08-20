@@ -13,7 +13,9 @@ import {
   monthlyCost,
 } from "@/lib/arbitrage";
 import type { City } from "@/lib/types";
+import { cityImage } from "@/lib/city-images";
 import { cn } from "@/lib/utils";
+
 
 /**
  * Deterministic cover band per city, stable across renders.
