@@ -195,7 +195,7 @@ function hasStoredSession() {
 type SortKey = "savings" | "cheapest" | "internet" | "weather";
 
 export function Explore() {
-  const { profile, hydrated } = useProfile();
+  const { profile, patchProfile, hydrated } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [showOnboarding, setShowOnboarding] = useState(true);
   const navigate = useNavigate();
