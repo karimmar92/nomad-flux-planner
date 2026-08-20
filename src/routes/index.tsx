@@ -195,7 +195,7 @@ function hasStoredSession() {
 type SortKey = "savings" | "cheapest" | "internet" | "weather";
 
 export function Explore() {
-  const { profile, hydrated } = useProfile();
+  const { profile, patchProfile, hydrated } = useProfile();
   const { saved, toggle } = useSavedCities();
   const [showOnboarding, setShowOnboarding] = useState(true);
   const navigate = useNavigate();
@@ -313,6 +313,34 @@ export function Explore() {
                 <HeroStat label="Per year" value={formatUsd(best.surplusAnnual)} />
                 <HeroStat label="Visa-free days" value={`${touristDaysFor(cities[0])}`} />
               </dl>
+              <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+                <label htmlFor="hero-income" className="text-sm text-muted-foreground">
+                  Monthly income
+                </label>
+                <div className="relative">
+                  <span className="absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    $
+                  </span>
+                  <input
+                    id="hero-income"
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={100}
+                    value={income ?? ""}
+                    onChange={(e) => {
+                      const next = e.target.value === "" ? null : Math.max(0, Number(e.target.value));
+                      patchProfile({ monthly_income_usd: Number.isNaN(next as number) ? null : next });
+                    }}
+                    className="num w-36 rounded-full border border-border bg-surface-2 py-1.5 pe-3 ps-6 text-sm"
+                    aria-label="Monthly income in US dollars"
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Every figure on this page updates as you change it.
+                </span>
+              </div>
+
             </>
           ) : (
             <>
