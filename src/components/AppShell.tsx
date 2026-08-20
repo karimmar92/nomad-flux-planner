@@ -70,12 +70,13 @@ const NAV_ABROAD: NavGroup[] = [
   {
     label: "Decide",
     items: [
+      { to: "/hops", labelKey: "nav.hops", icon: Route },
       { to: "/explore", labelKey: "nav.explore", icon: Compass },
       { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
-      { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
     ],
   },
 ];
+
 
 function flatten(groups: NavGroup[]): NavItem[] {
   return groups.flatMap((g) => g.items);
