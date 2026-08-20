@@ -327,7 +327,7 @@ export function Explore() {
                     inputMode="numeric"
                     min={0}
                     step={100}
-                    value={income}
+                    value={income ?? ""}
                     onChange={(e) => {
                       const next = e.target.value === "" ? null : Math.max(0, Number(e.target.value));
                       patchProfile({ monthly_income_usd: Number.isNaN(next as number) ? null : next });
