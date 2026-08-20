@@ -58,116 +58,126 @@
   --color-brand-soft: var(--brand-soft);
   --color-info: var(--info);
   --color-info-muted: var(--info-muted);
-  /* Manrope for UI, Newsreader for display headings — the prototype pairing.
-     The serif is what makes it read as editorial rather than dashboard, so it
-     belongs on hero and section headings, never on data or labels. */
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", ui-serif, Georgia, serif;
+  /* Space Grotesk for display, DM Sans for UI — the remote.com pairing.
+     Both are loaded via <link> in src/routes/__root.tsx. */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
+/* ─────────────────────────────────────────────────────────────────────
+   REMOTE-STYLE PALETTE — app-wide.
+
+   One skin, two modes. Light is the reference: warm-grey canvas, pure-white
+   cards, near-black type, a single electric blue carrying every action.
+   Dark is the same palette inverted onto neutral slate, so the header,
+   footer and every inner page read as one product rather than two.
+   ───────────────────────────────────────────────────────────────────── */
 :root {
   --radius: 0.5rem;
 
-  --background: oklch(0.17 0.021 264);
-  --foreground: oklch(0.95 0.006 250);
-  --surface: oklch(0.21 0.023 264);
-  --surface-2: oklch(0.25 0.024 264);
-  --card: oklch(0.205 0.022 264);
-  --card-foreground: oklch(0.95 0.006 250);
-  --popover: oklch(0.21 0.023 264);
-  --popover-foreground: oklch(0.95 0.006 250);
+  --background: oklch(0.17 0.006 264);
+  --foreground: oklch(0.96 0.002 260);
+  --surface: oklch(0.21 0.007 264);
+  --surface-2: oklch(0.25 0.008 264);
+  --card: oklch(0.205 0.007 264);
+  --card-foreground: oklch(0.96 0.002 260);
+  --popover: oklch(0.21 0.007 264);
+  --popover-foreground: oklch(0.96 0.002 260);
 
-  --primary: oklch(0.78 0.15 68);
-  --primary-foreground: oklch(0.2 0.03 60);
-  --secondary: oklch(0.27 0.024 264);
-  --secondary-foreground: oklch(0.93 0.006 250);
-  --muted: oklch(0.25 0.021 264);
-  --muted-foreground: oklch(0.68 0.017 258);
-  --accent: oklch(0.29 0.03 264);
-  --accent-foreground: oklch(0.95 0.006 250);
+  /* Lifted blue: on a dark canvas the light-mode blue goes muddy. */
+  --primary: oklch(0.66 0.19 264);
+  --primary-foreground: oklch(0.14 0.01 264);
+  --brand-bright: oklch(0.72 0.17 264);
+  --brand-soft: oklch(0.3 0.06 264);
+  --secondary: oklch(0.27 0.008 264);
+  --secondary-foreground: oklch(0.94 0.002 260);
+  --muted: oklch(0.25 0.007 264);
+  --muted-foreground: oklch(0.7 0.006 260);
+  --accent: oklch(0.29 0.05 264);
+  --accent-foreground: oklch(0.96 0.002 260);
 
-  --positive: oklch(0.8 0.15 78);
-  --positive-muted: oklch(0.8 0.15 78 / 12%);
-  --warning: oklch(0.78 0.13 60);
+  --info: oklch(0.72 0.11 220);
+  --info-muted: oklch(0.72 0.11 220 / 16%);
+
+  --positive: oklch(0.72 0.17 264);
+  --positive-muted: oklch(0.72 0.17 264 / 14%);
+  --warning: oklch(0.8 0.13 78);
 
   /* Partner / kit accents — semantic, never hardcoded in components. */
-  --accent-positive: oklch(0.8 0.15 160);
-  --accent-positive-muted: oklch(0.8 0.15 160 / 14%);
-  --accent-warning: oklch(0.83 0.14 85);
-  --accent-warning-muted: oklch(0.83 0.14 85 / 14%);
+  --accent-positive: oklch(0.78 0.14 162);
+  --accent-positive-muted: oklch(0.78 0.14 162 / 14%);
+  --accent-warning: oklch(0.83 0.13 78);
+  --accent-warning-muted: oklch(0.83 0.13 78 / 14%);
 
-  --negative: oklch(0.62 0.16 22);
-  --negative-muted: oklch(0.62 0.16 22 / 14%);
-  --destructive: oklch(0.62 0.16 22);
+  --negative: oklch(0.66 0.17 22);
+  --negative-muted: oklch(0.66 0.17 22 / 14%);
+  --destructive: oklch(0.66 0.17 22);
   --destructive-foreground: oklch(0.97 0.005 250);
 
-  --border: oklch(0.3 0.023 264);
-  --input: oklch(0.3 0.023 264);
-  --ring: oklch(0.78 0.15 68 / 50%);
+  --border: oklch(0.3 0.008 264);
+  --input: oklch(0.3 0.008 264);
+  --ring: oklch(0.66 0.19 264 / 45%);
+
+  --rm-wash: linear-gradient(
+    115deg,
+    oklch(0.22 0.01 264) 0%,
+    oklch(0.24 0.04 250) 48%,
+    oklch(0.24 0.04 200) 100%
+  );
 }
 
 .light {
-  /*
-   * Palette mapped from the Driftly prototype design tokens.
-   *
-   * Source tokens (prototype):
-   *   --bg   97% 0.012 65   --surface   99% 0.006 70
-   *   --ink  20% 0.02  60   --ink-soft  45% 0.02  60
-   *   --line 89% 0.012 60
-   *   --clay 62% 0.16  42   --clay-deep 48% 0.15 40   --clay-soft 94% 0.035 42
-   *   --teal 38% 0.06 195   --teal-soft 94% 0.02 195
-   *
-   * ONE DELIBERATE DEVIATION: --primary uses clay-DEEP, not clay.
-   * The prototype's clay sits at 62% lightness. White text on it measures
-   * roughly 2.9:1, well under the 4.5:1 WCAG AA minimum, so it cannot carry a
-   * filled button. clay-deep at 48% measures ~5.5:1 and passes. Clay is kept
-   * as --brand-bright for borders, icons and accents on light backgrounds,
-   * where it is decorative rather than load-bearing.
-   */
-  --background: oklch(0.97 0.012 65);
-  --foreground: oklch(0.2 0.02 60);
-  --surface: oklch(0.99 0.006 70);
-  --surface-2: oklch(0.955 0.016 64);
-  --card: oklch(0.99 0.006 70);
-  --card-foreground: oklch(0.2 0.02 60);
-  --popover: oklch(0.99 0.006 70);
-  --popover-foreground: oklch(0.2 0.02 60);
+  --background: oklch(0.955 0.002 90);
+  --foreground: oklch(0.16 0 0);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.965 0.002 90);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0 0);
 
-  --primary: oklch(0.48 0.15 40);
-  --primary-foreground: oklch(0.99 0.006 70);
-  /* The prototype's brighter clay — accents only, never a text background. */
-  --brand-bright: oklch(0.62 0.16 42);
-  --brand-soft: oklch(0.94 0.035 42);
-  --secondary: oklch(0.955 0.016 64);
-  --secondary-foreground: oklch(0.28 0.02 60);
-  --muted: oklch(0.955 0.016 64);
-  --muted-foreground: oklch(0.45 0.02 60);
-  --accent: oklch(0.94 0.035 42);
-  --accent-foreground: oklch(0.28 0.02 60);
+  /* Electric blue #1f5eff. White on it measures ~5.1:1 — safe for a filled button. */
+  --primary: oklch(0.52 0.24 264);
+  --primary-foreground: oklch(1 0 0);
+  --brand-bright: oklch(0.58 0.23 264);
+  --brand-soft: oklch(0.95 0.03 264);
+  --secondary: oklch(0.965 0.002 90);
+  --secondary-foreground: oklch(0.24 0 0);
+  --muted: oklch(0.965 0.002 90);
+  --muted-foreground: oklch(0.47 0.003 90);
+  --accent: oklch(0.95 0.03 264);
+  --accent-foreground: oklch(0.24 0 0);
 
-  /* Teal is the prototype's secondary accent — used for calm, informational
-     emphasis so it never competes with clay (actions) or the money colours. */
-  --info: oklch(0.38 0.06 195);
-  --info-muted: oklch(0.94 0.02 195);
+  --info: oklch(0.45 0.09 230);
+  --info-muted: oklch(0.95 0.02 230);
 
-  --positive: oklch(0.55 0.17 253);
-  --positive-muted: oklch(0.55 0.17 253 / 10%);
-  --warning: oklch(0.66 0.14 70);
+  --positive: oklch(0.52 0.24 264);
+  --positive-muted: oklch(0.52 0.24 264 / 10%);
+  --warning: oklch(0.64 0.13 78);
 
-  --accent-positive: oklch(0.52 0.13 162);
-  --accent-positive-muted: oklch(0.52 0.13 162 / 12%);
-  --accent-warning: oklch(0.62 0.13 78);
-  --accent-warning-muted: oklch(0.62 0.13 78 / 14%);
+  --accent-positive: oklch(0.55 0.14 162);
+  --accent-positive-muted: oklch(0.55 0.14 162 / 12%);
+  --accent-warning: oklch(0.64 0.13 78);
+  --accent-warning-muted: oklch(0.64 0.13 78 / 14%);
 
   --negative: oklch(0.55 0.19 27);
   --negative-muted: oklch(0.55 0.19 27 / 10%);
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.99 0.004 250);
 
-  --border: oklch(0.89 0.012 60);
-  --input: oklch(0.89 0.012 60);
-  --ring: oklch(0.48 0.15 40 / 40%);
+  --border: oklch(0.9 0.002 90);
+  --input: oklch(0.9 0.002 90);
+  --ring: oklch(0.52 0.24 264 / 40%);
+
+  /* The hero wash: three barely-there stops, the way the reference does it. */
+  --rm-wash: linear-gradient(
+    115deg,
+    oklch(0.945 0.004 90) 0%,
+    oklch(0.93 0.03 250) 48%,
+    oklch(0.94 0.03 190) 100%
+  );
 }
 
 
@@ -492,131 +502,46 @@ a {
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   REMOTE-STYLE MARKETING THEME  (scoped, landing page only)
+   REMOTE-STYLE SURFACE RULES — app-wide.
 
-   The app keeps its warm-cream/clay identity. The public landing page runs
-   on a second, self-contained palette modelled on remote.com: warm-grey
-   canvas, pure-white cards, near-black type, one electric-blue accent.
-
-   Scoped to `.theme-remote` on purpose. Redefining the same token names
-   inside one wrapper means every existing utility (`surface`, `cta`,
-   `pill`, `display-*`) re-renders in the new palette with no component
-   rewrites — the laziest possible way to run two skins off one system.
+   The palette lives on :root / .light above; these are the shape rules that
+   go with it: display type on headings, flat white cards, pill actions.
+   Unscoped on purpose — header, footer and every inner page share them.
    ───────────────────────────────────────────────────────────────────── */
-.theme-remote {
-  --background: oklch(0.955 0.002 90);
-  --foreground: oklch(0.16 0 0);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.965 0.002 90);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0 0);
-
-  /* Electric blue #1f5eff. White on it measures ~5.1:1 — safe for a filled button. */
-  --primary: oklch(0.52 0.24 264);
-  --primary-foreground: oklch(1 0 0);
-  --brand-bright: oklch(0.58 0.23 264);
-  --brand-soft: oklch(0.95 0.03 264);
-
-  --secondary: oklch(0.965 0.002 90);
-  --secondary-foreground: oklch(0.24 0 0);
-  --muted: oklch(0.965 0.002 90);
-  --muted-foreground: oklch(0.47 0.003 90);
-  --accent: oklch(0.95 0.03 264);
-  --accent-foreground: oklch(0.24 0 0);
-
-  --positive: oklch(0.52 0.24 264);
-  --positive-muted: oklch(0.52 0.24 264 / 10%);
-  --accent-positive: oklch(0.55 0.14 162);
-  --accent-positive-muted: oklch(0.55 0.14 162 / 12%);
-  --accent-warning: oklch(0.64 0.13 78);
-  --accent-warning-muted: oklch(0.64 0.13 78 / 14%);
-
-  --border: oklch(0.9 0.002 90);
-  --input: oklch(0.9 0.002 90);
-  --ring: oklch(0.52 0.24 264 / 40%);
-
-  /* The hero wash: three barely-there stops, the way the reference does it. */
-  --rm-wash: linear-gradient(
-    115deg,
-    oklch(0.945 0.004 90) 0%,
-    oklch(0.93 0.03 250) 48%,
-    oklch(0.94 0.03 190) 100%
-  );
-
-  /* Tailwind resolves `--color-x: var(--x)` once, on :root. A descendant that
-     only redefines `--x` inherits the already-computed :root value, so the
-     mapped names have to be restated here for the override to take effect. */
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-brand-bright: var(--brand-bright);
-  --color-brand-soft: var(--brand-soft);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-positive: var(--positive);
-  --color-positive-muted: var(--positive-muted);
-  --color-accent-positive: var(--accent-positive);
-  --color-accent-positive-muted: var(--accent-positive-muted);
-  --color-accent-warning: var(--accent-warning);
-  --color-accent-warning-muted: var(--accent-warning-muted);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
-  background-color: var(--background);
-  color: var(--foreground);
-  /* Set explicitly, not via --font-sans: inherited custom properties are not
-     re-resolved on the body rule that consumes them. */
-  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-}
-
-.theme-remote :is(h1, h2, h3, .display-xl, .display-lg, .display-md, .num) {
+:is(h1, h2, h3, .display-xl, .display-lg, .display-md, .num) {
   font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The reference sets headlines noticeably tighter than default optical sizing. */
-.theme-remote .display-xl {
+.display-xl {
   letter-spacing: -0.04em;
   font-weight: 700;
 }
-.theme-remote .display-lg,
-.theme-remote .display-md {
+.display-lg,
+.display-md {
   letter-spacing: -0.035em;
   font-weight: 700;
 }
 
 /* Flat cards, hairline borders, no glassy inner highlight: the reference
    builds depth from the white-on-grey step, not from shadow. */
-.theme-remote .surface {
+.surface {
   border-radius: 1rem;
   box-shadow: none;
 }
-.theme-remote .surface-raised {
+.surface-raised {
   border-radius: 1.25rem;
   box-shadow: 0 18px 48px -24px rgba(0, 0, 0, 0.22);
 }
-.theme-remote .cta {
+.cta {
   border-radius: 999px;
   font-weight: 500;
   box-shadow: none;
 }
-.theme-remote .cta:hover {
+.cta:hover {
   box-shadow: 0 10px 24px -12px color-mix(in oklch, var(--primary) 70%, transparent);
 }
-.theme-remote .pill {
+.pill {
   background-color: var(--surface);
   backdrop-filter: none;
 }

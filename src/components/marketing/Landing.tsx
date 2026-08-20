@@ -71,10 +71,10 @@ export function Landing() {
   const hasReviews = (reviews?.length ?? 0) > 0;
 
   return (
-    // `theme-remote` re-points the design tokens for this page only: warm-grey
-    // canvas, white cards, one electric-blue accent. The full-bleed trick
-    // below lets the canvas run edge to edge inside AppShell's fixed column.
-    <div className="theme-remote relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+    // Full-bleed: lets the hero wash run edge to edge inside AppShell's
+    // fixed-width column. The palette itself is app-wide, set in styles.css.
+    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+
       <div className="mx-auto w-full max-w-6xl px-4">
         {/* ── HERO ───────────────────────────────────────────────────────
             A single wash slab, content inset: headline and one filled button
