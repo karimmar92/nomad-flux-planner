@@ -17,9 +17,11 @@ import { useGateCopyVariant } from "@/lib/analytics/experiment";
  * for what each one actually is.
  */
 function GateValueNote({ gate }: { gate?: Gate | undefined }) {
+  // Hook first, always: the early return below must not sit above it.
+  const variant = useGateCopyVariant();
   if (!gate) return null;
   const lines = gateLines({
-    variant: useGateCopyVariant(),
+    variant,
     metered: gate.metered,
     used: gate.used,
     feature: gate.feature,
