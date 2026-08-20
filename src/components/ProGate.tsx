@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { FOUNDING_PRICE_USD } from "@/config/founding";
 import type { Gate } from "@/lib/paywall/use-gate";
 import { gateLines } from "@/lib/paywall/gate-copy";
-import { gateCopyVariant } from "@/lib/analytics/experiment";
+import { useGateCopyVariant } from "@/lib/analytics/experiment";
 
 /**
  * VALUE BEFORE THE ASK, at the gate itself.
@@ -19,7 +19,7 @@ import { gateCopyVariant } from "@/lib/analytics/experiment";
 function GateValueNote({ gate }: { gate?: Gate | undefined }) {
   if (!gate) return null;
   const lines = gateLines({
-    variant: gateCopyVariant(),
+    variant: useGateCopyVariant(),
     metered: gate.metered,
     used: gate.used,
     feature: gate.feature,

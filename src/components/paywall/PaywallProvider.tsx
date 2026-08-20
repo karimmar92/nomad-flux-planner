@@ -41,7 +41,7 @@ import {
   type MeterState,
 } from "@/lib/paywall/meter";
 import { gateLines } from "@/lib/paywall/gate-copy";
-import { gateCopyVariant } from "@/lib/analytics/experiment";
+import { useGateCopyVariant } from "@/lib/analytics/experiment";
 import {
   TRIAL_DAYS,
   annualMonthlyEquivalentUsd,
@@ -144,7 +144,7 @@ function PaywallSheet({
   const copy = paywallCopy(args.feature);
   // Same facts as the inline gate note, same experiment variant, one source.
   const sheetLines = gateLines({
-    variant: gateCopyVariant(),
+    variant: useGateCopyVariant(),
     metered: args.reason === "meter_exhausted",
     used: meter.spent.length,
     feature: args.feature,

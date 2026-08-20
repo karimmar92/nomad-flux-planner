@@ -12,6 +12,8 @@
  * device id the funnel already uses decides the coin flip.
  */
 
+import { useEffect, useState } from "react";
+
 export const GATE_COPY_EXPERIMENT = "gate_copy_v1";
 
 /**
@@ -55,4 +57,22 @@ export function forceGateCopyVariant(v: GateCopyVariant): void {
   } catch {
     /* ignore */
   }
+}
+
+/**
+ * React-safe read of the assignment.
+ *
+ * `gateCopyVariant()` cannot be called during render: the server always
+ * returns the control while the browser may hold "b" in localStorage, and
+ * React then throws a hydration mismatch on the gate copy. This returns the
+ * control for the server render AND the first client render, then swaps to
+ * the real assignment in an effect — the DOM React reconciles against is
+ * identical on both sides.
+ */
+export function useGateCopyVariant(): GateCopyVariant {
+  const [variant, setVariant] = useState<GateCopyVariant>("a");
+  useEffect(() => {
+    setVariant(gateCopyVariant());
+  }, []);
+  return variant;
 }
