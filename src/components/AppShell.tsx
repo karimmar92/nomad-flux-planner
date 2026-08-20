@@ -10,6 +10,7 @@ import {
   Tag,
   UserRound,
   PlaneTakeoff,
+  Route as RouteIcon,
 } from "lucide-react";
 import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -70,12 +71,13 @@ const NAV_ABROAD: NavGroup[] = [
   {
     label: "Decide",
     items: [
+      { to: "/hops", labelKey: "nav.hops", icon: RouteIcon },
       { to: "/explore", labelKey: "nav.explore", icon: Compass },
       { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
-      { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
     ],
   },
 ];
+
 
 function flatten(groups: NavGroup[]): NavItem[] {
   return groups.flatMap((g) => g.items);
@@ -179,6 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <FooterColumn title={t("footerGroups.product")}>
             <FooterLink to="/tracker">{t("nav.tracker")}</FooterLink>
             <FooterLink to="/explore">{t("nav.explore")}</FooterLink>
+            <FooterLink to="/hops">{t("nav.hops")}</FooterLink>
             <FooterLink to="/calculator">{t("nav.arbitrage")}</FooterLink>
             <FooterLink to="/plan">{t("footerLinks.beforeYouGo")}</FooterLink>
             <FooterLink to="/pricing">{t("nav.pricing")}</FooterLink>
