@@ -58,11 +58,11 @@
   --color-brand-soft: var(--brand-soft);
   --color-info: var(--info);
   --color-info-muted: var(--info-muted);
-  /* Manrope for UI, Newsreader for display headings — the prototype pairing.
-     The serif is what makes it read as editorial rather than dashboard, so it
-     belongs on hero and section headings, never on data or labels. */
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", ui-serif, Georgia, serif;
+  /* Space Grotesk for display, DM Sans for UI — the remote.com pairing.
+     Both are loaded via <link> in src/routes/__root.tsx. */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
