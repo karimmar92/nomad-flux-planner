@@ -24,6 +24,9 @@ import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import type { City } from "@/lib/types";
+import type { ReactNode } from "react";
+import { ExternalLink } from "lucide-react";
+import { visaApplyLink } from "@/config/visa-links";
 
 export const Route = createFileRoute("/compare")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -299,7 +302,7 @@ function CompareRow({
 }: {
   label: string;
   cities: City[];
-  value: (c: City) => string;
+  value: (c: City) => ReactNode;
   best?: number | null;
   raw?: (c: City) => number;
 }) {
