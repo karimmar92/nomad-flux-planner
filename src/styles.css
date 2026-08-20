@@ -490,3 +490,174 @@ a {
     transform: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   REMOTE-STYLE MARKETING THEME  (scoped, landing page only)
+
+   The app keeps its warm-cream/clay identity. The public landing page runs
+   on a second, self-contained palette modelled on remote.com: warm-grey
+   canvas, pure-white cards, near-black type, one electric-blue accent.
+
+   Scoped to `.theme-remote` on purpose. Redefining the same token names
+   inside one wrapper means every existing utility (`surface`, `cta`,
+   `pill`, `display-*`) re-renders in the new palette with no component
+   rewrites — the laziest possible way to run two skins off one system.
+   ───────────────────────────────────────────────────────────────────── */
+.theme-remote {
+  --background: oklch(0.955 0.002 90);
+  --foreground: oklch(0.16 0 0);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.965 0.002 90);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0 0);
+
+  /* Electric blue #1f5eff. White on it measures ~5.1:1 — safe for a filled button. */
+  --primary: oklch(0.52 0.24 264);
+  --primary-foreground: oklch(1 0 0);
+  --brand-bright: oklch(0.58 0.23 264);
+  --brand-soft: oklch(0.95 0.03 264);
+
+  --secondary: oklch(0.965 0.002 90);
+  --secondary-foreground: oklch(0.24 0 0);
+  --muted: oklch(0.965 0.002 90);
+  --muted-foreground: oklch(0.47 0.003 90);
+  --accent: oklch(0.95 0.03 264);
+  --accent-foreground: oklch(0.24 0 0);
+
+  --positive: oklch(0.52 0.24 264);
+  --positive-muted: oklch(0.52 0.24 264 / 10%);
+  --accent-positive: oklch(0.55 0.14 162);
+  --accent-positive-muted: oklch(0.55 0.14 162 / 12%);
+  --accent-warning: oklch(0.64 0.13 78);
+  --accent-warning-muted: oklch(0.64 0.13 78 / 14%);
+
+  --border: oklch(0.9 0.002 90);
+  --input: oklch(0.9 0.002 90);
+  --ring: oklch(0.52 0.24 264 / 40%);
+
+  /* The hero wash: three barely-there stops, the way the reference does it. */
+  --rm-wash: linear-gradient(
+    115deg,
+    oklch(0.945 0.004 90) 0%,
+    oklch(0.93 0.03 250) 48%,
+    oklch(0.94 0.03 190) 100%
+  );
+
+  /* Tailwind resolves `--color-x: var(--x)` once, on :root. A descendant that
+     only redefines `--x` inherits the already-computed :root value, so the
+     mapped names have to be restated here for the override to take effect. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-soft: var(--brand-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-positive: var(--positive);
+  --color-positive-muted: var(--positive-muted);
+  --color-accent-positive: var(--accent-positive);
+  --color-accent-positive-muted: var(--accent-positive-muted);
+  --color-accent-warning: var(--accent-warning);
+  --color-accent-warning-muted: var(--accent-warning-muted);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  background-color: var(--background);
+  color: var(--foreground);
+  /* Set explicitly, not via --font-sans: inherited custom properties are not
+     re-resolved on the body rule that consumes them. */
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.theme-remote :is(h1, h2, h3, .display-xl, .display-lg, .display-md, .num) {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* The reference sets headlines noticeably tighter than default optical sizing. */
+.theme-remote .display-xl {
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+.theme-remote .display-lg,
+.theme-remote .display-md {
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+/* Flat cards, hairline borders, no glassy inner highlight: the reference
+   builds depth from the white-on-grey step, not from shadow. */
+.theme-remote .surface {
+  border-radius: 1rem;
+  box-shadow: none;
+}
+.theme-remote .surface-raised {
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 48px -24px rgba(0, 0, 0, 0.22);
+}
+.theme-remote .cta {
+  border-radius: 999px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.theme-remote .cta:hover {
+  box-shadow: 0 10px 24px -12px color-mix(in oklch, var(--primary) 70%, transparent);
+}
+.theme-remote .pill {
+  background-color: var(--surface);
+  backdrop-filter: none;
+}
+
+/* The hero slab. Full-width wash with the content inset, as on the reference. */
+@utility rm-wash {
+  background: var(--rm-wash);
+  border-radius: 1.75rem;
+}
+
+/* Secondary action: outlined pill, same height as the primary. */
+@utility cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  border: 1px solid var(--color-foreground);
+  color: var(--color-foreground);
+  background-color: transparent;
+  transition: background-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+  }
+}
+
+/* Floating status chip over the hero globe. Decorative, aria-hidden. */
+@utility rm-chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 12px 28px -16px rgba(0, 0, 0, 0.35);
+}
