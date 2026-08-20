@@ -179,8 +179,27 @@ function ComparePage() {
               <CompareRow
                 label="Nomad visa"
                 cities={selected}
-                value={(c) => (c.visa.nomadVisa.exists ? c.visa.nomadVisa.name : "None")}
+                value={(c) => {
+                  if (!c.visa.nomadVisa.exists) return "None";
+                  const link = visaApplyLink(c.country_code);
+                  if (!link) return c.visa.nomadVisa.name;
+                  return (
+                    <span className="inline-flex flex-col items-end gap-0.5">
+                      <span>{c.visa.nomadVisa.name}</span>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary underline underline-offset-2"
+                      >
+                        Apply — {link.authority}
+                        <ExternalLink className="size-3" aria-hidden />
+                      </a>
+                    </span>
+                  );
+                }}
               />
+
               <CompareRow
                 label="Visa income req."
                 cities={selected}
