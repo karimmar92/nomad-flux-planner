@@ -9,6 +9,13 @@
  * Driftly trip store — the same structure the tracker, Schengen engine and
  * year-end report already read, so visa- and tax-day awareness can be layered
  * on later without touching this file.
+ *
+ * UX refinements (2026-08):
+ * - Collapsible secondary preferences (less visual noise)
+ * - Stronger hierarchy for "Best overall"
+ * - Timeline overlap detection before adding
+ * - Clearer Nomad Fit explanation
+ * - Tighter stop cards with continuity cues
  */
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -17,6 +24,7 @@ import {
   ArrowUp,
   CalendarPlus,
   Check,
+  ChevronDown,
   ExternalLink,
   GripVertical,
   Plane,
@@ -43,7 +51,7 @@ import { cn } from "@/lib/utils";
 const MAX_STOPS = 6;
 
 export function HopsPlanner() {
-  const { addTrip } = useTrips();
+  const { trips, addTrip } = useTrips();
   const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(() => addDays(todayIso(), 21));
@@ -55,6 +63,8 @@ export function HopsPlanner() {
   const [prefs, setPrefs] = useState<Preferences>(DEFAULT_PREFERENCES);
   const [added, setAdded] = useState<string | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [showMorePrefs, setShowMorePrefs] = useState(false);
+  const [overlapWarning, setOverlapWarning] = useState<string | null>(null);
 
   const results = useMemo(
     () => planItineraries(stops, startDate, prefs, 4),
@@ -75,7 +85,30 @@ export function HopsPlanner() {
     });
   }
 
+  /** Detect simple date overlaps with existing timeline trips. */
+  function findOverlaps(itinerary: Itinerary): string[] {
+    const overlaps: string[] = [];
+    for (const stop of itinerary.stops) {
+      for (const t of trips) {
+        if (!t.entry_date || !t.exit_date) continue;
+        const aStart = stop.arrivalDateISO;
+        const aEnd = stop.departureDateISO;
+        if (aStart < t.exit_date && aEnd > t.entry_date) {
+          overlaps.push(
+            `${stop.cityName} (${aStart}→${aEnd}) overlaps existing trip in ${t.country_code} (${t.entry_date}→${t.exit_date})`,
+          );
+        }
+      }
+    }
+    return overlaps;
+  }
+
   function addToTimeline(itinerary: Itinerary) {
+    const overlaps = findOverlaps(itinerary);
+    if (overlaps.length > 0 && overlapWarning !== itinerary.id) {
+      setOverlapWarning(itinerary.id);
+      return;
+    }
     for (const stop of itinerary.stops) {
       const trip: Trip = {
         id: crypto.randomUUID(),
@@ -91,10 +124,11 @@ export function HopsPlanner() {
       addTrip(trip);
     }
     setAdded(itinerary.id);
+    setOverlapWarning(null);
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+    <div className="grid gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
       {/* ---- INPUT PANEL ------------------------------------------------ */}
       <section className="space-y-4 rounded-2xl border border-border bg-card p-4">
         <div>
@@ -112,7 +146,13 @@ export function HopsPlanner() {
           />
         </label>
 
-        <ol className="space-y-2">
+        <ol className="relative space-y-2">
+          {stops.length > 1 ? (
+            <div
+              className="pointer-events-none absolute start-[18px] top-6 bottom-6 w-px bg-border/70"
+              aria-hidden
+            />
+          ) : null}
           {stops.map((stop, i) => (
             <li
               key={`${stop.cityKey}-${i}`}
@@ -124,13 +164,13 @@ export function HopsPlanner() {
                 setDragIndex(null);
               }}
               className={cn(
-                "rounded-xl border border-border bg-surface-2/50 p-3",
+                "relative rounded-xl border border-border bg-surface-2/50 p-2.5 transition-opacity",
                 dragIndex === i && "opacity-60",
               )}
             >
               <div className="flex items-start gap-2">
                 <GripVertical className="mt-2 h-4 w-4 shrink-0 cursor-grab text-muted-foreground" />
-                <div className="min-w-0 flex-1 space-y-2">
+                <div className="min-w-0 flex-1 space-y-1.5">
                   <CitySelect
                     value={stop.cityKey}
                     onChange={(cityKey) => patchStop(i, { cityKey })}
@@ -145,7 +185,7 @@ export function HopsPlanner() {
                         onChange={(e) =>
                           patchStop(i, { nights: Math.max(1, Number(e.target.value) || 1) })
                         }
-                        className="w-16 rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground"
+                        className="w-14 rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground"
                       />
                       nights
                     </label>
@@ -153,7 +193,7 @@ export function HopsPlanner() {
                       type="button"
                       onClick={() => patchStop(i, { flexible: !stop.flexible })}
                       className={cn(
-                        "rounded-full border px-2.5 py-1 text-[11px] transition-colors",
+                        "rounded-full border px-2 py-0.5 text-[11px] transition-colors",
                         stop.flexible
                           ? "border-primary/40 bg-primary/10 text-primary"
                           : "border-border text-muted-foreground hover:text-foreground",
@@ -164,7 +204,7 @@ export function HopsPlanner() {
                   </div>
                   <NomadHint nights={stop.nights} />
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   <IconBtn label="Move up" onClick={() => move(i, i - 1)}>
                     <ArrowUp className="h-3.5 w-3.5" />
                   </IconBtn>
@@ -208,27 +248,43 @@ export function HopsPlanner() {
             value={prefs.priority}
             onChange={(v) => setPrefs({ ...prefs, priority: v as Preferences["priority"] })}
           />
-          <ChipRow
-            options={[
-              { id: "any", label: "Any airport" },
-              { id: "main", label: "Main international" },
-              { id: "lowcost", label: "Low-cost airport" },
-            ]}
-            value={prefs.airportPreference}
-            onChange={(v) =>
-              setPrefs({ ...prefs, airportPreference: v as Preferences["airportPreference"] })
-            }
-          />
-          <Toggle
-            label="Avoid late-night arrivals"
-            checked={prefs.avoidLateArrivals}
-            onChange={(v) => setPrefs({ ...prefs, avoidLateArrivals: v })}
-          />
-          <Toggle
-            label="Prefer longer stays (nomad mode)"
-            checked={prefs.nomadMode}
-            onChange={(v) => setPrefs({ ...prefs, nomadMode: v })}
-          />
+
+          <button
+            type="button"
+            onClick={() => setShowMorePrefs((v) => !v)}
+            className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <span>More preferences</span>
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 transition-transform", showMorePrefs && "rotate-180")}
+            />
+          </button>
+
+          {showMorePrefs ? (
+            <div className="space-y-3">
+              <ChipRow
+                options={[
+                  { id: "any", label: "Any airport" },
+                  { id: "main", label: "Main international" },
+                  { id: "lowcost", label: "Low-cost airport" },
+                ]}
+                value={prefs.airportPreference}
+                onChange={(v) =>
+                  setPrefs({ ...prefs, airportPreference: v as Preferences["airportPreference"] })
+                }
+              />
+              <Toggle
+                label="Avoid late-night arrivals"
+                checked={prefs.avoidLateArrivals}
+                onChange={(v) => setPrefs({ ...prefs, avoidLateArrivals: v })}
+              />
+              <Toggle
+                label="Prefer longer stays (nomad mode)"
+                checked={prefs.nomadMode}
+                onChange={(v) => setPrefs({ ...prefs, nomadMode: v })}
+              />
+            </div>
+          ) : null}
         </div>
 
         <p className="text-[11px] text-muted-foreground">
@@ -251,7 +307,13 @@ export function HopsPlanner() {
               itinerary={it}
               rank={idx}
               added={added === it.id}
+              showOverlap={overlapWarning === it.id}
               onAdd={() => addToTimeline(it)}
+              onConfirmOverlap={() => {
+                setOverlapWarning(null);
+                addToTimeline(it);
+              }}
+              onDismissOverlap={() => setOverlapWarning(null)}
               onOpenTracker={() => navigate({ to: "/tracker" })}
             />
           ))
@@ -265,22 +327,40 @@ function ItineraryCard({
   itinerary,
   rank,
   added,
+  showOverlap,
   onAdd,
+  onConfirmOverlap,
+  onDismissOverlap,
   onOpenTracker,
 }: {
   itinerary: Itinerary;
   rank: number;
   added: boolean;
+  showOverlap: boolean;
   onAdd: () => void;
+  onConfirmOverlap: () => void;
+  onDismissOverlap: () => void;
   onOpenTracker: () => void;
 }) {
   const it = itinerary;
+  const isBest = rank === 0;
+
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card">
+    <article
+      className={cn(
+        "overflow-hidden rounded-2xl border bg-card transition-shadow",
+        isBest ? "border-primary/40 shadow-sm shadow-primary/5" : "border-border",
+      )}
+    >
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
-            {rank === 0 ? "Best overall" : `Option ${rank + 1}`}
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[11px] font-medium",
+              isBest ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary",
+            )}
+          >
+            {isBest ? "Best overall" : `Option ${rank + 1}`}
           </span>
           <span className="text-sm font-medium">
             {it.stops.map((s) => s.cityName).join(" → ")}
@@ -350,9 +430,38 @@ function ItineraryCard({
         </ul>
       ) : null}
 
+      {showOverlap ? (
+        <div className="border-t border-border bg-warning/10 px-4 py-3 text-xs">
+          <p className="font-medium text-foreground">
+            This sequence overlaps trips already on your timeline.
+          </p>
+          <p className="mt-1 text-muted-foreground">
+            You can still add it (as provisional), but check the tracker afterwards to resolve
+            any double-booking of dates.
+          </p>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={onConfirmOverlap}
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+            >
+              Add anyway
+            </button>
+            <button
+              type="button"
+              onClick={onDismissOverlap}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-        <p className="text-[11px] text-muted-foreground">
-          Nomad fit {it.nomadScore}/100 — how well these stay lengths suit a 2–8 week base.
+        <p className="max-w-md text-[11px] text-muted-foreground">
+          Nomad fit {it.nomadScore}/100 — stay lengths that score high sit in the 2–8 week
+          band where remote work is realistic. Below 14 nights is usually too short to settle.
         </p>
         {added ? (
           <button

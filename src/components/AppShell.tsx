@@ -7,11 +7,12 @@ import {
   GitCompareArrows,
   Moon,
   Sun,
-  Tag,
   UserRound,
   PlaneTakeoff,
   Route as RouteIcon,
+  MoreHorizontal,
 } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ArrivalGate } from "@/components/arrival/ArrivalGate";
@@ -21,33 +22,30 @@ import { useProfile, useTheme } from "@/lib/store";
 import { useOrgTripSync } from "@/lib/org/use-trip-sync";
 import { usePlanSync } from "@/lib/billing/use-plan-sync";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 
-type NavItem = { to: string; labelKey: string; icon: typeof Compass; label?: string };
+type NavItem = { to: string; labelKey: string; icon: typeof Compass };
 type NavGroup = { label: string; items: NavItem[] };
 
 /**
  * NAVIGATION — grouped by JOB, not by feature.
  *
- * The flat list mixed three unrelated jobs (comply, decide, buy) and made the
- * user scan six equal-weight links to find one. Grouping them means a person
- * looks in one place: "am I legal?" → Compliance, "where next?" → Decide.
+ * Desktop: stage-aware groups (planning vs abroad).
+ * Mobile: fixed primary chrome — Tracker · Hops · Explore · More — so the bar
+ * never exceeds four tappable targets. Secondary destinations live in More.
  *
- * Two rules:
- *   * The primary job for the user's stage sits leftmost and stays visible on
- *     mobile. Someone abroad opens this app to check days, not to browse cities.
- *   * Pricing is NOT in the primary nav for signed-in users. Selling to
- *     somebody mid-task is the fastest way to make a tool feel like a funnel;
- *     it lives in the footer and on the upgrade prompts that appear at the
- *     point of need.
+ * Hops is always present: multi-city routing is useful both while planning a
+ * first move and while already abroad (visa runs, next-city hops).
+ *
+ * Pricing is NOT in the primary nav for signed-in users.
  */
 const NAV_PLANNING: NavGroup[] = [
   {
     label: "Plan",
     items: [
       { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
+      { to: "/hops", labelKey: "nav.hops", icon: RouteIcon },
       { to: "/explore", labelKey: "nav.explore", icon: Compass },
     ],
   },
@@ -78,21 +76,29 @@ const NAV_ABROAD: NavGroup[] = [
   },
 ];
 
+/** Fixed mobile primary bar — max 4 targets for thumb accuracy. */
+const MOBILE_PRIMARY: NavItem[] = [
+  { to: "/tracker", labelKey: "nav.tracker", icon: CalendarClock },
+  { to: "/hops", labelKey: "nav.hops", icon: RouteIcon },
+  { to: "/explore", labelKey: "nav.explore", icon: Compass },
+];
 
-function flatten(groups: NavGroup[]): NavItem[] {
-  return groups.flatMap((g) => g.items);
-}
+const MOBILE_MORE: NavItem[] = [
+  { to: "/record", labelKey: "nav.record", icon: FolderLock },
+  { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
+  { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
+  { to: "/compare", labelKey: "nav.compare", icon: GitCompareArrows },
+  { to: "/profile", labelKey: "nav.profile", icon: UserRound },
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation("common");
   const { theme, toggleTheme } = useTheme();
   const { profile } = useProfile();
+  const [moreOpen, setMoreOpen] = useState(false);
   const NAV_GROUPS = profile.stage === "planning" ? NAV_PLANNING : NAV_ABROAD;
-  const NAV = flatten(NAV_GROUPS);
-  // Country + dates only, and only for people who are in an organisation.
+
   useOrgTripSync();
-  // Stripe writes the paid plan to the database; this is what brings it back
-  // to the device. Without it a paying customer keeps seeing the free tier.
   usePlanSync();
 
   return (
@@ -151,17 +157,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* FOOTER — grouped, not a wall.
-          Thirteen equal-weight links in one row is a list nobody reads. These
-          are the same destinations sorted by who wants them: a nomad, an
-          employer, a creator, or someone checking whether to trust us.
-          Pricing lives here rather than in the primary nav, because selling to
-          someone mid-task makes a tool feel like a funnel.
-
-          NO LINK TO /landing — deliberately. AppShell renders on every page and
-          TanStack Router validates `to` against the generated route tree; a
-          previous version added one before the route existed and took down
-          every route at once. Use a plain <a href> if that is ever needed. */}
       <footer className="mx-auto mb-20 w-full max-w-6xl px-4 pt-8 text-xs text-muted-foreground md:mb-6">
         <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-5">
           <FooterColumn title={t("footerGroups.rules")}>
@@ -214,13 +209,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           </FooterColumn>
         </div>
 
-        {/* LEGAL ROW — its own line, not buried in a column.
-            DDG §5 requires the Impressum to be "leicht erkennbar, unmittelbar
-            erreichbar und ständig verfügbar": recognisable, one click away, on
-            every page. A missing or hard-to-find imprint is the single most
-            reliably Abmahnung-attracting defect on a German commercial site,
-            so these sit on their own row rather than as the fourth item in a
-            column somebody has to scan. */}
         <div className="mt-6 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-4">
           <Link to="/legal/imprint" className="transition-colors hover:text-foreground">
             {t("footerLinks.imprint")}
@@ -245,11 +233,45 @@ export function AppShell({ children }: { children: ReactNode }) {
         </p>
       </footer>
 
+      {/* Mobile more sheet */}
+      {moreOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label={t("actions.close")}
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setMoreOpen(false)}
+          />
+          <div className="fixed inset-x-3 bottom-20 z-50 rounded-2xl border border-border bg-card p-2 shadow-lg md:hidden">
+            {MOBILE_MORE.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-surface-2"
+              >
+                <item.icon className="h-4 w-4 text-muted-foreground" />
+                {t(item.labelKey)}
+              </Link>
+            ))}
+            <Link
+              to="/pricing"
+              onClick={() => setMoreOpen(false)}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-surface-2"
+            >
+              {t("nav.pricing")}
+            </Link>
+          </div>
+        </>
+      ) : null}
+
+      {/* Mobile primary: Tracker · Hops · Explore · More */}
       <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-2xl border border-border bg-card/95 px-1 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur md:hidden">
-        {NAV.map((item) => (
+        {MOBILE_PRIMARY.map((item) => (
           <Link
             key={item.to}
             to={item.to}
+            onClick={() => setMoreOpen(false)}
             className={cn(
               "flex flex-1 flex-col items-center gap-1 rounded-xl py-1 text-[10px] text-muted-foreground",
             )}
@@ -262,6 +284,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             {t(item.labelKey)}
           </Link>
         ))}
+        <button
+          type="button"
+          onClick={() => setMoreOpen((o) => !o)}
+          className={cn(
+            "flex flex-1 flex-col items-center gap-1 rounded-xl py-1 text-[10px] text-muted-foreground",
+            moreOpen && "font-medium text-primary",
+          )}
+          aria-expanded={moreOpen}
+          aria-label={t("nav.more")}
+        >
+          <span
+            className={cn(
+              "grid h-7 w-7 place-items-center rounded-full",
+              moreOpen && "bg-primary/10",
+            )}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </span>
+          {t("nav.more")}
+        </button>
       </nav>
     </div>
   );
