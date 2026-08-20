@@ -10,6 +10,7 @@ import {
   Tag,
   UserRound,
   PlaneTakeoff,
+  Route as RouteIcon,
 } from "lucide-react";
 import { AuthButton } from "@/components/AuthButton";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -70,7 +71,7 @@ const NAV_ABROAD: NavGroup[] = [
   {
     label: "Decide",
     items: [
-      { to: "/hops", labelKey: "nav.hops", icon: Route },
+      { to: "/hops", labelKey: "nav.hops", icon: RouteIcon },
       { to: "/explore", labelKey: "nav.explore", icon: Compass },
       { to: "/calculator", labelKey: "nav.arbitrage", icon: Calculator },
     ],
