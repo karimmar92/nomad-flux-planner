@@ -47,6 +47,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarClock, Check, Globe2, MapPin, WifiOff } from "lucide-react";
 import { RuleCalculator } from "@/components/marketing/RuleCalculator";
+import { HeroGlobe } from "@/components/marketing/HeroGlobe";
 import { Reveal } from "@/components/marketing/Reveal";
 import { FaqList, PRICING_FAQ } from "@/components/marketing/Faq";
 import { APP_NAME } from "@/lib/app";
@@ -70,60 +71,89 @@ export function Landing() {
   const hasReviews = (reviews?.length ?? 0) > 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4">
-      {/* ── HERO ───────────────────────────────────────────────────────
-          Headline states the outcome. One sentence of context. One button.
-          The calculator sits beside it as the product shot: a working thing
-          beats a screenshot, and typing real dates into it is what makes
-          saving them later feel like continuing rather than converting. */}
-      <section className="section-gap grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-        <Reveal className="space-y-7">
-          <span className="pill">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-positive" aria-hidden />
-            Works offline · Hosted in the EU
-          </span>
+    // `theme-remote` re-points the design tokens for this page only: warm-grey
+    // canvas, white cards, one electric-blue accent. The full-bleed trick
+    // below lets the canvas run edge to edge inside AppShell's fixed column.
+    <div className="theme-remote relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        {/* ── HERO ───────────────────────────────────────────────────────
+            A single wash slab, content inset: headline and one filled button
+            on the left, the working calculator floating over a dotted globe
+            on the right. A live answer beats a screenshot, and typing real
+            dates into it makes saving them later feel like continuing. */}
+        <section className="pt-4 sm:pt-6">
+          <div className="rm-wash overflow-hidden px-6 py-14 sm:px-10 sm:py-20">
+            <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+              <Reveal className="space-y-7">
+                <span className="pill">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent-positive" aria-hidden />
+                  Works offline · Hosted in the EU
+                </span>
 
-          <h1 className="display-xl text-balance">Never wonder how many days you have left.</h1>
+                <h1 className="display-xl text-balance">
+                  Never wonder how many days you have left.
+                </h1>
 
-          <p className="lede max-w-lg text-pretty">
-            {APP_NAME} counts Schengen, tax residency and the US 330-day test from one trip history,
-            and tells you your leave-by date months before it matters.
-          </p>
+                <p className="lede max-w-lg text-pretty">
+                  {APP_NAME} counts Schengen, tax residency and the US 330-day test from one trip
+                  history, and tells you your leave-by date months before it matters.
+                </p>
 
-          <div>
-            <Link to="/tracker" className="cta">
-              Count my days
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Free. No account. Takes about a minute.
-            </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link to="/tracker" className="cta">
+                    Count my days
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </Link>
+                  <Link to="/pricing" className="cta-ghost">
+                    See pricing
+                  </Link>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Free. No account. Takes about a minute.
+                </p>
+              </Reveal>
+
+              <Reveal delay={90}>
+                <div className="relative">
+                  <HeroGlobe className="pointer-events-none absolute inset-0 m-auto h-[112%] w-[112%] text-primary opacity-70" />
+                  <div className="surface-raised relative p-2 sm:p-3">
+                    <RuleCalculator />
+                  </div>
+                  {/* Decorative status chips, the way the reference floats
+                      product moments around its globe. No live data here. */}
+                  <div className="rm-chip -top-4 end-2 hidden sm:flex" aria-hidden>
+                    <span className="h-2 w-2 rounded-full bg-accent-positive" />
+                    <span className="num text-xs font-semibold">62/90 days used</span>
+                  </div>
+                  <div className="rm-chip -bottom-5 start-2 hidden sm:flex" aria-hidden>
+                    <CalendarClock className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-medium">Leave by 12 Oct</span>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ── PROOF ──────────────────────────────────────────────────────
+            Three numbers, each traceable to the repo, on the flat canvas
+            rather than in boxes — the reference's quiet band under the hero. */}
+        <Reveal as="section" className="content-auto py-14">
+          <p className="label-xs text-center">Counted from one trip history</p>
+          <div className="mt-8 grid gap-8 sm:grid-cols-3">
+            {[
+              { n: "4", l: "rules counted from one history" },
+              { n: String(cityCount), l: "cities with the rules already checked" },
+              { n: "0", l: "trackers watching you" },
+            ].map((s) => (
+              <div key={s.l} className="text-center">
+                <div className="num text-5xl font-bold tracking-tight">{s.n}</div>
+                <div className="mt-2 text-sm text-muted-foreground">{s.l}</div>
+              </div>
+            ))}
           </div>
         </Reveal>
 
-        <Reveal delay={90}>
-          <div className="surface-raised p-2 sm:p-3">
-            <RuleCalculator />
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ── PROOF ──────────────────────────────────────────────────────
-          Three numbers, each traceable to the repo. Numbers are the hero and
-          labels are quiet, which is the neobanking pattern and happens to be
-          right for a product whose value is a figure you can trust. */}
-      <Reveal as="section" className="content-auto grid gap-3 sm:grid-cols-3">
-        {[
-          { n: "4", l: "rules counted from one history" },
-          { n: String(cityCount), l: "cities with the rules already checked" },
-          { n: "0", l: "trackers watching you" },
-        ].map((s) => (
-          <div key={s.l} className="surface px-6 py-7 text-center">
-            <div className="num text-4xl font-semibold tracking-tight">{s.n}</div>
-            <div className="mt-1.5 text-sm text-muted-foreground">{s.l}</div>
-          </div>
-        ))}
-      </Reveal>
 
       {/* ── WHAT CHANGES ───────────────────────────────────────────────
           Three, scannable in seconds. Each heading is a sentence the reader
