@@ -15,8 +15,8 @@ export type VisaApplyLink = {
 /** Keyed by ISO country code, matching City.countryCode. */
 export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
   PT: {
-    url: "https://vistos.mne.gov.pt/en/national-visas/general-information/types-of-visa",
-    authority: "Portuguese MFA (vistos.mne.gov.pt)",
+    url: "https://portaldascomunidades.mne.gov.pt/pt/vistos-e-legalizacao/vistos",
+    authority: "Portuguese MFA — visas portal",
   },
   ES: {
     url: "https://www.one.gob.es/es/tramites/solicitud-del-visado-de-nomada-digital",
@@ -83,8 +83,8 @@ export const VISA_APPLY_LINKS: Record<string, VisaApplyLink> = {
     authority: "Chinese Visa Application Service Centre",
   },
   AE: {
-    url: "https://u.ae/en/information-and-services/visa-and-emirates-id/residence-visas/residence-visa-for-working-outside-the-uae",
-    authority: "UAE government portal",
+    url: "https://www.gdrfad.gov.ae/en/services/f52024e3-b812-11ed-5210-4cd98f768936",
+    authority: "GDRFA Dubai — virtual work permit",
   },
   MX: {
     url: "https://www.gob.mx/sre/acciones-y-programas/visas",
