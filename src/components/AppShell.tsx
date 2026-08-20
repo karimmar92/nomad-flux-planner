@@ -7,7 +7,6 @@ import {
   GitCompareArrows,
   Moon,
   Sun,
-  Tag,
   UserRound,
   PlaneTakeoff,
   Route as RouteIcon,
@@ -42,12 +41,16 @@ type NavGroup = { label: string; items: NavItem[] };
  *     somebody mid-task is the fastest way to make a tool feel like a funnel;
  *     it lives in the footer and on the upgrade prompts that appear at the
  *     point of need.
+ *
+ * Hops is always present: multi-city routing is useful both while planning a
+ * first move and while already abroad (visa runs, next-city hops).
  */
 const NAV_PLANNING: NavGroup[] = [
   {
     label: "Plan",
     items: [
       { to: "/plan", labelKey: "nav.plan", icon: PlaneTakeoff },
+      { to: "/hops", labelKey: "nav.hops", icon: RouteIcon },
       { to: "/explore", labelKey: "nav.explore", icon: Compass },
     ],
   },
