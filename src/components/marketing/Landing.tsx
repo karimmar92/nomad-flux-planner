@@ -351,6 +351,8 @@ export function Landing() {
           </p>
         </div>
       </Reveal>
+      </div>
     </div>
   );
 }
+
