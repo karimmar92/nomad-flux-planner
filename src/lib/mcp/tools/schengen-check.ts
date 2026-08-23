@@ -1,5 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { toolResponse } from "../respond";
 import { maxStayFrom, schengenStatus, type Trip } from "@/lib/schengen";
 import { todayIso } from "@/lib/trip-dates";
 
@@ -61,8 +62,7 @@ export default defineTool({
     };
 
     return {
-      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-      structuredContent: payload,
+      ...toolResponse(payload),
     };
   },
 });

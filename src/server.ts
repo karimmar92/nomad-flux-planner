@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { cachePolicyFor } from "./lib/http-cache";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -44,12 +45,46 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+/**
+ * Attach a CDN cache policy on the way out.
+ *
+ * Done here, at the one point every response passes through, rather than in
+ * thirty route files. Two reasons: a route that forgets to opt in stays
+ * private (which is the safe direction), and the whole policy is reviewable in
+ * a single file instead of scattered across the app.
+ *
+ * A route that sets its own Cache-Control keeps it — sitemap.xml already does,
+ * and a handler that has thought about its own caching knows better than a
+ * general rule.
+ */
+function withCachePolicy(request: Request, response: Response): Response {
+  if (response.headers.has("cache-control")) return response;
+
+  const decision = cachePolicyFor({
+    pathname: new URL(request.url).pathname,
+    method: request.method,
+    status: response.status,
+    hasAuthHeader: request.headers.has("authorization"),
+  });
+  if (!decision.cacheControl) return response;
+
+  // Headers on a Response are immutable once constructed, so clone.
+  const headers = new Headers(response.headers);
+  headers.set("cache-control", decision.cacheControl);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return withCachePolicy(request, normalized);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

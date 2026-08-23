@@ -1,5 +1,6 @@
 import { defineTool, ToolError } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { toolResponse } from "../respond";
 import { CITIES } from "@/lib/cities";
 import { computeArbitrage, costLines, taxYearLabel, taxYearWarning } from "@/lib/arbitrage";
 
@@ -9,9 +10,7 @@ export default defineTool({
   description:
     "Full Driftly profile for one city: itemised costs, quality-of-life scores, visa rules, nomad visa requirements and tax residency triggers.",
   inputSchema: {
-    cityId: z
-      .string()
-      .describe("City id (e.g. 'lisbon-pt') or a city name such as 'Lisbon'."),
+    cityId: z.string().describe("City id (e.g. 'lisbon-pt') or a city name such as 'Lisbon'."),
     monthlyIncomeUsd: z
       .number()
       .nullable()
@@ -52,8 +51,7 @@ export default defineTool({
     };
 
     return {
-      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-      structuredContent: payload,
+      ...toolResponse(payload),
     };
   },
 });

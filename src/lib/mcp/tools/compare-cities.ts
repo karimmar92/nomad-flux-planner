@@ -1,5 +1,6 @@
 import { defineTool, ToolError } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { toolResponse } from "../respond";
 import { CITIES } from "@/lib/cities";
 import { computeArbitrage, monthsToTarget, isSchengenCity } from "@/lib/arbitrage";
 
@@ -48,18 +49,20 @@ export default defineTool({
         schengen: isSchengenCity(city),
         taxResidencyTriggerDays: city.tax.residencyTriggerDays,
         monthsToTarget:
-          savingsTargetUsd != null
-            ? monthsToTarget(arb.surplusMonthly, savingsTargetUsd)
-            : null,
+          savingsTargetUsd != null ? monthsToTarget(arb.surplusMonthly, savingsTargetUsd) : null,
       };
     });
 
     const best = [...rows].sort((a, b) => b.surplusMonthlyUsd - a.surplusMonthlyUsd)[0];
-    const payload = { monthlyIncomeUsd, tier: tier ?? "mid", best: best?.city ?? null, cities: rows };
+    const payload = {
+      monthlyIncomeUsd,
+      tier: tier ?? "mid",
+      best: best?.city ?? null,
+      cities: rows,
+    };
 
     return {
-      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
-      structuredContent: payload,
+      ...toolResponse(payload),
     };
   },
 });

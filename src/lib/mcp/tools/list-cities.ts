@@ -1,5 +1,6 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { toolResponse } from "../respond";
 import { CITIES } from "@/lib/cities";
 import { computeArbitrage, monthlyCost, isSchengenCity } from "@/lib/arbitrage";
 
@@ -24,7 +25,14 @@ export default defineTool({
     limit: z.number().optional().describe("Maximum number of cities to return (default 25)."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: ({ monthlyIncomeUsd, region, maxMonthlyCostUsd, nomadVisaOnly, excludeSchengen, limit }) => {
+  handler: ({
+    monthlyIncomeUsd,
+    region,
+    maxMonthlyCostUsd,
+    nomadVisaOnly,
+    excludeSchengen,
+    limit,
+  }) => {
     const income = monthlyIncomeUsd ?? null;
     const rows = CITIES.filter((city) => {
       if (region && city.region.toLowerCase() !== region.toLowerCase()) return false;
@@ -56,8 +64,7 @@ export default defineTool({
       .slice(0, Math.max(1, Math.min(limit ?? 25, 100)));
 
     return {
-      content: [{ type: "text", text: JSON.stringify(rows, null, 2) }],
-      structuredContent: { count: rows.length, cities: rows },
+      ...toolResponse({ count: rows.length, cities: rows }),
     };
   },
 });
