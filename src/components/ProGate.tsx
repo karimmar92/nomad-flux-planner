@@ -55,7 +55,7 @@ function UpgradeActions({ cta, gate }: { cta: string; gate?: Gate | undefined })
   */
   if (gate) {
     return (
-      <div className="flex shrink-0 flex-col items-end gap-1">
+      <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
         <button
           type="button"
           onClick={gate.request}
@@ -73,7 +73,7 @@ function UpgradeActions({ cta, gate }: { cta: string; gate?: Gate | undefined })
   }
 
   return (
-    <div className="flex shrink-0 flex-col items-end gap-1">
+    <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
       <Link
         to="/pricing"
         search={{ plan: "pro" as const, interval: "annual" as const }}
@@ -118,24 +118,37 @@ export function LockedPreview({
   className?: string;
 }) {
   return (
-    <div className={cn("relative overflow-hidden rounded-xl", className)}>
-      <div
-        aria-hidden
-        inert
-        className="pointer-events-none select-none blur-[6px] saturate-[0.6] opacity-70"
-      >
-        {children}
+    <div className={cn("relative", className)}>
+      {/*
+        The card used to sit `absolute bottom-0` over the blur, which looked
+        right only as long as its content stayed shorter than the blurred
+        preview beneath it. A long headline (a translated locale, a metered
+        gate's two-sentence value note) made the card taller than that space
+        and it overflowed upward, out of its own container, landing wherever
+        there happened to be room above — the "misplaced box" bug. Normal
+        flow with a pull-up margin can never do that: worst case the card
+        just pushes the page down instead of escaping its box.
+      */}
+      <div className="relative overflow-hidden rounded-xl">
+        <div
+          aria-hidden
+          inert
+          className="pointer-events-none select-none blur-[6px] saturate-[0.6] opacity-70"
+        >
+          {children}
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-surface/40 via-surface/80 to-surface" />
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-surface/40 via-surface/80 to-surface" />
-
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <div className="flex items-start gap-2.5 rounded-xl border border-border bg-surface-2 p-3 shadow-sm">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold leading-snug">{headline}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
-            <GateValueNote gate={gate} />
+      <div className="relative -mt-3 px-3 pb-3">
+        <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-2 p-3 shadow-sm sm:flex-row sm:items-start">
+          <div className="flex min-w-0 flex-1 items-start gap-2.5">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-snug">{headline}</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
+              <GateValueNote gate={gate} />
+            </div>
           </div>
           <UpgradeActions cta={cta} gate={gate} />
         </div>
@@ -157,12 +170,14 @@ export function ProPrompt({
   gate?: Gate;
 }) {
   return (
-    <div className="panel flex items-start gap-2.5 p-4">
-      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
-        <GateValueNote gate={gate} />
+    <div className="panel flex flex-col gap-2.5 p-4 sm:flex-row sm:items-start">
+      <div className="flex min-w-0 flex-1 items-start gap-2.5">
+        <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">{title}</p>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
+          <GateValueNote gate={gate} />
+        </div>
       </div>
       <UpgradeActions cta={cta} gate={gate} />
     </div>
