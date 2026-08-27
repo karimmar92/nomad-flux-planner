@@ -13,6 +13,7 @@ import {
   parseTripText,
   type ParsedRow,
 } from "@/lib/trips/import-parse";
+import { parseFlightEmailText } from "@/lib/trips/import-email-parse";
 import { useTrips } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +21,27 @@ const EXAMPLE = `Portugal, 2026-01-10, 2026-03-15
 Thailand, 14/01/2026, 02/02/2026
 Spain, 2026-05-01, still here`;
 
+const EMAIL_EXAMPLE = `Outbound
+LIS → CDG
+14 Mar 2026
+
+Return
+CDG → LIS
+20 Mar 2026`;
+
+type ImportMode = "list" | "email";
+
 export function ImportTrips({ onDone }: { onDone?: (added: number) => void }) {
   const { trips, setTrips } = useTrips();
+  const [mode, setMode] = useState<ImportMode>("list");
   const [text, setText] = useState("");
   const [skip, setSkip] = useState<Set<number>>(new Set());
   const [done, setDone] = useState<number | null>(null);
 
-  const parsed = useMemo(() => (text.trim() ? parseTripText(text) : null), [text]);
+  const parsed = useMemo(() => {
+    if (!text.trim()) return null;
+    return mode === "email" ? parseFlightEmailText(text) : parseTripText(text);
+  }, [text, mode]);
   const duplicates = useMemo(
     () => (parsed ? findDuplicates(parsed.rows, trips) : new Set<number>()),
     [parsed, trips],
@@ -93,18 +108,46 @@ export function ImportTrips({ onDone }: { onDone?: (added: number) => void }) {
         <div>
           <h2 className="text-sm font-semibold">Import your travel history</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            One trip per line: country, entry date, exit date. Dates in almost any format, and
-            &ldquo;still here&rdquo; for a stay that has not ended. Nothing is saved until you
-            confirm the preview.
+            {mode === "email"
+              ? "Paste a flight confirmation email. Driftly finds the routes and dates and works out where you stayed. Nothing is saved until you confirm the preview."
+              : `One trip per line: country, entry date, exit date. Dates in almost any format, and “still here” for a stay that has not ended. Nothing is saved until you confirm the preview.`}
           </p>
         </div>
+      </div>
+
+      <div className="flex gap-1 rounded-md border border-border bg-surface-2 p-1 text-xs">
+        {(
+          [
+            { id: "list", label: "Paste a list" },
+            { id: "email", label: "Paste a confirmation email" },
+          ] as const
+        ).map((tab) => (
+          <button
+            type="button"
+            key={tab.id}
+            onClick={() => {
+              if (tab.id === mode) return;
+              setMode(tab.id);
+              setText("");
+              setSkip(new Set());
+            }}
+            className={cn(
+              "flex-1 rounded px-2 py-1.5 font-medium transition-colors",
+              mode === tab.id
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={6}
-        placeholder={EXAMPLE}
+        placeholder={mode === "email" ? EMAIL_EXAMPLE : EXAMPLE}
         className="w-full rounded-md border border-input bg-surface px-3 py-2 font-mono text-xs outline-none focus:border-primary"
       />
 
