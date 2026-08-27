@@ -22,13 +22,15 @@ import {
   VISA_RULE_LABELS,
   type VisaRuleType,
 } from "@/lib/types";
-import { useProfile, useSavedCities } from "@/lib/store";
+import { useProfile, useSavedCities, useTrips } from "@/lib/store";
 import { isPaid } from "@/lib/entitlements";
 import { formatLocal } from "@/lib/fx";
+import { todayIso } from "@/lib/trip-dates";
 import { ConfidenceBadge, ScoreBar, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { WorkWindowCard } from "@/components/city/WorkWindowCard";
+import { CityTelemetryHero } from "@/components/city/CityTelemetryHero";
 import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { useCityContent } from "@/lib/i18n/city-content";
@@ -84,6 +86,10 @@ function CityDetail() {
   const cityContent = useCityContent();
   const { profile, patchProfile } = useProfile();
   const { saved, toggle } = useSavedCities();
+  // The gauges need real trips: a Schengen bar counts area-wide days, not
+  // days in this country.
+  const { trips } = useTrips();
+  const today = todayIso();
   const [tier, setTier] = useState<CostTier>("mid");
   const [showMath, setShowMath] = useState(false);
 
@@ -107,18 +113,28 @@ function CityDetail() {
           present a machine-translated visa rule as authoritative. */}
       <TranslationStatusBanner namespaces={["cities", "visa"]} />
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <span aria-hidden>{flagEmoji(city.country_code)}</span>
-            {city.city}
-            <span className="text-muted-foreground">{city.country}</span>
-          </h1>
-          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>Last verified {city.last_verified}</span>
-            <ConfidenceBadge confidence={city.confidence} />
-            <span>· {city.local_currency}</span>
-          </div>
+      {/*
+        The telemetry hero replaces a plain title row.
+
+        The two things a person opening a city page actually wants are "what
+        would this cost me" and "how long can I stay" — and the second was
+        previously four sections down, expressed as prose. It is now a bar with
+        a percentage, which is the same shape as the question.
+      */}
+      <CityTelemetryHero
+        city={city}
+        trips={trips}
+        today={today}
+        monthlyCostUsd={arb.cost}
+        surplusMonthlyUsd={income == null ? null : arb.surplusMonthly}
+        savingsRatePct={income == null ? null : arb.savingsRate}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span>Last verified {city.last_verified}</span>
+          <ConfidenceBadge confidence={city.confidence} />
+          <span>· {city.local_currency}</span>
         </div>
         <div className="flex gap-2">
           <button
