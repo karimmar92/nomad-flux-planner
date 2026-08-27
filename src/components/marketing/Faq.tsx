@@ -16,7 +16,7 @@ export type FaqItem = { q: string; a: string };
 export const PRICING_FAQ: FaqItem[] = [
   {
     q: "Is the free plan really free, or a trial?",
-    a: "Free, permanently, with no trip cap and no card. Logging where you have been is the part that has to work for everyone — if you only ever use the tracker, that is a complete product and it costs nothing.",
+    a: "Free, permanently, with no trip cap and no card. Logging where you have been is the part that has to work for everyone. If you only ever use the tracker, that is a complete product and it costs nothing.",
   },
   {
     q: "What does the annual plan actually save?",
@@ -24,7 +24,7 @@ export const PRICING_FAQ: FaqItem[] = [
   },
   {
     q: "Can I cancel, and what happens to my data?",
-    a: "Cancel any time; it stops the next renewal rather than cutting you off mid-period. Your trips and record stay yours — you can export everything as JSON, CSV and PDF at any point, including after you downgrade.",
+    a: "Cancel any time; it stops the next renewal rather than cutting you off mid-period. Your trips and record stay yours: you can export everything as JSON, CSV and PDF at any point, including after you downgrade.",
   },
   {
     q: "Why is Teams priced per seat when everything else is per person?",
@@ -32,7 +32,7 @@ export const PRICING_FAQ: FaqItem[] = [
   },
   {
     q: "Does this replace my accountant?",
-    a: "No, and it is not built to. The app produces a defensible record of where you were and how the days were counted, with the method version printed on it. What that means for your tax position is a question for a qualified adviser — this is the document you hand them.",
+    a: "No, and it is not built to. The app produces a defensible record of where you were and how the days were counted, with the method version printed on it. What that means for your tax position is a question for a qualified adviser: this is the document you hand them.",
   },
   {
     q: "What if I am about to overstay and I am on the free plan?",
