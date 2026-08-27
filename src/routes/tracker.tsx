@@ -28,7 +28,7 @@ import { toDayIndex } from "@/lib/schengen";
 import { TransportGroup } from "@/components/partners/TransportGroup";
 import { getCity } from "@/lib/cities";
 import { flagEmoji } from "@/lib/arbitrage";
-import { EmptyState, Stat } from "@/components/Primitives";
+import { EmptyState, ProgressRing, Stat } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { APP_NAME } from "@/lib/app";
@@ -214,6 +214,12 @@ function Tracker() {
       : schengen.status === "ok"
         ? "text-positive"
         : "text-primary";
+  const ringTone =
+    schengen.status === "violation"
+      ? "negative"
+      : schengen.status === "ok"
+        ? "positive"
+        : "primary";
 
   const entryFlow =
     entryMode === "guided" ? (
@@ -272,17 +278,27 @@ function Tracker() {
 
       {/* 1 ─ STATUS HERO. Days remaining is the largest thing on the page. */}
       <section className="panel p-4 sm:p-5">
-        <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
-          <div className="num text-6xl font-semibold leading-none tracking-tight sm:text-7xl">
-            {schengen.remaining}
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-medium">days remaining</div>
-            <div className={cn("flex items-center gap-1.5 text-sm font-semibold", statusTone)}>
-              <StatusIcon className="h-4 w-4 shrink-0" aria-hidden />
-              {statusWord}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
+            <div className="num text-6xl font-semibold leading-none tracking-tight sm:text-7xl">
+              {schengen.remaining}
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm font-medium">days remaining</div>
+              <div className={cn("flex items-center gap-1.5 text-sm font-semibold", statusTone)}>
+                <StatusIcon className="h-4 w-4 shrink-0" aria-hidden />
+                {statusWord}
+              </div>
             </div>
           </div>
+          <ProgressRing
+            value={schengen.used}
+            max={SCHENGEN_MAX_DAYS}
+            tone={ringTone}
+            center={`${schengen.used}/${SCHENGEN_MAX_DAYS}`}
+            caption="used"
+            label={`${schengen.used} of ${SCHENGEN_MAX_DAYS} Schengen days used in the current rolling window`}
+          />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           In the rolling Schengen 180-day window. Entry and exit days both count as full days.
@@ -454,48 +470,41 @@ function Tracker() {
           <h2 className="mb-3 text-sm font-semibold">Tax residency day counters</h2>
           <div className="space-y-3">
             {counters.map((c) => (
-              <div key={c.code}>
-                <div className="flex items-baseline justify-between text-sm">
-                  <span>
-                    {flagEmoji(c.code)} {countryName(c.code)}{" "}
-                    <span className="text-xs text-muted-foreground">
-                      · {c.meta.label} year
-                      {c.meta.startMonth !== 0 ? " (non-calendar)" : ""}
-                    </span>
-                  </span>
-                  <span
-                    id={`tax-count-${c.code}`}
-                    className={cn(
-                      "num font-medium",
-                      c.pct >= 90 && "text-negative",
-                      c.pct >= 75 && c.pct < 90 && "text-primary",
-                    )}
-                  >
-                    {c.count.days} / {c.meta.trigger}
-                  </span>
-                </div>
-                {/* The bar is decoration over the number; the number is the
+              <div key={c.code} className="flex items-center gap-3">
+                {/* The ring is decoration over the number; the number is the
                     accessible value, associated here rather than duplicated. */}
-                <div
-                  role="progressbar"
-                  aria-labelledby={`tax-count-${c.code}`}
-                  aria-valuenow={c.count.days}
-                  aria-valuemin={0}
-                  aria-valuemax={c.meta.trigger}
-                  aria-valuetext={`${c.count.days} of ${c.meta.trigger} days in ${countryName(c.code)}`}
-                  className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface-2"
-                >
-                  <div
-                    className={cn(
-                      "h-full rounded-full",
-                      c.pct >= 90 ? "bg-negative" : "bg-primary",
-                    )}
-                    style={{ width: `${Math.min(100, c.pct)}%` }}
-                  />
+                <ProgressRing
+                  value={c.count.days}
+                  max={c.meta.trigger}
+                  size={36}
+                  strokeWidth={4}
+                  tone={c.pct >= 90 ? "negative" : c.pct >= 75 ? "primary" : "positive"}
+                  label={`${countryName(c.code)}: ${c.count.days} of ${c.meta.trigger} days`}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between text-sm">
+                    <span>
+                      {flagEmoji(c.code)} {countryName(c.code)}{" "}
+                      <span className="text-xs text-muted-foreground">
+                        · {c.meta.label} year
+                        {c.meta.startMonth !== 0 ? " (non-calendar)" : ""}
+                      </span>
+                    </span>
+                    <span
+                      id={`tax-count-${c.code}`}
+                      className={cn(
+                        "num font-medium",
+                        c.pct >= 90 && "text-negative",
+                        c.pct >= 75 && c.pct < 90 && "text-primary",
+                      )}
+                    >
+                      {c.count.days} / {c.meta.trigger}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Counting {c.count.periodStart} → {c.count.periodEnd}
+                  </p>
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Counting {c.count.periodStart} → {c.count.periodEnd}
-                </p>
               </div>
             ))}
           </div>
