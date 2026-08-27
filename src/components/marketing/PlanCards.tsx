@@ -144,7 +144,7 @@ export function PlanCardGrid({
             "New Pro features as they ship",
             `Only ${FOUNDING_SPOTS} spots`,
           ]}
-          cta={`Take a founding spot — $${FOUNDING_PRICE_USD}`}
+          cta={`Take a founding spot ($${FOUNDING_PRICE_USD})`}
           hash="founding"
         />
       ) : null}

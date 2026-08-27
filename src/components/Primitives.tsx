@@ -62,6 +62,84 @@ export function ScoreBar({
   );
 }
 
+/**
+ * A ring restates a count graphically next to the number that is already the
+ * accessible source of truth (see `aria-label` below) — it never replaces it.
+ * Hand-rolled SVG, not a chart library: one circle, one stroke-dasharray.
+ */
+export function ProgressRing({
+  value,
+  max,
+  size = 92,
+  strokeWidth = 8,
+  tone = "primary",
+  center,
+  caption,
+  label,
+}: {
+  value: number;
+  max: number;
+  size?: number;
+  strokeWidth?: number;
+  tone?: "primary" | "positive" | "negative" | "warning";
+  /** Text in the ring's center, e.g. "62/90". Omit for a small, purely decorative ring in a list row. */
+  center?: ReactNode;
+  /** Small line under the center text, e.g. "used". Ignored when `center` is omitted. */
+  caption?: string;
+  /** Accessible description; falls back to a plain "value of max" reading. */
+  label?: string;
+}) {
+  const r = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * r;
+  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  const strokeTone = {
+    primary: "stroke-primary",
+    positive: "stroke-positive",
+    negative: "stroke-negative",
+    warning: "stroke-accent-warning",
+  }[tone];
+
+  return (
+    <div
+      className="relative shrink-0"
+      style={{ width: size, height: size }}
+      role="img"
+      aria-label={label ?? `${value} of ${max}`}
+    >
+      <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90" width={size} height={size}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          className="fill-none stroke-surface-2"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          className={cn(
+            "fill-none transition-[stroke-dashoffset] duration-300 ease-out",
+            strokeTone,
+          )}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference * (1 - pct)}
+        />
+      </svg>
+      {center != null ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden>
+          <span className="num text-[1.0625rem] font-semibold leading-none">{center}</span>
+          {caption ? (
+            <span className="mt-0.5 text-[0.625rem] text-muted-foreground">{caption}</span>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function EmptyState({
   title,
   body,

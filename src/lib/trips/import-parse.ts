@@ -58,6 +58,15 @@ const EXTRA_COUNTRIES: Record<string, string> = {
   guatemala: "GT", peru: "PE", chile: "CL", uruguay: "UY", ecuador: "EC",
 };
 
+/** Display name for a country code, shared with the email/flight parser. */
+export function countryName(code: string): string {
+  const upper = code.toUpperCase();
+  const fromCities = CITIES.find((c) => c.country_code === upper)?.country;
+  if (fromCities) return fromCities;
+  const fromExtras = Object.entries(EXTRA_COUNTRIES).find(([, c]) => c === upper);
+  return fromExtras ? titleCase(fromExtras[0]) : upper;
+}
+
 function countryIndex(): Map<string, { code: string; name: string }> {
   const map = new Map<string, { code: string; name: string }>();
   for (const c of CITIES) {

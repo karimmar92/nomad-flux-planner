@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ExternalLink } from "lucide-react";
 import { GraduationCard } from "@/components/plan/GraduationCard";
+import { ProgressRing } from "@/components/Primitives";
 import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { CITIES } from "@/lib/cities";
@@ -87,17 +88,23 @@ function ChecklistPage() {
             {city ? `To ${city.city}, ${city.country}.` : "Pick a destination on the planning hub."}
           </p>
         </div>
-        <div>
-          <span className="label-xs">Progress</span>
-          <p className="num mt-1 text-3xl font-semibold">
-            {progress.done}
-            <span className="text-lg text-muted-foreground">/{progress.total}</span>
-          </p>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-positive transition-all"
-              style={{ width: `${(progress.done / progress.total) * 100}%` }}
-            />
+        <div className="flex items-center gap-3">
+          <ProgressRing
+            value={progress.done}
+            max={progress.total}
+            size={64}
+            strokeWidth={5}
+            tone="positive"
+            center={`${progress.done}/${progress.total}`}
+            label={`${progress.done} of ${progress.total} tasks done`}
+          />
+          <div>
+            <span className="label-xs">Progress</span>
+            <p className="text-sm text-muted-foreground">
+              {progress.done === progress.total
+                ? "All tasks done."
+                : `${progress.total - progress.done} left.`}
+            </p>
           </div>
         </div>
       </section>

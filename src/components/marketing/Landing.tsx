@@ -46,6 +46,7 @@
  */
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarClock, Check, Globe2, MapPin, WifiOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { RuleCalculator } from "@/components/marketing/RuleCalculator";
 import { HeroGlobe } from "@/components/marketing/HeroGlobe";
 import { Reveal } from "@/components/marketing/Reveal";
@@ -169,21 +170,26 @@ export function Landing() {
               Icon: CalendarClock,
               title: "You stop guessing your leave-by date.",
               body: `${APP_NAME} counts the rolling 180-day window the way the border does and tells you the last day you can legally stay, months before it matters.`,
+              tint: "bg-info/10 text-info",
             },
             {
               Icon: Globe2,
               title: "You stop crossing tax lines you did not know you were near.",
               body: "Per-country day counters run against each country's real rule, including the ones that measure over any rolling twelve months rather than the calendar year.",
+              tint: "bg-accent-warning/10 text-accent-warning",
             },
             {
               Icon: WifiOff,
               title: "You stop needing signal to know where you stand.",
               body: "Everything works offline, so the number is on your phone in the queue at the border, not on a server you cannot reach.",
+              tint: "bg-accent-positive/10 text-accent-positive",
             },
-          ].map(({ Icon, title, body }, i) => (
+          ].map(({ Icon, title, body, tint }, i) => (
             <Reveal key={title} delay={i * 70}>
               <div className="surface h-full p-7">
-                <Icon className="h-5 w-5 text-primary" aria-hidden />
+                <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", tint)}>
+                  <Icon className="h-5 w-5" aria-hidden />
+                </div>
                 <h3 className="mt-4 text-base font-semibold tracking-tight text-balance">
                   {title}
                 </h3>
