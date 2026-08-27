@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { Bookmark, Check, GitCompareArrows, Plus, TriangleAlert, X } from "lucide-react";
-import { getCity, SEED_LAST_VERIFIED } from "@/lib/cities";
+import { getCity, CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
 import {
   type CostTier,
   computeArbitrage,
@@ -31,6 +31,7 @@ import { PartnerGroup } from "@/components/partners/PartnerCard";
 import { LegalFooter } from "@/components/LegalFooter";
 import { WorkWindowCard } from "@/components/city/WorkWindowCard";
 import { CityTelemetryHero } from "@/components/city/CityTelemetryHero";
+import { WorldCard } from "@/components/city/WorldCard";
 import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { cn } from "@/lib/utils";
 import { useCityContent } from "@/lib/i18n/city-content";
@@ -129,6 +130,8 @@ function CityDetail() {
         surplusMonthlyUsd={income == null ? null : arb.surplusMonthly}
         savingsRatePct={income == null ? null : arb.savingsRate}
       />
+
+      <WorldCard city={city} cities={CITIES} trips={trips} today={today} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
