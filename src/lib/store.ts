@@ -147,7 +147,7 @@ export function useTrips() {
     [value, update],
   );
 
-  return { trips: value, addTrip, removeTrip, setTrips: update, hydrated };
+  return { trips: value, addTrip, addTrips, removeTrip, setTrips: update, hydrated };
 }
 
 export function useSavedCities() {
