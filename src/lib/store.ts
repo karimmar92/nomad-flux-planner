@@ -100,6 +100,23 @@ export function useTrips() {
   const addTrip = useCallback((trip: Trip) => update([...value, trip]), [value, update]);
 
   /**
+   * Append several trips in ONE write.
+   *
+   * Calling addTrip in a loop looks correct but is not: every call closes over
+   * the same `value`, so each write replaces the previous one and only the last
+   * trip survives — locally and, therefore, in the synced `trips` table too.
+   * Any multi-stop insert (the multi-city planner) must go through here.
+   */
+  const addTrips = useCallback(
+    (newTrips: Trip[]) => {
+      if (newTrips.length === 0) return;
+      update([...value, ...newTrips]);
+    },
+    [value, update],
+  );
+
+
+  /**
    * Removes locally first, then deletes the remote row.
    *
    * The remote delete is explicit and singular by design. Sync never bulk
@@ -130,7 +147,7 @@ export function useTrips() {
     [value, update],
   );
 
-  return { trips: value, addTrip, removeTrip, setTrips: update, hydrated };
+  return { trips: value, addTrip, addTrips, removeTrip, setTrips: update, hydrated };
 }
 
 export function useSavedCities() {

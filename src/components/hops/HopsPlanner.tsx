@@ -4,18 +4,20 @@
  * PARTNER-FREE ZONE. The ranking decides where somebody flies; it must depend
  * on their inputs and nothing else. Leg links are plain search URLs.
  *
- * All planning happens in the browser. Nothing leaves the device unless the
- * user presses "Add to timeline", which writes trips into the ordinary
- * Driftly trip store — the same structure the tracker, Schengen engine and
- * year-end report already read, so visa- and tax-day awareness can be layered
- * on later without touching this file.
+ * Ranking is pure and client-side (src/lib/hops/plan.ts). The only thing that
+ * ever leaves the device is an explicit "Add to timeline", which appends to the
+ * ordinary Driftly trip store — the same rows the tracker, Schengen engine and
+ * year-end report read, and the same rows the offline queue pushes to the
+ * backend `trips` table when signed in.
  *
- * UX refinements (2026-08):
- * - Collapsible secondary preferences (less visual noise)
- * - Stronger hierarchy for "Best overall"
- * - Timeline overlap detection before adding
- * - Clearer Nomad Fit explanation
- * - Tighter stop cards with continuity cues
+ * 2026-08 rebuild:
+ * - Styling moved onto the shared theme utilities (panel / input / pill / label-xs)
+ *   so this page stops being the one screen with its own look.
+ * - Layout works at every width: single column on mobile, sticky route panel
+ *   from lg up, metrics as a wrapping grid instead of a row that clips.
+ * - Timeline writes go through a single batched store write (see addTrips) —
+ *   the old loop of addTrip calls persisted only the last stop.
+ * - city_id is validated against the seed city dataset before it is stored.
  */
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,6 +27,7 @@ import {
   CalendarPlus,
   Check,
   ChevronDown,
+  CloudOff,
   ExternalLink,
   GripVertical,
   Plane,
@@ -32,6 +35,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
+import { getCity } from "@/lib/cities";
 import { HOP_CITIES, type HopCity } from "@/lib/hops/airports";
 import { legLinks } from "@/lib/hops/links";
 import {
@@ -46,12 +50,14 @@ import type { Itinerary, Preferences, StopInput } from "@/lib/hops/types";
 import { useTrips } from "@/lib/store";
 import { todayIso } from "@/lib/trip-dates";
 import type { Trip } from "@/lib/types";
+import { useSession } from "@/lib/use-session";
 import { cn } from "@/lib/utils";
 
 const MAX_STOPS = 6;
 
 export function HopsPlanner() {
-  const { trips, addTrip } = useTrips();
+  const { trips, addTrips } = useTrips();
+  const { userId } = useSession();
   const navigate = useNavigate();
 
   const [startDate, setStartDate] = useState(() => addDays(todayIso(), 21));
@@ -91,12 +97,8 @@ export function HopsPlanner() {
     for (const stop of itinerary.stops) {
       for (const t of trips) {
         if (!t.entry_date || !t.exit_date) continue;
-        const aStart = stop.arrivalDateISO;
-        const aEnd = stop.departureDateISO;
-        if (aStart < t.exit_date && aEnd > t.entry_date) {
-          overlaps.push(
-            `${stop.cityName} (${aStart}→${aEnd}) overlaps existing trip in ${t.country_code} (${t.entry_date}→${t.exit_date})`,
-          );
+        if (stop.arrivalDateISO < t.exit_date && stop.departureDateISO > t.entry_date) {
+          overlaps.push(`${stop.cityName} overlaps an existing trip in ${t.country_code}`);
         }
       }
     }
@@ -104,33 +106,40 @@ export function HopsPlanner() {
   }
 
   function addToTimeline(itinerary: Itinerary) {
-    const overlaps = findOverlaps(itinerary);
-    if (overlaps.length > 0 && overlapWarning !== itinerary.id) {
+    if (findOverlaps(itinerary).length > 0 && overlapWarning !== itinerary.id) {
       setOverlapWarning(itinerary.id);
       return;
     }
-    for (const stop of itinerary.stops) {
-      const trip: Trip = {
+
+    // One batched write: the store enqueues a single sync op for the whole set.
+    const newTrips: Trip[] = itinerary.stops.map((stop) => {
+      // Only reference a city the seed dataset actually knows, so city_id never
+      // points at something the tracker and reports cannot resolve.
+      const cityId = stop.cityId && getCity(stop.cityId) ? stop.cityId : null;
+      const airports = [
+        stop.arrivalAirport ? `arrive ${stop.arrivalAirport.iata}` : null,
+        stop.departureAirport ? `depart ${stop.departureAirport.iata}` : null,
+      ].filter(Boolean);
+      return {
         id: crypto.randomUUID(),
-        country_code: stop.countryCode,
-        city_id: stop.cityId ?? null,
+        country_code: stop.countryCode.toUpperCase().slice(0, 2),
+        city_id: cityId,
         entry_date: stop.arrivalDateISO,
         exit_date: stop.departureDateISO,
         purpose: "tourist",
-        notes: `Provisional — multi-city plan${
-          stop.arrivalAirport ? ` (arrive ${stop.arrivalAirport.iata}` : " ("
-        }${stop.departureAirport ? `, depart ${stop.departureAirport.iata}` : ""})`,
+        notes: `Provisional — multi-city plan${airports.length ? ` (${airports.join(", ")})` : ""}`,
       };
-      addTrip(trip);
-    }
+    });
+
+    addTrips(newTrips);
     setAdded(itinerary.id);
     setOverlapWarning(null);
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] lg:gap-5">
       {/* ---- INPUT PANEL ------------------------------------------------ */}
-      <section className="space-y-4 rounded-2xl border border-border bg-card p-4">
+      <section className="panel space-y-4 p-4 lg:sticky lg:top-4 lg:self-start">
         <div>
           <p className="label-xs">Your route</p>
           <h2 className="text-lg font-semibold tracking-tight">Stops, in order</h2>
@@ -142,7 +151,7 @@ export function HopsPlanner() {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+            className="input mt-1"
           />
         </label>
 
@@ -164,18 +173,18 @@ export function HopsPlanner() {
                 setDragIndex(null);
               }}
               className={cn(
-                "relative rounded-xl border border-border bg-surface-2/50 p-2.5 transition-opacity",
+                "relative rounded-lg border border-border bg-surface-2/60 p-2.5 transition-opacity",
                 dragIndex === i && "opacity-60",
               )}
             >
               <div className="flex items-start gap-2">
-                <GripVertical className="mt-2 h-4 w-4 shrink-0 cursor-grab text-muted-foreground" />
+                <GripVertical className="mt-2 hidden h-4 w-4 shrink-0 cursor-grab text-muted-foreground sm:block" />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <CitySelect
                     value={stop.cityKey}
                     onChange={(cityKey) => patchStop(i, { cityKey })}
                   />
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <input
                         type="number"
@@ -185,7 +194,7 @@ export function HopsPlanner() {
                         onChange={(e) =>
                           patchStop(i, { nights: Math.max(1, Number(e.target.value) || 1) })
                         }
-                        className="w-14 rounded-lg border border-border bg-background px-2 py-1 text-sm text-foreground"
+                        className="input w-16 px-2 py-1"
                       />
                       nights
                     </label>
@@ -193,7 +202,7 @@ export function HopsPlanner() {
                       type="button"
                       onClick={() => patchStop(i, { flexible: !stop.flexible })}
                       className={cn(
-                        "rounded-full border px-2 py-0.5 text-[11px] transition-colors",
+                        "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
                         stop.flexible
                           ? "border-primary/40 bg-primary/10 text-primary"
                           : "border-border text-muted-foreground hover:text-foreground",
@@ -204,7 +213,7 @@ export function HopsPlanner() {
                   </div>
                   <NomadHint nights={stop.nights} />
                 </div>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex shrink-0 flex-col gap-0.5">
                   <IconBtn label="Move up" onClick={() => move(i, i - 1)}>
                     <ArrowUp className="h-3.5 w-3.5" />
                   </IconBtn>
@@ -231,7 +240,7 @@ export function HopsPlanner() {
             onClick={() =>
               setStops((p) => [...p, { cityKey: "lisbon", nights: 21, flexible: true }])
             }
-            className="w-full rounded-xl border border-dashed border-border py-2 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+            className="w-full rounded-lg border border-dashed border-border py-2 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
           >
             + Add a stop
           </button>
@@ -252,7 +261,7 @@ export function HopsPlanner() {
           <button
             type="button"
             onClick={() => setShowMorePrefs((v) => !v)}
-            className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-xs text-muted-foreground hover:text-foreground"
+            className="flex w-full items-center justify-between rounded-md px-1 py-1 text-xs text-muted-foreground hover:text-foreground"
           >
             <span>More preferences</span>
             <ChevronDown
@@ -287,17 +296,16 @@ export function HopsPlanner() {
           ) : null}
         </div>
 
-        <p className="text-[11px] text-muted-foreground">
-          Prices are indicative ranges for planning, not live fares. Everything here is calculated
-          on your device — nothing about this route is sent anywhere unless you add it to your
-          timeline.
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          Prices are indicative ranges for planning, not live fares. Ranking runs on your device —
+          nothing about this route is sent anywhere unless you add it to your timeline.
         </p>
       </section>
 
       {/* ---- RESULTS ---------------------------------------------------- */}
       <section className="space-y-4">
         {results.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          <div className="panel border-dashed p-8 text-center text-sm text-muted-foreground">
             Add at least two different cities to see routes.
           </div>
         ) : (
@@ -307,6 +315,7 @@ export function HopsPlanner() {
               itinerary={it}
               rank={idx}
               added={added === it.id}
+              signedIn={Boolean(userId)}
               showOverlap={overlapWarning === it.id}
               onAdd={() => addToTimeline(it)}
               onConfirmOverlap={() => {
@@ -327,6 +336,7 @@ function ItineraryCard({
   itinerary,
   rank,
   added,
+  signedIn,
   showOverlap,
   onAdd,
   onConfirmOverlap,
@@ -336,6 +346,7 @@ function ItineraryCard({
   itinerary: Itinerary;
   rank: number;
   added: boolean;
+  signedIn: boolean;
   showOverlap: boolean;
   onAdd: () => void;
   onConfirmOverlap: () => void;
@@ -348,12 +359,12 @@ function ItineraryCard({
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-2xl border bg-card transition-shadow",
-        isBest ? "border-primary/40 shadow-sm shadow-primary/5" : "border-border",
+        "panel overflow-hidden",
+        isBest && "border-primary/40 shadow-sm shadow-primary/5",
       )}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-2">
+      <header className="space-y-3 border-b border-border p-4">
+        <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn(
               "rounded-full px-2.5 py-1 text-[11px] font-medium",
@@ -362,16 +373,16 @@ function ItineraryCard({
           >
             {isBest ? "Best overall" : `Option ${rank + 1}`}
           </span>
-          <span className="text-sm font-medium">
+          <span className="min-w-0 text-sm font-medium">
             {it.stops.map((s) => s.cityName).join(" → ")}
           </span>
         </div>
-        <div className="flex items-center gap-4 text-sm">
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Metric label="Est. total" value={`$${it.priceUsdLow}–${it.priceUsdHigh}`} />
           <Metric label="Travel time" value={formatMinutes(it.totalTravelMinutes)} />
           <Metric label="Transfers" value={String(it.flightStops)} />
-          <Metric label="Nomad fit" value={`${it.nomadScore}`} />
-        </div>
+          <Metric label="Nomad fit" value={`${it.nomadScore}/100`} />
+        </dl>
       </header>
 
       {it.crossAirportChanges.length > 0 ? (
@@ -398,7 +409,7 @@ function ItineraryCard({
       <ol className="divide-y divide-border">
         {it.stops.map((stop, i) => (
           <li key={`${stop.cityKey}-${i}`} className="px-4 py-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <p className="text-sm font-medium">
                 {stop.cityName}
                 <span className="ms-2 text-xs font-normal text-muted-foreground">
@@ -436,21 +447,21 @@ function ItineraryCard({
             This sequence overlaps trips already on your timeline.
           </p>
           <p className="mt-1 text-muted-foreground">
-            You can still add it (as provisional), but check the tracker afterwards to resolve
-            any double-booking of dates.
+            You can still add it (as provisional), but check the tracker afterwards to resolve any
+            double-booking of dates.
           </p>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={onConfirmOverlap}
-              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+              className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
             >
               Add anyway
             </button>
             <button
               type="button"
               onClick={onDismissOverlap}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs"
+              className="rounded-md border border-border px-3 py-1.5 text-xs"
             >
               Cancel
             </button>
@@ -458,26 +469,39 @@ function ItineraryCard({
         </div>
       ) : null}
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-        <p className="max-w-md text-[11px] text-muted-foreground">
-          Nomad fit {it.nomadScore}/100 — stay lengths that score high sit in the 2–8 week
-          band where remote work is realistic. Below 14 nights is usually too short to settle.
+      <footer className="flex flex-col gap-3 border-t border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-md text-[11px] leading-relaxed text-muted-foreground">
+          {added ? (
+            signedIn ? (
+              <>Added as provisional trips and saved to your account.</>
+            ) : (
+              <span className="inline-flex items-start gap-1.5">
+                <CloudOff className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                Added on this device only — sign in to keep these trips across devices.
+              </span>
+            )
+          ) : (
+            <>
+              Nomad fit {it.nomadScore}/100 — stay lengths that score high sit in the 2–8 week band
+              where remote work is realistic. Below 14 nights is usually too short to settle.
+            </>
+          )}
         </p>
         {added ? (
           <button
             type="button"
             onClick={onOpenTracker}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-surface-2 px-3 py-2 text-sm font-medium"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-surface-2 px-3 py-2 text-sm font-medium sm:w-auto"
           >
-            <Check className="h-4 w-4" /> Added — open tracker
+            <Check className="h-4 w-4" /> Open tracker
           </button>
         ) : (
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
           >
-            <CalendarPlus className="h-4 w-4" /> Add this sequence to my timeline
+            <CalendarPlus className="h-4 w-4" /> Add to my timeline
           </button>
         )}
       </footer>
@@ -487,7 +511,7 @@ function ItineraryCard({
 
 function LegRow({ leg }: { leg: Itinerary["legs"][number] }) {
   return (
-    <div className="mt-2 rounded-xl bg-surface-2/60 px-3 py-2">
+    <div className="mt-2 rounded-lg bg-surface-2/60 px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         <Plane className="h-3.5 w-3.5 text-muted-foreground" />
         <span className="font-medium">
@@ -500,7 +524,7 @@ function LegRow({ leg }: { leg: Itinerary["legs"][number] }) {
           {formatMinutes(leg.offer.durationMinutes)} ·{" "}
           {leg.offer.stops === 0 ? "direct" : `${leg.offer.stops} stop`}
         </span>
-        <span className="text-muted-foreground">
+        <span className="text-muted-foreground tabular-nums">
           ${leg.offer.priceUsdLow}–{leg.offer.priceUsdHigh}
         </span>
         {leg.lateArrival ? (
@@ -509,7 +533,7 @@ function LegRow({ leg }: { leg: Itinerary["legs"][number] }) {
           </span>
         ) : null}
       </div>
-      <div className="mt-1.5 flex flex-wrap gap-2">
+      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
         {legLinks(leg).map((l) => (
           <a
             key={l.label}
@@ -528,12 +552,10 @@ function LegRow({ leg }: { leg: Itinerary["legs"][number] }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <span className="text-right">
-      <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </span>
-      <span className="block text-sm font-medium tabular-nums">{value}</span>
-    </span>
+    <div className="min-w-0">
+      <dt className="label-xs">{label}</dt>
+      <dd className="truncate text-sm font-medium tabular-nums">{value}</dd>
+    </div>
   );
 }
 
@@ -563,7 +585,7 @@ function IconBtn({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="grid h-6 w-6 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+      className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
     >
       {children}
     </button>
@@ -580,14 +602,14 @@ function ChipRow({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="hide-scrollbar -mx-1 flex gap-1.5 overflow-x-auto px-1 sm:flex-wrap sm:overflow-visible">
       {options.map((o) => (
         <button
           key={o.id}
           type="button"
           onClick={() => onChange(o.id)}
           className={cn(
-            "rounded-full border px-3 py-1 text-xs transition-colors",
+            "shrink-0 rounded-full border px-3 py-1 text-xs transition-colors",
             value === o.id
               ? "border-primary/40 bg-primary/10 text-primary"
               : "border-border text-muted-foreground hover:text-foreground",
@@ -618,7 +640,7 @@ function Toggle({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative h-5 w-9 rounded-full transition-colors",
+          "relative h-5 w-9 shrink-0 rounded-full transition-colors",
           checked ? "bg-primary" : "bg-border",
         )}
       >
@@ -648,7 +670,7 @@ function CitySelect({ value, onChange }: { value: string; onChange: (key: string
           setOpen(true);
           setQ("");
         }}
-        className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-start text-sm"
+        className="input flex items-center justify-between gap-2 text-start"
       >
         <span className="truncate">
           {selected?.name ?? "Pick a city"}
@@ -662,13 +684,13 @@ function CitySelect({ value, onChange }: { value: string; onChange: (key: string
   }
 
   return (
-    <div className="rounded-lg border border-border bg-background">
+    <div className="rounded-md border border-input bg-background">
       <input
         autoFocus
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="City or airport code…"
-        className="w-full rounded-t-lg bg-transparent px-3 py-2 text-sm outline-none"
+        className="w-full rounded-t-md bg-transparent px-3 py-2 text-sm outline-none"
         onKeyDown={(e) => {
           if (e.key === "Escape") setOpen(false);
           if (e.key === "Enter" && matches[0]) {
