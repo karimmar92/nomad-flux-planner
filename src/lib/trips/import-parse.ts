@@ -81,6 +81,27 @@ function countryIndex(): Map<string, { code: string; name: string }> {
   return map;
 }
 
+/**
+ * Finds a country by name inside free-form text (a spoken sentence, not a
+ * single token). Deliberately excludes the 2-3 letter code aliases that
+ * `countryIndex()` also stores — "NO" (Norway), "AT" (Austria) and "IN"
+ * (India) are common English words, and matching them against natural speech
+ * ("in March", "at the airport") would misfire constantly. Names only, and
+ * the longest match wins, so "United Kingdom" is not shadowed by a shorter
+ * unrelated substring.
+ */
+export function countryCodeFromName(text: string): string | null {
+  const lower = text.toLowerCase();
+  const index = countryIndex();
+  let best: { code: string; length: number } | null = null;
+  for (const [key, value] of index) {
+    if (key.length < 4) continue; // skip code-length aliases
+    if (!new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(lower)) continue;
+    if (!best || key.length > best.length) best = { code: value.code, length: key.length };
+  }
+  return best?.code ?? null;
+}
+
 function titleCase(s: string): string {
   return s.replace(/\b\w/g, (m) => m.toUpperCase());
 }

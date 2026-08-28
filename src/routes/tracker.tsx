@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils";
 import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 import { ImportTrips } from "@/components/trips/ImportTrips";
+import { VoiceDictationButton } from "@/components/voice/VoiceDictationButton";
+import { parseSpokenTrip } from "@/lib/trips/parse-speech";
 import type { Trip, TripPurpose } from "@/lib/types";
 import { formatDate, formatDateLong } from "@/lib/i18n/format";
 
@@ -761,6 +763,7 @@ function Timeline({
 
 
 function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
+  const { i18n } = useTranslation();
   /**
    * No country is preselected. This used to open on "PT", which silently
    * became the logged country whenever the user did not notice — a wrong
@@ -772,6 +775,25 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
   const [stillHere, setStillHere] = useState(false);
   const [purpose, setPurpose] = useState<TripPurpose>("tourist");
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Fills whatever the sentence contained; never touches a field it did not
+   * find. "Still here" is never auto-checked from a single date — a single
+   * date could just as easily mean the person forgot to say the exit date,
+   * and ticking that box is a claim the form should not make for them.
+   */
+  function applySpokenTrip(text: string) {
+    const spoken = parseSpokenTrip(text);
+    if (!spoken) {
+      setError("Didn't catch a country or a date in that — try again, or fill it in below.");
+      return;
+    }
+    setError(null);
+    if (spoken.country_code) setCountry(spoken.country_code);
+    if (spoken.entry_date) setEntry(spoken.entry_date);
+    if (spoken.exit_date) setExit(spoken.exit_date);
+    setPurpose(spoken.purpose);
+  }
 
   /**
    * Returns a message when the form cannot be submitted, null when it can.
@@ -795,7 +817,14 @@ function AddTrip({ onAdd }: { onAdd: (trip: Trip) => void }) {
 
   return (
     <section className="panel p-4">
-      <h2 className="mb-3 text-sm font-semibold">Add a trip</h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">Add a trip</h2>
+        <VoiceDictationButton
+          onTranscript={applySpokenTrip}
+          lang={i18n.language}
+          label="Say a trip"
+        />
+      </div>
       <div className="grid gap-3 sm:grid-cols-4">
         <label className="block">
           <span className="label-xs">Country</span>

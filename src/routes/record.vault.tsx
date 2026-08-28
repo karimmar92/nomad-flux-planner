@@ -22,6 +22,8 @@ import { useProfile } from "@/lib/store";
 import { useGate } from "@/lib/paywall/use-gate";
 import { LockedPreview } from "@/components/ProGate";
 import { cn } from "@/lib/utils";
+import { VoiceDictationButton } from "@/components/voice/VoiceDictationButton";
+import { parseSpokenDocument } from "@/lib/documents/parse-speech";
 
 export const Route = createFileRoute("/record/vault")({
   head: () => ({
@@ -213,6 +215,19 @@ function UploadForm({
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
 
+  /**
+   * Best-effort only — the raw transcript always lands in notes so nothing
+   * spoken is lost even when a guessed field is wrong. Every field stays
+   * editable before Upload; this never submits anything by itself.
+   */
+  function applySpokenDocument(text: string) {
+    const spoken = parseSpokenDocument(text);
+    if (spoken.type) setType(spoken.type);
+    if (spoken.expires_on) setExpiresOn(spoken.expires_on);
+    if (spoken.title) setTitle(spoken.title);
+    setNotes(spoken.notes);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) return;
@@ -250,6 +265,13 @@ function UploadForm({
           className="input"
         />
       </label>
+
+      <div className="sm:col-span-2">
+        <VoiceDictationButton
+          onTranscript={applySpokenDocument}
+          label="Say what this document is"
+        />
+      </div>
 
       <label className="space-y-1 text-xs">
         <span className="text-muted-foreground">Title</span>
