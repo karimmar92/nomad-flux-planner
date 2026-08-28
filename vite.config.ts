@@ -32,6 +32,16 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    /**
+     * MapLibre GL JS spawns its own tile-parsing worker via a relative
+     * `new Worker(new URL(...), import.meta.url)` inside the package. Vite's
+     * dependency pre-bundler rewrites that into a hashed `.vite/deps/...`
+     * path that does not actually exist, so the worker 404s and the map
+     * hangs forever with no thrown error — it just never fires "load".
+     * Excluding the package from pre-bundling serves it as native ESM
+     * instead, which resolves the worker URL correctly.
+     */
+    optimizeDeps: { exclude: ["maplibre-gl"] },
     plugins: [
       ...(isWindows ? [] : [mcpPlugin()]),
       /**
