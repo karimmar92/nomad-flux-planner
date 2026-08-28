@@ -45,6 +45,10 @@ export type RulePage = {
   faq: { q: string; a: string }[];
   /** Country preset the calculator should open on. */
   defaultCountry: string;
+  /** ISO date this page's facts were last checked against `sources`. */
+  reviewedOn: string;
+  /** Official sources only — never a third-party explainer site. */
+  sources: { label: string; url: string }[];
 };
 
 export const RULE_PAGES: RulePage[] = [
@@ -90,6 +94,13 @@ export const RULE_PAGES: RulePage[] = [
       },
     ],
     defaultCountry: "PT",
+    reviewedOn: "2026-08-28",
+    sources: [
+      {
+        label: "European Commission — Schengen short-stay calculator and policy",
+        url: "https://home-affairs.ec.europa.eu/policies/schengen/border-crossing/short-stay-calculator_en",
+      },
+    ],
   },
   {
     /**
@@ -147,6 +158,17 @@ export const RULE_PAGES: RulePage[] = [
       },
     ],
     defaultCountry: "PT",
+    reviewedOn: "2026-08-28",
+    sources: [
+      {
+        label: "European Commission — Entry/Exit System",
+        url: "https://travel-europe.europa.eu/ees/ltr",
+      },
+      {
+        label: "European Commission — EES fully operational, 10 April 2026",
+        url: "https://home-affairs.ec.europa.eu/news/entryexit-system-ees-fully-operational-2026-04-10_en",
+      },
+    ],
   },
   {
     id: "feie",
@@ -190,6 +212,13 @@ export const RULE_PAGES: RulePage[] = [
       },
     ],
     defaultCountry: "TH",
+    reviewedOn: "2026-08-28",
+    sources: [
+      {
+        label: "IRS — Foreign earned income exclusion: physical presence test",
+        url: "https://www.irs.gov/individuals/international-taxpayers/foreign-earned-income-exclusion-physical-presence-test",
+      },
+    ],
   },
   {
     id: "tax_183",
@@ -225,6 +254,14 @@ export const RULE_PAGES: RulePage[] = [
       },
     ],
     defaultCountry: "VN",
+    reviewedOn: "2026-08-28",
+    sources: [
+      {
+        label:
+          "OECD Model Tax Convention (the treaty tie-breaker concept — each country still sets its own domestic threshold)",
+        url: "https://www.oecd.org/content/dam/oecd/en/publications/reports/2019/04/model-tax-convention-on-income-and-on-capital-2017-full-version_g1g972ee/g2g972ee-en.pdf",
+      },
+    ],
   },
   {
     id: "uk_srt",
@@ -268,6 +305,13 @@ export const RULE_PAGES: RulePage[] = [
       },
     ],
     defaultCountry: "GB",
+    reviewedOn: "2026-08-28",
+    sources: [
+      {
+        label: "HMRC — RDR3: Statutory Residence Test guidance note",
+        url: "https://www.gov.uk/government/publications/rdr3-statutory-residence-test-srt/guidance-note-for-statutory-residence-test-srt-rdr3",
+      },
+    ],
   },
 ];
 

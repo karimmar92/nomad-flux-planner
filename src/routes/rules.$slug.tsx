@@ -6,7 +6,7 @@
  * the real engine, and everything is usable without an account.
  */
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, Check } from "lucide-react";
+import { AlertTriangle, ArrowRight, Check, ExternalLink } from "lucide-react";
 import { APP_NAME, absoluteUrl } from "@/lib/app";
 import { RULE_PAGES, rulePageBySlug, type RulePage } from "@/config/rule-pages";
 import { RuleCalculator } from "@/components/marketing/RuleCalculator";
@@ -36,6 +36,52 @@ export const Route = createFileRoute("/rules/$slug")({
       // Absolute, not `/rules/...`: Google ignores a relative canonical, which
       // silently un-does the whole point of having one page per rule.
       links: [{ rel: "canonical", href: absoluteUrl(`/rules/${page.slug}`) }],
+      // Structured data, same pattern as src/routes/index.tsx: Article carries
+      // the reviewed date (a freshness signal), FAQPage reshapes the FAQ we
+      // already wrote (no new copy), BreadcrumbList locates the page in the
+      // guide hierarchy. This is what lets an AI answer engine or a Google
+      // rich result quote this page accurately instead of paraphrasing it.
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Article",
+                headline: page.h1,
+                description: page.metaDescription,
+                datePublished: page.reviewedOn,
+                dateModified: page.reviewedOn,
+                url: absoluteUrl(`/rules/${page.slug}`),
+                author: { "@type": "Organization", name: APP_NAME },
+                publisher: { "@type": "Organization", name: APP_NAME },
+              },
+              {
+                "@type": "FAQPage",
+                mainEntity: page.faq.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              },
+              {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+                  { "@type": "ListItem", position: 2, name: "Rules", item: absoluteUrl("/rules") },
+                  {
+                    "@type": "ListItem",
+                    position: 3,
+                    name: page.h1,
+                    item: absoluteUrl(`/rules/${page.slug}`),
+                  },
+                ],
+              },
+            ],
+          }),
+        },
+      ],
     };
   },
   notFoundComponent: () => (
@@ -55,6 +101,7 @@ function RulePageView() {
           {page.h1}
         </h1>
         <p className="text-base leading-relaxed text-muted-foreground">{page.intro}</p>
+        <p className="text-xs text-muted-foreground">Reviewed {page.reviewedOn}</p>
       </Reveal>
 
       <Reveal as="section">
@@ -81,6 +128,25 @@ function RulePageView() {
       <Reveal as="section" className="space-y-3">
         <h2 className="text-lg font-semibold tracking-tight">Questions people ask</h2>
         <FaqList items={page.faq} />
+      </Reveal>
+
+      <Reveal as="section" className="space-y-2">
+        <h2 className="text-lg font-semibold tracking-tight">Primary sources</h2>
+        <ul className="space-y-1.5 text-sm">
+          {page.sources.map((s) => (
+            <li key={s.url}>
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-start gap-1.5 text-primary hover:underline"
+              >
+                <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
       </Reveal>
 
       <Reveal as="section" className="panel space-y-4 p-6">

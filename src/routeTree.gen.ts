@@ -61,6 +61,7 @@ import { Route as PlanTaxExitRouteImport } from './routes/plan.tax-exit'
 import { Route as PlansPlanIdRouteImport } from './routes/plans.$planId'
 import { Route as RecordIndexRouteImport } from './routes/record.index'
 import { Route as RecordVaultRouteImport } from './routes/record.vault'
+import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesSlugRouteImport } from './routes/rules.$slug'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
 import { Route as SetupCompanyRouteImport } from './routes/setup.company'
@@ -332,6 +333,11 @@ const RecordVaultRoute = RecordVaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => RecordRoute,
 } as any)
+const RulesIndexRoute = RulesIndexRouteImport.update({
+  id: '/rules/',
+  path: '/rules/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RulesSlugRoute = RulesSlugRouteImport.update({
   id: '/rules/$slug',
   path: '/rules/$slug',
@@ -431,6 +437,7 @@ export interface FileRoutesByFullPath {
   '/community/': typeof CommunityIndexRoute
   '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
+  '/rules/': typeof RulesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   '/community': typeof CommunityIndexRoute
   '/plan': typeof PlanIndexRoute
   '/record': typeof RecordIndexRoute
+  '/rules': typeof RulesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -554,6 +562,7 @@ export interface FileRoutesById {
   '/community/': typeof CommunityIndexRoute
   '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
+  '/rules/': typeof RulesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -618,6 +627,7 @@ export interface FileRouteTypes {
     | '/community/'
     | '/plan/'
     | '/record/'
+    | '/rules/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -678,6 +688,7 @@ export interface FileRouteTypes {
     | '/community'
     | '/plan'
     | '/record'
+    | '/rules'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -740,6 +751,7 @@ export interface FileRouteTypes {
     | '/community/'
     | '/plan/'
     | '/record/'
+    | '/rules/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -796,6 +808,7 @@ export interface RootRouteChildren {
   SetupCompanyRoute: typeof SetupCompanyRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
+  RulesIndexRoute: typeof RulesIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAlertsRunRoute: typeof ApiPublicAlertsRunRoute
@@ -1168,6 +1181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecordVaultRouteImport
       parentRoute: typeof RecordRoute
     }
+    '/rules/': {
+      id: '/rules/'
+      path: '/rules'
+      fullPath: '/rules/'
+      preLoaderRoute: typeof RulesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rules/$slug': {
       id: '/rules/$slug'
       path: '/rules/$slug'
@@ -1318,6 +1338,7 @@ const rootRouteChildren: RootRouteChildren = {
   SetupCompanyRoute: SetupCompanyRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
+  RulesIndexRoute: RulesIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAlertsRunRoute: ApiPublicAlertsRunRoute,

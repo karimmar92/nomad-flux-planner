@@ -31,6 +31,7 @@ type Entry = { path: string; changefreq: string; priority: string; lastmod?: str
 const STATIC_PAGES: Entry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/explore", changefreq: "weekly", priority: "0.9" },
+  { path: "/rules", changefreq: "monthly", priority: "0.8" },
   { path: "/pricing", changefreq: "monthly", priority: "0.7" },
   { path: "/plan", changefreq: "monthly", priority: "0.8" },
   { path: "/setup/company", changefreq: "monthly", priority: "0.7" },
