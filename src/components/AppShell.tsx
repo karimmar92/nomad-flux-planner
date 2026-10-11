@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   CalendarClock,
   Compass,
@@ -101,12 +101,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   useOrgTripSync();
   usePlanSync();
 
+  // Sign-in is a full-screen moment, like an app's welcome screen: no
+  // navigation, no footer, nothing to tap that isn't a way in.
+  const bare = useRouterState({ select: (s) => s.location.pathname === "/auth" });
+  if (bare) return <div className="min-h-screen bg-background">{children}</div>;
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <OfflineBanner />
 
-      <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+      <header className="glass-bar pt-safe sticky top-0 z-30 border-b border-border/60">
+        <div className="px-safe mx-auto flex h-14 max-w-6xl items-center gap-3">
           <Link to="/" className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight text-primary">{APP_NAME}</span>
           </Link>
@@ -152,12 +157,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:pb-10">
+      <main className="px-safe mx-auto w-full max-w-6xl flex-1 pb-28 pt-5 md:pb-10">
         <ArrivalGate />
         {children}
       </main>
 
-      <footer className="mx-auto mb-20 w-full max-w-6xl px-4 pt-8 text-xs text-muted-foreground md:mb-6">
+      <footer className="px-safe mx-auto mb-24 w-full max-w-6xl pt-8 text-xs text-muted-foreground md:mb-6">
         <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-5">
           <FooterColumn title={t("footerGroups.rules")}>
             <FooterLink to="/rules">All rules</FooterLink>
@@ -243,7 +248,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="fixed inset-0 z-40 bg-black/40 md:hidden"
             onClick={() => setMoreOpen(false)}
           />
-          <div className="fixed inset-x-3 bottom-20 z-50 rounded-2xl border border-border bg-card p-2 shadow-lg md:hidden">
+          <div className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 rounded-2xl border border-border bg-card p-2 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)] md:hidden">
             {MOBILE_MORE.map((item) => (
               <Link
                 key={item.to}
@@ -266,45 +271,38 @@ export function AppShell({ children }: { children: ReactNode }) {
         </>
       ) : null}
 
-      {/* Mobile primary: Tracker · Hops · Explore · More */}
-      <nav className="fixed inset-x-3 bottom-3 z-30 flex rounded-2xl border border-border bg-card/95 px-1 py-1.5 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur md:hidden">
-        {MOBILE_PRIMARY.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            onClick={() => setMoreOpen(false)}
+      {/* Mobile primary: Tracker · Hops · Explore · More.
+          A flush tab bar, like UITabBar: full width, translucent, and padded
+          by the home-indicator inset so nothing sits under the gesture bar. */}
+      <nav className="glass-bar pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-border/60 md:hidden">
+        <div className="mx-auto flex max-w-md px-2 pt-1.5">
+          {MOBILE_PRIMARY.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              onClick={() => setMoreOpen(false)}
+              className="flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground"
+              activeProps={{ className: "text-primary" }}
+              activeOptions={{ exact: item.to === "/" }}
+            >
+              <item.icon className="h-[22px] w-[22px]" strokeWidth={1.75} />
+              {t(item.labelKey)}
+            </Link>
+          ))}
+          <button
+            type="button"
+            onClick={() => setMoreOpen((o) => !o)}
             className={cn(
-              "flex flex-1 flex-col items-center gap-1 rounded-xl py-1 text-[10px] text-muted-foreground",
+              "flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground",
+              moreOpen && "text-primary",
             )}
-            activeProps={{ className: "text-primary font-medium [&>span]:bg-primary/10" }}
-            activeOptions={{ exact: item.to === "/" }}
+            aria-expanded={moreOpen}
+            aria-label={t("nav.more")}
           >
-            <span className="grid h-7 w-7 place-items-center rounded-full">
-              <item.icon className="h-4 w-4" />
-            </span>
-            {t(item.labelKey)}
-          </Link>
-        ))}
-        <button
-          type="button"
-          onClick={() => setMoreOpen((o) => !o)}
-          className={cn(
-            "flex flex-1 flex-col items-center gap-1 rounded-xl py-1 text-[10px] text-muted-foreground",
-            moreOpen && "font-medium text-primary",
-          )}
-          aria-expanded={moreOpen}
-          aria-label={t("nav.more")}
-        >
-          <span
-            className={cn(
-              "grid h-7 w-7 place-items-center rounded-full",
-              moreOpen && "bg-primary/10",
-            )}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </span>
-          {t("nav.more")}
-        </button>
+            <MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={1.75} />
+            {t("nav.more")}
+          </button>
+        </div>
       </nav>
     </div>
   );

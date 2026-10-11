@@ -63,7 +63,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("errors.genericBody")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button type="button"
+          <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
@@ -88,7 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // viewport-fit=cover lets the installed app draw under the notch; the
+      // safe-area utilities in styles.css keep content clear of it.
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "color-scheme", content: "light dark" },
       { title: `${APP_NAME} — ${APP_TAGLINE}` },
       {
         name: "description",
@@ -96,19 +100,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Personalised geo-arbitrage and visa compliance for freelancers and remote workers.",
       },
       { property: "og:type", content: "website" },
-      { name: "theme-color", content: "#1e1e21" },
+      { name: "theme-color", content: "#f6f6f8", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#1e1e21", media: "(prefers-color-scheme: dark)" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "format-detection", content: "telephone=no" },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@500&family=Space+Grotesk:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap",
-      },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -181,6 +183,5 @@ function RootComponent() {
         </PaywallProvider>
       </I18nProvider>
     </QueryClientProvider>
-
   );
 }

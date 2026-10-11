@@ -58,12 +58,17 @@
   --color-brand-soft: var(--brand-soft);
   --color-info: var(--info);
   --color-info-muted: var(--info-muted);
-  /* Space Grotesk for display, DM Sans for UI — the remote.com pairing.
-     Both are loaded via <link> in src/routes/__root.tsx. */
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* The platform's own typeface: SF Pro on iOS and macOS, Roboto on Android,
+     Segoe UI on Windows. No web font is downloaded, so first paint is not
+     blocked and no request goes to a third-party font host. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-display:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-display);
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -75,7 +80,9 @@
    footer and every inner page read as one product rather than two.
    ───────────────────────────────────────────────────────────────────── */
 :root {
-  --radius: 0.5rem;
+  /* iOS continuous corners read around 10-14px on controls; 0.75rem is the
+     base, and --radius-sm..2xl step from it. */
+  --radius: 0.75rem;
 
   --background: oklch(0.17 0.006 264);
   --foreground: oklch(0.96 0.002 260);
@@ -194,8 +201,9 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
     -webkit-font-smoothing: antialiased;
+    /* No rubber-band bounce revealing the canvas behind an installed app. */
+    overscroll-behavior-y: none;
   }
 
   /* Numbers are the hero: tabular mono everywhere they appear. */
@@ -381,6 +389,51 @@
   padding-block: clamp(4.5rem, 11vw, 9rem);
 }
 
+/* ── Native-app surface ───────────────────────────────────────────────
+ * Installed as a PWA, the page runs edge to edge under the notch and the home
+ * indicator. These pad content clear of both; they resolve to 0 in a normal
+ * desktop browser, so they are safe to apply everywhere.
+ */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility px-safe {
+  padding-inline: max(1rem, env(safe-area-inset-left), env(safe-area-inset-right));
+}
+
+/* UIKit-style bar: translucent, saturated blur, hairline edge. */
+@utility glass-bar {
+  background-color: color-mix(in oklch, var(--color-background) 72%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Sign-in buttons. 52px tall: above the 44pt iOS / 48dp Android touch minimum. */
+@utility auth-btn {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  border-radius: 0.875rem;
+  padding: 0 1rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  transition:
+    transform 160ms cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 160ms ease,
+    opacity 160ms ease;
+
+  &:disabled {
+    opacity: 0.55;
+  }
+}
+
 @utility hide-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {
@@ -508,8 +561,8 @@ a {
    go with it: display type on headings, flat white cards, pill actions.
    Unscoped on purpose — header, footer and every inner page share them.
    ───────────────────────────────────────────────────────────────────── */
-:is(h1, h2, h3, .display-xl, .display-lg, .display-md, .num) {
-  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+:is(h1, h2, h3, .display-xl, .display-lg, .display-md) {
+  font-family: var(--font-display);
 }
 
 /* The reference sets headlines noticeably tighter than default optical sizing. */

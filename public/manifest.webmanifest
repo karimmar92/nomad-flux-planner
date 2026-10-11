@@ -3,12 +3,14 @@
   "short_name": "Driftly",
   "description": "Offline-first visa tracker, Schengen 90/180 engine and city cost data for freelancers and remote workers.",
   "id": "/",
-  "start_url": "/",
+  "start_url": "/tracker",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#1e1e21",
-  "theme_color": "#1e1e21",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f6f6f8",
+  "theme_color": "#f6f6f8",
+  "categories": ["travel", "productivity", "finance"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -28,5 +30,10 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    { "name": "Tracker", "url": "/tracker" },
+    { "name": "Border runs", "url": "/hops" },
+    { "name": "Team dashboard", "url": "/org" }
   ]
 }
