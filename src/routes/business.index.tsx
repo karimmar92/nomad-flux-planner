@@ -339,7 +339,7 @@ function LeadForm() {
           set up and pay online
         </Link>{" "}
         in a few minutes — no call needed. If you need a custom contract, an invoice instead of a
-        card, or more than 250 seats, tell us the shape of the team here and we&rsquo;ll walk
+        card, or more than 500 seats, tell us the shape of the team here and we&rsquo;ll walk
         through what your finance and people teams each need.
       </p>
       {sent ? (
