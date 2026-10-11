@@ -207,26 +207,14 @@ export const createOrganisation = createServerFn({ method: "POST" })
     seats: integer(d?.seats, "Seats", 10, 5000),
   }))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context;
-    const { data: org, error } = await supabase
-      .from("organisations")
-      .insert({
-        name: data.name,
-        billing_email: data.billing_email,
-        seats_purchased: data.seats,
-      })
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    const { error: memberError } = await supabase.from("org_members").insert({
-      org_id: org.id,
-      user_id: userId,
-      role: "admin",
-      status: "active",
-      joined_at: new Date().toISOString(),
+    // Service-role on purpose: see lib/org/create-org.ts for why the caller's
+    // own client can never complete this. The caller is already authenticated.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { createOrganisationFor } = await import("./create-org");
+    return createOrganisationFor(supabaseAdmin, context.userId, {
+      name: data.name,
+      billing_email: data.billing_email,
     });
-    if (memberError) throw new Error(memberError.message);
-    return { org_id: org.id as string };
   });
 
 type Db = SupabaseClient<Database>;
