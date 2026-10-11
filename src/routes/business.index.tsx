@@ -7,7 +7,15 @@ import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { submitB2bLead } from "@/lib/org/org.functions";
 import { joinWaitlist } from "@/lib/waitlist.functions";
 import { submitWaitlist } from "@/lib/waitlist";
-import { B2B_PRICING, annualPerSeatMonthly, annualTotal, monthlyTotal, usd } from "@/lib/org/pricing";
+import {
+  ANNUAL_DISCOUNT_PERCENT,
+  MINIMUM_SEATS,
+  annualPerSeatMonthly,
+  annualTotal,
+  monthlyTotal,
+  perSeatMonthlyUsd,
+  usd,
+} from "@/lib/org/pricing";
 import { PE_BENCHMARK_LABEL } from "@/lib/org/presence";
 
 export const Route = createFileRoute("/business/")({
@@ -16,8 +24,7 @@ export const Route = createFileRoute("/business/")({
       { title: `${APP_NAME} for teams — work-from-anywhere compliance` },
       {
         name: "description",
-        content:
-          "Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a full personal account for every employee. $8 per seat per month.",
+        content: `Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a full personal account for every employee. $${perSeatMonthlyUsd()} per seat per month.`,
       },
       { property: "og:title", content: `${APP_NAME} for teams` },
       {
@@ -65,11 +72,17 @@ function BusinessPage() {
           need for compliance. They see everything else.
         </p>
         <div className="flex flex-wrap gap-2">
-          <a
-            href="#book-a-call"
+          <Link
+            to="/org"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-            Book a call
+            Start now — no sales call
+          </Link>
+          <a
+            href="#book-a-call"
+            className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-2"
+          >
+            Talk to us first
           </a>
           <Link
             to="/business/explain"
@@ -162,15 +175,12 @@ function BusinessPage() {
         <div className="panel space-y-4 p-5">
           <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
             <div>
-              <div className="num text-3xl font-semibold">
-                {usd(B2B_PRICING.perSeatMonthlyUsd)}
-              </div>
+              <div className="num text-3xl font-semibold">{usd(perSeatMonthlyUsd())}</div>
               <div className="text-xs text-muted-foreground">per seat, per month</div>
             </div>
             <div className="text-xs text-muted-foreground">
-              Minimum {B2B_PRICING.minimumSeats} seats · Annual billing{" "}
-              {B2B_PRICING.annualDiscountPct}% off ({usd(annualPerSeatMonthly())}/seat/month
-              equivalent)
+              Minimum {MINIMUM_SEATS} seats · Annual billing {ANNUAL_DISCOUNT_PERCENT}% off (
+              {usd(annualPerSeatMonthly())}/seat/month equivalent)
             </div>
           </div>
 
@@ -181,7 +191,7 @@ function BusinessPage() {
             <input
               id="seats"
               type="range"
-              min={B2B_PRICING.minimumSeats}
+              min={MINIMUM_SEATS}
               max={250}
               value={seats}
               onChange={(e) => setSeats(Number(e.target.value))}
@@ -204,6 +214,12 @@ function BusinessPage() {
             calculator, the Schengen engine, the tax report, the document vault and the radar. It
             stays theirs to use for personal travel, and those features are invisible to you.
           </p>
+          <Link
+            to="/org"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+          >
+            Create your organisation and pay online
+          </Link>
         </div>
       </section>
 
@@ -245,9 +261,7 @@ function LeadForm() {
       });
       // The lead row is the conversation; the waitlist row is the demand
       // signal. A duplicate here is expected and handled as "already".
-      void submitWaitlist(joinList, { email: form.work_email, feature: "b2b" }).catch(
-        () => {},
-      );
+      void submitWaitlist(joinList, { email: form.work_email, feature: "b2b" }).catch(() => {});
       setSent(true);
       toast.success("Thanks — we'll be in touch within a working day.");
     } catch (err) {
@@ -261,18 +275,32 @@ function LeadForm() {
     <section id="book-a-call" className="space-y-3 scroll-mt-20">
       <h2 className="text-lg font-semibold tracking-tight">Book a call</h2>
       <p className="max-w-2xl text-sm text-muted-foreground">
-        No self-serve checkout for teams yet — deliberately. Tell us the shape of the team and
-        we&rsquo;ll walk through what your finance and people teams each need.
+        Most teams under 250 people can{" "}
+        <Link to="/org" className="underline">
+          set up and pay online
+        </Link>{" "}
+        in a few minutes — no call needed. If you need a custom contract, an invoice instead of a
+        card, or more than 250 seats, tell us the shape of the team here and we&rsquo;ll walk
+        through what your finance and people teams each need.
       </p>
       {sent ? (
         <div className="panel p-4 text-sm">
-          Request received. We&rsquo;ll reply to{" "}
-          <span className="num">{form.work_email}</span>.
+          Request received. We&rsquo;ll reply to <span className="num">{form.work_email}</span>.
         </div>
       ) : (
         <form onSubmit={onSubmit} className="panel grid gap-3 p-4 sm:grid-cols-2">
-          <Field label="Company" value={form.company_name} onChange={set("company_name")} required />
-          <Field label="Your name" value={form.contact_name} onChange={set("contact_name")} required />
+          <Field
+            label="Company"
+            value={form.company_name}
+            onChange={set("company_name")}
+            required
+          />
+          <Field
+            label="Your name"
+            value={form.contact_name}
+            onChange={set("contact_name")}
+            required
+          />
           <Field
             label="Work email"
             type="email"

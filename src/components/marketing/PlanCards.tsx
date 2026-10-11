@@ -7,9 +7,11 @@
  * Two separate pricing presentations is how a price ends up differing between
  * the promise and the checkout.
  *
- * TEAMS IS NOT HERE. Per-seat sales need a conversation and a contract, and a
- * fourth column on a launch page mostly adds deliberation. /business still
- * explains it; the card returns when the tier is actually sold self-serve.
+ * TEAMS IS NOT HERE. It is sold self-serve now (via /org, with real Stripe
+ * checkout), but a per-seat price with a seat-count input does not fit this
+ * card's fixed shape, and a fourth column on a launch page mostly adds
+ * deliberation for the free/Pro/Founding decision this grid exists for.
+ * /business explains Teams and links to /org to buy it.
  */
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";

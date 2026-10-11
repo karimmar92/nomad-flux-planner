@@ -18,14 +18,22 @@ import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession } from "@/lib/billing/billing.functions";
 import type { BillingInterval, PaidPlanId } from "@/config/stripe-prices";
 
-export type CheckoutRequest = { plan: PaidPlanId; interval: BillingInterval };
+export type CheckoutRequest = {
+  plan: PaidPlanId;
+  interval: BillingInterval;
+  /** Teams only — forwarded to Stripe as the starting (buyer-adjustable) quantity. */
+  seats?: number;
+};
 
 export function CheckoutDialog({
   request,
   onClose,
+  returnPath = "/profile",
 }: {
   request: CheckoutRequest;
   onClose: () => void;
+  /** Where Stripe sends the buyer back after paying. Defaults to the personal profile page. */
+  returnPath?: string;
 }) {
   const createSession = useServerFn(createCheckoutSession);
   const createSessionRef = useRef(createSession);
@@ -33,6 +41,8 @@ export function CheckoutDialog({
   const requestRef = useRef(request);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const returnPathRef = useRef(returnPath);
+  returnPathRef.current = returnPath;
   const sessionPromiseRef = useRef<Promise<string> | null>(null);
 
   const fetchClientSecret = useCallback(async (): Promise<string> => {
@@ -40,19 +50,22 @@ export function CheckoutDialog({
     // Reuse one in-flight request so retries cannot create duplicate sessions.
     if (!sessionPromiseRef.current) {
       const selected = requestRef.current;
-      sessionPromiseRef.current = createSessionRef.current({
-        data: {
-          plan: selected.plan,
-          interval: selected.interval,
-          environment: getStripeEnvironment(),
-          // Stripe substitutes the session id server-side before returning here.
-          returnUrl: `${window.location.origin}/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        },
-      }).then((result) => {
-        if ("error" in result) throw new Error(result.error);
-        if (!result.clientSecret) throw new Error("Checkout could not be started.");
-        return result.clientSecret;
-      });
+      sessionPromiseRef.current = createSessionRef
+        .current({
+          data: {
+            plan: selected.plan,
+            interval: selected.interval,
+            ...(selected.seats != null ? { seats: selected.seats } : {}),
+            environment: getStripeEnvironment(),
+            // Stripe substitutes the session id server-side before returning here.
+            returnUrl: `${window.location.origin}${returnPathRef.current}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+          },
+        })
+        .then((result) => {
+          if ("error" in result) throw new Error(result.error);
+          if (!result.clientSecret) throw new Error("Checkout could not be started.");
+          return result.clientSecret;
+        });
       // A rejection here otherwise renders as an empty, broken iframe. Close
       // the dialog and say what actually went wrong instead.
       sessionPromiseRef.current.catch((e: unknown) => {
@@ -66,7 +79,6 @@ export function CheckoutDialog({
   }, []);
 
   const options = useMemo(() => ({ fetchClientSecret }), [fetchClientSecret]);
-
 
   return (
     <div

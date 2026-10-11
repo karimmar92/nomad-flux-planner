@@ -1,13 +1,26 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  CheckCircle2,
+  CreditCard,
+  Download,
+  Loader2,
+  ShieldCheck,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
+import { CreateOrgFlow } from "@/components/org/CreateOrgFlow";
+import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
+import { paymentsAvailable, getStripeEnvironment } from "@/lib/stripe";
+import { verifyCheckoutSession } from "@/lib/billing/billing.functions";
+import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import {
   decideTravelRequest,
@@ -25,12 +38,19 @@ import {
   type RiskLevel,
 } from "@/lib/org/presence";
 import { auditFileName, auditToCsv, auditToPdf, AUDIT_DISCLAIMER } from "@/lib/org/export";
+import { monthlyTotal, usd } from "@/lib/org/pricing";
 import { downloadBlob } from "@/lib/reports/export-csv";
 import { todayIso } from "@/lib/trip-dates";
 import { formatDate } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
 
+type OrgSearch = { checkout?: "success"; session_id?: string };
+
 export const Route = createFileRoute("/org")({
+  validateSearch: (search: Record<string, unknown>): OrgSearch => ({
+    ...(search["checkout"] === "success" ? { checkout: "success" as const } : {}),
+    ...(typeof search["session_id"] === "string" ? { session_id: search["session_id"] } : {}),
+  }),
   head: () => ({
     meta: [
       { title: `Team compliance | ${APP_NAME}` },
@@ -73,11 +93,84 @@ function RiskPill({ risk }: { risk: RiskLevel }) {
   );
 }
 
+/**
+ * Confirms a Teams checkout on return from Stripe, scoped to this dashboard.
+ *
+ * Mirrors CheckoutReturn (src/components/billing/CheckoutReturn.tsx) rather
+ * than reusing it: that component's CTAs ("open the comparison", "go to the
+ * tracker") are written for the personal upgrade flow, and would be actively
+ * wrong here — the next thing an admin who just paid wants is to invite
+ * their team, not browse cities.
+ */
+function TeamsCheckoutBanner({ sessionId, onDone }: { sessionId: string; onDone: () => void }) {
+  const verify = useServerFn(verifyCheckoutSession);
+  const { patchProfile } = useProfile();
+  const [state, setState] = useState<"working" | "granted" | "pending" | "failed">("working");
+  const [message, setMessage] = useState<string | null>(null);
+  const ran = useRef(false);
+
+  useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+    void (async () => {
+      try {
+        const result = await verify({ data: { sessionId, environment: getStripeEnvironment() } });
+        if ("error" in result) {
+          setState(result.pending ? "pending" : "failed");
+          setMessage(result.error);
+          return;
+        }
+        patchProfile({ plan: result.plan as never });
+        setState("granted");
+        onDone();
+      } catch (e) {
+        setState("failed");
+        setMessage(e instanceof Error ? e.message : "Could not reach the payment service.");
+      }
+    })();
+    // onDone/patchProfile/verify are stable enough for a run-once effect keyed on sessionId.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
+
+  if (state === "working") {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 p-4 text-sm">
+        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />
+        Checking your payment with Stripe…
+      </div>
+    );
+  }
+  if (state === "granted") {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-accent-positive/40 bg-accent-positive-muted p-4 text-sm">
+        <CheckCircle2 className="h-4 w-4 shrink-0 text-accent-positive" aria-hidden />
+        Payment received — your Teams subscription is active. Invite your people on the Seats tab.
+      </div>
+    );
+  }
+  if (state === "pending") {
+    return (
+      <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 p-4 text-sm">
+        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground" aria-hidden />
+        Your payment is still settling — {message} Access opens automatically.
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-negative/40 bg-negative-muted p-4 text-sm">
+      <XCircle className="h-4 w-4 shrink-0 text-negative" aria-hidden />
+      We could not confirm that payment. {message}
+    </div>
+  );
+}
+
 function OrgDashboard() {
   const { signedIn, ready } = useSession();
   const [tab, setTab] = useState<Tab>("Risk");
   const fetchDashboard = useServerFn(getEmployerDashboard);
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const { checkout, session_id: sessionId } = Route.useSearch();
 
   const { data, isLoading } = useQuery({
     queryKey: ["employer-dashboard"],
@@ -85,11 +178,18 @@ function OrgDashboard() {
     enabled: signedIn,
   });
 
+  const clearCheckoutParams = () =>
+    void navigate({
+      to: "/org",
+      search: (prev: Record<string, unknown>) => {
+        const { checkout: _c, session_id: _s, ...rest } = prev;
+        return rest as OrgSearch;
+      },
+      replace: true,
+    });
+
   const overview = useMemo(
-    () =>
-      data
-        ? buildOrgOverview(data.rows, data.members, data.policies, todayIso())
-        : null,
+    () => (data ? buildOrgOverview(data.rows, data.members, data.policies, todayIso()) : null),
     [data],
   );
 
@@ -113,19 +213,24 @@ function OrgDashboard() {
   }
   if (!data?.isAdmin || !data.org || !overview) {
     return (
-      <div className="max-w-2xl space-y-3">
-        <h1 className="text-xl font-semibold tracking-tight">Team compliance</h1>
-        <div className="panel p-5 text-sm text-muted-foreground">
-          This account is not an admin of an organisation. If your company is evaluating {APP_NAME},{" "}
-          <Link to="/business" className="underline">
-            see the team plan
-          </Link>
-          . If you were given a seat, everything shared with your employer is listed on{" "}
-          <Link to="/settings/employer-sharing" className="underline">
-            your sharing screen
-          </Link>
-          .
+      <div className="max-w-lg space-y-5">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">Team compliance</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            If you were given a seat, everything shared with your employer is listed on{" "}
+            <Link to="/settings/employer-sharing" className="underline">
+              your sharing screen
+            </Link>
+            . Setting this up for your company — start below, no sales call required, or{" "}
+            <Link to="/business" className="underline">
+              read about the team plan
+            </Link>{" "}
+            first.
+          </p>
         </div>
+        <CreateOrgFlow
+          onFinished={() => qc.invalidateQueries({ queryKey: ["employer-dashboard"] })}
+        />
       </div>
     );
   }
@@ -137,6 +242,15 @@ function OrgDashboard() {
 
   return (
     <div className="space-y-5 pb-6">
+      {checkout === "success" && sessionId ? (
+        <TeamsCheckoutBanner
+          sessionId={sessionId}
+          onDone={() => {
+            refresh();
+            clearCheckoutParams();
+          }}
+        />
+      ) : null}
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-xl font-semibold tracking-tight">{org.name}</h1>
@@ -152,12 +266,15 @@ function OrgDashboard() {
 
       <div className="flex flex-wrap gap-1">
         {TABS.map((t) => (
-          <button type="button"
+          <button
+            type="button"
             key={t}
             onClick={() => setTab(t)}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm transition-colors",
-              tab === t ? "bg-surface-2 text-foreground" : "text-muted-foreground hover:bg-surface-2",
+              tab === t
+                ? "bg-surface-2 text-foreground"
+                : "text-muted-foreground hover:bg-surface-2",
             )}
           >
             {t}
@@ -166,7 +283,11 @@ function OrgDashboard() {
       </div>
 
       {tab === "Risk" ? (
-        <RiskTab overview={overview} orgName={org.name} seats={{ activeSeats, invited, purchased: org.seats_purchased }} />
+        <RiskTab
+          overview={overview}
+          orgName={org.name}
+          seats={{ activeSeats, invited, purchased: org.seats_purchased }}
+        />
       ) : null}
       {tab === "Countries" ? <CountriesTab overview={overview} /> : null}
       {tab === "Employees" ? <EmployeesTab overview={overview} /> : null}
@@ -312,13 +433,15 @@ function RiskTab({
               ))}
             </select>
           </label>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => void exportCsv()}
             className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
           >
             <Download className="h-4 w-4" aria-hidden /> CSV
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => void exportPdf()}
             className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
           >
@@ -345,7 +468,8 @@ function CountriesTab({ overview }: { overview: Overview }) {
     <div className="space-y-3">
       <div className="flex flex-wrap gap-1">
         {overview.countries.map((c) => (
-          <button type="button"
+          <button
+            type="button"
             key={c.country_code}
             onClick={() => setCode(c.country_code)}
             className={cn(
@@ -495,19 +619,21 @@ function RequestsTab({
                 <RiskPill risk={impact.risk} />
               </div>
               <p className="num text-xs text-muted-foreground">
-                {formatDate(r.start_date, i18n.language)} → {formatDate(r.end_date, i18n.language)} ·{" "}
-                {impact.requestedDays} days
+                {formatDate(r.start_date, i18n.language)} → {formatDate(r.end_date, i18n.language)}{" "}
+                · {impact.requestedDays} days
               </p>
               <p className="text-sm">{impact.sentence}</p>
               {r.note ? <p className="text-xs text-muted-foreground">“{r.note}”</p> : null}
               <div className="flex gap-2">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => void act(r.id, "approved")}
                   className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
                 >
                   Approve
                 </button>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => void act(r.id, "declined")}
                   className="rounded-md border border-border px-3 py-1.5 text-sm transition-colors hover:bg-surface-2"
                 >
@@ -531,8 +657,8 @@ function RequestsTab({
                   {nameOf(r.user_id)} · {r.country_code}
                 </span>
                 <span className="num text-muted-foreground">
-                  {formatDate(r.start_date, i18n.language)} → {formatDate(r.end_date, i18n.language)} ·{" "}
-                  {r.status}
+                  {formatDate(r.start_date, i18n.language)} →{" "}
+                  {formatDate(r.end_date, i18n.language)} · {r.status}
                   {r.decided_at ? ` · ${formatDate(r.decided_at, i18n.language)}` : ""}
                 </span>
               </div>
@@ -555,8 +681,15 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
   const savePolicy = useServerFn(upsertPolicy);
   const dropPolicy = useServerFn(deletePolicy);
   const [email, setEmail] = useState("");
-  const [policy, setPolicy] = useState({ country_code: "", max_days: 30, requires_approval: true, note: "" });
+  const [policy, setPolicy] = useState({
+    country_code: "",
+    max_days: 30,
+    requires_approval: true,
+    note: "",
+  });
+  const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
   const orgId = data.org!.id;
+  const purchasedSeats = data.org!.seats_purchased;
 
   async function onInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -605,6 +738,33 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
   return (
     <div className="space-y-5">
       <section className="space-y-2">
+        <h2 className="text-sm font-semibold">Billing</h2>
+        <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+          <p className="text-sm text-muted-foreground">
+            {purchasedSeats} seats on file · {usd(monthlyTotal(purchasedSeats))}/month at the
+            standard rate. Started on an invoice, or want to switch to card billing?
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              if (!paymentsAvailable()) {
+                toast.error("Checkout is not available on this build yet.");
+                return;
+              }
+              setCheckout({ plan: "teams", interval: "monthly", seats: purchasedSeats });
+            }}
+            className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+          >
+            <CreditCard className="h-3.5 w-3.5" aria-hidden />
+            Pay by card
+          </button>
+        </div>
+        {checkout ? (
+          <CheckoutDialog request={checkout} returnPath="/org" onClose={() => setCheckout(null)} />
+        ) : null}
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-sm font-semibold">Seats</h2>
         <form onSubmit={onInvite} className="panel flex flex-wrap items-end gap-3 p-4">
           <label className="min-w-[220px] flex-1 space-y-1">
@@ -617,7 +777,10 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
               className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
             />
           </label>
-          <button type="button" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+          <button
+            type="submit"
+            className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+          >
             Invite
           </button>
         </form>
@@ -631,7 +794,8 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
                 </span>
               </span>
               {m.status !== "left" ? (
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => void onRemove(m.member_id)}
                   className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs transition-colors hover:bg-surface-2"
                 >
@@ -687,7 +851,10 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
               className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
             />
           </label>
-          <button type="button" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+          <button
+            type="submit"
+            className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+          >
             Add
           </button>
         </form>
@@ -700,12 +867,13 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
           {data.policies.map((p) => (
             <div key={p.id} className="flex flex-wrap items-center gap-2 p-3 text-sm">
               <span className="flex-1">
-                {p.country_code ?? "All countries"} · max{" "}
-                <span className="num">{p.max_days}</span> days
+                {p.country_code ?? "All countries"} · max <span className="num">{p.max_days}</span>{" "}
+                days
                 {p.requires_approval ? " · approval required" : ""}
                 {p.note ? ` · ${p.note}` : ""}
               </span>
-              <button type="button"
+              <button
+                type="button"
                 onClick={async () => {
                   await dropPolicy({ data: { id: p.id } });
                   onChange();

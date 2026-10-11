@@ -16,7 +16,7 @@
  *
  *   Starter  $14/mo   $112/yr    starter_monthly / starter_yearly
  *   Pro      $29/mo   $232/yr    pro_monthly     / pro_yearly
- *   Teams    $59/seat $472/seat  teams_monthly   / teams_yearly  (not sold yet)
+ *   Teams    $59/seat $472/seat  teams_monthly   / teams_yearly  (sold via /org)
  *
  * TAX — deliberately NOT automated. The provider is a §19 UStG
  * Kleinunternehmer (src/config/legal.ts): there is no entitlement to collect
