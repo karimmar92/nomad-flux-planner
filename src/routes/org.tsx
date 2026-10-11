@@ -874,6 +874,18 @@ function RequestsTab({
                 · {impact.requestedDays} days
               </p>
               <p className="text-sm">{impact.sentence}</p>
+              <p className="num text-xs text-muted-foreground">
+                {impact.headroomBefore >= 0
+                  ? `${impact.headroomBefore} days of headroom now`
+                  : `${-impact.headroomBefore} days past the limit already`}
+                {" · "}
+                {impact.headroomAfter >= 0
+                  ? `${impact.headroomAfter} left if approved`
+                  : `${-impact.headroomAfter} over if approved as asked`}
+                {impact.headroomAfter < 0 && impact.latestCompliantEnd
+                  ? ` · latest end date within the limit: ${formatDate(impact.latestCompliantEnd, i18n.language)}`
+                  : ""}
+              </p>
               {r.note ? <p className="text-xs text-muted-foreground">“{r.note}”</p> : null}
               <div className="flex gap-2">
                 <button

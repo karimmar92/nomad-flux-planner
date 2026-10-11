@@ -249,7 +249,9 @@ async function orgBilling(supabase: Db, orgId: string): Promise<{ plan: OrgPlan;
 async function requireOrgFeature(supabase: Db, orgId: string, feature: OrgFeature): Promise<void> {
   const { plan } = await orgBilling(supabase, orgId);
   if (!orgHasFeature(plan, feature)) {
-    throw new Error(`This is part of the ${tierUnlocking(feature).name} plan and above.`);
+    throw new Error(
+      `Your organisation's plan doesn't include this. It comes with ${tierUnlocking(feature).name} and above, so an admin can switch it on.`,
+    );
   }
 }
 
@@ -364,6 +366,7 @@ export const createTravelRequest = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data, context }) => {
+    await requireOrgFeature(context.supabase, data.org_id, "approvals");
     const { error } = await context.supabase.from("travel_requests").insert({
       org_id: data.org_id,
       user_id: context.userId,
@@ -380,6 +383,12 @@ export const decideTravelRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; status: "approved" | "declined"; note?: string }) => d)
   .handler(async ({ data, context }) => {
+    const { data: req } = await context.supabase
+      .from("travel_requests")
+      .select("org_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (req?.org_id) await requireOrgFeature(context.supabase, req.org_id, "approvals");
     const patch = {
       status: data.status,
       decided_by: context.userId,

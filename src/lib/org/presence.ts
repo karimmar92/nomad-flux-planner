@@ -57,16 +57,9 @@ export const ROLLING_WINDOW_DAYS = 365;
 export type RiskLevel = "clear" | "approaching" | "over";
 
 /** Inclusive-of-both-ends day count, clamped to [windowStart, windowEnd]. */
-export function daysInWindow(
-  row: PresenceRow,
-  windowStart: string,
-  windowEnd: string,
-): number {
+export function daysInWindow(row: PresenceRow, windowStart: string, windowEnd: string): number {
   const start = Math.max(toDayIndex(row.entry_date), toDayIndex(windowStart));
-  const end = Math.min(
-    toDayIndex(row.exit_date ?? windowEnd),
-    toDayIndex(windowEnd),
-  );
+  const end = Math.min(toDayIndex(row.exit_date ?? windowEnd), toDayIndex(windowEnd));
   return end < start ? 0 : end - start + 1;
 }
 
@@ -300,15 +293,12 @@ export function presenceQualityFlags(
       flags.push({
         kind: "no_data",
         label: `${name} has logged no travel`,
-        detail:
-          "No entries recorded. Absence of entries is not evidence of absence of travel.",
+        detail: "No entries recorded. Absence of entries is not evidence of absence of travel.",
         user_id: m.user_id,
       });
       continue;
     }
-    const sorted = [...list].sort(
-      (a, b) => toDayIndex(a.entry_date) - toDayIndex(b.entry_date),
-    );
+    const sorted = [...list].sort((a, b) => toDayIndex(a.entry_date) - toDayIndex(b.entry_date));
     for (const r of sorted) {
       if (!r.exit_date) {
         flags.push({
@@ -362,6 +352,16 @@ export type RequestImpact = {
   policyMaxDays: number | null;
   requiresApproval: boolean;
   risk: RiskLevel;
+  /** Days still allowed before the binding limit, today. Negative if already past it. */
+  headroomBefore: number;
+  /** Days left if this request is approved as asked. Negative means it would go past the limit. */
+  headroomAfter: number;
+  /**
+   * The last day that keeps the person within the binding limit, if the trip
+   * started as requested. Null when there is no headroom at all. Ignores days
+   * rolling out of the window during the trip, so it errs on the early side.
+   */
+  latestCompliantEnd: string | null;
   /** Evidence sentence shown before any approval decision is taken. */
   sentence: string;
 };
@@ -382,11 +382,16 @@ export function requestImpact(
     .filter((r) => r.user_id === input.user_id && r.country_code.toUpperCase() === code)
     .reduce((n, r) => n + daysInWindow(r, start, end), 0);
 
-  const requestedDays =
-    toDayIndex(input.end_date) - toDayIndex(input.start_date) + 1;
+  const requestedDays = toDayIndex(input.end_date) - toDayIndex(input.start_date) + 1;
   const projectedDays = currentDays + Math.max(requestedDays, 0);
   const policyMax = policy?.max_days ?? null;
   const risk = riskFrom(projectedDays, basis.thresholdDays, policyMax);
+
+  const limit = Math.min(basis.thresholdDays, policyMax ?? Number.POSITIVE_INFINITY);
+  const headroomBefore = limit - currentDays;
+  const headroomAfter = headroomBefore - Math.max(requestedDays, 0);
+  const latestCompliantEnd =
+    headroomBefore > 0 ? fromDayIndex(toDayIndex(input.start_date) + headroomBefore - 1) : null;
 
   const limitClause =
     policyMax !== null && projectedDays > policyMax
@@ -405,6 +410,9 @@ export function requestImpact(
     policyMaxDays: policyMax,
     requiresApproval: policy?.requires_approval ?? false,
     risk,
+    headroomBefore,
+    headroomAfter,
+    latestCompliantEnd,
     sentence: `${requestedDays} days in ${basis.country} would put ${displayName} at ${projectedDays} days for the rolling year, ${limitClause}.`,
   };
 }
