@@ -175,7 +175,7 @@ export const TIERS: Tier[] = [
       "Travel request approvals with an audit trail",
       "Company travel policy, enforced at request time",
       "Org-wide audit export (PDF, CSV)",
-      "Shared presence with per-field consent — staff choose what is visible",
+      "Shares only country and dates, structurally — never income, documents or notes",
     ],
   },
 ];
