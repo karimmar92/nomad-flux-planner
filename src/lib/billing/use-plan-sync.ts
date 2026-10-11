@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import type { Plan } from "@/lib/types";
+import { effectivePlan, normaliseOrgPlan, personalPlanFor } from "@/config/business-plans";
 
 // Must list EVERY plan the webhook can write. Omitting one (founding_lifetime
 // was missing) silently drops the paid plan on the way from server to device:
@@ -68,9 +69,34 @@ export function usePlanSync() {
       if (!active || error || !data) return;
 
       const remote = (data as { plan?: unknown }).plan;
-      if (isPlan(remote) && remote !== latest.current.plan) {
-        latest.current.patch({ plan: remote });
+      if (!isPlan(remote)) return;
+
+      // An employer seat can raise the plan, never lower it. Both reads are
+      // RLS-scoped to the caller; a failure leaves the plan they pay for.
+      let seatGrant: ReturnType<typeof personalPlanFor> = null;
+      try {
+        const { data: seat } = await supabase
+          .from("org_members")
+          .select("org_id")
+          .eq("user_id", userId!)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+        if (seat?.org_id) {
+          const { data: org } = await supabase
+            .from("organisations")
+            .select("plan")
+            .eq("id", seat.org_id)
+            .maybeSingle();
+          seatGrant = personalPlanFor(normaliseOrgPlan(org?.plan));
+        }
+      } catch {
+        // Keep the plan they pay for.
       }
+
+      const next = effectivePlan(remote, seatGrant) as Plan;
+      if (!active) return;
+      if (next !== latest.current.plan) latest.current.patch({ plan: next });
     }
 
     void pull();
@@ -115,7 +141,6 @@ export function usePlanSync() {
 
     // One delayed re-check, for the race between the redirect and the webhook.
     const timer = justPaid ? window.setTimeout(() => void pull(), AFTER_CHECKOUT_RECHECK_MS) : null;
-
 
     return () => {
       active = false;

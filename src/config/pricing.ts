@@ -25,6 +25,7 @@
  */
 
 import { VAT } from "@/config/legal";
+import { businessTier } from "@/config/business-plans";
 
 export type PlanId = "free" | "starter" | "pro" | "teams" | "founding_lifetime";
 
@@ -70,7 +71,6 @@ export const ANNUAL_MONTHS_CHARGED = 8;
  */
 export const TRIAL_DAYS = 3;
 
-
 /**
  * The short tax note shown next to a price. Empty while the §19 exemption
  * applies, because there is nothing to add and "incl. VAT" would be equally
@@ -104,7 +104,6 @@ export function annualSavingPercent(): number {
 
 /** Months not charged on annual — "four months free", derived. */
 export const ANNUAL_MONTHS_FREE = 12 - ANNUAL_MONTHS_CHARGED;
-
 
 /** What the annual plan saves against paying monthly for a year. */
 export function annualSavingUsd(tier: Tier): number {
@@ -165,17 +164,19 @@ export const TIERS: Tier[] = [
   {
     id: "teams",
     name: "Teams",
-    monthlyUsd: 59,
+    // The top business plan's price, so a Teams buyer reads as the highest
+    // tier here. The three plans themselves are in config/business-plans.ts.
+    monthlyUsd: businessTier("pro").monthlyUsd,
     perSeat: true,
     audience: "Employers whose staff work across borders.",
     headline: "See the whole team's exposure before it becomes a permanent-establishment problem.",
     features: [
-      "Everything in Pro, for every seat",
-      "Employer dashboard — presence and risk per member",
+      "Three plans: Basic, Advanced and Pro, priced per seat",
+      "Employer dashboard: presence and risk per member",
       "Travel request approvals with an audit trail",
       "Company travel policy, enforced at request time",
       "Org-wide audit export (PDF, CSV)",
-      "Shares only country and dates, structurally — never income, documents or notes",
+      "Shares only country and dates, structurally. Never income, documents or notes",
     ],
   },
 ];

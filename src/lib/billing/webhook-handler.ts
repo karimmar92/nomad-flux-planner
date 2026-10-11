@@ -33,6 +33,7 @@ import {
 } from "@/lib/referrals/commission";
 import { CREATOR_PROGRAM } from "@/lib/referrals/config";
 import { planForPriceId } from "@/config/stripe-prices";
+import { syncOrgTier } from "@/lib/billing/org-tier";
 import type { StripeEnv } from "@/lib/stripe.server";
 
 const DAY_MS = 86_400_000;
@@ -118,7 +119,6 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
 
     if (!plan) return Response.json({ received: true, skipped: "unmapped_price", priceKey });
 
-
     /**
      * FOUNDING 100 — must not fall through to the generic plan write below.
      *
@@ -189,6 +189,14 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     if (error) return new Response(error.message, { status: 500 });
+
+    // Teams: record the tier on the organisation. The session has no expanded
+    // line items, so the tier comes from the metadata checkout stamped on it.
+    const businessTier = object["metadata"]?.["business_tier"] as string | undefined;
+    if (plan === "teams" && businessTier) {
+      const interval = object["metadata"]?.["interval"] === "monthly" ? "monthly" : "yearly";
+      await syncOrgTier(supabaseAdmin, userId, `teams_${businessTier}_${interval}`, true);
+    }
 
     return Response.json({ received: true, plan, user_id: userId, mode });
   }
@@ -263,6 +271,16 @@ export async function handleStripeEvent(event: StripeEvent, env: StripeEnv): Pro
 
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     if (error) return new Response(error.message, { status: 500 });
+
+    // Authoritative tier and seat count for the organisation. Unlike the
+    // checkout session, the subscription carries the real price and quantity.
+    await syncOrgTier(
+      supabaseAdmin,
+      userId,
+      priceKey,
+      entitled,
+      object["items"]?.["data"]?.[0]?.["quantity"] ?? null,
+    );
 
     return Response.json({ received: true, plan: entitlementPlan, billed: plan, user_id: userId });
   }

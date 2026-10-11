@@ -16,7 +16,16 @@
  *
  *   Starter  $14/mo   $112/yr    starter_monthly / starter_yearly
  *   Pro      $29/mo   $232/yr    pro_monthly     / pro_yearly
- *   Teams    $59/seat $472/seat  teams_monthly   / teams_yearly  (sold via /org)
+ *   Teams    three tiers, per seat, sold via /org. Prices live in
+ *            config/business-plans.ts; lookup keys are
+ *            teams_basic_monthly / teams_basic_yearly,
+ *            teams_advanced_monthly / teams_advanced_yearly,
+ *            teams_pro_monthly / teams_pro_yearly.
+ *            The old teams_monthly / teams_yearly are read as Pro.
+ *
+ * ALL SIX TEAMS PRICES MUST EXIST IN THE STRIPE CATALOGUE BEFORE CHECKOUT
+ * WORKS. Create them with these exact lookup keys (yearly = 8 x monthly) and
+ * publish the catalogue. Until then checkout answers "Price not found".
  *
  * TAX — deliberately NOT automated. The provider is a §19 UStG
  * Kleinunternehmer (src/config/legal.ts): there is no entitlement to collect
@@ -26,6 +35,13 @@
  * that end this.
  */
 import type { PlanId } from "./pricing";
+import {
+  MAXIMUM_SEATS,
+  MINIMUM_SEATS,
+  teamsPriceKey,
+  tierFromPriceKey,
+  type BusinessTierId,
+} from "./business-plans";
 
 export type BillingInterval = "monthly" | "yearly";
 
@@ -46,9 +62,17 @@ const ONE_TIME_KEYS: Record<OneTimePlanId, string> = {
   founding_lifetime: "founding_lifetime",
 };
 
-/** The lookup key checkout resolves against Stripe. Safe on client or server. */
-export function priceIdFor(plan: PaidPlanId, interval: BillingInterval): string {
+/**
+ * The lookup key checkout resolves against Stripe. Safe on client or server.
+ * For Teams, `tier` picks one of the three business plans (default Advanced).
+ */
+export function priceIdFor(
+  plan: PaidPlanId,
+  interval: BillingInterval,
+  tier: BusinessTierId = "advanced",
+): string {
   if (plan === "founding_lifetime") return ONE_TIME_KEYS[plan];
+  if (plan === "teams") return teamsPriceKey(tier, interval);
   return RECURRING_KEYS[plan][interval];
 }
 
@@ -62,6 +86,9 @@ export function priceIdFor(plan: PaidPlanId, interval: BillingInterval): string 
 export function planForPriceId(priceId: string | null | undefined): PaidPlanId | null {
   if (!priceId) return null;
   if (priceId in ONE_TIME_KEYS) return priceId as OneTimePlanId;
+  // Every business tier entitles the buyer as "teams"; which tier is recorded
+  // separately on the organisation (see lib/billing/org-tier.ts).
+  if (tierFromPriceKey(priceId)) return "teams";
   for (const plan of Object.keys(RECURRING_KEYS) as RecurringPlanId[]) {
     for (const interval of ["monthly", "yearly"] as BillingInterval[]) {
       if (RECURRING_KEYS[plan][interval] === priceId) return plan;
@@ -76,5 +103,5 @@ export function isOneTimePlan(plan: PaidPlanId): boolean {
 }
 
 /** Seat range for the per-seat tier, enforced server-side as well as in Stripe. */
-export const TEAMS_SEAT_MIN = 10;
-export const TEAMS_SEAT_MAX = 500;
+export const TEAMS_SEAT_MIN = MINIMUM_SEATS;
+export const TEAMS_SEAT_MAX = MAXIMUM_SEATS;

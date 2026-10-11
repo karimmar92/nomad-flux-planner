@@ -53,6 +53,17 @@ describe("buildActionItems", () => {
     expect(forecast!.detail).toMatch(/assumes they stay/i);
   });
 
+  it("leaves out dated projections when the plan does not include them", () => {
+    const rows: PresenceRow[] = [
+      { user_id: "u1", country_code: "DE", entry_date: "2026-01-01", exit_date: null },
+    ];
+    const overview = buildOrgOverview(rows, members, noPolicies, TODAY);
+    const list = buildActionItems(overview, rows, [], TODAY, { forecast: false });
+    expect(list.some((i) => i.id.startsWith("forecast-"))).toBe(false);
+    // They still appear, as someone approaching the limit, just without a date.
+    expect(list.some((i) => i.id === "approaching-DE-u1")).toBe(true);
+  });
+
   it("does not forecast a closed trip, since nothing is accruing", () => {
     const rows: PresenceRow[] = [
       { user_id: "u1", country_code: "DE", entry_date: "2026-01-01", exit_date: "2026-06-25" },

@@ -13,9 +13,10 @@ import {
   annualPerSeatMonthly,
   annualTotal,
   monthlyTotal,
-  perSeatMonthlyUsd,
   usd,
 } from "@/lib/org/pricing";
+import { BUSINESS_ROADMAP, BUSINESS_TIERS } from "@/config/business-plans";
+import { TRIAL_DAYS } from "@/config/pricing";
 import { PE_BENCHMARK_LABEL } from "@/lib/org/presence";
 
 export const Route = createFileRoute("/business/")({
@@ -24,13 +25,13 @@ export const Route = createFileRoute("/business/")({
       { title: `${APP_NAME} for teams — work-from-anywhere compliance` },
       {
         name: "description",
-        content: `Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a full personal account for every employee. $${perSeatMonthlyUsd()} per seat per month.`,
+        content: `Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a personal account for every employee. Three plans from $${BUSINESS_TIERS[0]!.monthlyUsd} per seat per month, with prices on the page.`,
       },
       { property: "og:title", content: `${APP_NAME} for teams` },
       {
         property: "og:description",
         content:
-          "Country day-counts and permanent-establishment exposure for finance. A full personal travel account for every employee.",
+          "Country day-counts and permanent-establishment exposure for finance, a policy and approval flow for people teams. Three plans, prices published, no demo call.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -56,6 +57,7 @@ const EMPLOYER_NEVER_SEES = [
 
 function BusinessPage() {
   const [seats, setSeats] = useState(25);
+  const [annual, setAnnual] = useState(true);
 
   return (
     <div className="space-y-10 pb-6">
@@ -67,9 +69,9 @@ function BusinessPage() {
           Give your team the freedom to work from anywhere — and the paperwork that makes it safe.
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Every seat includes a full personal account: visa tracking, tax records, and document
-          storage that belongs to your employee, not to you. You see only the country day-counts you
-          need for compliance. They see everything else.
+          Every seat comes with a personal account that belongs to your employee, not to you: their
+          own visa tracking, with more included on higher plans. You see only the country day-counts
+          you need for compliance. They see everything else.
         </p>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -138,24 +140,24 @@ function BusinessPage() {
         <div className="grid gap-3 sm:grid-cols-3">
           {[
             {
+              t: "A to-do list, not an archive",
+              d: "Each morning: requests waiting, people past a limit, and a dated warning for anyone abroad who will cross one. Every item links to the screen that fixes it.",
+            },
+            {
+              t: "Every number shows its working",
+              d: "Open any day count to see the window, each stay that contributed and the days it added. Overlapping or open-ended entries are called out, so the figure survives an audit.",
+            },
+            {
               t: "Permanent-establishment exposure",
-              d: `Per country: how many employees, total days and the longest single stay. Flagged against the ${PE_BENCHMARK_LABEL}.`,
+              d: `Per country: how many employees, total days and the longest single stay. Flagged against the ${PE_BENCHMARK_LABEL}. A prompt to take advice, never a legal finding.`,
             },
             {
               t: "Policy limits you set",
-              d: "\u201cNo more than 30 days in Germany without approval.\u201d Per country or global, with or without an approval gate.",
+              d: "\u201cNo more than 30 days in Germany without approval.\u201d Per country or global, from a template or your own numbers.",
             },
             {
               t: "Travel requests with the maths first",
               d: "The compliance implication is shown before a decision is taken, and approving writes the audit trail.",
-            },
-            {
-              t: "Country day-counts",
-              d: "The same timezone-safe engine behind the personal Schengen tracker, applied to your whole team.",
-            },
-            {
-              t: "Audit export",
-              d: "CSV and PDF per country per period, with gaps, missing exit dates and retrospective entries declared.",
             },
             {
               t: "Seats, not surveillance",
@@ -170,57 +172,114 @@ function BusinessPage() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold tracking-tight">Pricing</h2>
-        <div className="panel space-y-4 p-5">
-          <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
-            <div>
-              <div className="num text-3xl font-semibold">{usd(perSeatMonthlyUsd())}</div>
-              <div className="text-xs text-muted-foreground">per seat, per month</div>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Minimum {MINIMUM_SEATS} seats · Annual billing {ANNUAL_DISCOUNT_PERCENT}% off (
-              {usd(annualPerSeatMonthly())}/seat/month equivalent)
-            </div>
+      <section className="space-y-4" id="pricing">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Pricing</h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Per seat, per month, published here. Start a {TRIAL_DAYS}-day trial online, no call.
+              Minimum {MINIMUM_SEATS} seats. Annual billing is {ANNUAL_DISCOUNT_PERCENT}% off.
+            </p>
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="seats" className="label-xs block">
-              Seats: <span className="num">{seats}</span>
-            </label>
-            <input
-              id="seats"
-              type="range"
-              min={MINIMUM_SEATS}
-              max={250}
-              value={seats}
-              onChange={(e) => setSeats(Number(e.target.value))}
-              className="w-full accent-[hsl(var(--primary))]"
-            />
-            <div className="flex flex-wrap gap-6 text-sm">
-              <span>
-                <span className="num font-semibold">{usd(monthlyTotal(seats))}</span>
-                <span className="text-muted-foreground"> / month</span>
-              </span>
-              <span>
-                <span className="num font-semibold">{usd(annualTotal(seats))}</span>
-                <span className="text-muted-foreground"> / year billed annually</span>
-              </span>
-            </div>
-          </div>
-
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Every seat includes full Pro for that employee, personally: all cities, the arbitrage
-            calculator, the Schengen engine, the tax report, the document vault and the radar. It
-            stays theirs to use for personal travel, and those features are invisible to you.
-          </p>
-          <Link
-            to="/org"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+          <div
+            className="inline-flex rounded-full border border-border p-1"
+            role="group"
+            aria-label="Billing period"
           >
-            Create your organisation and pay online
-          </Link>
+            {([true, false] as const).map((isAnnual) => (
+              <button
+                key={String(isAnnual)}
+                type="button"
+                onClick={() => setAnnual(isAnnual)}
+                aria-pressed={annual === isAnnual}
+                className={
+                  annual === isAnnual
+                    ? "min-h-9 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground"
+                    : "min-h-9 rounded-full px-3.5 text-xs text-muted-foreground hover:text-foreground"
+                }
+              >
+                {isAnnual ? `Annual · save ${ANNUAL_DISCOUNT_PERCENT}%` : "Monthly"}
+              </button>
+            ))}
+          </div>
         </div>
+
+        <div className="grid gap-3 lg:grid-cols-3">
+          {BUSINESS_TIERS.map((t) => (
+            <div
+              key={t.id}
+              className={
+                t.recommended
+                  ? "panel flex flex-col space-y-3 border-primary/50 p-5 ring-1 ring-primary/15"
+                  : "panel flex flex-col space-y-3 p-5"
+              }
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">{t.name}</h3>
+                {t.recommended ? (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                    Most chosen
+                  </span>
+                ) : null}
+              </div>
+              <div>
+                <span className="num text-3xl font-semibold">
+                  {usd(annual ? annualPerSeatMonthly(t.id) : t.monthlyUsd)}
+                </span>
+                <span className="text-xs text-muted-foreground"> per seat per month</span>
+                {annual ? (
+                  <span className="num ms-2 text-sm text-muted-foreground line-through">
+                    {usd(t.monthlyUsd)}
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-sm font-medium leading-snug">{t.headline}</p>
+              <ul className="flex-1 space-y-1.5 text-xs text-muted-foreground">
+                {t.features.map((f) => (
+                  <li key={f} className="flex gap-2">
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-positive" aria-hidden />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="num border-t border-border pt-3 text-xs text-muted-foreground">
+                {seats} seats:{" "}
+                <span className="font-semibold text-foreground">
+                  {usd(annual ? annualTotal(seats, t.id) : monthlyTotal(seats, t.id))}
+                </span>
+                {annual ? " a year" : " a month"}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="panel space-y-2 p-4">
+          <label htmlFor="seats" className="label-xs block">
+            Team size: <span className="num">{seats}</span> seats
+          </label>
+          <input
+            id="seats"
+            type="range"
+            min={MINIMUM_SEATS}
+            max={250}
+            value={seats}
+            onChange={(e) => setSeats(Number(e.target.value))}
+            className="w-full accent-[hsl(var(--primary))]"
+          />
+        </div>
+
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          What a seat includes for the employee personally rises with the plan: a free account on
+          Basic, Starter on Advanced, full Pro on Pro. It stays theirs for personal travel and those
+          features are invisible to you. On the roadmap, not sold today:{" "}
+          {BUSINESS_ROADMAP.join(", ")}.
+        </p>
+        <Link
+          to="/org"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+        >
+          Create your organisation and start the trial
+        </Link>
       </section>
 
       <LeadForm />

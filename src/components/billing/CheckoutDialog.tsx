@@ -17,12 +17,15 @@ import { toast } from "sonner";
 import { getStripe, getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession } from "@/lib/billing/billing.functions";
 import type { BillingInterval, PaidPlanId } from "@/config/stripe-prices";
+import type { BusinessTierId } from "@/config/business-plans";
 
 export type CheckoutRequest = {
   plan: PaidPlanId;
   interval: BillingInterval;
   /** Teams only — forwarded to Stripe as the starting (buyer-adjustable) quantity. */
   seats?: number;
+  /** Teams only — which business plan to charge. */
+  tier?: BusinessTierId;
 };
 
 export function CheckoutDialog({
@@ -56,6 +59,7 @@ export function CheckoutDialog({
             plan: selected.plan,
             interval: selected.interval,
             ...(selected.seats != null ? { seats: selected.seats } : {}),
+            ...(selected.tier ? { tier: selected.tier } : {}),
             environment: getStripeEnvironment(),
             // Stripe substitutes the session id server-side before returning here.
             returnUrl: `${window.location.origin}${returnPathRef.current}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,

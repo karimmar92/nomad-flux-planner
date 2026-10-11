@@ -24,18 +24,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, Users } from "lucide-react";
 import { createOrganisation, inviteSeat } from "@/lib/org/org.functions";
-import {
-  MINIMUM_SEATS,
-  annualPerSeatMonthly,
-  monthlyTotal,
-  annualTotal,
-  perSeatMonthlyUsd,
-  usd,
-} from "@/lib/org/pricing";
-import { ANNUAL_MONTHS_FREE, annualSavingPercent } from "@/config/pricing";
+import { MINIMUM_SEATS, annualTotal, monthlyTotal, usd } from "@/lib/org/pricing";
+import { EVALUATION_SEATS, businessTier } from "@/config/business-plans";
+import { TRIAL_DAYS } from "@/config/pricing";
+import { PlanPicker, type PlanChoice } from "@/components/org/PlanPicker";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { paymentsAvailable } from "@/lib/stripe";
-import type { BillingInterval } from "@/config/stripe-prices";
 
 type Step = "create" | "billing" | "invite" | "done";
 
@@ -48,7 +42,11 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
   const [name, setName] = useState("");
   const [billingEmail, setBillingEmail] = useState("");
   const [seats, setSeats] = useState(String(MINIMUM_SEATS));
-  const [interval, setInterval] = useState<BillingInterval>("yearly");
+  const [choice, setChoice] = useState<PlanChoice>({
+    tier: "advanced",
+    interval: "yearly",
+    seats: MINIMUM_SEATS,
+  });
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
   const [emailsText, setEmailsText] = useState("");
 
@@ -78,7 +76,7 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
       toast.error("Checkout is not available on this build yet — use “invoice us instead” below.");
       return;
     }
-    setCheckout({ plan: "teams", interval, seats: seatCount });
+    setCheckout({ plan: "teams", interval: choice.interval, seats: seatCount, tier: choice.tier });
   }
 
   async function submitInvites() {
@@ -99,11 +97,14 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
     const results = await Promise.allSettled(
       emails.map((email) => invite({ data: { org_id: orgId, email, role: "member" } })),
     );
-    const failed = results.filter((r) => r.status === "rejected").length;
+    const rejected = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+    const failed = rejected.length;
     setBusy(false);
     if (failed > 0) {
+      // Say why. A seat limit and a typo need different fixes.
+      const reason = rejected[0]?.reason;
       toast.error(
-        `${failed} of ${emails.length} ${emails.length === 1 ? "invite" : "invites"} could not be sent — check those addresses.`,
+        `${failed} of ${emails.length} ${emails.length === 1 ? "invite" : "invites"} not sent. ${reason instanceof Error ? reason.message : "Check those addresses."}`,
       );
     } else {
       toast.success(`${emails.length} ${emails.length === 1 ? "invite" : "invites"} sent.`);
@@ -152,8 +153,8 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
               className="input num"
             />
             <span className="mt-1 block text-xs text-muted-foreground">
-              {usd(perSeatMonthlyUsd())}/seat/month · you'll pay for these on the next step, or
-              choose to be invoiced instead.
+              From {usd(businessTier("basic").monthlyUsd)}/seat/month. You will choose a plan on the
+              next step.
             </span>
           </label>
           <button
@@ -170,57 +171,27 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
   }
 
   if (step === "billing") {
-    const monthly = monthlyTotal(seatCount);
-    const yearly = annualTotal(seatCount);
+    const total =
+      choice.interval === "yearly"
+        ? annualTotal(seatCount, choice.tier)
+        : monthlyTotal(seatCount, choice.tier);
     return (
       <div className="panel max-w-lg space-y-4 p-5">
         <div>
-          <h2 className="text-base font-semibold">Pay for your seats</h2>
+          <h2 className="text-base font-semibold">Choose a plan</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {seatCount} seats for {orgName || "your organisation"}. Card charged today, cancel any
-            time from the billing portal — the same checkout the personal plans use.
+            For {orgName || "your organisation"}. Card charged after a {TRIAL_DAYS}-day trial,
+            cancel any time from the billing portal. The same checkout the personal plans use.
           </p>
         </div>
 
-        <div
-          className="inline-flex rounded-full border border-border p-1"
-          role="group"
-          aria-label="Billing period"
-        >
-          {(["yearly", "monthly"] as const).map((iv) => (
-            <button
-              key={iv}
-              type="button"
-              onClick={() => setInterval(iv)}
-              aria-pressed={interval === iv}
-              className={
-                interval === iv
-                  ? "min-h-9 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground"
-                  : "min-h-9 rounded-full px-3.5 text-xs text-muted-foreground hover:text-foreground"
-              }
-            >
-              {iv === "yearly" ? `Annual · save ${annualSavingPercent()}%` : "Monthly"}
-            </button>
-          ))}
-        </div>
-
-        <div className="rounded-lg border border-border bg-surface-2 p-3 text-sm">
-          {interval === "yearly" ? (
-            <>
-              <span className="num font-semibold">{usd(yearly)}</span>
-              <span className="text-muted-foreground"> billed annually</span>
-              <span className="mt-1 block text-xs text-muted-foreground">
-                {usd(annualPerSeatMonthly())}/seat/month equivalent · {ANNUAL_MONTHS_FREE} months
-                free
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="num font-semibold">{usd(monthly)}</span>
-              <span className="text-muted-foreground"> / month</span>
-            </>
-          )}
-        </div>
+        <PlanPicker
+          value={{ ...choice, seats: seatCount }}
+          onChange={(c) => {
+            setChoice(c);
+            setSeats(String(c.seats));
+          }}
+        />
 
         <button
           type="button"
@@ -228,14 +199,15 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
           className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground"
         >
           <CreditCard className="h-4 w-4" aria-hidden />
-          Pay now — {interval === "yearly" ? usd(yearly) : `${usd(monthly)}/mo`}
+          Start {TRIAL_DAYS}-day trial · {usd(total)}
+          {choice.interval === "yearly" ? "/yr" : "/mo"} after
         </button>
         <button
           type="button"
           onClick={() => setStep("invite")}
           className="min-h-11 w-full rounded-full border border-border px-4 text-sm text-muted-foreground hover:text-foreground"
         >
-          Invoice us instead
+          Not yet: evaluate with up to {EVALUATION_SEATS} people
         </button>
 
         {checkout ? (
@@ -292,8 +264,8 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
       <Users className="mx-auto h-6 w-6 text-primary" aria-hidden />
       <h2 className="text-base font-semibold">{orgName || "Your organisation"} is set up</h2>
       <p className="text-sm text-muted-foreground">
-        Invited teammates show up here as soon as they accept. We will be in touch at your billing
-        email to arrange invoicing for the seats you set — or pay now any time from the Seats tab.
+        Invited teammates show up here as soon as they accept. While you evaluate, the organisation
+        holds {EVALUATION_SEATS} people including you. Choose a plan from the Seats tab to add more.
       </p>
       <button
         type="button"

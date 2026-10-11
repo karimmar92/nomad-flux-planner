@@ -1,38 +1,35 @@
 /**
- * Business-tier commercials — seat packaging for /business and /org.
+ * Business-tier commercials: seat maths for /business, /org and checkout.
  *
- * The PRICE ITSELF lives in src/config/pricing.ts (`tier("teams")`), the
- * app's single declared source of truth for every price shown anywhere.
- * This file used to duplicate it as a hand-typed $8/seat, dated 2026-08-04 —
- * before the central pricing config existed. When Teams later became $59/
- * seat there, nothing told this file, and it sat here live and unnoticed,
- * quoting a stale price on the one page (/business) an actual buyer reads.
- * Fixed by deleting the duplicate number and reading the real one instead,
- * so the two can never drift apart again.
+ * The prices live in src/config/business-plans.ts, next to the features they
+ * buy. This file used to hold its own hand-typed $8 per seat, dated before the
+ * central pricing config existed; when Teams later became $59 nothing told it,
+ * and it sat live quoting a stale price on the one page a buyer reads. It now
+ * only does arithmetic on the real numbers.
  */
-import { ANNUAL_MONTHS_CHARGED, annualSavingPercent, tier } from "@/config/pricing";
+import { ANNUAL_MONTHS_CHARGED, annualSavingPercent } from "@/config/pricing";
+import { MINIMUM_SEATS, businessTier, type BusinessTierId } from "@/config/business-plans";
 
-/** Minimum seats sold on a Teams contract — a packaging policy, not a price. */
-export const MINIMUM_SEATS = 10;
+export { MINIMUM_SEATS };
 
-export function perSeatMonthlyUsd(): number {
-  return tier("teams").monthlyUsd;
+export function perSeatMonthlyUsd(tier: BusinessTierId = "advanced"): number {
+  return businessTier(tier).monthlyUsd;
 }
 
-export function monthlyTotal(seats: number): number {
-  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd();
+export function monthlyTotal(seats: number, tier: BusinessTierId = "advanced"): number {
+  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd(tier);
 }
 
 /** Annual billing: pay ANNUAL_MONTHS_CHARGED months, the same rule every other tier uses. */
-export function annualTotal(seats: number): number {
-  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd() * ANNUAL_MONTHS_CHARGED;
+export function annualTotal(seats: number, tier: BusinessTierId = "advanced"): number {
+  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd(tier) * ANNUAL_MONTHS_CHARGED;
 }
 
-export function annualPerSeatMonthly(): number {
-  return Math.round((perSeatMonthlyUsd() * ANNUAL_MONTHS_CHARGED) / 12);
+export function annualPerSeatMonthly(tier: BusinessTierId = "advanced"): number {
+  return Math.round((perSeatMonthlyUsd(tier) * ANNUAL_MONTHS_CHARGED) / 12);
 }
 
-/** Derived, never hand-typed — see annualSavingPercent() in the central config. */
+/** Derived, never hand-typed. See annualSavingPercent() in the central config. */
 export const ANNUAL_DISCOUNT_PERCENT = annualSavingPercent();
 
 export function usd(n: number): string {

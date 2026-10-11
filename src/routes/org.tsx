@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -19,7 +19,11 @@ import { RequiresNetwork } from "@/components/OfflineBanner";
 import { CreateOrgFlow } from "@/components/org/CreateOrgFlow";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { paymentsAvailable, getStripeEnvironment } from "@/lib/stripe";
-import { verifyCheckoutSession } from "@/lib/billing/billing.functions";
+import {
+  confirmCheckout,
+  createPortalSession,
+  verifyCheckoutSession,
+} from "@/lib/billing/billing.functions";
 import { useProfile } from "@/lib/store";
 import { useSession } from "@/lib/use-session";
 import {
@@ -38,8 +42,21 @@ import {
   type RiskLevel,
 } from "@/lib/org/presence";
 import { auditFileName, auditToCsv, auditToPdf, AUDIT_DISCLAIMER } from "@/lib/org/export";
-import { monthlyTotal, usd } from "@/lib/org/pricing";
+import { usd } from "@/lib/org/pricing";
+import {
+  businessTier,
+  clampSeats,
+  EVALUATION_SEATS,
+  normaliseOrgPlan,
+  orgHasFeature,
+  tierUnlocking,
+  type OrgFeature,
+  type OrgPlan,
+} from "@/config/business-plans";
+import { PlanPicker, type PlanChoice } from "@/components/org/PlanPicker";
+import { TRIAL_DAYS } from "@/config/pricing";
 import { buildActionItems, type ActionItem } from "@/lib/org/actions";
+import { explainCount } from "@/lib/org/explain";
 import { downloadBlob } from "@/lib/reports/export-csv";
 import { todayIso } from "@/lib/trip-dates";
 import { formatDate } from "@/lib/i18n/format";
@@ -105,6 +122,7 @@ function RiskPill({ risk }: { risk: RiskLevel }) {
  */
 function TeamsCheckoutBanner({ sessionId, onDone }: { sessionId: string; onDone: () => void }) {
   const verify = useServerFn(verifyCheckoutSession);
+  const confirm = useServerFn(confirmCheckout);
   const { patchProfile } = useProfile();
   const [state, setState] = useState<"working" | "granted" | "pending" | "failed">("working");
   const [message, setMessage] = useState<string | null>(null);
@@ -115,6 +133,12 @@ function TeamsCheckoutBanner({ sessionId, onDone }: { sessionId: string; onDone:
     ran.current = true;
     void (async () => {
       try {
+        // Records the purchased tier on the organisation before the dashboard
+        // refreshes, so the plan the buyer just paid for is the one it shows.
+        // Idempotent with the webhook; a failure here is not fatal.
+        await confirm({ data: { environment: getStripeEnvironment(), sessionId } }).catch(
+          () => undefined,
+        );
         const result = await verify({ data: { sessionId, environment: getStripeEnvironment() } });
         if ("error" in result) {
           setState(result.pending ? "pending" : "failed");
@@ -194,10 +218,15 @@ function OrgDashboard() {
     [data],
   );
 
+  const orgPlan = normaliseOrgPlan(data?.org?.plan);
   const actions = useMemo(
     () =>
-      data && overview ? buildActionItems(overview, data.rows, data.requests, todayIso()) : [],
-    [data, overview],
+      data && overview && orgHasFeature(orgPlan, "actionCenter")
+        ? buildActionItems(overview, data.rows, data.requests, todayIso(), {
+            forecast: orgHasFeature(orgPlan, "forecast"),
+          })
+        : [],
+    [data, overview, orgPlan],
   );
 
   if (!ready) return null;
@@ -291,6 +320,7 @@ function OrgDashboard() {
 
       {tab === "Risk" ? (
         <RiskTab
+          plan={orgPlan}
           actions={actions}
           onJump={setTab}
           overview={overview}
@@ -298,12 +328,22 @@ function OrgDashboard() {
           seats={{ activeSeats, invited, purchased: org.seats_purchased }}
         />
       ) : null}
-      {tab === "Countries" ? <CountriesTab overview={overview} /> : null}
+      {tab === "Countries" ? (
+        <CountriesTab plan={orgPlan} overview={overview} rows={data.rows} />
+      ) : null}
       {tab === "Employees" ? <EmployeesTab overview={overview} /> : null}
       {tab === "Requests" ? (
-        <RequestsTab data={data} overview={overview} onChange={refresh} />
+        orgHasFeature(orgPlan, "approvals") ? (
+          <RequestsTab data={data} overview={overview} onChange={refresh} />
+        ) : (
+          <Locked
+            feature="approvals"
+            what="Travel requests with the compliance maths shown before you decide"
+            onJump={() => setTab("Seats")}
+          />
+        )
       ) : null}
-      {tab === "Seats" ? <SeatsTab data={data} onChange={refresh} /> : null}
+      {tab === "Seats" ? <SeatsTab data={data} plan={orgPlan} onChange={refresh} /> : null}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">{LEGAL_DISCLAIMER}</p>
     </div>
@@ -385,13 +425,47 @@ function ActionCenter({ items, onJump }: { items: ActionItem[]; onJump: (tab: Ta
   );
 }
 
+/** What a plan does not include, said plainly, with the cheapest plan that does. */
+function Locked({
+  feature,
+  what,
+  onJump,
+}: {
+  feature: OrgFeature;
+  what: string;
+  onJump?: () => void;
+}) {
+  const t = tierUnlocking(feature);
+  return (
+    <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{what}</p>
+        <p className="text-xs text-muted-foreground">
+          Included in {t.name} and above, from {usd(t.monthlyUsd)} per seat per month.
+        </p>
+      </div>
+      {onJump ? (
+        <button
+          type="button"
+          onClick={onJump}
+          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs transition-colors hover:bg-surface-2"
+        >
+          See plans
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function RiskTab({
+  plan,
   actions,
   onJump,
   overview,
   orgName,
   seats,
 }: {
+  plan: OrgPlan;
   actions: ActionItem[];
   onJump: (tab: Tab) => void;
   overview: Overview;
@@ -413,7 +487,15 @@ function RiskTab({
 
   return (
     <div className="space-y-5">
-      <ActionCenter items={actions} onJump={onJump} />
+      {orgHasFeature(plan, "actionCenter") ? (
+        <ActionCenter items={actions} onJump={onJump} />
+      ) : (
+        <Locked
+          feature="actionCenter"
+          what="A ranked daily to-do list for your compliance team"
+          onJump={() => onJump("Seats")}
+        />
+      )}
       <div className="panel grid grid-cols-2 gap-4 p-4 sm:grid-cols-5">
         <Stat label="Over a limit" value={overview.counts.over} tone="negative" size="sm" />
         <Stat label="Approaching" value={overview.counts.approaching} size="sm" />
@@ -427,60 +509,70 @@ function RiskTab({
         />
       </div>
 
-      <section className="space-y-2">
-        <h2 className="text-sm font-semibold">Permanent-establishment exposure</h2>
-        <p className="max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          {PE_BENCHMARK_LABEL}. Anyone at or approaching {PE_BENCHMARK_DAYS} recorded days in a
-          single country over the rolling 12 months is flagged below. This records presence; it is
-          not a determination that a permanent establishment exists.
-        </p>
-        {overview.countries.length === 0 ? (
-          <div className="panel p-4 text-sm text-muted-foreground">
-            No travel recorded in the last 12 months.
-          </div>
-        ) : (
-          <div className="panel overflow-x-auto p-4">
-            <table className="w-full text-start text-sm">
-              <thead className="text-muted-foreground">
-                <tr className="border-b border-border">
-                  <th className="py-1.5 pe-4 font-medium">Country</th>
-                  <th className="py-1.5 pe-4 font-medium">Employees</th>
-                  <th className="py-1.5 pe-4 font-medium">Total days</th>
-                  <th className="py-1.5 pe-4 font-medium">Longest stay</th>
-                  <th className="py-1.5 pe-4 font-medium">Threshold</th>
-                  <th className="py-1.5 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {overview.countries.map((c) => (
-                  <tr key={c.country_code} className="border-b border-border/60">
-                    <td className="py-1.5 pe-4">
-                      {c.country}
-                      {c.peExceeded ? (
-                        <span className="ms-2 text-[11px] text-negative">PE benchmark passed</span>
-                      ) : c.peApproaching ? (
-                        <span className="ms-2 text-[11px] text-warning">
-                          approaching PE benchmark
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="num py-1.5 pe-4">{c.employeeCount}</td>
-                    <td className="num py-1.5 pe-4">{c.totalDays}</td>
-                    <td className="num py-1.5 pe-4">{c.longestSingleStay}</td>
-                    <td className="num py-1.5 pe-4">
-                      {c.thresholdDays}
-                      {c.policyMaxDays !== null ? ` · policy ${c.policyMaxDays}` : ""}
-                    </td>
-                    <td className="py-1.5">
-                      <RiskPill risk={c.risk} />
-                    </td>
+      {orgHasFeature(plan, "peExposure") ? (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold">Permanent-establishment exposure</h2>
+          <p className="max-w-3xl text-xs leading-relaxed text-muted-foreground">
+            {PE_BENCHMARK_LABEL}. Anyone at or approaching {PE_BENCHMARK_DAYS} recorded days in a
+            single country over the rolling 12 months is flagged below. This records presence; it is
+            not a determination that a permanent establishment exists.
+          </p>
+          {overview.countries.length === 0 ? (
+            <div className="panel p-4 text-sm text-muted-foreground">
+              No travel recorded in the last 12 months.
+            </div>
+          ) : (
+            <div className="panel overflow-x-auto p-4">
+              <table className="w-full text-start text-sm">
+                <thead className="text-muted-foreground">
+                  <tr className="border-b border-border">
+                    <th className="py-1.5 pe-4 font-medium">Country</th>
+                    <th className="py-1.5 pe-4 font-medium">Employees</th>
+                    <th className="py-1.5 pe-4 font-medium">Total days</th>
+                    <th className="py-1.5 pe-4 font-medium">Longest stay</th>
+                    <th className="py-1.5 pe-4 font-medium">Threshold</th>
+                    <th className="py-1.5 font-medium">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {overview.countries.map((c) => (
+                    <tr key={c.country_code} className="border-b border-border/60">
+                      <td className="py-1.5 pe-4">
+                        {c.country}
+                        {c.peExceeded ? (
+                          <span className="ms-2 text-[11px] text-negative">
+                            PE benchmark passed
+                          </span>
+                        ) : c.peApproaching ? (
+                          <span className="ms-2 text-[11px] text-warning">
+                            approaching PE benchmark
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="num py-1.5 pe-4">{c.employeeCount}</td>
+                      <td className="num py-1.5 pe-4">{c.totalDays}</td>
+                      <td className="num py-1.5 pe-4">{c.longestSingleStay}</td>
+                      <td className="num py-1.5 pe-4">
+                        {c.thresholdDays}
+                        {c.policyMaxDays !== null ? ` · policy ${c.policyMaxDays}` : ""}
+                      </td>
+                      <td className="py-1.5">
+                        <RiskPill risk={c.risk} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      ) : (
+        <Locked
+          feature="peExposure"
+          what="Permanent-establishment exposure by country"
+          onJump={() => onJump("Seats")}
+        />
+      )}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Data quality</h2>
@@ -526,13 +618,15 @@ function RiskTab({
           >
             <Download className="h-4 w-4" aria-hidden /> CSV
           </button>
-          <button
-            type="button"
-            onClick={() => void exportPdf()}
-            className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
-          >
-            <Download className="h-4 w-4" aria-hidden /> PDF
-          </button>
+          {orgHasFeature(plan, "pdfExport") ? (
+            <button
+              type="button"
+              onClick={() => void exportPdf()}
+              className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-surface-2"
+            >
+              <Download className="h-4 w-4" aria-hidden /> PDF
+            </button>
+          ) : null}
           <span className="text-xs text-muted-foreground">
             Period {overview.windowStart} → {overview.windowEnd}
           </span>
@@ -542,7 +636,17 @@ function RiskTab({
   );
 }
 
-function CountriesTab({ overview }: { overview: Overview }) {
+function CountriesTab({
+  plan,
+  overview,
+  rows,
+}: {
+  plan: OrgPlan;
+  overview: Overview;
+  rows: Dashboard["rows"];
+}) {
+  const canExplain = orgHasFeature(plan, "explain");
+  const [open, setOpen] = useState<string | null>(null);
   const [code, setCode] = useState(overview.countries[0]?.country_code ?? "");
   const country = overview.countries.find((c) => c.country_code === code);
 
@@ -586,23 +690,84 @@ function CountriesTab({ overview }: { overview: Overview }) {
                 <th className="py-1.5 pe-4 font-medium">Employee</th>
                 <th className="py-1.5 pe-4 font-medium">Days</th>
                 <th className="py-1.5 pe-4 font-medium">Longest</th>
-                <th className="py-1.5 font-medium">Status</th>
+                <th className="py-1.5 pe-4 font-medium">Status</th>
+                <th className="py-1.5" />
               </tr>
             </thead>
             <tbody>
-              {country.members.map((m) => (
-                <tr key={m.user_id} className="border-b border-border/60">
-                  <td className="py-1.5 pe-4">{m.display_name}</td>
-                  <td className="num py-1.5 pe-4">
-                    {m.days}
-                    {m.openStay ? " (open)" : ""}
-                  </td>
-                  <td className="num py-1.5 pe-4">{m.longestStay}</td>
-                  <td className="py-1.5">
-                    <RiskPill risk={m.risk} />
-                  </td>
-                </tr>
-              ))}
+              {country.members.map((m) => {
+                const isOpen = open === m.user_id;
+                const why = isOpen
+                  ? explainCount(rows, m.user_id, country.country_code, overview.windowEnd)
+                  : null;
+                return (
+                  <Fragment key={m.user_id}>
+                    <tr className="border-b border-border/60">
+                      <td className="py-1.5 pe-4">{m.display_name}</td>
+                      <td className="num py-1.5 pe-4">
+                        {m.days}
+                        {m.openStay ? " (open)" : ""}
+                      </td>
+                      <td className="num py-1.5 pe-4">{m.longestStay}</td>
+                      <td className="py-1.5 pe-4">
+                        <RiskPill risk={m.risk} />
+                      </td>
+                      <td className="py-1.5 text-end">
+                        {canExplain ? (
+                          <button
+                            type="button"
+                            onClick={() => setOpen(isOpen ? null : m.user_id)}
+                            aria-expanded={isOpen}
+                            className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                          >
+                            {isOpen ? "Hide working" : "Show working"}
+                          </button>
+                        ) : null}
+                      </td>
+                    </tr>
+                    {why ? (
+                      <tr className="border-b border-border/60 bg-surface-2">
+                        <td colSpan={5} className="space-y-2 px-3 py-3 text-xs">
+                          <p className="text-muted-foreground">
+                            Window {why.windowStart} to {why.windowEnd} (rolling 12 months). Both
+                            the entry and exit day count. Threshold {why.thresholdDays} days, on a{" "}
+                            {why.basisLabel} basis.
+                          </p>
+                          <ul className="space-y-1">
+                            {why.stays.map((st) => (
+                              <li
+                                key={`${st.entry_date}-${st.exit_date ?? "open"}`}
+                                className="num flex flex-wrap justify-between gap-2"
+                              >
+                                <span>
+                                  {st.entry_date} to {st.exit_date ?? "no exit date"}
+                                  {st.clipped ? ` · counted from ${st.countedFrom}` : ""}
+                                  {st.open ? ` · counted to ${st.countedTo}` : ""}
+                                </span>
+                                <span>{st.days} days</span>
+                              </li>
+                            ))}
+                            <li className="num flex justify-between gap-2 border-t border-border pt-1 font-semibold">
+                              <span>Total</span>
+                              <span>{why.total} days</span>
+                            </li>
+                          </ul>
+                          {why.overlapDays > 0 ? (
+                            <p className="text-warning">
+                              {why.overlapDays} {why.overlapDays === 1 ? "day sits" : "days sit"} in
+                              overlapping entries and {why.overlapDays === 1 ? "is" : "are"} counted
+                              twice. Ask the employee to correct the dates.
+                            </p>
+                          ) : null}
+                          <p className="text-muted-foreground">
+                            Recorded presence only. Self-reported by the employee.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -761,7 +926,53 @@ function RequestsTab({
   );
 }
 
-function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void }) {
+/**
+ * One-click starting points. They fill the form rather than saving, so the
+ * admin reads what they are about to enforce. The numbers are policy choices,
+ * not legal thresholds: tax and visa limits still apply on top.
+ */
+const POLICY_TEMPLATES: {
+  label: string;
+  values: { country_code: string; max_days: number; requires_approval: boolean; note: string };
+}[] = [
+  {
+    label: "Short workation: 30 days, approval",
+    values: {
+      country_code: "",
+      max_days: 30,
+      requires_approval: true,
+      note: "Workation cap. Longer stays need approval.",
+    },
+  },
+  {
+    label: "Extended stay: 60 days, approval",
+    values: {
+      country_code: "",
+      max_days: 60,
+      requires_approval: true,
+      note: "Extended remote stay, reviewed before it starts.",
+    },
+  },
+  {
+    label: "Light touch: 90 days, no approval",
+    values: {
+      country_code: "",
+      max_days: 90,
+      requires_approval: false,
+      note: "Flag only. No approval step.",
+    },
+  },
+];
+
+function SeatsTab({
+  data,
+  plan,
+  onChange,
+}: {
+  data: Dashboard;
+  plan: OrgPlan;
+  onChange: () => void;
+}) {
   const invite = useServerFn(inviteSeat);
   const remove = useServerFn(removeSeat);
   const savePolicy = useServerFn(upsertPolicy);
@@ -774,8 +985,28 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
     note: "",
   });
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
+  const openPortal = useServerFn(createPortalSession);
   const orgId = data.org!.id;
   const purchasedSeats = data.org!.seats_purchased;
+  const seatsInUse = data.members.filter((m) => m.status !== "left").length;
+  const [choice, setChoice] = useState<PlanChoice>({
+    tier: plan === "unpaid" ? "advanced" : plan,
+    interval: "yearly",
+    seats: clampSeats(purchasedSeats),
+  });
+
+  async function manageBilling() {
+    try {
+      const result = await openPortal({
+        data: { environment: getStripeEnvironment(), returnUrl: window.location.href },
+      });
+      if ("url" in result) window.location.assign(result.url);
+      else if ("error" in result) toast.error(result.error);
+      else toast.message(result.message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not open billing.");
+    }
+  }
 
   async function onInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -824,27 +1055,51 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
   return (
     <div className="space-y-5">
       <section className="space-y-2">
-        <h2 className="text-sm font-semibold">Billing</h2>
-        <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-          <p className="text-sm text-muted-foreground">
-            {purchasedSeats} seats on file · {usd(monthlyTotal(purchasedSeats))}/month at the
-            standard rate. Started on an invoice, or want to switch to card billing?
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              if (!paymentsAvailable()) {
-                toast.error("Checkout is not available on this build yet.");
-                return;
-              }
-              setCheckout({ plan: "teams", interval: "monthly", seats: purchasedSeats });
-            }}
-            className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-          >
-            <CreditCard className="h-3.5 w-3.5" aria-hidden />
-            Pay by card
-          </button>
-        </div>
+        <h2 className="text-sm font-semibold">Plan and billing</h2>
+        {plan === "unpaid" ? (
+          <div className="panel space-y-4 p-4">
+            <p className="text-sm text-muted-foreground">
+              You are evaluating: {seatsInUse} of {EVALUATION_SEATS} places used, with the Basic
+              features. Choose a plan to add your team and unlock the rest.
+            </p>
+            <PlanPicker value={choice} onChange={setChoice} />
+            <button
+              type="button"
+              onClick={() => {
+                if (!paymentsAvailable()) {
+                  toast.error("Checkout is not available on this build yet.");
+                  return;
+                }
+                setCheckout({
+                  plan: "teams",
+                  interval: choice.interval,
+                  seats: clampSeats(choice.seats),
+                  tier: choice.tier,
+                });
+              }}
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground"
+            >
+              <CreditCard className="h-4 w-4" aria-hidden />
+              Start {TRIAL_DAYS}-day trial
+            </button>
+          </div>
+        ) : (
+          <div className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{businessTier(plan).name}</span> plan ·{" "}
+              {seatsInUse} of {purchasedSeats} seats in use. Change plan, add seats, update the card
+              or cancel in the billing portal.
+            </p>
+            <button
+              type="button"
+              onClick={() => void manageBilling()}
+              className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+            >
+              <CreditCard className="h-3.5 w-3.5" aria-hidden />
+              Manage billing
+            </button>
+          </div>
+        )}
         {checkout ? (
           <CheckoutDialog request={checkout} returnPath="/org" onClose={() => setCheckout(null)} />
         ) : null}
@@ -899,78 +1154,102 @@ function SeatsTab({ data, onChange }: { data: Dashboard; onChange: () => void })
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold">Policy limits</h2>
-        <form onSubmit={onSavePolicy} className="panel flex flex-wrap items-end gap-3 p-4">
-          <label className="space-y-1">
-            <span className="label-xs">Country code (blank = global)</span>
-            <input
-              value={policy.country_code}
-              maxLength={2}
-              onChange={(e) => setPolicy({ ...policy, country_code: e.target.value.toUpperCase() })}
-              placeholder="DE"
-              className="w-24 rounded-md border border-border bg-surface-1 px-3 py-2 text-sm uppercase"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="label-xs">Max days</span>
-            <input
-              type="number"
-              min={1}
-              max={365}
-              value={policy.max_days}
-              onChange={(e) => setPolicy({ ...policy, max_days: Number(e.target.value) })}
-              className="w-24 rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="flex items-center gap-2 pb-2 text-sm">
-            <input
-              type="checkbox"
-              checked={policy.requires_approval}
-              onChange={(e) => setPolicy({ ...policy, requires_approval: e.target.checked })}
-            />
-            Requires approval
-          </label>
-          <label className="min-w-[200px] flex-1 space-y-1">
-            <span className="label-xs">Note</span>
-            <input
-              value={policy.note}
-              onChange={(e) => setPolicy({ ...policy, note: e.target.value })}
-              className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
-            />
-          </label>
-          <button
-            type="submit"
-            className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Add
-          </button>
-        </form>
-        <div className="panel divide-y divide-border p-0">
-          {data.policies.length === 0 ? (
-            <p className="p-3 text-sm text-muted-foreground">
-              No limits set. Country tax-residency thresholds still apply.
-            </p>
-          ) : null}
-          {data.policies.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center gap-2 p-3 text-sm">
-              <span className="flex-1">
-                {p.country_code ?? "All countries"} · max <span className="num">{p.max_days}</span>{" "}
-                days
-                {p.requires_approval ? " · approval required" : ""}
-                {p.note ? ` · ${p.note}` : ""}
-              </span>
-              <button
-                type="button"
-                onClick={async () => {
-                  await dropPolicy({ data: { id: p.id } });
-                  onChange();
-                }}
-                className="rounded-md border border-border px-2 py-1 text-xs transition-colors hover:bg-surface-2"
-              >
-                Delete
-              </button>
+        {orgHasFeature(plan, "policies") ? (
+          <>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground">Start from a template:</span>
+              {POLICY_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.label}
+                  type="button"
+                  onClick={() => setPolicy({ ...tpl.values })}
+                  className="rounded-md border border-border px-2.5 py-1 text-xs transition-colors hover:bg-surface-2"
+                >
+                  {tpl.label}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
+            <form onSubmit={onSavePolicy} className="panel flex flex-wrap items-end gap-3 p-4">
+              <label className="space-y-1">
+                <span className="label-xs">Country code (blank = global)</span>
+                <input
+                  value={policy.country_code}
+                  maxLength={2}
+                  onChange={(e) =>
+                    setPolicy({ ...policy, country_code: e.target.value.toUpperCase() })
+                  }
+                  placeholder="DE"
+                  className="w-24 rounded-md border border-border bg-surface-1 px-3 py-2 text-sm uppercase"
+                />
+              </label>
+              <label className="space-y-1">
+                <span className="label-xs">Max days</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={policy.max_days}
+                  onChange={(e) => setPolicy({ ...policy, max_days: Number(e.target.value) })}
+                  className="w-24 rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2 pb-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={policy.requires_approval}
+                  onChange={(e) => setPolicy({ ...policy, requires_approval: e.target.checked })}
+                />
+                Requires approval
+              </label>
+              <label className="min-w-[200px] flex-1 space-y-1">
+                <span className="label-xs">Note</span>
+                <input
+                  value={policy.note}
+                  onChange={(e) => setPolicy({ ...policy, note: e.target.value })}
+                  className="w-full rounded-md border border-border bg-surface-1 px-3 py-2 text-sm"
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
+              >
+                Add
+              </button>
+            </form>
+            <div className="panel divide-y divide-border p-0">
+              {data.policies.length === 0 ? (
+                <p className="p-3 text-sm text-muted-foreground">
+                  No limits set. Country tax-residency thresholds still apply.
+                </p>
+              ) : null}
+              {data.policies.map((p) => (
+                <div key={p.id} className="flex flex-wrap items-center gap-2 p-3 text-sm">
+                  <span className="flex-1">
+                    {p.country_code ?? "All countries"} · max{" "}
+                    <span className="num">{p.max_days}</span> days
+                    {p.requires_approval ? " · approval required" : ""}
+                    {p.note ? ` · ${p.note}` : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await dropPolicy({ data: { id: p.id } });
+                      onChange();
+                    }}
+                    className="rounded-md border border-border px-2 py-1 text-xs transition-colors hover:bg-surface-2"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <Locked
+            feature="policies"
+            what="Company travel limits per country, with an approval step"
+          />
+        )}
       </section>
     </div>
   );

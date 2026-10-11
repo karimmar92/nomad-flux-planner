@@ -98,6 +98,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       plan: string;
       interval: string;
       seats?: number;
+      tier?: string;
       environment: string;
       returnUrl: string;
     }) => ({
@@ -107,6 +108,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         "Plan",
       ) as PaidPlanId,
       interval: oneOf(d?.interval, ["monthly", "yearly"] as const, "Interval") as BillingInterval,
+      // Only meaningful for plan "teams"; ignored otherwise.
+      tier: oneOf(d?.tier ?? "advanced", ["basic", "advanced", "pro"] as const, "Tier"),
       // Seats only apply to Teams; clamped so a crafted request cannot bill 10,000 seats.
       seats: d?.seats == null ? TEAMS_SEAT_MIN : integer(d.seats, "Seats", 1, TEAMS_SEAT_MAX),
       environment: envOf(d?.environment),
@@ -121,7 +124,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       const stripe = createStripeClient(data.environment);
 
       const prices = await stripe.prices.list({
-        lookup_keys: [priceIdFor(data.plan, data.interval)],
+        lookup_keys: [priceIdFor(data.plan, data.interval, data.tier)],
       });
       const price = prices.data[0];
       if (!price) throw new Error("Price not found — publish the product catalogue first.");
@@ -199,12 +202,23 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
         */
         ...(!isOneTime && {
           subscription_data: {
-            metadata: { user_id: userId, userId, plan: data.plan, trial_grants: "pro" },
+            metadata: {
+              user_id: userId,
+              userId,
+              plan: data.plan,
+              trial_grants: "pro",
+              ...(isTeams ? { business_tier: data.tier } : {}),
+            },
             trial_period_days: TRIAL_DAYS,
             trial_settings: { end_behavior: { missing_payment_method: "cancel" } },
           },
         }),
-        metadata: { user_id: userId, userId, plan: data.plan },
+        metadata: {
+          user_id: userId,
+          userId,
+          plan: data.plan,
+          ...(isTeams ? { business_tier: data.tier, interval: data.interval } : {}),
+        },
         allow_promotion_codes: true,
         // Full handling supplies its own terms, tax treatment and checkout
         // disclosures. custom_text, consent_collection and tax_id_collection
@@ -355,7 +369,6 @@ export const createPortalSession = createServerFn({ method: "POST" })
           "You bought a founding spot outright. There is no subscription to manage, nothing renews and no card is kept on file. You can export your data at any time, and support can help with anything else.",
       };
     }
-
 
     const { data: sub } = await supabase
       .from("subscriptions")
@@ -577,7 +590,10 @@ export const getSubscriptionState = createServerFn({ method: "POST" })
         .eq("id", userId)
         .maybeSingle();
 
-      const p = (profile ?? {}) as { stripe_customer_id?: string | null; founding_number?: number | null };
+      const p = (profile ?? {}) as {
+        stripe_customer_id?: string | null;
+        founding_number?: number | null;
+      };
       const lifetime = p.founding_number != null;
       const customerId = p.stripe_customer_id ?? null;
 
@@ -606,7 +622,8 @@ export const getSubscriptionState = createServerFn({ method: "POST" })
 
       // current_period_end moved onto the item in newer API versions; read
       // both so this does not silently return null on one of them.
-      const endUnix = chosen.current_period_end ?? chosen.items?.data?.[0]?.current_period_end ?? null;
+      const endUnix =
+        chosen.current_period_end ?? chosen.items?.data?.[0]?.current_period_end ?? null;
 
       return {
         cancellable: !chosen.cancel_at_period_end,
@@ -669,7 +686,6 @@ export const confirmCheckout = createServerFn({ method: "POST" })
       );
       const result = (await response.json().catch(() => ({}))) as { plan?: string };
       return result?.plan ? { plan: result.plan } : {};
-
     } catch (error) {
       return { error: getStripeErrorMessage(error) };
     }

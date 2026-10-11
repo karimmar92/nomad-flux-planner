@@ -63,7 +63,10 @@ export function buildActionItems(
   rows: PresenceRow[],
   requests: PendingRequest[],
   todayIso: string,
+  /** Dated projections are a Pro feature; without them the person still shows as approaching. */
+  opts: { forecast?: boolean } = {},
 ): ActionItem[] {
+  const forecast = opts.forecast ?? true;
   const items: ActionItem[] = [];
   const today = toDayIndex(todayIso);
 
@@ -103,7 +106,7 @@ export function buildActionItems(
         continue;
       }
 
-      const crossing = m.openStay ? projectedCrossing(m.days, limit, todayIso) : null;
+      const crossing = forecast && m.openStay ? projectedCrossing(m.days, limit, todayIso) : null;
       if (crossing && crossing.inDays <= FORECAST_HORIZON_DAYS) {
         items.push({
           id: `forecast-${c.country_code}-${m.user_id}`,

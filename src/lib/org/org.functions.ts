@@ -6,9 +6,19 @@
  * `trips` directly — see fields.ts for why the column list is narrow.
  */
 import { createServerFn } from "@tanstack/react-start";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { email, integer, requiredText } from "@/lib/validate";
+import {
+  EVALUATION_SEATS,
+  normaliseOrgPlan,
+  orgHasFeature,
+  seatLimit,
+  tierUnlocking,
+  type OrgFeature,
+  type OrgPlan,
+} from "@/config/business-plans";
 import { EMPLOYER_DIRECTORY_FIELDS, EMPLOYER_PRESENCE_FIELDS } from "./fields";
 import type { MemberRef, OrgPolicy, PresenceRow } from "./presence";
 
@@ -148,32 +158,31 @@ export const getEmployerDashboard = createServerFn({ method: "GET" })
       }
 
       const orgId = member.org_id;
-      const [{ data: org }, { data: rows }, { data: members }, { data: policies }, { data: requests }] =
-        await Promise.all([
-          supabase
-            .from("organisations")
-            .select("id,name,plan,seats_purchased,billing_email")
-            .eq("id", orgId)
-            .maybeSingle(),
-          // Restricted view only. Do not swap this for `trips`.
-          supabase
-            .from("org_member_presence")
-            .select(EMPLOYER_PRESENCE_FIELDS)
-            .eq("org_id", orgId),
-          supabase
-            .from("org_member_directory")
-            .select(EMPLOYER_DIRECTORY_FIELDS)
-            .eq("org_id", orgId),
-          supabase
-            .from("org_policies")
-            .select("id,country_code,max_days,requires_approval,note")
-            .eq("org_id", orgId),
-          supabase
-            .from("travel_requests")
-            .select("*")
-            .eq("org_id", orgId)
-            .order("created_at", { ascending: false }),
-        ]);
+      const [
+        { data: org },
+        { data: rows },
+        { data: members },
+        { data: policies },
+        { data: requests },
+      ] = await Promise.all([
+        supabase
+          .from("organisations")
+          .select("id,name,plan,seats_purchased,billing_email")
+          .eq("id", orgId)
+          .maybeSingle(),
+        // Restricted view only. Do not swap this for `trips`.
+        supabase.from("org_member_presence").select(EMPLOYER_PRESENCE_FIELDS).eq("org_id", orgId),
+        supabase.from("org_member_directory").select(EMPLOYER_DIRECTORY_FIELDS).eq("org_id", orgId),
+        supabase
+          .from("org_policies")
+          .select("id,country_code,max_days,requires_approval,note")
+          .eq("org_id", orgId),
+        supabase
+          .from("travel_requests")
+          .select("*")
+          .eq("org_id", orgId)
+          .order("created_at", { ascending: false }),
+      ]);
 
       return {
         org: (org ?? null) as OrgSummary | null,
@@ -220,12 +229,53 @@ export const createOrganisation = createServerFn({ method: "POST" })
     return { org_id: org.id as string };
   });
 
+type Db = SupabaseClient<Database>;
+
+/** The organisation's plan and paid seat count, read as the calling admin (RLS applies). */
+async function orgBilling(supabase: Db, orgId: string): Promise<{ plan: OrgPlan; seats: number }> {
+  const { data } = await supabase
+    .from("organisations")
+    .select("plan,seats_purchased")
+    .eq("id", orgId)
+    .maybeSingle();
+  const row = (data ?? {}) as { plan?: unknown; seats_purchased?: number };
+  return { plan: normaliseOrgPlan(row.plan), seats: row.seats_purchased ?? 0 };
+}
+
+/**
+ * Server-side half of the plan gates. The dashboard hides what a plan does not
+ * include, but a hidden button is not a lock: this refuses the write itself.
+ */
+async function requireOrgFeature(supabase: Db, orgId: string, feature: OrgFeature): Promise<void> {
+  const { plan } = await orgBilling(supabase, orgId);
+  if (!orgHasFeature(plan, feature)) {
+    throw new Error(`This is part of the ${tierUnlocking(feature).name} plan and above.`);
+  }
+}
+
 export const inviteSeat = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { org_id: string; email: string; role: "admin" | "member" }) => d)
   .handler(async ({ data, context }) => {
     const email = data.email.trim().toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error("Enter a valid work email");
+
+    // Seats are a real limit: the paid count from Stripe, or a small allowance
+    // while an organisation is still evaluating. Removed members do not count.
+    const { plan, seats } = await orgBilling(context.supabase, data.org_id);
+    const { count } = await context.supabase
+      .from("org_members")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", data.org_id)
+      .neq("status", "left");
+    if ((count ?? 0) >= seatLimit(plan, seats)) {
+      throw new Error(
+        plan === "unpaid"
+          ? `Until you pick a plan an organisation holds ${EVALUATION_SEATS} people, including you.`
+          : `All ${seats} seats are in use. Add seats from the Billing section.`,
+      );
+    }
+
     const { error } = await context.supabase.from("org_members").insert({
       org_id: data.org_id,
       invite_email: email,
@@ -278,6 +328,7 @@ export const upsertPolicy = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data, context }) => {
+    await requireOrgFeature(context.supabase, data.org_id, "policies");
     const payload = {
       org_id: data.org_id,
       country_code: data.country_code ? data.country_code.toUpperCase().slice(0, 2) : null,
@@ -402,8 +453,8 @@ export const submitB2bLead = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const email = data.work_email.trim().toLowerCase();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error("Enter a valid work email");
-    const key = process.env['SUPABASE_PUBLISHABLE_KEY']!;
-    const supabase = createClient(process.env['SUPABASE_URL']!, key, {
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const supabase = createClient(process.env["SUPABASE_URL"]!, key, {
       auth: { persistSession: false, autoRefreshToken: false },
       global: {
         fetch: (input, init) => {
