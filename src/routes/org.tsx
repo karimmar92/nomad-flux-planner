@@ -39,6 +39,7 @@ import {
 } from "@/lib/org/presence";
 import { auditFileName, auditToCsv, auditToPdf, AUDIT_DISCLAIMER } from "@/lib/org/export";
 import { monthlyTotal, usd } from "@/lib/org/pricing";
+import { buildActionItems, type ActionItem } from "@/lib/org/actions";
 import { downloadBlob } from "@/lib/reports/export-csv";
 import { todayIso } from "@/lib/trip-dates";
 import { formatDate } from "@/lib/i18n/format";
@@ -193,6 +194,12 @@ function OrgDashboard() {
     [data],
   );
 
+  const actions = useMemo(
+    () =>
+      data && overview ? buildActionItems(overview, data.rows, data.requests, todayIso()) : [],
+    [data, overview],
+  );
+
   if (!ready) return null;
   if (!signedIn) {
     return (
@@ -284,6 +291,8 @@ function OrgDashboard() {
 
       {tab === "Risk" ? (
         <RiskTab
+          actions={actions}
+          onJump={setTab}
           overview={overview}
           orgName={org.name}
           seats={{ activeSeats, invited, purchased: org.seats_purchased }}
@@ -304,11 +313,87 @@ function OrgDashboard() {
 type Dashboard = NonNullable<Awaited<ReturnType<typeof getEmployerDashboard>>>;
 type Overview = NonNullable<ReturnType<typeof buildOrgOverview>>;
 
+const SEVERITY_DOT: Record<ActionItem["severity"], string> = {
+  urgent: "bg-negative",
+  soon: "bg-warning",
+  housekeeping: "bg-muted-foreground/50",
+};
+
+/**
+ * The first thing an admin sees: what to do today, ranked, each with a way
+ * straight to the screen that resolves it. An archive tells you where people
+ * were; this tells you what needs a decision before it becomes a problem.
+ */
+function ActionCenter({ items, onJump }: { items: ActionItem[]; onJump: (tab: Tab) => void }) {
+  const [showAll, setShowAll] = useState(false);
+  const shown = showAll ? items : items.slice(0, 5);
+  const urgent = items.filter((i) => i.severity === "urgent").length;
+
+  return (
+    <section className="space-y-2" aria-labelledby="needs-attention">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="needs-attention" className="text-sm font-semibold">
+          Needs attention
+          {items.length > 0 ? (
+            <span className="num ms-2 text-xs font-normal text-muted-foreground">
+              {urgent > 0 ? `${urgent} urgent · ` : ""}
+              {items.length} total
+            </span>
+          ) : null}
+        </h2>
+      </div>
+      {items.length === 0 ? (
+        <div className="panel p-4 text-sm text-muted-foreground">
+          Nothing needs a decision right now. No one is over a limit, no stay is projected to cross
+          one in the next 30 days, and no requests are waiting.
+        </div>
+      ) : (
+        <ul className="panel divide-y divide-border p-0">
+          {shown.map((item) => (
+            <li key={item.id} className="flex items-start gap-3 p-3.5">
+              <span
+                className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", SEVERITY_DOT[item.severity])}
+                aria-hidden
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium leading-snug">{item.title}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                  {item.detail}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onJump(item.tab)}
+                className="shrink-0 rounded-md border border-border px-2.5 py-1 text-xs transition-colors hover:bg-surface-2"
+              >
+                {item.tab}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {items.length > 5 ? (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          {showAll ? "Show fewer" : `Show all ${items.length}`}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
 function RiskTab({
+  actions,
+  onJump,
   overview,
   orgName,
   seats,
 }: {
+  actions: ActionItem[];
+  onJump: (tab: Tab) => void;
   overview: Overview;
   orgName: string;
   seats: { activeSeats: number; invited: number; purchased: number };
@@ -328,6 +413,7 @@ function RiskTab({
 
   return (
     <div className="space-y-5">
+      <ActionCenter items={actions} onJump={onJump} />
       <div className="panel grid grid-cols-2 gap-4 p-4 sm:grid-cols-5">
         <Stat label="Over a limit" value={overview.counts.over} tone="negative" size="sm" />
         <Stat label="Approaching" value={overview.counts.approaching} size="sm" />
