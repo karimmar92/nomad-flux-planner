@@ -24,8 +24,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { ArrowRight, CreditCard, Users } from "lucide-react";
 import { createOrganisation, inviteSeat } from "@/lib/org/org.functions";
-import { MINIMUM_SEATS, annualTotal, monthlyTotal, usd } from "@/lib/org/pricing";
-import { EVALUATION_SEATS, businessTier } from "@/config/business-plans";
+import { MINIMUM_SEATS, monthlyEquivalentUsd, usd, yearlyTotal } from "@/lib/org/pricing";
+import { EVALUATION_SEATS } from "@/config/business-plans";
 import { TRIAL_DAYS } from "@/config/pricing";
 import { PlanPicker, type PlanChoice } from "@/components/org/PlanPicker";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
@@ -44,7 +44,6 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
   const [seats, setSeats] = useState(String(MINIMUM_SEATS));
   const [choice, setChoice] = useState<PlanChoice>({
     tier: "advanced",
-    interval: "yearly",
     seats: MINIMUM_SEATS,
   });
   const [checkout, setCheckout] = useState<CheckoutRequest | null>(null);
@@ -76,7 +75,7 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
       toast.error("Checkout is not available on this build yet — use “invoice us instead” below.");
       return;
     }
-    setCheckout({ plan: "teams", interval: choice.interval, seats: seatCount, tier: choice.tier });
+    setCheckout({ plan: "teams", interval: "yearly", seats: seatCount, tier: choice.tier });
   }
 
   async function submitInvites() {
@@ -153,8 +152,8 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
               className="input num"
             />
             <span className="mt-1 block text-xs text-muted-foreground">
-              From {usd(businessTier("basic").monthlyUsd)}/seat/month. You will choose a plan on the
-              next step.
+              From {usd(monthlyEquivalentUsd("basic"))} a seat a month, billed yearly. You will
+              choose a plan on the next step.
             </span>
           </label>
           <button
@@ -171,10 +170,7 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
   }
 
   if (step === "billing") {
-    const total =
-      choice.interval === "yearly"
-        ? annualTotal(seatCount, choice.tier)
-        : monthlyTotal(seatCount, choice.tier);
+    const total = yearlyTotal(seatCount, choice.tier);
     return (
       <div className="panel max-w-lg space-y-4 p-5">
         <div>
@@ -199,8 +195,7 @@ export function CreateOrgFlow({ onFinished }: { onFinished: () => void }) {
           className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground"
         >
           <CreditCard className="h-4 w-4" aria-hidden />
-          Start {TRIAL_DAYS}-day trial · {usd(total)}
-          {choice.interval === "yearly" ? "/yr" : "/mo"} after
+          Start {TRIAL_DAYS}-day trial · {usd(total)} a year after
         </button>
         <button
           type="button"

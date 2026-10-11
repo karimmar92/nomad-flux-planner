@@ -3,6 +3,7 @@ import {
   BUSINESS_TIERS,
   EVALUATION_SEATS,
   businessTier,
+  monthlyEquivalentUsd,
   clampSeats,
   effectivePlan,
   normaliseOrgPlan,
@@ -29,7 +30,7 @@ const ALL: OrgFeature[] = [
 
 describe("business tiers", () => {
   it("prices strictly increase, so each step up has to be earned", () => {
-    const prices = BUSINESS_TIERS.map((t) => t.monthlyUsd);
+    const prices = BUSINESS_TIERS.map((t) => t.yearlyUsd);
     expect([...prices].sort((a, b) => a - b)).toEqual(prices);
     expect(new Set(prices).size).toBe(prices.length);
   });
@@ -93,9 +94,12 @@ describe("price keys", () => {
     }
   });
 
-  it("maps the legacy single Teams price to Pro, its old $59 level", () => {
+  it("maps the legacy single Teams price to Pro, the closest tier to its old level", () => {
     expect(tierFromPriceKey("teams_monthly")).toBe("pro");
-    expect(businessTier("pro").monthlyUsd).toBe(59);
+  });
+
+  it("sells yearly only: the default key for a tier is its yearly price", () => {
+    expect(teamsPriceKey("advanced")).toBe("teams_advanced_yearly");
   });
 
   it("ignores consumer price keys", () => {
@@ -127,5 +131,37 @@ describe("clampSeats", () => {
     expect(clampSeats(25.6)).toBe(26);
     expect(clampSeats(99999)).toBe(500);
     expect(clampSeats(Number.NaN)).toBe(10);
+  });
+});
+
+describe("yearly pricing", () => {
+  it("publishes the agreed per-seat yearly prices", () => {
+    expect(BUSINESS_TIERS.map((t) => t.yearlyUsd)).toEqual([149, 299, 449]);
+  });
+
+  it("works out to a monthly figure under mobility tooling and above HR software", () => {
+    expect(monthlyEquivalentUsd("basic")).toBe(12);
+    expect(monthlyEquivalentUsd("advanced")).toBe(25);
+    expect(monthlyEquivalentUsd("pro")).toBe(37);
+  });
+
+  it("charges slightly less than the earlier eight-months-of-twelve annual price", () => {
+    // Earlier model: $19 / $39 / $59 a month, 8 months charged for the year.
+    const earlier = { basic: 19 * 8, advanced: 39 * 8, pro: 59 * 8 };
+    for (const t of BUSINESS_TIERS) {
+      expect(t.yearlyUsd).toBeLessThan(earlier[t.id]);
+      expect(t.yearlyUsd).toBeGreaterThan(earlier[t.id] * 0.9);
+    }
+  });
+
+  it("each higher plan builds on the one below and adds something", () => {
+    expect(BUSINESS_TIERS[1]!.features[0]).toBe("Everything in Basic");
+    expect(BUSINESS_TIERS[2]!.features[0]).toBe("Everything in Advanced");
+    expect(BUSINESS_TIERS[1]!.features.length).toBeGreaterThan(1);
+    expect(BUSINESS_TIERS[2]!.features.length).toBeGreaterThan(1);
+  });
+
+  it("the entry plan carries the shared value, not a stripped-down shell", () => {
+    expect(BUSINESS_TIERS[0]!.features.length).toBeGreaterThanOrEqual(8);
   });
 });

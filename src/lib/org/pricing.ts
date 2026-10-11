@@ -6,31 +6,26 @@
  * central pricing config existed; when Teams later became $59 nothing told it,
  * and it sat live quoting a stale price on the one page a buyer reads. It now
  * only does arithmetic on the real numbers.
+ *
+ * Plans are billed yearly per seat, so there is one total, not two.
  */
-import { ANNUAL_MONTHS_CHARGED, annualSavingPercent } from "@/config/pricing";
-import { MINIMUM_SEATS, businessTier, type BusinessTierId } from "@/config/business-plans";
+import {
+  MINIMUM_SEATS,
+  businessTier,
+  monthlyEquivalentUsd,
+  type BusinessTierId,
+} from "@/config/business-plans";
 
-export { MINIMUM_SEATS };
+export { MINIMUM_SEATS, monthlyEquivalentUsd };
 
-export function perSeatMonthlyUsd(tier: BusinessTierId = "advanced"): number {
-  return businessTier(tier).monthlyUsd;
+export function perSeatYearlyUsd(tier: BusinessTierId = "advanced"): number {
+  return businessTier(tier).yearlyUsd;
 }
 
-export function monthlyTotal(seats: number, tier: BusinessTierId = "advanced"): number {
-  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd(tier);
+/** What one year costs, never fewer than the minimum seat count. */
+export function yearlyTotal(seats: number, tier: BusinessTierId = "advanced"): number {
+  return Math.max(seats, MINIMUM_SEATS) * perSeatYearlyUsd(tier);
 }
-
-/** Annual billing: pay ANNUAL_MONTHS_CHARGED months, the same rule every other tier uses. */
-export function annualTotal(seats: number, tier: BusinessTierId = "advanced"): number {
-  return Math.max(seats, MINIMUM_SEATS) * perSeatMonthlyUsd(tier) * ANNUAL_MONTHS_CHARGED;
-}
-
-export function annualPerSeatMonthly(tier: BusinessTierId = "advanced"): number {
-  return Math.round((perSeatMonthlyUsd(tier) * ANNUAL_MONTHS_CHARGED) / 12);
-}
-
-/** Derived, never hand-typed. See annualSavingPercent() in the central config. */
-export const ANNUAL_DISCOUNT_PERCENT = annualSavingPercent();
 
 export function usd(n: number): string {
   return `$${n.toLocaleString("en-US")}`;

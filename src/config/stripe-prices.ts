@@ -16,16 +16,17 @@
  *
  *   Starter  $14/mo   $112/yr    starter_monthly / starter_yearly
  *   Pro      $29/mo   $232/yr    pro_monthly     / pro_yearly
- *   Teams    three tiers, per seat, sold via /org. Prices live in
- *            config/business-plans.ts; lookup keys are
- *            teams_basic_monthly / teams_basic_yearly,
- *            teams_advanced_monthly / teams_advanced_yearly,
- *            teams_pro_monthly / teams_pro_yearly.
- *            The old teams_monthly / teams_yearly are read as Pro.
+ *   Teams    three tiers, per seat, billed YEARLY only, sold via /org.
+ *            Amounts live in config/business-plans.ts. Create three prices:
+ *              teams_basic_yearly      149 per seat per year
+ *              teams_advanced_yearly   299
+ *              teams_pro_yearly        449
+ *            Earlier monthly keys (teams_*_monthly) are still read so an
+ *            existing subscription resolves to its tier, but none are sold.
  *
- * ALL SIX TEAMS PRICES MUST EXIST IN THE STRIPE CATALOGUE BEFORE CHECKOUT
- * WORKS. Create them with these exact lookup keys (yearly = 8 x monthly) and
- * publish the catalogue. Until then checkout answers "Price not found".
+ * THE THREE TEAMS PRICES MUST EXIST IN THE STRIPE CATALOGUE BEFORE CHECKOUT
+ * WORKS. Create them with these exact lookup keys and publish the catalogue.
+ * Until then checkout answers "Price not found".
  *
  * TAX — deliberately NOT automated. The provider is a §19 UStG
  * Kleinunternehmer (src/config/legal.ts): there is no entitlement to collect

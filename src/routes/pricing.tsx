@@ -52,9 +52,10 @@ const truthy = (v: unknown) => v === true || v === "1" || v === "true";
 export const Route = createFileRoute("/pricing")({
   validateSearch: (search: Record<string, unknown>): PricingSearch => {
     const plan = DEEP_LINK_PLANS.find((p) => p === search["plan"]);
-    const interval = search["interval"] === "monthly" || search["interval"] === "annual"
-      ? (search["interval"] as PlanCardBilling)
-      : undefined;
+    const interval =
+      search["interval"] === "monthly" || search["interval"] === "annual"
+        ? (search["interval"] as PlanCardBilling)
+        : undefined;
     return {
       ...(plan ? { plan } : {}),
       ...(interval ? { interval } : {}),
@@ -160,6 +161,13 @@ function Pricing() {
       return;
     }
 
+    // Teams is sold per seat in three plans, chosen on /business and bought on
+    // /org. A deep link here used to open a checkout labelled with a price that
+    // was not the one charged.
+    if (deepLinkPlan === "teams") {
+      void navigate({ to: "/business" });
+      return;
+    }
     if (!deepLinkPlan || deepLinkPlan === "free") return;
     const plan = deepLinkPlan as PaidPlanId;
     const interval: BillingInterval =
@@ -207,6 +215,7 @@ function Pricing() {
     ready,
     signedIn,
     clearIntentParams,
+    navigate,
   ]);
 
   return (
@@ -281,7 +290,6 @@ function Pricing() {
         never scroll to the thing we actually want them to take.
       */}
       <FoundingOffer autoOpen={foundingAutoOpen} onAutoOpened={clearIntentParams} />
-
 
       {/*
         DEV ONLY — and it was not.
@@ -379,8 +387,7 @@ function Pricing() {
             }
             setBusy(chosen);
             const plan = chosen as PaidPlanId;
-            const interval: BillingInterval =
-              chosenBilling === "annual" ? "yearly" : "monthly";
+            const interval: BillingInterval = chosenBilling === "annual" ? "yearly" : "monthly";
             void (async () => {
               // Auth hydration NEVER disables a purchase button: if the session
               // has not resolved when the click arrives, resolve it here.
@@ -404,18 +411,16 @@ function Pricing() {
 
         <p className="text-center text-xs text-muted-foreground">
           {/* Said once, plainly, next to the buttons that start it. */}
-          Every paid plan starts with {TRIAL_DAYS} free days. A card is required, nothing is
-          charged until day {TRIAL_DAYS + 1}, and cancelling before then costs nothing. Annual is
-          billed once and saves {annualSavingPercent()}% — {ANNUAL_MONTHS_FREE} months free.{" "}
-          {VAT.notice} Managing several people?{" "}
+          Every paid plan starts with {TRIAL_DAYS} free days. A card is required, nothing is charged
+          until day {TRIAL_DAYS + 1}, and cancelling before then costs nothing. Annual is billed
+          once and saves {annualSavingPercent()}% — {ANNUAL_MONTHS_FREE} months free. {VAT.notice}{" "}
+          Managing several people?{" "}
           <Link to="/business" className="underline hover:text-foreground">
             See how team accounts work
           </Link>
           .
         </p>
       </div>
-
-
 
       {checkout ? (
         <CheckoutDialog
@@ -429,7 +434,6 @@ function Pricing() {
           }}
         />
       ) : null}
-
 
       <section className="panel flex items-start gap-2.5 p-4">
         <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

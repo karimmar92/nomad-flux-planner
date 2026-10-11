@@ -1,5 +1,5 @@
 /**
- * BUSINESS PLANS — the three employer tiers, their prices and what each unlocks.
+ * BUSINESS PLANS: the three employer tiers, their prices and what each unlocks.
  *
  * One file, because a plan is three things that must agree: the price on
  * /business, the Stripe lookup key that charges it, and the features the
@@ -7,20 +7,21 @@
  * $8 sat live next to a $59 price), so the display lists, the gates and the
  * personal-plan grant all read from here.
  *
- * Prices are per seat per month, billed monthly. Annual is the app-wide
- * "pay 8 of 12 months" rule in config/pricing.ts and is derived, never typed.
- * This file must not import config/pricing.ts (which imports this one for the
- * Teams entry), so annual maths lives in lib/org/pricing.ts.
+ * YEARLY ONLY. A company buys per seat for a year. There is no monthly price,
+ * which removes a column from the page, a toggle from checkout and three of
+ * the six Stripe prices, and matches how a finance team buys software. The
+ * monthly figure shown is only the yearly price divided by twelve, for
+ * comparison with tools that quote per month.
  *
  * WHY THESE NUMBERS. Day-count tracking sits between two reference points:
  * generic HR software is cheap (BambooHR-class tools are roughly $6-12 per
- * employee) while enterprise mobility platforms are quote-only and priced for
- * large programmes (one marketplace listing for Topia shows $75k a year;
- * Localyze is listed around EUR 49 a user, unverified). None of the direct
- * competitors researched publishes a per-seat price or sells without a demo.
- * $19 / $39 / $59 undercuts mobility tooling, charges more than HR software
- * because it prevents tax and permanent-establishment cost rather than filing
- * leave, and annual billing lands the effective prices at about $13 / $26 / $39.
+ * employee per month) while enterprise mobility platforms are quote-only and
+ * priced for large programmes (one marketplace listing for Topia shows $75k a
+ * year; Localyze is listed around EUR 49 a user, unverified). None of the
+ * direct competitors researched publishes a per-seat price or sells without a
+ * demo. $149 / $299 / $449 a seat a year works out to about $12 / $25 / $37 a
+ * month: under mobility tooling, above HR software because it prevents tax and
+ * permanent-establishment cost rather than filing leave.
  */
 
 export type BusinessTierId = "basic" | "advanced" | "pro";
@@ -45,7 +46,8 @@ export type OrgFeature =
 export type BusinessTier = {
   id: BusinessTierId;
   name: string;
-  monthlyUsd: number;
+  /** Per seat, billed once a year. */
+  yearlyUsd: number;
   audience: string;
   headline: string;
   /** Plan every active seat holder gets for personal use. */
@@ -64,14 +66,17 @@ export const BUSINESS_TIERS: BusinessTier[] = [
   {
     id: "basic",
     name: "Basic",
-    monthlyUsd: 19,
+    yearlyUsd: 149,
     audience: "Teams that need to know where people are and when a limit is close.",
     headline: "Day counts and threshold flags for everyone who works abroad.",
     personalPlan: "free",
     features: [
+      "One verdict on opening: act, watch or clear",
       "Day counts per person and country, rolling 12 months",
       "Visa and tax-residency threshold flags in every country",
-      "Team overview: who is clear, approaching or over",
+      "Record confidence: how far each number can be trusted",
+      "Four views of the same data: People, Finance, Mobility, Simple",
+      "Sample-data preview before anyone is invited",
       "Invite by email, remove a seat any time",
       "Employees see exactly what you see",
       "CSV audit export",
@@ -80,7 +85,7 @@ export const BUSINESS_TIERS: BusinessTier[] = [
   {
     id: "advanced",
     name: "Advanced",
-    monthlyUsd: 39,
+    yearlyUsd: 299,
     audience: "People and finance teams that set policy and approve travel.",
     headline: "A policy, an approval flow and a daily to-do list, with the working shown.",
     personalPlan: "starter",
@@ -88,8 +93,8 @@ export const BUSINESS_TIERS: BusinessTier[] = [
     features: [
       "Everything in Basic",
       "Needs-attention list, ranked, with the screen that fixes each item",
-      "Company limits per country or global, with an approval step",
-      "Travel requests with the compliance maths shown before you decide",
+      "Company limits per country or global, from a template or your own",
+      "Travel requests with days of headroom and the latest compliant end date",
       "Show working: every number broken down stay by stay",
       "Permanent-establishment exposure by country",
       "PDF audit pack",
@@ -99,7 +104,7 @@ export const BUSINESS_TIERS: BusinessTier[] = [
   {
     id: "pro",
     name: "Pro",
-    monthlyUsd: 59,
+    yearlyUsd: 449,
     audience: "Companies with people abroad year-round and an auditor to answer to.",
     headline: "Dated warnings before a limit is crossed, and full Pro for every seat.",
     personalPlan: "pro",
@@ -107,7 +112,7 @@ export const BUSINESS_TIERS: BusinessTier[] = [
       "Everything in Advanced",
       "Projected crossing dates for anyone currently abroad",
       "Every seat includes Pro for personal use: tax report, vault, full ranking",
-      "Annual invoice billing on request",
+      "Invoice billing on request",
       "Priority support",
       "Admin onboarding session",
     ],
@@ -134,6 +139,11 @@ const MIN_TIER: Record<OrgFeature, BusinessTierId> = {
 
 export function businessTier(id: BusinessTierId): BusinessTier {
   return BUSINESS_TIERS.find((t) => t.id === id)!;
+}
+
+/** The yearly price spread over twelve months, for comparing with per-month quotes. */
+export function monthlyEquivalentUsd(tier: BusinessTierId): number {
+  return Math.round(businessTier(tier).yearlyUsd / 12);
 }
 
 /** Anything unrecognised is treated as unpaid, never as a paid tier. */
@@ -165,8 +175,15 @@ export function personalPlanFor(plan: OrgPlan): PersonalPlan | null {
   return plan === "unpaid" ? null : businessTier(plan).personalPlan;
 }
 
-/** Stripe lookup key, e.g. teams_advanced_yearly. */
-export function teamsPriceKey(tier: BusinessTierId, interval: "monthly" | "yearly"): string {
+/**
+ * Stripe lookup key, e.g. teams_advanced_yearly. Only yearly prices are sold;
+ * the monthly interval stays in the type so a subscription created under the
+ * earlier model still resolves to its tier.
+ */
+export function teamsPriceKey(
+  tier: BusinessTierId,
+  interval: "monthly" | "yearly" = "yearly",
+): string {
   return `teams_${tier}_${interval}`;
 }
 

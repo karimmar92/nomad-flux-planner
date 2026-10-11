@@ -8,12 +8,11 @@ import { submitB2bLead } from "@/lib/org/org.functions";
 import { joinWaitlist } from "@/lib/waitlist.functions";
 import { submitWaitlist } from "@/lib/waitlist";
 import {
-  ANNUAL_DISCOUNT_PERCENT,
   MINIMUM_SEATS,
-  annualPerSeatMonthly,
-  annualTotal,
-  monthlyTotal,
+  monthlyEquivalentUsd,
+  perSeatYearlyUsd,
   usd,
+  yearlyTotal,
 } from "@/lib/org/pricing";
 import { BUSINESS_ROADMAP, BUSINESS_TIERS } from "@/config/business-plans";
 import { TRIAL_DAYS } from "@/config/pricing";
@@ -25,7 +24,7 @@ export const Route = createFileRoute("/business/")({
       { title: `${APP_NAME} for teams — work-from-anywhere compliance` },
       {
         name: "description",
-        content: `Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a personal account for every employee. Three plans from $${BUSINESS_TIERS[0]!.monthlyUsd} per seat per month, with prices on the page.`,
+        content: `Give your team the freedom to work from anywhere and the paperwork that makes it safe. Country day-counts for compliance, a personal account for every employee. Three plans from $${BUSINESS_TIERS[0]!.yearlyUsd} per seat per year, with prices on the page.`,
       },
       { property: "og:title", content: `${APP_NAME} for teams` },
       {
@@ -57,7 +56,6 @@ const EMPLOYER_NEVER_SEES = [
 
 function BusinessPage() {
   const [seats, setSeats] = useState(25);
-  const [annual, setAnnual] = useState(true);
 
   return (
     <div className="space-y-10 pb-6">
@@ -173,35 +171,13 @@ function BusinessPage() {
       </section>
 
       <section className="space-y-4" id="pricing">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold tracking-tight">Pricing</h2>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Per seat, per month, published here. Start a {TRIAL_DAYS}-day trial online, no call.
-              Minimum {MINIMUM_SEATS} seats. Annual billing is {ANNUAL_DISCOUNT_PERCENT}% off.
-            </p>
-          </div>
-          <div
-            className="inline-flex rounded-full border border-border p-1"
-            role="group"
-            aria-label="Billing period"
-          >
-            {([true, false] as const).map((isAnnual) => (
-              <button
-                key={String(isAnnual)}
-                type="button"
-                onClick={() => setAnnual(isAnnual)}
-                aria-pressed={annual === isAnnual}
-                className={
-                  annual === isAnnual
-                    ? "min-h-9 rounded-full bg-primary px-3.5 text-xs font-medium text-primary-foreground"
-                    : "min-h-9 rounded-full px-3.5 text-xs text-muted-foreground hover:text-foreground"
-                }
-              >
-                {isAnnual ? `Annual · save ${ANNUAL_DISCOUNT_PERCENT}%` : "Monthly"}
-              </button>
-            ))}
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Pricing</h2>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            One price per seat per year, published here. Start a {TRIAL_DAYS}-day trial online, no
+            call. Minimum {MINIMUM_SEATS} seats, billed once a year. Cancel before renewal and you
+            are not charged again.
+          </p>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-3">
@@ -223,15 +199,11 @@ function BusinessPage() {
                 ) : null}
               </div>
               <div>
-                <span className="num text-3xl font-semibold">
-                  {usd(annual ? annualPerSeatMonthly(t.id) : t.monthlyUsd)}
-                </span>
-                <span className="text-xs text-muted-foreground"> per seat per month</span>
-                {annual ? (
-                  <span className="num ms-2 text-sm text-muted-foreground line-through">
-                    {usd(t.monthlyUsd)}
-                  </span>
-                ) : null}
+                <span className="num text-3xl font-semibold">{usd(perSeatYearlyUsd(t.id))}</span>
+                <span className="text-xs text-muted-foreground"> per seat per year</span>
+                <p className="num mt-0.5 text-xs text-muted-foreground">
+                  about {usd(monthlyEquivalentUsd(t.id))} a month, billed yearly
+                </p>
               </div>
               <p className="text-sm font-medium leading-snug">{t.headline}</p>
               <ul className="flex-1 space-y-1.5 text-xs text-muted-foreground">
@@ -245,9 +217,9 @@ function BusinessPage() {
               <div className="num border-t border-border pt-3 text-xs text-muted-foreground">
                 {seats} seats:{" "}
                 <span className="font-semibold text-foreground">
-                  {usd(annual ? annualTotal(seats, t.id) : monthlyTotal(seats, t.id))}
-                </span>
-                {annual ? " a year" : " a month"}
+                  {usd(yearlyTotal(seats, t.id))}
+                </span>{" "}
+                a year
               </div>
             </div>
           ))}

@@ -25,7 +25,7 @@
  */
 
 import { VAT } from "@/config/legal";
-import { businessTier } from "@/config/business-plans";
+import { monthlyEquivalentUsd } from "@/config/business-plans";
 
 export type PlanId = "free" | "starter" | "pro" | "teams" | "founding_lifetime";
 
@@ -164,14 +164,16 @@ export const TIERS: Tier[] = [
   {
     id: "teams",
     name: "Teams",
-    // The top business plan's price, so a Teams buyer reads as the highest
-    // tier here. The three plans themselves are in config/business-plans.ts.
-    monthlyUsd: businessTier("pro").monthlyUsd,
+    // The top business plan's yearly price spread over twelve months, so a
+    // Teams buyer reads as the highest tier here. Teams is billed yearly per
+    // seat and never goes through annualUsd(); the plans are in
+    // config/business-plans.ts.
+    monthlyUsd: monthlyEquivalentUsd("pro"),
     perSeat: true,
     audience: "Employers whose staff work across borders.",
     headline: "See the whole team's exposure before it becomes a permanent-establishment problem.",
     features: [
-      "Three plans: Basic, Advanced and Pro, priced per seat",
+      "Three plans, Basic, Advanced and Pro, billed yearly per seat",
       "Employer dashboard: presence and risk per member",
       "Travel request approvals with an audit trail",
       "Company travel policy, enforced at request time",

@@ -528,7 +528,7 @@ function Locked({
       <div className="min-w-0">
         <p className="text-sm font-medium">{what}</p>
         <p className="text-xs text-muted-foreground">
-          Included in {t.name} and above, from {usd(t.monthlyUsd)} per seat per month.
+          Included in {t.name} and above, from {usd(t.yearlyUsd)} per seat per year.
         </p>
       </div>
       {onJump ? (
@@ -1331,7 +1331,6 @@ function SeatsTab({
   const seatsInUse = data.members.filter((m) => m.status !== "left").length;
   const [choice, setChoice] = useState<PlanChoice>({
     tier: plan === "unpaid" ? "advanced" : plan,
-    interval: "yearly",
     seats: clampSeats(purchasedSeats),
   });
 
@@ -1412,7 +1411,7 @@ function SeatsTab({
                 }
                 setCheckout({
                   plan: "teams",
-                  interval: choice.interval,
+                  interval: "yearly",
                   seats: clampSeats(choice.seats),
                   tier: choice.tier,
                 });
