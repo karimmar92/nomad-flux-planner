@@ -13,6 +13,7 @@
  */
 import { fromDayIndex, toDayIndex } from "@/lib/schengen";
 import type { OrgOverview, PresenceRow } from "./presence";
+import type { WorkRightsEntry } from "@/lib/work-rights";
 
 export type ActionSeverity = "urgent" | "soon" | "housekeeping";
 export type ActionTab = "Risk" | "Countries" | "Employees" | "Requests" | "Seats";
@@ -64,7 +65,11 @@ export function buildActionItems(
   requests: PendingRequest[],
   todayIso: string,
   /** Dated projections are a Pro feature; without them the person still shows as approaching. */
-  opts: { forecast?: boolean } = {},
+  opts: {
+    forecast?: boolean;
+    /** Looks up the published right-to-work position for a country, if the guide has one. */
+    workRights?: (countryCode: string) => WorkRightsEntry | null;
+  } = {},
 ): ActionItem[] {
   const forecast = opts.forecast ?? true;
   const items: ActionItem[] = [];
@@ -90,6 +95,22 @@ export function buildActionItems(
   // 2. Per person, per country.
   for (const c of overview.countries) {
     for (const m of c.members) {
+      // Someone recorded as currently present where the published official
+      // position is that visitor status does not allow work. This is a prompt
+      // to confirm they hold a status that does, not a finding that they do not.
+      const rights = m.openStay ? opts.workRights?.(c.country_code) : null;
+      if (rights && rights.visitorWork.status === "not_permitted") {
+        items.push({
+          id: `work-${c.country_code}-${m.user_id}`,
+          severity: "soon",
+          title: `${m.display_name} is recorded in ${c.country}, where visitor status is officially not for work`,
+          detail:
+            "Confirm they hold a status that permits remote work there. This reports a published official position, not whether this person is compliant.",
+          tab: "Countries",
+          sortKey: 500,
+        });
+      }
+
       const limit = limitOf(m.thresholdDays, m.policyMaxDays);
       const policyBound = m.policyMaxDays !== null && m.policyMaxDays <= m.thresholdDays;
       const limitLabel = policyBound ? `${limit}-day policy limit` : `${limit}-day threshold`;

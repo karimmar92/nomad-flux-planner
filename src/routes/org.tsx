@@ -68,6 +68,8 @@ import {
   type SectionId,
 } from "@/lib/org/lens";
 import { sampleDashboard } from "@/lib/org/sample";
+import { workRightsFor } from "@/config/work-rights-data";
+import { STATUS_LABEL } from "@/lib/work-rights";
 import { downloadBlob } from "@/lib/reports/export-csv";
 import { todayIso } from "@/lib/trip-dates";
 import { formatDate } from "@/lib/i18n/format";
@@ -264,6 +266,7 @@ function OrgDashboard() {
       view && overview && orgHasFeature(orgPlan, "actionCenter")
         ? buildActionItems(overview, view.rows, view.requests, todayIso(), {
             forecast: orgHasFeature(orgPlan, "forecast"),
+            workRights: workRightsFor,
           })
         : [],
     [view, overview, orgPlan],
@@ -1202,6 +1205,21 @@ function RequestsTab({
                 · {impact.requestedDays} days
               </p>
               <p className="text-sm">{impact.sentence}</p>
+              {(() => {
+                const rights = workRightsFor(r.country_code);
+                return rights ? (
+                  <p className="text-xs text-muted-foreground">
+                    Remote work there on visitor status: {STATUS_LABEL[rights.visitorWork.status]}.{" "}
+                    <Link
+                      to="/work-rights/$code"
+                      params={{ code: rights.countryCode.toLowerCase() }}
+                      className="underline underline-offset-2"
+                    >
+                      Sources
+                    </Link>
+                  </p>
+                ) : null;
+              })()}
               <p className="num text-xs text-muted-foreground">
                 {impact.headroomBefore >= 0
                   ? `${impact.headroomBefore} days of headroom now`

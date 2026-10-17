@@ -70,6 +70,7 @@ const EXACT: Record<string, string> = {
   "/calculator": CONTENT,
   "/checklist": CONTENT,
   "/pension": CONTENT,
+  "/work-rights": STABLE,
   "/sitemap.xml": STABLE,
   "/robots.txt": STABLE,
 };
@@ -84,6 +85,7 @@ const EXACT: Record<string, string> = {
 const PREFIXES: { prefix: string; policy: string }[] = [
   { prefix: "/city/", policy: CONTENT },
   { prefix: "/rules/", policy: STABLE },
+  { prefix: "/work-rights/", policy: STABLE },
   { prefix: "/legal/", policy: STABLE },
 ];
 

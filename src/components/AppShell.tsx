@@ -166,6 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-5">
           <FooterColumn title={t("footerGroups.rules")}>
             <FooterLink to="/rules">All rules</FooterLink>
+            <FooterLink to="/work-rights">Right to work by country</FooterLink>
             {RULE_PAGES.map((r) => (
               <li key={r.slug}>
                 <Link

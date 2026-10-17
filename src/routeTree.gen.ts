@@ -65,6 +65,8 @@ import { Route as RulesIndexRouteImport } from './routes/rules.index'
 import { Route as RulesSlugRouteImport } from './routes/rules.$slug'
 import { Route as SettingsEmployerSharingRouteImport } from './routes/settings.employer-sharing'
 import { Route as SetupCompanyRouteImport } from './routes/setup.company'
+import { Route as WorkRightsIndexRouteImport } from './routes/work-rights.index'
+import { Route as WorkRightsCodeRouteImport } from './routes/work-rights.$code'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as RecordReportYearRouteImport } from './routes/record.report.$year'
@@ -353,6 +355,16 @@ const SetupCompanyRoute = SetupCompanyRouteImport.update({
   path: '/setup/company',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkRightsIndexRoute = WorkRightsIndexRouteImport.update({
+  id: '/work-rights/',
+  path: '/work-rights/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkRightsCodeRoute = WorkRightsCodeRouteImport.update({
+  id: '/work-rights/$code',
+  path: '/work-rights/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -433,11 +445,13 @@ export interface FileRoutesByFullPath {
   '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
+  '/work-rights/$code': typeof WorkRightsCodeRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/work-rights/': typeof WorkRightsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -494,11 +508,13 @@ export interface FileRoutesByTo {
   '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
+  '/work-rights/$code': typeof WorkRightsCodeRoute
   '/business': typeof BusinessIndexRoute
   '/community': typeof CommunityIndexRoute
   '/plan': typeof PlanIndexRoute
   '/record': typeof RecordIndexRoute
   '/rules': typeof RulesIndexRoute
+  '/work-rights': typeof WorkRightsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -558,11 +574,13 @@ export interface FileRoutesById {
   '/rules/$slug': typeof RulesSlugRoute
   '/settings/employer-sharing': typeof SettingsEmployerSharingRoute
   '/setup/company': typeof SetupCompanyRoute
+  '/work-rights/$code': typeof WorkRightsCodeRoute
   '/business/': typeof BusinessIndexRoute
   '/community/': typeof CommunityIndexRoute
   '/plan/': typeof PlanIndexRoute
   '/record/': typeof RecordIndexRoute
   '/rules/': typeof RulesIndexRoute
+  '/work-rights/': typeof WorkRightsIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/record/report/$year': typeof RecordReportYearRoute
@@ -623,11 +641,13 @@ export interface FileRouteTypes {
     | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
+    | '/work-rights/$code'
     | '/business/'
     | '/community/'
     | '/plan/'
     | '/record/'
     | '/rules/'
+    | '/work-rights/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -684,11 +704,13 @@ export interface FileRouteTypes {
     | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
+    | '/work-rights/$code'
     | '/business'
     | '/community'
     | '/plan'
     | '/record'
     | '/rules'
+    | '/work-rights'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -747,11 +769,13 @@ export interface FileRouteTypes {
     | '/rules/$slug'
     | '/settings/employer-sharing'
     | '/setup/company'
+    | '/work-rights/$code'
     | '/business/'
     | '/community/'
     | '/plan/'
     | '/record/'
     | '/rules/'
+    | '/work-rights/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/record/report/$year'
@@ -806,9 +830,11 @@ export interface RootRouteChildren {
   RulesSlugRoute: typeof RulesSlugRoute
   SettingsEmployerSharingRoute: typeof SettingsEmployerSharingRoute
   SetupCompanyRoute: typeof SetupCompanyRoute
+  WorkRightsCodeRoute: typeof WorkRightsCodeRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
   CommunityIndexRoute: typeof CommunityIndexRoute
   RulesIndexRoute: typeof RulesIndexRoute
+  WorkRightsIndexRoute: typeof WorkRightsIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicAlertsRunRoute: typeof ApiPublicAlertsRunRoute
@@ -1209,6 +1235,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetupCompanyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/work-rights/': {
+      id: '/work-rights/'
+      path: '/work-rights'
+      fullPath: '/work-rights/'
+      preLoaderRoute: typeof WorkRightsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work-rights/$code': {
+      id: '/work-rights/$code'
+      path: '/work-rights/$code'
+      fullPath: '/work-rights/$code'
+      preLoaderRoute: typeof WorkRightsCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -1336,9 +1376,11 @@ const rootRouteChildren: RootRouteChildren = {
   RulesSlugRoute: RulesSlugRoute,
   SettingsEmployerSharingRoute: SettingsEmployerSharingRoute,
   SetupCompanyRoute: SetupCompanyRoute,
+  WorkRightsCodeRoute: WorkRightsCodeRoute,
   BusinessIndexRoute: BusinessIndexRoute,
   CommunityIndexRoute: CommunityIndexRoute,
   RulesIndexRoute: RulesIndexRoute,
+  WorkRightsIndexRoute: WorkRightsIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicAlertsRunRoute: ApiPublicAlertsRunRoute,

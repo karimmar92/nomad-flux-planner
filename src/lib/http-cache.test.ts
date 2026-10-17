@@ -158,19 +158,24 @@ describe("structural guards", () => {
       "/calculator",
       "/checklist",
       "/pension",
+      "/work-rights",
       "/sitemap.xml",
       "/robots.txt",
     ]);
 
     for (const raw of paths) {
       // Concrete-ise dynamic segments so a real URL is tested, not a pattern.
-      const path = raw.replace(/\$\w+/g, "x").replace(/\/\$$/, "/x");
+      const concrete = raw.replace(/\$\w+/g, "x").replace(/\/\$$/, "/x");
+      // The route tree writes index routes with a trailing slash ("/business/");
+      // the cache policy treats both spellings alike, so compare without it.
+      const path = concrete.length > 1 ? concrete.replace(/\/$/, "") : concrete;
       const decision = cachePolicyFor({ pathname: path, ...GET });
       if (decision.cacheControl) {
         const allowed =
           PUBLIC_OK.has(path) ||
           path.startsWith("/city/") ||
           path.startsWith("/rules/") ||
+          path.startsWith("/work-rights/") ||
           path.startsWith("/legal/");
         expect(
           allowed,

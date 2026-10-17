@@ -16,6 +16,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CITIES, SEED_LAST_VERIFIED } from "@/lib/cities";
 import { RULE_PAGES } from "@/config/rule-pages";
+import { WORK_RIGHTS } from "@/config/work-rights-data";
 import { absoluteUrl } from "@/lib/app";
 
 type Entry = { path: string; changefreq: string; priority: string; lastmod?: string };
@@ -32,6 +33,7 @@ const STATIC_PAGES: Entry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/explore", changefreq: "weekly", priority: "0.9" },
   { path: "/rules", changefreq: "monthly", priority: "0.8" },
+  { path: "/work-rights", changefreq: "monthly", priority: "0.8" },
   { path: "/pricing", changefreq: "monthly", priority: "0.7" },
   { path: "/plan", changefreq: "monthly", priority: "0.8" },
   { path: "/setup/company", changefreq: "monthly", priority: "0.7" },
@@ -85,9 +87,18 @@ export const Route = createFileRoute("/sitemap.xml")({
           priority: "0.9",
         }));
 
+        // Each country page carries the date its sources were checked, which is
+        // the honest lastmod: it changes when the facts were re-verified.
+        const workEntries: Entry[] = WORK_RIGHTS.map((e) => ({
+          path: `/work-rights/${e.countryCode.toLowerCase()}`,
+          changefreq: "monthly",
+          priority: "0.7",
+          lastmod: e.verifiedOn,
+        }));
+
         const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...STATIC_PAGES, ...ruleEntries, ...cityEntries].map(urlEntry).join("\n")}
+${[...STATIC_PAGES, ...ruleEntries, ...workEntries, ...cityEntries].map(urlEntry).join("\n")}
 </urlset>
 `;
 
