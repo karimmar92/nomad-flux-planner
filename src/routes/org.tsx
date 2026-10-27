@@ -4,11 +4,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CheckCircle2,
+  ClipboardCheck,
   CreditCard,
   Download,
+  Globe,
+  LayoutDashboard,
   Loader2,
+  Settings2,
   ShieldCheck,
   Trash2,
+  UserPlus,
+  Users,
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +23,7 @@ import { APP_NAME, LEGAL_DISCLAIMER } from "@/lib/app";
 import { Stat } from "@/components/Primitives";
 import { RequiresNetwork } from "@/components/OfflineBanner";
 import { CreateOrgFlow } from "@/components/org/CreateOrgFlow";
+import { DashboardShell, type NavItem } from "@/components/org/DashboardShell";
 import { CheckoutDialog, type CheckoutRequest } from "@/components/billing/CheckoutDialog";
 import { paymentsAvailable, getStripeEnvironment } from "@/lib/stripe";
 import {
@@ -104,6 +111,41 @@ export const Route = createFileRoute("/org")({
 
 const TABS = ["Risk", "Countries", "Employees", "Requests", "Seats"] as const;
 type Tab = (typeof TABS)[number];
+
+/** Where each tab appears in the sidebar and what its page header says. */
+const NAV_COPY: Record<Tab, Pick<NavItem<Tab>, "label" | "icon" | "title" | "description">> = {
+  Risk: {
+    label: "Overview",
+    icon: LayoutDashboard,
+    title: "Overview",
+    description: "One verdict on where your team stands, then what needs a decision today.",
+  },
+  Countries: {
+    label: "Countries",
+    icon: Globe,
+    title: "Countries",
+    description:
+      "Days per person in each country against its limit. Open any number to see the working.",
+  },
+  Employees: {
+    label: "People",
+    icon: Users,
+    title: "People",
+    description: "Everyone on the team, what they have logged, and anything that needs a word.",
+  },
+  Requests: {
+    label: "Requests",
+    icon: ClipboardCheck,
+    title: "Travel requests",
+    description: "Each request shows the days it would use before you approve or decline.",
+  },
+  Seats: {
+    label: "Team & plan",
+    icon: Settings2,
+    title: "Team and plan",
+    description: "Invite people, set company limits, and manage your plan and billing.",
+  },
+};
 
 const riskTone: Record<RiskLevel, string> = {
   over: "text-negative",
@@ -330,8 +372,48 @@ function OrgDashboard() {
   const invited = data.members.filter((m) => m.status === "invited").length;
   const refresh = () => qc.invalidateQueries({ queryKey: ["employer-dashboard"] });
 
-  return (
-    <div className="space-y-5 pb-6">
+  const pendingRequests = view.requests.filter((r) => r.status === "pending").length;
+  const urgentActions = actions.filter((a) => a.severity === "urgent").length;
+  const navItems: NavItem<Tab>[] = TABS.map((id) => ({
+    id,
+    ...NAV_COPY[id],
+    badge:
+      id === "Risk"
+        ? urgentActions || undefined
+        : id === "Requests"
+          ? pendingRequests || undefined
+          : undefined,
+    badgeTone: id === "Risk" ? "alert" : "info",
+  }));
+
+  async function quickExport() {
+    downloadBlob(
+      new Blob([auditToCsv(overview!, org.name, null)], { type: "text/csv;charset=utf-8" }),
+      auditFileName(org.name, "csv"),
+    );
+  }
+
+  const quickActions = (
+    <>
+      <button
+        type="button"
+        onClick={() => setTab("Seats")}
+        className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-xs font-medium text-background transition-opacity hover:opacity-90"
+      >
+        <UserPlus className="h-3.5 w-3.5" aria-hidden /> Invite people
+      </button>
+      <button
+        type="button"
+        onClick={() => void quickExport()}
+        className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border px-3.5 text-xs font-medium transition-colors hover:bg-surface-2"
+      >
+        <Download className="h-3.5 w-3.5" aria-hidden /> Export CSV
+      </button>
+    </>
+  );
+
+  const banner = (
+    <>
       {checkout === "success" && sessionId ? (
         <TeamsCheckoutBanner
           sessionId={sessionId}
@@ -359,37 +441,18 @@ function OrgDashboard() {
           </button>
         </div>
       ) : null}
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold tracking-tight">{org.name}</h1>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
-            <ShieldCheck className="h-3 w-3" aria-hidden /> Country and dates only
-          </span>
-        </div>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Employees can see this exact data on their own settings screen. Nothing personal — no
-          location, documents, income or notes — reaches this dashboard.
-        </p>
-      </header>
+    </>
+  );
 
-      <div className="flex flex-wrap gap-1">
-        {TABS.map((t) => (
-          <button
-            type="button"
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm transition-colors",
-              tab === t
-                ? "bg-surface-2 text-foreground"
-                : "text-muted-foreground hover:bg-surface-2",
-            )}
-          >
-            {t === "Risk" ? "Overview" : t}
-          </button>
-        ))}
-      </div>
-
+  return (
+    <DashboardShell
+      orgName={org.name}
+      items={navItems}
+      current={tab}
+      onNavigate={setTab}
+      actions={quickActions}
+      banner={banner}
+    >
       {tab === "Risk" ? (
         <RiskTab
           plan={orgPlan}
@@ -428,7 +491,7 @@ function OrgDashboard() {
       {tab === "Seats" ? <SeatsTab data={data} plan={orgPlan} onChange={refresh} /> : null}
 
       <p className="text-[11px] leading-relaxed text-muted-foreground">{LEGAL_DISCLAIMER}</p>
-    </div>
+    </DashboardShell>
   );
 }
 
@@ -946,17 +1009,59 @@ function RiskTab({
       <LensSwitch lens={lens} onChange={onLens} />
 
       {lens !== "founder" ? (
-        <div className="panel grid grid-cols-2 gap-4 p-4 sm:grid-cols-5">
-          <Stat label="Over a limit" value={overview.counts.over} tone="negative" size="sm" />
-          <Stat label="Approaching" value={overview.counts.approaching} size="sm" />
-          <Stat label="Clear" value={overview.counts.clear} tone="positive" size="sm" />
-          <Stat label="No data logged" value={overview.counts.noData} tone="muted" size="sm" />
-          <Stat
-            label="Seats"
-            value={`${seats.activeSeats}/${seats.purchased}`}
-            hint={seats.invited > 0 ? `${seats.invited} invited` : "active"}
-            size="sm"
-          />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {(
+            [
+              {
+                label: "Over a limit",
+                value: overview.counts.over,
+                tone: "text-negative",
+                dot: "bg-negative",
+                go: "Countries",
+              },
+              {
+                label: "Approaching",
+                value: overview.counts.approaching,
+                tone: "text-warning",
+                dot: "bg-warning",
+                go: "Countries",
+              },
+              {
+                label: "Clear",
+                value: overview.counts.clear,
+                tone: "text-positive",
+                dot: "bg-accent-positive",
+                go: "Employees",
+              },
+              {
+                label: "Seats in use",
+                value: `${seats.activeSeats}/${seats.purchased}`,
+                tone: "text-foreground",
+                dot: "bg-muted-foreground/50",
+                go: "Seats",
+              },
+            ] as const
+          ).map((k) => (
+            <button
+              key={k.label}
+              type="button"
+              onClick={() => onJump(k.go)}
+              className="panel group p-4 text-start transition-colors hover:border-primary"
+            >
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className={cn("h-1.5 w-1.5 rounded-full", k.dot)} aria-hidden />
+                {k.label}
+              </p>
+              <p className={cn("num mt-1 text-2xl font-semibold", k.tone)}>{k.value}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {k.label === "Seats in use" && seats.invited > 0
+                  ? `${seats.invited} invited`
+                  : overview.counts.noData > 0 && k.label === "Clear"
+                    ? `${overview.counts.noData} with no data`
+                    : "\u00a0"}
+              </p>
+            </button>
+          ))}
         </div>
       ) : null}
 
