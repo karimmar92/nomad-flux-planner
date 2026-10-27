@@ -17,6 +17,8 @@ import {
 import { BUSINESS_ROADMAP, BUSINESS_TIERS } from "@/config/business-plans";
 import { TRIAL_DAYS } from "@/config/pricing";
 import { PE_BENCHMARK_LABEL } from "@/lib/org/presence";
+import { DashboardPreview } from "@/components/business/DashboardPreview";
+import { Reveal } from "@/components/marketing/Reveal";
 
 export const Route = createFileRoute("/business/")({
   head: () => ({
@@ -59,39 +61,94 @@ function BusinessPage() {
 
   return (
     <div className="space-y-10 pb-6">
-      <header className="space-y-4">
+      <header className="space-y-6 pt-4 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[11px] uppercase tracking-wide text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> {APP_NAME} for teams
         </span>
-        <h1 className="max-w-3xl text-2xl font-semibold leading-tight tracking-tight sm:text-4xl">
-          Give your team the freedom to work from anywhere — and the paperwork that makes it safe.
+        <h1 className="display-lg mx-auto max-w-3xl">
+          Know where your team works from, and what to do about it.
         </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Every seat comes with a personal account that belongs to your employee, not to you: their
-          own visa tracking, with more included on higher plans. You see only the country day-counts
-          you need for compliance. They see everything else.
+        <p className="lede mx-auto max-w-2xl">
+          One verdict each morning: who is past a limit, who is about to be, and what needs your
+          decision. Built from country and dates only, so your people keep logging honestly.
         </p>
-        <div className="flex flex-wrap gap-2">
+        <ul className="mx-auto flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          {[
+            "Set up in minutes, no demo call",
+            "Employees see exactly what you see",
+            "Every number shows its working",
+          ].map((t) => (
+            <li key={t} className="flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-positive" aria-hidden />
+              {t}
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
           <Link
             to="/org"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            className="inline-flex min-h-11 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
-            Start now — no sales call
+            Start your {TRIAL_DAYS}-day trial
           </Link>
           <a
-            href="#book-a-call"
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-2"
+            href="#how-it-works"
+            className="inline-flex min-h-11 items-center rounded-full border border-border px-5 text-sm font-medium transition-colors hover:bg-surface-2"
           >
-            Talk to us first
+            See how it works
           </a>
-          <Link
-            to="/business/explain"
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-2"
-          >
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Prices published below.{" "}
+          <a href="#book-a-call" className="underline underline-offset-2">
+            Talk to us first
+          </a>{" "}
+          ·{" "}
+          <Link to="/business/explain" className="underline underline-offset-2">
             Explain this to your team
           </Link>
-        </div>
+        </p>
       </header>
+
+      <Reveal>
+        <DashboardPreview />
+      </Reveal>
+
+      <section id="how-it-works" className="scroll-mt-20 space-y-5">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="display-md">How it works</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Nothing to install for you, and nothing new for them to learn.
+          </p>
+        </div>
+        <ol className="grid gap-3 sm:grid-cols-3">
+          {[
+            {
+              n: "1",
+              t: "Create the organisation",
+              d: "Name it, pick a plan and seat count, and preview the whole dashboard on sample data before anyone is invited.",
+            },
+            {
+              n: "2",
+              t: "Invite your people",
+              d: "They accept by email. Anyone who already tracks trips shares country and dates straight away, so nothing is re-entered.",
+            },
+            {
+              n: "3",
+              t: "Open the verdict",
+              d: "See who needs attention, set limits, approve travel with the maths shown first, and export an audit pack when asked.",
+            },
+          ].map((step, i) => (
+            <Reveal key={step.n} as="li" delay={i * 80} className="panel p-5">
+              <span className="num grid h-7 w-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+                {step.n}
+              </span>
+              <h3 className="mt-3 text-sm font-semibold">{step.t}</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{step.d}</p>
+            </Reveal>
+          ))}
+        </ol>
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
         <div className="panel p-4">
